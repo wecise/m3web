@@ -34,20 +34,25 @@ class Notes {
                             },
                             treeData: [],
                             root: "/assets/documents",
+                            filterText: ""
                         }
                     },
                     template:   `<el-container style="height:100%;">
                                     <el-header style="height:40px;line-height:40px;padding:0px 10px;">
-                                        <el-input placeholder="搜索" size="mini"></el-input>
+                                        <el-input v-model="filterText" 
+                                            placeholder="搜索" size="mini"
+                                            clearable></el-input>
                                     </el-header>
                                     <el-main style="padding:0px 10px; height: 100%;">
                                         <el-tree :data="treeData" 
                                                 :props="defaultProps" 
                                                 node-key="fullname"
                                                 highlight-current="true"
-                                                @node-click="handleNodeClick"
-                                                @node-contextmenu="handleNodeContextMenu"
-                                                style="background:transparent;">
+                                                default-expand-all="true"
+                                                @node-click="onNodeClick"
+                                                :filter-node-method="onFilterNode"
+                                                style="background:transparent;"
+                                                ref="tree">
                                             <span slot-scope="{ node, data }" style="width:100%;">
                                                 <span v-if="data.ftype!=='dir'">
                                                     <i class="el-icon-c-scale-to-original" style="color:#0088cc;"></i> #{ node.label }#
@@ -59,48 +64,52 @@ class Notes {
                                         </el-tree>
                                     </el-main>
                                 </el-container>`,
+                    watch: {
+                        filterText(val) {
+                            if(_.isEmpty(val)){
+                                this.onInit();
+                            } else {
+                                this.$refs.tree.filter(val);
+                            }
+                        }
+                    },
                     created(){
                         this.onInit();
                     },
                     methods: {
-                        handleNodeContextMenu(event,data,node,el){
-                            this.onInitContextMenu();
-                        },
-                        handleNodeClick(data){
-                            if(data.ftype !=='dir') {
-                                let item = {
-                                                alias: data.alias,
-                                                children: data.children,
-                                                ftype: data.ftype,
-                                                fullname: data.fullname,
-                                                id: data.id,
-                                                name: data.name,
-                                                parent: data.parent,
-                                                size: _.find(fsHandler.fsList(data.parent),{name: data.name}).size || 0
-                                            };
-                                this.$root.model = {item:item, content:fsHandler.fsContent(data.parent, data.name)};
+                        onFilterNode:_.debounce(function(value, data) {
+                            if (!value) return true;
+                            try{
+                                let rtn = fsHandler.callFsJScript("/matrix/fs/getFsByTerm.js", encodeURIComponent(value)).message;
+                                this.treeData = rtn;
+                            } catch(err){
+                                this.treeData = [];
+                            }
+                        },1000),
+                        onNodeClick(data){
+                            if(!data.isdir) {
+                                
+                                let childrenData = fsHandler.fsList(data.fullname);
+                                
+                                this.$set(data, 'children', childrenData);
+
+                                this.$root.model = {item:data, content:fsHandler.fsContent(data.parent, data.name)};
                             } else {
-                                let root = data.parent + "/" + data.name;
-                                let rtn = fsHandler.fsList(root);
+                                let childrenData = fsHandler.fsList(data.fullname);
+
+                                this.$set(data, 'children', childrenData);
                             }
                         },
                         onInit(){
                             this.treeData = fsHandler.callFsJScript("/matrix/devops/getFsForTree.js", encodeURIComponent(this.root)).message;
                             
                             // 默认首页
-                            let homeNode = _.find(_.flattenDeep(_.map(this.treeData,'children')),{name: '系统介绍.md'});
+                            // let homeNode = _.find(_.flattenDeep(_.map(this.treeData,'children')),{name: '系统介绍.md'});
                             
-                            let item = {
-                                alias: homeNode.alias,
-                                children: homeNode.children,
-                                ftype: homeNode.ftype,
-                                fullname: homeNode.fullname,
-                                id: homeNode.id,
-                                name: homeNode.name,
-                                parent: homeNode.parent,
-                                size: _.find(fsHandler.fsList(homeNode.parent),{name: homeNode.name}).size || 0
-                            };
-                            this.$root.model = {item:homeNode, content:fsHandler.fsContent(homeNode.parent, homeNode.name)};
+                            // let item = _.extend(homeNode,{
+                            //     size: _.find(fsHandler.fsList(homeNode.parent),{name: homeNode.name}).size || 0
+                            // });
+                            // this.$root.model = {item:homeNode, content:fsHandler.fsContent(homeNode.parent, homeNode.name)};
                         }
                     }
                 });

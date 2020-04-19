@@ -17,7 +17,7 @@
             border-top: 1px solid #ddd;
             border-left: 1px solid #ddd;
             background: #fff;
-            
+            height: 100%;            
         }
 
         .vis-background.vis-item-content {
@@ -41,6 +41,13 @@
 
         .topological-timeline .el-divider.el-divider--vertical{
             margin: 8px 12px;
+            background: #333;
+        }
+
+        .topological-timeline .el-radio-button__inner,
+        .topological-timeline .el-input__inner{
+            background: transparent;
+            border:unset;
         }
 
 	</style>
@@ -48,7 +55,7 @@
 	
 	/*----------  最外层element会自动增加组件同名 class="topological-timeline"  ----------*/
 	<template>
-        <el-container style="height:100%;width:100%;">
+        <el-container style="height:200px;width:100%;">
             <el-aside width="200px">
                 <el-tree 
                     show-checkbox
@@ -64,21 +71,26 @@
                     </span>  
                 </el-tree>
             </el-aside>
-            <el-container style="width:100%;height:100%;">
-                <el-header style="height:30px;line-height: 30px;display: flex;">
-                    <div class="block" style="width:95%;display: flex;">
+            <el-container style="width:100%;height:100%;background: #dcdfe6;">
+                <el-header style="height:30px;line-height: 30px;display: flex;padding:0px;margin-right:14px;">
+                    <div style="width:200px;">
                         <el-date-picker
-                            v-model="timeline.daterange"
-                            type="datetimerange"
+                            v-model="timeline.pickDate"
+                            type="datetime"
                             :picker-options="timeline.pickerOptions"
-                            range-separator="至"
-                            start-placeholder="开始日期"
-                            end-placeholder="结束日期"
-                            @change="onDateRangeChange"
                             align="right"
-                            popper-class="timeLineDateRange el-picker-panel el-date-range-picker el-popper">
+                            size="mini"
+                            style="width:200px;">
                         </el-date-picker>
-                    
+                    </div>
+                    <div style="width:225px;">
+                        <el-radio-group v-model="timeline.pickRange" size="mini">
+                            <el-radio-button :label="30 * 60 * 1000">30 分钟</el-radio-button>
+                            <el-radio-button :label="60 * 60 * 1000">60 分钟</el-radio-button>
+                            <el-radio-button :label="120 * 60 * 1000">120 分钟</el-radio-button>
+                        </el-radio-group>
+                    </div>
+                    <div style="width:55%;">
                         <el-divider direction="vertical"></el-divider>
                         <el-tooltip content="放大" open-delay="500">
                             <el-button type="text" icon="el-icon-zoom-in" @click="onTimelineZoomin(0.2)" style="padding:5px 0px;"></el-button>
@@ -89,15 +101,15 @@
                         <el-divider direction="vertical"></el-divider>
                         <el-checkbox v-model="timeline.showDiff">显示差异</el-checkbox>
                     </div>
-                    <div style="width:5%;text-align: right;">
+                    <div style="width:20px;text-align: right;">
                         <el-tooltip content="关闭" open-delay="500">
                             <el-button type="text" icon="el-icon-close" style="float:right;" @click="onClose"></el-button>
                         </el-tooltip>
                     </div>
                 </el-header>
-                <el-main style="width:100%;height:100%;padding:0px;display: flex;">
-                    <el-button type="text" icon="el-icon-arrow-left" @sclick="onTimeLineMove(0.2)"></el-button>
-                    <div id="timeline" ref="timeline" style="width:100%;"></div>
+                <el-main style="width:100%;height:100%;padding:0px;display: flex;overflow: hidden;">
+                    <el-button type="text" icon="el-icon-arrow-left" @click="onTimeLineMove(0.2)"></el-button>
+                    <div id="timeline" ref="timeline" style="width:100%;position: relative;"></div>
                     <el-button type="text" icon="el-icon-arrow-right" @click="onTimeLineMove(-0.2)"></el-button>
                 </el-main>
             </el-container>
@@ -115,70 +127,40 @@
             return {
                 timeline:{
                     showDiff:false,
-                    daterange: "",
+                    pickDate: _.now(),
+                    pickRange: 30 * 60 * 1000,
                     pickerOptions: {
-                        shortcuts: [
-                            {
-                                text: '最近5小时',
-                                onClick(picker) {
-                                    const end = new Date();
-                                    const start = new Date();
-                                    start.setTime(start.getTime() - 3600 * 1000 * 5);
-                                    picker.$emit('pick', [start, end]);
-                                }
-                            }, 
-                            {
-                                text: '最近12小时',
-                                onClick(picker) {
-                                    const end = new Date();
-                                    const start = new Date();
-                                    start.setTime(start.getTime() - 3600 * 1000 * 12);
-                                    picker.$emit('pick', [start, end]);
-                                }
-                            }, 
-                            {
-                                text: '最近24小时',
-                                onClick(picker) {
-                                    const end = new Date();
-                                    const start = new Date();
-                                    start.setTime(start.getTime() - 3600 * 1000 * 24);
-                                    picker.$emit('pick', [start, end]);
-                                }
-                            }, 
-                            {
-                                text: '最近一周',
-                                onClick(picker) {
-                                    const end = new Date();
-                                    const start = new Date();
-                                    start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
-                                    picker.$emit('pick', [start, end]);
-                                }
-                            }, {
-                                text: '最近一个月',
-                                onClick(picker) {
-                                    const end = new Date();
-                                    const start = new Date();
-                                    start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
-                                    picker.$emit('pick', [start, end]);
-                                }
-                            }, {
-                                text: '最近三个月',
-                                onClick(picker) {
-                                    const end = new Date();
-                                    const start = new Date();
-                                    start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
-                                    picker.$emit('pick', [start, end]);
-                                }
+                        shortcuts: [{
+                            text: '今天',
+                            onClick(picker) {
+                                picker.$emit('pick', new Date());
                             }
-                        ]
+                        }, {
+                            text: '昨天',
+                            onClick(picker) {
+                                const date = new Date();
+                                date.setTime(date.getTime() - 3600 * 1000 * 24);
+                                picker.$emit('pick', date);
+                            }
+                        }, {
+                            text: '一周前',
+                            onClick(picker) {
+                                const date = new Date();
+                                date.setTime(date.getTime() - 3600 * 1000 * 24 * 7);
+                                picker.$emit('pick', date);
+                            }
+                        }]
                     },
                     inst: null,
                     items:  new vis.DataSet(),
                     options: {
                         type: "point",
                         editable: true,
+                        zoomMin: 60 * 60 * 1000,
+                        zoomMax: 60 * 60 * 24 * 1000 * 365 * 5,
                         showCurrentTime: true,
                         showWeekScale: true,
+                        stack: false,
                         locale: 'zh_CN'
                     }
                 },
@@ -216,6 +198,12 @@
             },
             'tree.selected': function(val,oldVal){
                 this.setItems();
+            },
+            'timeline.pickDate':function(val,oldVal){
+                this.setTimelineRange();
+            },
+            'timeline.pickRange':function(val,oldVal){
+                this.setTimelineRange();
             }
         },
         created(){
@@ -223,14 +211,16 @@
 	    },
 	    mounted() {
             this.$nextTick(() => {
-            
-                this.timeline.inst = new vis.Timeline(this.$refs.timeline, this.timeline.items, this.timeline.options);
-                this.timeline.inst.fit();
-                this.timeline.inst.on('select', this.onSelect);
-                // $(this.$refs.timeline).on("click",(event)=> {
-                //     var props = this.timeline.inst.getEventProperties(event)
-                //     //this.onClick(props);
-                // })
+                
+                _.delay(()=>{
+                    this.timeline.inst = new vis.Timeline(this.$refs.timeline, this.timeline.items, this.timeline.options);
+                    this.timeline.inst.fit();
+                    this.timeline.inst.on('select', this.onSelect);
+                    this.timeline.inst.on("doubleClick",(properties)=> {
+                        let props = this.timeline.inst.getEventProperties(properties.event)
+                        this.onClick(props);
+                    })
+                },50)
                 
             })
 	        
@@ -245,8 +235,10 @@
             add(){
                 //this.timeline.items.pLOWERh();
             },
-            onDateRangeChange(evt){
-                this.timeline.inst.setOptions({start:evt[0],end:evt[1]});
+            setTimelineRange(){
+                let start = moment(this.timeline.pickDate - this.timeline.pickRange);
+                let end = moment(this.timeline.pickDate + this.timeline.pickRange);
+                this.timeline.inst.setOptions({start:start,end:end});
             },
             setItems(){
 
@@ -319,19 +311,38 @@
                 console.log('selected items: ' + properties.items);
             },
             onClick(props){
-                let oldTerm = this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.$refs.graphViewSearch.term.split(" diff ");
-                oldTerm[1] = `'${moment(props.time.toString()).format("YYYY-MM-DD HH:MM")}'`;
-                let term = oldTerm.join(" diff ")
                 
-                this.$message({
-                    type: "info",
-                    message: " 图查询: " + term
-                });
+                try{
+                    let timeline = this.timeline.inst;
+                    
+                    if (props.what === 'custom-time') {
+                        timeline.removeCustomTime(props.customTime);
+                    } else {
+                        
+                        let id = moment(props.time.toString()).format("YYY-MM-DD HH:MM:SS");
 
-                _.delay(()=>{
-                    this.$root.$refs.graphViewRef.search( encodeURIComponent(term) );
-                    this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.$refs.graphViewSearch.term = term;
-                },500)
+                        let oldTerm = this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.$refs.searchToolbar.term.split(" diff ");
+                        oldTerm[1] = `'${id}'`;
+                        let term = oldTerm.join(" diff ")
+                        
+                        this.$message({
+                            type: "info",
+                            message: " 图查询: " + term
+                        });
+
+                        _.delay(()=>{
+                            this.$root.$refs.graphViewRef.search( encodeURIComponent(term) );
+                            this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.$refs.searchToolbar.term = term;
+                        },500)
+
+                        // 添加标注
+                        timeline.addCustomTime(props.time, id);
+                        timeline.setCustomTimeMarker(term, id);
+                    }
+
+                } catch(err){
+
+                }
 
             },
             onClose(){

@@ -2510,7 +2510,8 @@ class Event {
                                 // 指定时间戳
                                 forTime:  ' for vtime ',
                             }
-                        }
+                        },
+                        splitInst: null
                     },
                     watch:{
                         'control.ifRefresh':{
@@ -2576,46 +2577,7 @@ class Event {
                         }
                     },
                     created(){
-                        /* try {
-                            
-                            if(mx.urlParams['cfg']){
-                                event.URL_PARAMS_CFG = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(mx.urlParams['cfg']))));
-                            }
                         
-                            let init = function(){
-                    
-                                _.forEach(event.URL_PARAMS_CFG,function(v,k){
-                                    if("false" == String(v)){
-                                    
-                                        $(`#${k}`).hide();
-
-                                        $(".page-header-fixed").css({
-                                            "paddingTop": "0px"
-                                        })
-
-                                        $(".page-sidebar-minified .sidebar-bg").css({
-                                            "width": "0px"
-                                        })
-
-                                        $(".page-sidebar-minified .content").css({
-                                            "marginLeft": "0px"
-                                        })
-
-                                        $("body").css({
-                                            "background": "transparent"
-                                        })
-                                        
-                                    }
-                                })
-                    
-                            };
-                            _.delay(()=>{
-                                init();
-                            },50)
-                        } catch(err){
-                            event.URL_PARAMS_CFG = null;
-                        } */
-
                         // 集成
                         try{
                             if(!_.isEmpty(window.location.search)){
@@ -2668,21 +2630,6 @@ class Event {
                             _.delay(()=>{
                                 // RESIZE Event Summary
                                 eventHub.$emit("WINDOW-RESIZE-EVENT");
-
-                                Split([this.$refs.leftView.$el, this.$refs.mainView.$el], {
-                                    sizes: [20, 80],
-                                    minSize: [0, 0],
-                                    gutterSize: 5,
-                                    gutterStyle: function(dimension, gutterSize) {
-                                        return {
-                                            'display': 'none'
-                                        }
-                                    },
-                                    gutterAlign: 'end',
-                                    cursor: 'col-resize',
-                                    direction: 'horizontal',
-                                    expandToMin: true
-                                });
                             },2000);
 
                             // 数据设置
@@ -2715,6 +2662,20 @@ class Event {
                             $(this.$el).removeClass(window.EVENT_VIEW);
                             $(this.$el).addClass(event);
                             window.EVENT_VIEW = event;
+                            
+                            if(event == 'view-normal'){
+                                this.splitInst.destroy();
+                            } else {
+                                this.splitInst = Split([this.$refs.leftView[0].$el, this.$refs.mainView[0].$el], {
+                                    sizes: [20, 80],
+                                    minSize: [0, 0],
+                                    gutterSize: 5,
+                                    gutterAlign: 'end',
+                                    cursor: 'col-resize',
+                                    direction: 'horizontal',
+                                    expandToMin: true
+                                });
+                            }
                         },
                         toggleView(cmd){
                             if(cmd === 'm'){

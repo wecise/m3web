@@ -150,8 +150,8 @@ class SideBar {
                             </el-main>
                             <el-footer style="height:40px;line-height:40px;">
                                 <el-link href="/janesware/system" target="_blank" icon="el-icon-edit">发布新应用</el-link>
-                                <el-link href="http://wecise.com#appstore" target="_blank" type="primary" icon="el-icon-view" style="margin-left:20px;">
-                                    唯简企业应用商店
+                                <el-link href="http://${window.COMPANY_WEBSITE}#appstore" target="_blank" type="primary" icon="el-icon-view" style="margin-left:20px;">
+                                    #{window.COMPANY_NAME}# 应用商店
                                 </el-link>
                             </el-footer>
                         </el-container>`,
@@ -355,14 +355,14 @@ class SideBar {
             },
             template:   `<el-container style="position:fixed;z-index:20;top:0;left:0;width:100%;background:rgb(37, 45, 71);" id="header">
                             <el-header style="padding:0px 0px 0px 10px;height:50px;line-height:50px;display:flex;">
-                                <div style="width:80%;">
+                                <div style="width:88%;">
                                     <el-link href="/" :underline="false">
                                         <img id="company_logo" src="">
                                         <span style="color:#ffffff;">#{mxTitle}#</span>
                                     </el-link>
                                 </div>
-                                <div id="ai-robot" style="width:8%;"></div>
-                                <div style="width:12%;">
+                                <div id="ai-robot" style="width:6%;"></div>
+                                <div style="width:6%;">
                                     <el-menu :default-active="activeIndex" 
                                             class="topbar-el-menu" 
                                             mode="horizontal" 

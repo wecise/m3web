@@ -276,14 +276,18 @@
                     appVue.currentView = 'user-info';
                 },
                 importLicense: function(event){
-                    const self = this;
+                    console.log(1,event)
+                    try{
 
-                    let file = event.target.files[0];
+                        let file = event.target.files[0];
 
-                    let rtn = licenseHandler.licenseImport(file);
+                        let rtn = licenseHandler.licenseImport(file);
 
-                    if(rtn == 1){
-                        document.location.href = mx.getPage();
+                        if(rtn == 1){
+                            document.location.href = mx.getPage();
+                        }
+                    } catch(err){
+                        console.log(err)
                     }
 
                 }
@@ -625,7 +629,7 @@
                 <el-input id="config" class="form-control" :value="license" required disabled>
                     <el-button type="success" slot="append">
                         导入
-                        <el-input type="file" name="loadfile" @change="importLicense"></el-input>
+                        <input type="file" name="loadfile" @change="importLicense" />
                     </el-button>
                 </el-input>
             </el-form-item>

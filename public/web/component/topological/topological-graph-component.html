@@ -254,6 +254,13 @@
             line-height: 32px!important;
         }
 
+
+        /* graph */
+        .topological-search-toolbar-graph .el-input-group__prepend{
+            background: transparent;
+            border: unset;
+        }
+
         /* graphAdv  */
         .topological-search-toolbar-graphAdv .el-textarea__inner,
         .topological-search-toolbar-path .el-radio-button__inner{
@@ -346,6 +353,47 @@
             padding: 10px;
             box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
         }
+
+        /* graph background pattern */
+        .topological-graph-component #graphContainer > svg.grid-pattern{
+            background:
+                linear-gradient(-90deg, rgba(0,0,0,.05) 1px, transparent 1px),
+                linear-gradient(rgba(0,0,0,.05) 1px, transparent 1px), 
+                linear-gradient(-90deg, rgba(0, 0, 0, .04) 1px, transparent 1px),
+                linear-gradient(rgba(0,0,0,.04) 1px, transparent 1px),
+                linear-gradient(transparent 3px, #f2f2f2 3px, #f2f2f2 78px, transparent 78px),
+                linear-gradient(-90deg, #aaa 1px, transparent 1px),
+                linear-gradient(-90deg, transparent 3px, #f2f2f2 3px, #f2f2f2 78px, transparent 78px),
+                linear-gradient(#aaa 1px, transparent 1px),
+                #f2f2f2;
+            background-size:
+                4px 4px,
+                4px 4px,
+                80px 80px,
+                80px 80px,
+                80px 80px,
+                80px 80px,
+                80px 80px,
+                80px 80px;
+        }
+
+        /* note background */
+        .topological-view-diagnosis .notes-view-content {
+            height: calc(100% - 45px)!important;
+            background: #f9f9f5;
+        }
+
+        /* edge flow Effect */
+        .topological-graph-component .flow {
+		  stroke-dasharray: 8;
+		  animation: dash 0.5s linear;
+		  animation-iteration-count: infinite;
+		}
+		@keyframes dash {
+		  to {
+		    stroke-dashoffset: -16;
+		  }
+		}
     }
 
 	</style>
@@ -384,10 +432,10 @@
                             <el-divider content-position="left">实体类型</el-divider>
                             <div style="display:flex;flex-wrap: wrap; align-items: flex-start;margin:10px 0px;">
                                 <el-tag type="default" 
-                                    :key="v" v-for="v in allNodes" 
+                                    :key="v" v-for="v in model.graph.allNodesClass" 
                                     style="margin:5px;width:auto;cursor:pointer;"
                                     effect="plain" 
-                                    @click="onTagClick($event,'node',v)">
+                                    @click="onTagClick($event,'vertex',v)">
                                     ${v}
                                 </el-tag>
                             </div>
@@ -577,6 +625,7 @@
                             edgeStyle: "4"
                         },
                         allNodesIds: [],
+                        allNodesClass: [],
                         nodes:null,
                         edges:null,                        
                         path: {
@@ -607,10 +656,6 @@
                                                 ]
                         },
                         history:[],
-                        timeline: {
-                            value: "",
-                            marks: {}
-                        },
                         footbar:{
                             show: false
                         },
@@ -696,7 +741,8 @@
         computed: {
             allNodes(){
                 try{
-                    return  _.uniq(_.map(this.model.graph.nodes,(v,k)=>{
+                    let cells = this.model.editor.graph.getChildVertices(this.model.editor.graph.getDefaultParent());
+                    return  _.uniq(_.map(cells,(v,k)=>{
                                 return v.getId().split(":")[0];
                             })).sort();
                 } catch(err){
@@ -736,6 +782,14 @@
                     }
                 },
                 deep:true
+            },
+            'model.graph.allNodesIds': {
+                handler:function(val,oldVal) {
+                    this.model.graph.allNodesClass = _.uniq(_.map(val,(v)=>{
+                            return v.split(":")[0];
+                        })).sort();
+                },
+                immediate: true
             },
             'model.control.refresh.enable':{
                 handler(val,oldVal){
@@ -874,7 +928,13 @@
 
                     // 禁止改变节点大小
                     this.model.editor.graph.setCellsResizable(false);
+                    // 禁止节点文字编辑功能
+                    this.model.editor.graph.setCellsEditable(false);
                     
+                    // 禁止连线移动
+                    this.model.editor.graph.disconnectOnMove = false;
+                    
+
                     // 允许连线的目标和源是同一元素 
                     this.model.editor.graph.setAllowLoops(true); 
                     // 居中缩放
@@ -1078,14 +1138,16 @@
                         
                         menu.addItem('节点隐藏', null, ()=>{
                             // graph action
-                            cell.removeFromParent();
-                            this.model.editor.graph.refresh(cell);
+                            // cell.removeFromParent();
+                            // this.model.editor.graph.refresh(cell);
+                            graph.removeCells([cell]);
+							mxEvent.consume(evt);
                         });
 
                         menu.addItem('节点删除', null, ()=>{
                             // graph action
-                            cell.removeFromParent();
-                            this.model.editor.graph.refresh(cell);
+                            graph.removeCells([cell]);
+							mxEvent.consume(evt);
                         });
 
 
@@ -1109,7 +1171,6 @@
                         menu.addItem('刷新', null, ()=>{
                             this.onReload();
                         });
-                        menu.addSeparator();
                     }
                     
                     let cells = this.model.editor.graph.getChildVertices(this.model.editor.graph.getDefaultParent())
@@ -1117,8 +1178,9 @@
                         menu.addItem('清空', null, ()=>{
                             this.onClear();
                         });
-                        menu.addSeparator();
                     }
+
+                    menu.addSeparator();
 
                     menu.addItem('撤销', null, ()=>{
                         this.model.editor.execute("undo");
@@ -1206,6 +1268,15 @@
                         this.executeLayout();
                     }, submenuLayout);
 
+                    menu.addSeparator();
+
+                    var submenuGraph = menu.addItem('画布',null,null);
+                    menu.addItem('无', null, ()=>{
+                        $("#graphContainer>svg").removeClass("grid-pattern");
+                    }, submenuGraph);
+                    menu.addItem('格子', null, ()=>{
+                        $("#graphContainer>svg").addClass("grid-pattern");
+                    }, submenuGraph);
                 }
                 
             },
@@ -1404,6 +1475,9 @@
                     this.model.editor.graph.getModel().endUpdate();
 
                     this.toCenter();
+
+                    // 统计IDs
+                    this.getAllCellIds();
 
                 }
             },
@@ -1777,7 +1851,7 @@
                             node = graph.insertVertex(parent, v.id, _name, 50, 50, size, size,`shape=ellipse;perimeter=ellipsePerimeter;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=middle;${fillColor}`);
                         }
 
-                        
+                        this.model.graph.allNodesIds.push(node.getId());
 
                         // node directory
                         _.extend(nodes,{[v.id]:node});
@@ -1876,6 +1950,9 @@
                     // 加入高级搜索定义
                     this.$refs.searchToolbar.term = term;
                     //this.$refs.searchToolbar.search();
+
+                    // 统计IDs
+                    this.getAllCellIds();
                     
                 }
             },
@@ -2079,7 +2156,6 @@
 
                                         // 定位到cell
                                         _.delay(()=>{
-                                            console.log(1)
                                             graph.scrollCellToVisible(cell);
                                             graph.setSelectionCell(cell);
                                         },3500)
@@ -2105,8 +2181,14 @@
             // 获取所有cell ids
             getAllCellIds(){
                 try{
-                    let cells = this.model.editor.graph.getModel().cells;
-                    this.model.graph.allNodesIds = _.xor(_.keys(cells),['0','1']);
+                    let parent = this.model.editor.graph.getDefaultParent();
+                    let cells = this.model.editor.graph.getChildVertices(parent);
+                    
+                    // IDs
+                    this.model.graph.allNodesIds = _.uniq(_.map(cells,(v,k)=>{
+                                        return v.getId();
+                                    })).sort();
+                    
                 } catch(err){
                     this.model.graph.allNodesIds = [];
                 }
@@ -2715,18 +2797,92 @@
                 event.preventDefault();
                 event.stopPropagation();
                 
+                const self = this;
+                window.flowEdges = [];
+                
                 this.model.control.ifIcon = false;
-                this.onReload();
-                //this.model.editor.graph.selectAll(null, true);
-                let cells = this.model.editor.graph.getChildVertices(this.model.editor.graph.getDefaultParent());
-                _.forEach(cells,(v)=>{
-                    if(!_.startsWith(v.getId(),value)){
-                        this.model.editor.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, "#f6f6f6", [v]);
-                        this.model.editor.graph.setCellStyles(mxConstants.STYLE_FONTCOLOR, "#333333", [v]);
-                        this.model.editor.graph.setCellStyles(mxConstants.STYLE_GRADIENTCOLOR, "#ffffff", [v]);
-                        //this.model.editor.graph.getModel().setVisible(v, false);
-                    }    
-                })
+                let vertices = this.model.editor.graph.getChildVertices(this.model.editor.graph.getDefaultParent());
+                let edges = this.model.editor.graph.getChildEdges(this.model.editor.graph.getDefaultParent());
+                
+
+                let reset = function(){
+                    _.forEach(vertices,(v)=>{
+                        self.model.editor.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, "blue", [v]);
+                        self.model.editor.graph.setCellStyles(mxConstants.STYLE_FONTCOLOR, "#333333", [v]);
+                        self.model.editor.graph.setCellStyles(mxConstants.STYLE_GRADIENTCOLOR, "blue", [v]);
+                    })
+                    
+                    _.forEach(edges,(v)=>{
+                        self.model.editor.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, "#000000", [v]);
+                        self.model.editor.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, "1", [v]);
+                    })
+                    
+                    _.forEach(window.flowEdges,(v)=>{
+                        resetFlowEffect(v);
+                    });
+
+                    clearInterval(window.flowEffectInterval);
+                }
+
+                let setVertex = function(){
+                    _.forEach(vertices,(v)=>{
+                        if(!_.startsWith(v.getId(),value)){
+                            self.model.editor.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, "#f6f6f6", [v]);
+                            self.model.editor.graph.setCellStyles(mxConstants.STYLE_FONTCOLOR, "#333333", [v]);
+                            self.model.editor.graph.setCellStyles(mxConstants.STYLE_GRADIENTCOLOR, "#ffffff", [v]);
+                        } 
+                    })
+                }
+
+                let setEdge = function(){
+                    
+                    _.forEach(edges,(v)=>{
+                        if(v.getValue() != value){
+                            self.model.editor.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, "#f6f6f6", [v]);
+                            self.model.editor.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, "3", [v]);
+                        } else {
+                            window.flowEdges.push(v);
+                        }
+                    })
+
+                    window.flowEffectInterval = setInterval(()=>{
+                        _.forEach(window.flowEdges,(v)=>{
+                            setFlowEffect(v);
+                        });
+                    },50)
+                }
+
+
+                let setFlowEffect = function(edge){
+                    // Adds animation to edge shape and makes "pipe" visible
+                    var state = self.model.editor.graph.view.getState(edge);
+                    state.shape.node.getElementsByTagName('path')[0].removeAttribute('visibility');
+                    state.shape.node.getElementsByTagName('path')[0].setAttribute('stroke-width', '6');
+                    state.shape.node.getElementsByTagName('path')[0].setAttribute('stroke', 'lightGray');
+                    state.shape.node.getElementsByTagName('path')[1].setAttribute('class', 'flow');
+                }
+
+                let resetFlowEffect = function(edge){
+                    try{
+                        var state = self.model.editor.graph.view.getState(edge);
+                        console.log(edge,state.shape.node.getElementsByTagName('path')[1])
+                        // state.shape.node.getElementsByTagName('path')[0].setAttribute('visibility','visible');
+                        // state.shape.node.getElementsByTagName('path')[0].setAttribute('stroke-width', '1');
+                        // state.shape.node.getElementsByTagName('path')[0].setAttribute('stroke', '#333333');
+                        state.shape.node.getElementsByTagName('path')[1].removeAttribute('class');
+                    } catch(err){
+                        console.log(err)
+                    }
+                }
+
+                // 重置样式
+                reset();
+                // 设置样式
+                if(type == 'vertex'){
+                    setVertex();
+                } else {
+                    setEdge();
+                }
                 
             }
 	    }

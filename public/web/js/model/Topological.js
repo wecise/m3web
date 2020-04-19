@@ -275,7 +275,6 @@ class Topological {
             }
         })
         
-
         // 拓扑分析输入组件
         Vue.component("topological-analysis-input",{
             delimiters: ['#{', '}#'],
@@ -863,18 +862,41 @@ class Topological {
                     entity: {
                         list: [],
                         timeout:  null
-                    }
+                    },
+                    file: {
+                        show: false
+                    },
+                    doc:null,
+                    dialogOpen:{
+                        title: "打开",
+                        content: "",
+                        visible: false
+                    },
+                    dialogSaveAs:{
+                        title: "另存为",
+                        content: "",
+                        visible: false
+                    },
                 }
             },
             template:   `<div>
                             <el-header style="width:100%;display:flex;height:35px;line-height:35px;padding:0px 0px 0px 10px;">
                                 <el-button type="text" icon="el-icon-arrow-left" @click="$parent.$parent.control.show=false"></el-button>
-                                <el-input v-model="search.term" placeholder="选择实体" style="width:100%;"
+                                <el-input v-model="search.term" placeholder="搜索实体关键字" style="width:100%;"
                                     @blur="onSearchEntity"
                                     @clear="onClear"
+                                    @focus="file.show=false"
                                     @keyup.enter.native="onSearchEntity" 
                                     clearable
                                     autofocus>
+                                    <template slot="prepend">
+                                        <el-tooltip content="选择实体" open-delay="500">
+                                            <el-button type="text" 
+                                                icon="el-icon-menu" size="mini" 
+                                                @click=""
+                                                @focus.native="file.show=false"></el-button>
+                                        </el-tooltip>
+                                    </template>
                                 </el-input>
                                 <el-button type="default" @click="$parent.$parent.onToggleView('topological-search-toolbar-path')"  style="margin-left:-1px;">
                                     <el-image src="/fs/assets/images/tools/png/path-blue.png?type=open&issys=true" style="width:16px;"></el-image>
@@ -885,11 +907,30 @@ class Topological {
                                 </el-button>
                                 <el-button type="primary" 
                                     @click="onSearchEntity" 
+                                    @focus.native="file.show=false"
                                     style="margin-left:-1px;">
                                     <i class="el-icon-search" style="font-weight: 900;font-size:14px;"></i>
                                 </el-button>
+                                <el-dropdown trigger="click">
+                                    <span class="el-dropdown-link">
+                                        <el-button type="text" icon="el-icon-folder-opened" style="font-weight: 900;font-size:14px;padding:10px;">
+                                        </el-button>
+                                    </span>
+                                    <el-dropdown-menu slot="dropdown">
+                                        <el-dropdown-item @click.native="onNew">新建</el-dropdown-item>
+                                        <el-dropdown-item @click.native="dialogOpen.visible=true" divided>打开</el-dropdown-item>
+                                        <el-dropdown-item @click.native="onSave" divided>保存</el-dropdown-item>
+                                        <el-dropdown-item @click.native="dialogSaveAs.visible=true">另存为</el-dropdown-item>
+                                        <el-dropdown-item @click.native="onDelete" divided>删除</el-dropdown-item>
+                                        <el-dropdown-item @click.native="onPrint" divided>打印</el-dropdown-item>
+                                        <el-dropdown-item @click.native="onClose" divided>关闭</el-dropdown-item>
+                                    </el-dropdown-menu>
+                                </el-dropdown>
                             </el-header>
-                            <el-main ref="mainView" style="width:30vw;height:40vh;padding:10px;border-top:1px solid #409EFF;" v-show="!_.isEmpty(search.result)">
+                            <el-main ref="fileView" style="width:30vw;height:40vh;padding:10px;border-top:1px solid #409EFF;" v-if="file.show">
+                                
+                            </el-main>
+                            <el-main ref="mainView" style="width:30vw;height:40vh;padding:10px;border-top:1px solid #409EFF;" v-show="!_.isEmpty(search.result)" v-else>
                                 <div class="div-hover-effect" style="display:flex;padding:10px 0;cursor:pointer;" 
                                     v-for="item in search.result"
                                     @click="onSelect(item)"
@@ -907,6 +948,22 @@ class Topological {
                             <el-footer ref="footerView" style="width:30vw;padding:0px;border-top:1px solid #409EFF;height:auto;" v-if="!_.isEmpty(search.selected)">
                                 <topological-graph class="graphAction" :model="$parent.$parent.mainView.search.model" ref="searchRef"></topological-graph>
                             </el-footer>
+                            <!-- 打开窗口 -->
+                            <el-dialog :title="dialogOpen.title" :visible.sync="dialogOpen.visible">
+                                <mx-fs-open dfsRoot="/home/admin/Documents/graph" ref="dfsOpen" v-if="dialogOpen.visible"></mx-fs-open>
+                                <div slot="footer" class="dialog-footer">
+                                    <el-button @click="dialogOpen.visible = false">取 消</el-button>
+                                    <el-button type="primary" @click="onOpen(false)">打 开</el-button>
+                                </div>
+                            </el-dialog>
+                            <!-- 保存窗口 -->
+                            <el-dialog :title="dialogSaveAs.title" :visible.sync="dialogSaveAs.visible">
+                                <mx-fs-saveas dfsRoot="/home/admin/Documents/graph" ref="dfsSaveas"></mx-fs-saveas>
+                                <div slot="footer" class="dialog-footer">
+                                    <el-button @click="dialogSaveAs.visible = false">取 消</el-button>
+                                    <el-button type="primary" @click="onSaveAs">保存</el-button>
+                                </div>
+                            </el-dialog>
                         </div>`,
             filters: {
                 pickIcon(item){
@@ -975,6 +1032,137 @@ class Topological {
                     return (state) => {
                       return (state.value.toLowerCase().indexOf(term.toLowerCase()) === 0);
                     };
+                },
+                onNew(){
+                    this.deleteCells(true);
+                    this.doc = null;
+                },
+                onOpen(auto){
+                    try{
+                        
+                        let editor = inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.model.editor;
+
+                        // 选择文件打开
+                        if(!auto){
+                            this.doc = this.$refs.dfsOpen.node;
+                        }
+                        
+                        let xml = fsHandler.fsContent(this.doc.parent, this.doc.name);
+                        let doc = mxUtils.parseXml(xml);
+                        let codec = new mxCodec(doc);
+                        codec.decode(doc.documentElement, editor.graph.getModel());
+                    } catch(err){
+                        console.error(err);
+                    } finally {
+                        this.dialogOpen.visible = false;
+                    }
+                    
+                },
+                onSave(){
+                    if(this.doc){
+                        let editor = inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.model.editor;
+                        let enc = new mxCodec(mxUtils.createXmlDocument());
+                        let node = enc.encode(editor.graph.getModel());
+                        let xml = mxUtils.getPrettyXml(node);
+                        let attr = _.extend(this.doc, {});
+                        let rtn = fsHandler.fsNew('file',this.doc.parent, this.doc.name, xml, attr);
+                        if(rtn == 1){
+                            this.$message({
+                                type:"success",
+                                message: "保存成功！"
+                            })
+                        }
+                    } else {
+                        this.dialogSaveAs.visible = true;
+                    }
+                },
+                onSaveAs(){
+                    
+                    let editor = inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.model.editor;
+
+                    let enc = new mxCodec(mxUtils.createXmlDocument());
+                    let node = enc.encode(editor.graph.getModel());
+                    let xml = mxUtils.getPrettyXml(node);
+                    let attr = {};
+                    
+                    let parent = this.$refs.dfsSaveas.node.fullname;
+                    let name = this.$refs.dfsSaveas.node.name;
+                    let rtn = fsHandler.fsNew('file',parent, name, xml, attr);
+                    if(rtn == 1){
+                        this.$message({
+                            type:"success",
+                            message: "保存成功！"
+                        })
+                        
+                        this.doc = {parent:parent, name:name, fullname: [parent,name].join("/")};
+                    }
+    
+                    this.dialogSaveAs.visible = false;
+                },
+                onClose(){
+                    let editor = inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.model.editor;
+                    editor.execute("deleteAll");
+                    this.doc = null;
+                },
+                onPrint(){
+                    inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.model.editor.execute('print');
+                },
+                onDelete(){
+                    if(this.doc){
+    
+                        this.$confirm(`确认要删除该设计文档：${this.doc.name}？`, '提示', {
+                            confirmButtonText: '确定',
+                            cancelButtonText: '取消',
+                            type: 'warning'
+                        }).then(() => {
+                            let rtn = fsHandler.fsDelete(this.doc.parent,this.doc.name);
+        
+                            if (rtn == 1){
+                                this.$message({
+                                    type: "success",
+                                    message: "删除成功！"
+                                });
+                                this.deleteCells(true);
+                                this.doc = null;
+                                localStorage.setItem("CLASS-DESIGN-OPEN-FILE",'');
+                                this.summaryInfo();
+                            } else {
+                                this.$message({
+                                    type: "error",
+                                    message: "删除失败 " + rtn.message
+                                })
+                            } 
+                        }).catch(() => {
+                            
+                        });
+                    }
+                },
+                deleteCells(includeEdges){
+                    
+                    // Cancels interactive operations
+                    let editor = inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.model.editor;
+                    let graph = editor.graph;
+                    graph.escape();
+                    //var cells = graph.getDeletableCells(graph.getSelectionCells());
+                    let cells = graph.getChildVertices(graph.getDefaultParent());
+                    if (cells != null && cells.length > 0){
+                        var parents = graph.model.getParents(cells);
+                        graph.removeCells(cells, includeEdges);
+                        
+                        // Selects parents for easier editing of groups
+                        if (parents != null){
+                            var select = [];
+                            
+                            for (var i = 0; i < parents.length; i++){
+                                if (graph.model.contains(parents[i]) &&
+                                    (graph.model.isVertex(parents[i]) ||
+                                    graph.model.isEdge(parents[i]))){
+                                    select.push(parents[i]);
+                                }
+                            }
+                            graph.setSelectionCells(select);
+                        }
+                    }
                 }
             }
         })
@@ -1504,6 +1692,59 @@ class Topological {
             },
             methods: {
                 
+            }
+        });
+
+        // 实体分析-笔记
+        Vue.component("entity-diagnosis-notes",{
+            delimiters: ['#{', '}#'],
+            props: {
+                model:Object
+            },
+            data(){
+                return {
+                    note: {   
+                        parent: "",
+                        name: "note.md",
+                        ftype: "md",
+                        item: "",
+                        content: ""
+                    }
+                }
+            },
+            template: `<el-container style="height: calc(100vh - 120px);">
+                            <el-main style="padding:10px 0px;">
+                                <md-editor-component :model="{item:note,content:note.content}"></md-editor-component>
+                            </el-main>
+                        </el-container>`,
+            created(){
+                // 根据实体ID定义该实体note存储位置
+                this.note.parent = "/storage/entity/notes/" + this.model.node.id;
+            },
+            mounted(){
+                this.initNote();
+            },
+            methods: {
+                initNote(){
+                    // 文件存在
+                    try{
+                        let rtn = fsHandler.fsCheck(this.note.parent,this.note.name); 
+                        if(!rtn){
+                            this.newNote();
+                        } else {
+                            this.note.content = fsHandler.fsContent(this.note.parent,this.note.name); 
+                        }
+                    } 
+                    // 文件不存在则新建一个
+                    catch(err){
+                        console.log(err)
+                    }
+                },
+                newNote(){
+                    let attr = {remark: '', ctime: _.now(), author: window.SignedUser_UserName};
+                    let rtn = fsHandler.fsNew(this.note.ftype, this.note.parent, this.note.name, this.model.title, attr);
+                    this.note.content = this.model.title;
+                }
             }
         });
 
@@ -2100,26 +2341,38 @@ class Topological {
             props: {
                 
             },
-            template:   `<el-tabs v-model="activeIndex" type="border-card" closable @tab-remove="diagnosisRemove" style="height:100%;">
-                            <el-tab-pane :label="item.title" v-for="item in tabs" :key="item.name" :name="item.name" lazy=true style="height:100%;">
-                                <el-tabs v-if="item.child" v-model="subIndex" class="entity-diagnosis-tabs" tab-position="left">
-                                    <el-tab-pane v-for="it in item.child" :key="it.name" :name="it.name" lazy=true>
+            template:   `<el-tabs v-model="activeIndex" 
+                                type="border-card" 
+                                closable 
+                                @tab-remove="diagnosisRemove" 
+                                @tab-click="onTabClick"
+                                style="height:100%;">
+                            <el-tab-pane :label="item.title" v-for="item in tabs.list" :key="item.name" :name="item.name" lazy style="height:100%;">
+                                <el-tabs 
+                                    v-model="item.subIndex" 
+                                    class="entity-diagnosis-tabs" 
+                                    tab-position="left"
+                                    v-if="item.child">
+                                    <el-tab-pane v-for="it in item.child" :key="it.name" :name="it.name" lazy>
                                         <span slot="label">
                                             <el-tooltip :content="it | pickTitle" open-delay="500" placement="left-start">
-                                                <el-image :src="it | pickImage" style="width:16px;height:16px;filter: brightness(0.5);"></el-image><!--i class="el-icon-menu"></i-->
+                                                <el-image src="/fs/assets/images/tools/png/add.png?issys=true&type=open" style="width:20px;height:20px;filter: brightness(0.5);" v-if="it.type=='new'"></el-image>
+                                                <el-image :src="it | pickImage" style="width:20px;height:20px;filter: brightness(0.5);" v-else></el-image>
                                             </el-tooltip>
                                         </span>
-                                        <entity-diagnosis-profile :id="item.name" :model="model[it.type]" v-if="it.type === 'profile'"></entity-diagnosis-profile>
+                                        <entity-diagnosis-profile :id="item.name" :model="it.model[it.type]" v-if="it.type === 'profile'"></entity-diagnosis-profile>
                                         
-                                        <el-table-component :model="it.model[it.type]" v-if=" _.includes(['ticket'],it.type) "></el-table-component>
-
                                         <entity-diagnosis-event :model="it.model[it.type]" v-if=" _.includes(['event','log'],it.type) "></entity-diagnosis-event>
 
                                         <entity-diagnosis-performance :model="it.model[it.type]" v-if="it.type === 'history'"></entity-diagnosis-performance>
                                         
-                                        <diagnosis-base-table :model="it.model[it.type]" v-if=" _.includes(['element'],it.type) "></diagnosis-base-table>
+                                        <!--diagnosis-base-table :model="it.model[it.type]" v-if=" _.includes(['element'],it.type) "></diagnosis-base-table-->
+
+                                        <entity-diagnosis-notes :model="item" v-if="it.type === 'notes'"></entity-diagnosis-notes>
 
                                         <entity-diagnosis-file :id="it.name" :model="it.model[it.type]" :node="item.node" v-if="it.type === 'file'"></entity-diagnosis-file>
+
+                                        <div v-if="it.type === 'new'"></div>
                                         
                                     </el-tab-pane>
                                 </el-tabs>
@@ -2127,9 +2380,11 @@ class Topological {
                         </el-tabs>`,
             data(){
                 return {
-                    tabs:   [],
+                    tabs: {
+                        list:[],
+                        subIndex: ''
+                    },
                     activeIndex: '',
-                    subIndex: '',
                     model: null
                 }
             },
@@ -2155,7 +2410,7 @@ class Topological {
                 }
             },
             watch: {
-                tabs:function(val,oldVal){
+                'tabs.list':function(val,oldVal){
                     if(val.length > 0){
                         this.$root.$data.splitInst.setSizes([0,70,30]);
                         $(".gutter").show();
@@ -2170,6 +2425,13 @@ class Topological {
             mounted(){ 
             },
             methods:{
+                onTabClick(tab, event){
+                    // 检查是否已打开
+                    let activeTab = _.find(this.tabs.list,{name: tab.name});
+                    console.log(1,activeTab,this.tabs.subIndex)
+                    // this.tabs.subIndex = _.head(activeTab.child).name;
+                    // console.log(2,this.tabs.subIndex)
+                },
                 diagnosisAdd(node){
                     const self = this;
                     
@@ -2192,35 +2454,40 @@ class Topological {
 
                         // 检查是否已打开
                         let name = `diagnosis-${id}`;
-                        let find = _.find(self.tabs,{name: name});
+                        let find = _.find(self.tabs.list,{name: name});
                         if(find){
                             self.diagnosisRemove(name);
                         }
 
+                        let child = _.map(self.model.template,(v)=>{
+                                        return _.extend(v, {name:`diagnosis-${v.name}-${id}`, model: self.model});
+                                    });
+                        let subIndex = _.head(child).name;
                         let tab = {
-                            title: node.value || node.id, name: `diagnosis-${id}`, type: 'diagnosis', node: node, child:_.map(self.model.template,function(v){
-                                return _.extend(v, {name:`diagnosis-${v.name}-${id}`, model: self.model});
-                            })};
+                                title: node.value || node.id, name: `diagnosis-${id}`, type: 'diagnosis', node: node, child: child, subIndex: subIndex
+                            };
 
                         self.activeIndex = tab.name;
-                        self.tabs.push(tab);
-                        self.subIndex = _.first(tab.child).name;
+                        self.tabs.list.push(tab);
 
                     } catch(err){
                         console.log(err)
                     } finally{
                         let graph = this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.model.editor.graph;
-                        //graph.getView().setTranslate(20,20);//将画布放到容器中间
+                        
                         // 访问过的节点高亮
-                        var highlight = new mxCellHighlight(graph, '#2790e1', 1);
+                        var highlight = new mxCellHighlight(graph, '#2790e1', 2);
                         highlight.highlight(graph.view.getState(node.cell));
+                        
+                        // 隐藏工具栏
+                        this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.model.control.show = false;
                     }
                     
                 },
                 diagnosisRemove(targetName) {
                         
                     try{
-                        let tabs = this.tabs;
+                        let tabs = this.tabs.list;
                         let activeIndex = this.activeIndex;
                         if (activeIndex === targetName) {
                         tabs.forEach((tab, index) => {
@@ -2233,11 +2500,14 @@ class Topological {
                         });
                         }
                         
-                        this.tabs = tabs.filter(tab => tab.name !== targetName);
+                        this.tabs.list = tabs.filter(tab => tab.name !== targetName);
                         this.activeIndex = activeIndex;
-                        this.subIndex = _.first(_.last(this.tabs).child).name;
+                        this.tabs.subIndex = _.first(_.last(this.tabs.list).child).name;
                     } catch(err){
                         
+                    } finally{
+                        // 隐藏工具栏
+                        this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.model.control.show = true;
                     }
                     
                     
@@ -2362,7 +2632,8 @@ class Topological {
                             "event-summary-component",
                             "search-preset-component",
                             "search-base-component",
-                            "entity-tree-component"],function() {
+                            "entity-tree-component",
+                            "md-editor-component"],function() {
             $(function() {
 
             

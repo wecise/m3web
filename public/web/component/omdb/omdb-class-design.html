@@ -229,7 +229,7 @@
                    </div>
                    <!-- 打开窗口 -->
                    <el-dialog :title="dialogOpen.title" :visible.sync="dialogOpen.visible">
-                        <mx-fs-open dfsRoot="/home/admin/Documents" ref="dfsOpen" v-if="dialogOpen.visible"></mx-fs-open>
+                        <mx-fs-open dfsRoot="/home/admin/Documents/class" ref="dfsOpen" v-if="dialogOpen.visible"></mx-fs-open>
                         <div slot="footer" class="dialog-footer">
                             <el-button @click="dialogOpen.visible = false">取 消</el-button>
                             <el-button type="primary" @click="onOpen(false)">打 开</el-button>

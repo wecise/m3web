@@ -19,6 +19,7 @@ class Matrix {
         this.name = 'M³ Platform';
         this.version = '0.8';
         this.theme = 'DARK';
+        this.env = "product";
 
         this.username = window.SignedUser_UserName;
         this.fullname = window.SignedUser_FullName;
@@ -81,10 +82,12 @@ class Matrix {
 
         }, false);
 
-        console.log(`%c产品：${mx.name}`, "color:red")
-        console.log(`%c版本：${mx.version}`, "color:red")
-        console.log("%c唯简科技：http://wecise.com", "color:red")
-        console.log("%cBug提交：mailto://wangzd@wecise.com?subject=Bug", "color:red")
+        if(mx.env !== 'product'){
+            console.log(`%c产品：${mx.name}`, "color:red")
+            console.log(`%c版本：${mx.version}`, "color:red")
+            console.log("%c唯简科技：http://wecise.com", "color:red")
+            console.log("%cBug提交：mailto://wangzd@wecise.com?subject=Bug", "color:red")
+        }
 
     }
 
@@ -204,7 +207,7 @@ class Matrix {
                 onAddTag: function(event){
 
 
-                    let input = {class: row.class, action: "+", tag: event.detail.value, id: row.id};
+                    let input = {class: row.class, action: "+", tags: [event.detail.value], ids: [row.id]};
                     let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
 
                     if(rtn.status == 'ok'){
@@ -214,7 +217,7 @@ class Matrix {
                 },
                 onRemoveTag: function(event){
 
-                    let input = {class: row.class, action: "-", tag: event.detail.value, id: row.id};
+                    let input = {class: row.class, action: "-", tags: [event.detail.value], ids: [row.id]};
                     let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
 
                     if(rtn.status == 'ok'){

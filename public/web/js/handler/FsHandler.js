@@ -73,7 +73,7 @@ class FsHandler {
     */
     fsNew(ftype, path, name, content, attr){
         let rtn = null;
-
+        
         let parent = path.replace(/\/\//g,'/');
         let _url = `/fs${parent}/${name}`;
 
