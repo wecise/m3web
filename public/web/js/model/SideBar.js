@@ -149,7 +149,7 @@ class SideBar {
                                 </el-container>
                             </el-main>
                             <el-footer style="height:40px;line-height:40px;">
-                                <el-link href="/janesware/system" target="_blank" icon="el-icon-edit">发布新应用</el-link>
+                                <el-link href="/matrix/system" target="_blank" icon="el-icon-edit">发布新应用</el-link>
                                 <el-link href="http://${window.COMPANY_WEBSITE}#appstore" target="_blank" type="primary" icon="el-icon-view" style="margin-left:20px;">
                                     #{window.COMPANY_NAME}# 应用商店
                                 </el-link>
@@ -432,7 +432,7 @@ class SideBar {
                         //mx.fullScreen();
                     }
                     else {
-                        window.open('/janesware/'+key,"_blank");
+                        window.open('/matrix/'+key,"_blank");
                     }
                 }
             }
@@ -546,7 +546,7 @@ class SideBar {
                 preFixIcon: `${window.ASSETS_ICON}/apps/png/`,
                 postFixIcon: `?type=open&issys=${window.SignedUser_IsAdmin}`,
                 isCollapse: true,
-                defaultActive: '/janesware/home',
+                defaultActive: '/matrix/home',
                 appConfig: [],
                 sideBarStatus: 2
             },

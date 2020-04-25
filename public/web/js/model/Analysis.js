@@ -498,7 +498,7 @@ class Analysis {
                     },
                     methods:{
                         forward(item){
-                            let url = `/janesware/entity?term=${window.btoa(encodeURIComponent(item.id))}`;
+                            let url = `/matrix/entity?term=${window.btoa(encodeURIComponent(item.id))}`;
                             window.open(url,'_blank');
                         }
                     }

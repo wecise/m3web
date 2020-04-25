@@ -15,7 +15,7 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file leaf-file-name="diagnosis.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/janesware/diagnosis.html">
+        <entry file="file://$PROJECT_DIR$/matrix/diagnosis.html">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="485">
               <caret line="1029" column="22" lean-forward="true" selection-start-line="985" selection-start-column="20" selection-end-line="1029" selection-end-column="22" />
@@ -31,7 +31,7 @@
         </entry>
       </file>
       <file leaf-file-name="search.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/janesware/search.html">
+        <entry file="file://$PROJECT_DIR$/matrix/search.html">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="138">
               <caret line="791" column="8" lean-forward="false" selection-start-line="791" selection-start-column="8" selection-end-line="791" selection-end-column="8" />
@@ -44,7 +44,7 @@
         </entry>
       </file>
       <file leaf-file-name="log.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/janesware/log.html">
+        <entry file="file://$PROJECT_DIR$/matrix/log.html">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="243">
               <caret line="317" column="37" lean-forward="true" selection-start-line="314" selection-start-column="35" selection-end-line="317" selection-end-column="37" />
@@ -64,7 +64,7 @@
         </entry>
       </file>
       <file leaf-file-name="event.html" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/janesware/event.html">
+        <entry file="file://$PROJECT_DIR$/matrix/event.html">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="232">
               <caret line="464" column="31" lean-forward="true" selection-start-line="462" selection-start-column="24" selection-end-line="464" selection-end-column="31" />
@@ -101,10 +101,10 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/janesware/event.html" />
+        <option value="$PROJECT_DIR$/matrix/event.html" />
         <option value="$PROJECT_DIR$/../public/web/js/cfg.js" />
-        <option value="$PROJECT_DIR$/janesware/diagnosis.html" />
-        <option value="$PROJECT_DIR$/janesware/search.html" />
+        <option value="$PROJECT_DIR$/matrix/diagnosis.html" />
+        <option value="$PROJECT_DIR$/matrix/search.html" />
       </list>
     </option>
   </component>
@@ -229,7 +229,7 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/janesware/search.html</url>
+          <url>file://$PROJECT_DIR$/matrix/search.html</url>
           <line>787</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="3" />
@@ -240,7 +240,7 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/janesware/diagnosis.html">
+    <entry file="file://$PROJECT_DIR$/matrix/diagnosis.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
@@ -254,7 +254,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/janesware/event.html">
+    <entry file="file://$PROJECT_DIR$/matrix/event.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="7125">
           <caret line="576" column="150" lean-forward="true" selection-start-line="576" selection-start-column="130" selection-end-line="576" selection-end-column="150" />
@@ -280,7 +280,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/janesware/diagnosis.html">
+    <entry file="file://$PROJECT_DIR$/matrix/diagnosis.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="5070">
           <caret line="338" column="35" lean-forward="false" selection-start-line="338" selection-start-column="35" selection-end-line="338" selection-end-column="35" />
@@ -294,7 +294,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/janesware/event.html">
+    <entry file="file://$PROJECT_DIR$/matrix/event.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1965">
           <caret line="131" column="50" lean-forward="false" selection-start-line="131" selection-start-column="50" selection-end-line="131" selection-end-column="50" />
@@ -312,20 +312,20 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/janesware/api.html">
+    <entry file="file://$PROJECT_DIR$/matrix/api.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
         </state>
       </provider>
     </entry>
-    <entry file="uml://JavaScript-modules-diagram//opt/go/workspace/bin/templates/janesware/event.html">
+    <entry file="uml://JavaScript-modules-diagram//opt/go/workspace/bin/templates/matrix/event.html">
       <provider selected="true" editor-type-id="UmlEditorProvider">
         <state>
           <ID>JavaScript-modules-diagram</ID>
-          <OriginalElement>$PROJECT_DIR$/janesware/event.html</OriginalElement>
+          <OriginalElement>$PROJECT_DIR$/matrix/event.html</OriginalElement>
           <nodes>
-            <node x="" y="">$PROJECT_DIR$/janesware/event.html</node>
+            <node x="" y="">$PROJECT_DIR$/matrix/event.html</node>
             <node x="" y="">{{AppSubUrl}}/web/component/vue-bootstrap-table.html</node>
             <node x="" y="">{{AppSubUrl}}/web/component/vue-echart-timeline-component.html</node>
             <node x="" y="">{{AppSubUrl}}/web/component/vue-editor-component.html</node>
@@ -363,7 +363,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/janesware/log.html">
+    <entry file="file://$PROJECT_DIR$/matrix/log.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="243">
           <caret line="317" column="37" lean-forward="true" selection-start-line="314" selection-start-column="35" selection-end-line="317" selection-end-column="37" />
@@ -381,7 +381,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/janesware/diagnosis.html">
+    <entry file="file://$PROJECT_DIR$/matrix/diagnosis.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="485">
           <caret line="1029" column="22" lean-forward="true" selection-start-line="985" selection-start-column="20" selection-end-line="1029" selection-end-column="22" />
@@ -395,7 +395,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/janesware/search.html">
+    <entry file="file://$PROJECT_DIR$/matrix/search.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="138">
           <caret line="791" column="8" lean-forward="false" selection-start-line="791" selection-start-column="8" selection-end-line="791" selection-end-column="8" />
@@ -414,7 +414,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/janesware/event.html">
+    <entry file="file://$PROJECT_DIR$/matrix/event.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="232">
           <caret line="464" column="31" lean-forward="true" selection-start-line="462" selection-start-column="24" selection-end-line="464" selection-end-column="31" />

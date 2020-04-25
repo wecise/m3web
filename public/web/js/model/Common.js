@@ -146,7 +146,9 @@ Vue.component("mx-fs-editor",{
         'tabs.activeIndex':{
             handler(val,oldVal){
                 // 默认展开节点
-                this.tabs.activeNode = _.find(this.tabs.list,{name:val}).model || null;
+                if(!_.isEmpty(this.tabs.list)){
+                    this.tabs.activeNode = _.find(this.tabs.list,{name:val}).model || null;
+                }
             }
         }
     },
@@ -346,17 +348,25 @@ Vue.component("mx-fs-editor",{
                 // 后运行 depend ftype: js/html
                 if(_.includes(['html','html'],this.tabs.activeNode.ftype)){
                     eventHub.$emit(`FS-EDITOR-RUN-EVENT-${this.tabs.activeIndex}`, `/fs${[this.tabs.activeNode.parent,this.tabs.activeNode.name].join("/")}?issys=true&type=open`);
+                    _.forEach(this.tabs.list,(v)=>{
+                        if(v.name == this.tabs.activeIndex){
+                            _.extend(v.model,{output: `/fs${[this.tabs.activeNode.parent,this.tabs.activeNode.name].join("/")}?issys=true&type=open`});
+                        }
+                    })
                 } else {
 
                     try {
                         let rtn = fsHandler.callFsJScript([this.tabs.activeNode.parent, this.tabs.activeNode.name].join("/").replace(/\/script/g, ""), '');
-                        _.extend(_.find(this.tabs.list,{name:this.tabs.activeIndex}).model, {output:rtn});
                         
-                        //eventHub.$emit(`FS-EDITOR-RUN-EVENT-${this.tabs.activeIndex}`, rtn);
+                        _.forEach(this.tabs.list,(v)=>{
+                            if(v.name == this.tabs.activeIndex){
+                                _.extend(v.model,{output:rtn});
+                            }
+                        })
+                        
                     } catch(err) {
-                        //eventHub.$emit(`FS-EDITOR-RUN-EVENT-${this.tabs.activeIndex}`, err);
+                        console.log(err)
                         _.extend(_.find(this.tabs.list,{name:this.tabs.activeIndex}).model, {output:err});
-                        
                     }
                 }
             },500)
@@ -991,17 +1001,7 @@ Vue.component("mx-entity-new",{
             this.$parent.$parent.$parent.$parent.entity.newDialog.show = false;
         },
         onSave(){
-            // let mql =   _.concat(["INSERT INTO", this.model.selectedNode.class],_.map(this.model.node,function(v){
-            //                     if(v.type == 'int'){
-            //                         return `${v.name}='${v.value}'`;
-            //                     } else if(v.type == 'map' || v.type == 'list' || v.type == 'set'){
-            //                         return `${v.name}='${v.value}'`;
-            //                     } else {
-            //                         return `${v.name}='${v.value}'`;
-            //                     }
-            //             }).join(", ")).join(" ");
-            // console.log(mql)
-
+            
             if(_.isEmpty(this.model.form.class) || _.isEmpty(this.model.form.id)){
                 this.$message({
                     type: "info",
@@ -1029,13 +1029,15 @@ Vue.component("mx-entity-new",{
             _.extend(this.model.form, {type: "new"});
 
             let rtn = fsHandler.callFsJScript("/matrix/graph/entity-action.js",encodeURIComponent(JSON.stringify(this.model.form)));
-            console.log(rtn,this.$parent.$parent.$parent.$parent.entity.newDialog.show)
+            
             if(rtn.status == 'ok'){
                 this.$message({
                     type: "success",
                     message: "实体插入成功！"
                 })
                 this.$parent.$parent.$parent.$parent.entity.newDialog.show = false;
+                // 实体新建成功
+                eventHub.$emit("ENTITY-ADD-EVENT",this.model.form);
             } else {
                 this.$message({
                     type: "error",

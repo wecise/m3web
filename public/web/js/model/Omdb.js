@@ -1181,9 +1181,9 @@ class Omdb{
                                                 </el-popover>
                                             </span>
                                         </template>
-                                        <!--template slot-scope="scope">
+                                        <template slot-scope="scope">
                                             #{scope.row[item['field']]}#
-                                        </template-->
+                                        </template>
                                     </el-table-column>
                                 </el-table>
                             </el-main>
@@ -1241,19 +1241,19 @@ class Omdb{
                         }
 
                         //  data & time render
-                        if(_.includes(['day'],v['field'])){
+                        else if(_.includes(['day'],v['field'])){
                             return _.extend(v,{render: function(row, column, cellValue, index){
                                         return moment(cellValue).format("YYYY-MM-DD");
                                     }});
                         }
 
-                        if(_.includes(['vtime','mtime','ctime','stime','etime'],v['field'])){
+                        else if(_.includes(['vtime','mtime','ctime','stime','etime'],v['field'])){
                             return _.extend(v,{render: function(row, column, cellValue, index){
                                         return moment(cellValue).format("YYYY-MM-DD HH:mm:ss.SSS");
                                     }});
                         }
 
-                        if(_.includes(['map','set','list'],v.type) || typeof(data) === 'object'){
+                        else if(_.includes(['map','set','list'],v.type) || typeof(data) === 'object'){
                             return _.extend(v,{render: function(row, column, cellValue, index){
                                         if(_.isNull(cellValue) || _.isEmpty(cellValue)) {
                                             return '';
@@ -1261,6 +1261,9 @@ class Omdb{
                                             return JSON.stringify(cellValue,null,2);
                                         }
                                     }});
+                        }
+                        else {
+                            return v;
                         }
 
                         return v;

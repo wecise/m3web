@@ -47,10 +47,12 @@
 	
 	/*----------  最外层element会自动增加组件同名 class="fs-output-component"  ----------*/
 	<template>
-		<div class="editor-container">
-			<div :id="id" ref="editor"></div>
-			<div id="statusBar"></div>
-		</div>
+		<el-container class="editor-container">
+			<el-main style="padding:0px;">
+                <div :id="id" ref="editor"></div>
+            </el-main>
+			<el-footer id="statusBar"></el-footer>
+		</el-container>
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
@@ -81,9 +83,8 @@
         },
         watch: {
             model: {
-            	handler:function(val,oldVal){
-                    let self = this;
-                    self.editor.setValue(val.newInput);
+            	handler(val,oldVal){
+                    this.editor.setValue(val.newInput);
                 },
                 deep:true,
                 immediate:true

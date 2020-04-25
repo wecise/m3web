@@ -3158,19 +3158,19 @@ class System {
 								"event": {
 									name: "事件", icon: "fa-warning",
 									callback: function (itemKey, opt, rootMenu, originalEvent) {
-										self.look('itsm', '/janesware/event');
+										self.look('itsm', '/matrix/event');
 									}
 								},
 								"performance": {
 									name: "性能", icon: "fa-line-chart",
 									callback: function (itemKey, opt, rootMenu, originalEvent) {
-										self.look('itsm', '/janesware/performance');
+										self.look('itsm', '/matrix/performance');
 									}
 								},
 								"log": {
 									name: "日志", icon: "fa-file-code-o",
 									callback: function (itemKey, opt, rootMenu, originalEvent) {
-										self.look('itsm', '/janesware/log');
+										self.look('itsm', '/matrix/log');
 									}
 								},
 								"----": "----",

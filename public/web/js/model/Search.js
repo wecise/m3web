@@ -172,7 +172,7 @@ class Search {
                             
                             $(this.$el).on('dbl-click-row.bs.table', function (e, row, $element) {
                                 let term = row.id;
-                                let url = `/janesware/${this.forward}?term=${window.btoa(encodeURIComponent(term))}`;
+                                let url = `/matrix/${this.forward}?term=${window.btoa(encodeURIComponent(term))}`;
                                 window.open(url,'_blank');
                             });
 
@@ -193,7 +193,7 @@ class Search {
                         },
                         rowDblclick(row, column, event){
                             let term = row.id;
-                            let url = `/janesware/${this.forward}?term=${window.btoa(encodeURIComponent(term))}`;
+                            let url = `/matrix/${this.forward}?term=${window.btoa(encodeURIComponent(term))}`;
                             window.open(url,'_blank');
                         }
                     }
@@ -212,7 +212,7 @@ class Search {
                     filters:{
                         pickUrl(item){
                             try{
-                                return '/janesware/event?cond='+item.id+'&preset='+item.preset;
+                                return '/matrix/event?cond='+item.id+'&preset='+item.preset;
                             } catch(err){
                                 return '';
                             }
@@ -314,7 +314,7 @@ class Search {
                                                 </span>
                                                 <div v-for="item in model.rows" v-if="item">
                                                     <h6>
-                                                        <el-link :href="'/janesware/event?cond='+item.id+'&preset='+item.preset" target="_blank">#{item.host}#</el-link>
+                                                        <el-link :href="'/matrix/event?cond='+item.id+'&preset='+item.preset" target="_blank">#{item.host}#</el-link>
                                                     </h6>
                                                     <p>
                                                         <el-button :style="'background:'+mx.global.register.log.severity[item.severity][2]+';color:#FFFFFF;'">#{mx.global.register.log.severity[item.severity][1]}#</el-button>
@@ -364,7 +364,7 @@ class Search {
                                                 </span>
                                                 <div v-for="item in model.rows" v-if="item">
                                                     <h6>
-                                                        <el-link :href="'/janesware/event?cond='+item.id+'&preset='+item.preset" target="_blank">#{item.host}#</el-link>
+                                                        <el-link :href="'/matrix/event?cond='+item.id+'&preset='+item.preset" target="_blank">#{item.host}#</el-link>
                                                     </h6>
                                                     <p>
                                                         <i class="el-icon-timer"></i> 时间： #{ new Date(item.vtime).toLocaleString() }#
@@ -411,7 +411,7 @@ class Search {
                                                 </span>
                                                 <div v-for="item in model.rows" v-if="item">
                                                     <h6>
-                                                        <el-link :href="'/janesware/log?cond='+item.id+'&preset='+item.preset" target="_blank">#{item.host}#</el-link>
+                                                        <el-link :href="'/matrix/log?cond='+item.id+'&preset='+item.preset" target="_blank">#{item.host}#</el-link>
                                                     </h6>
                                                     <p>
                                                         <el-button :style="'background:'+mx.global.register.log.severity[item.severity][2]+';color:#FFFFFF;'">#{mx.global.register.log.severity[item.severity][1]}#</el-button>
@@ -461,7 +461,7 @@ class Search {
                                                 </span>
                                                 <div v-for="item in model.rows" v-if="item">
                                                     <h6>
-                                                        <el-link :href="'/janesware/log?cond='+item.id+'&preset='+item.preset" target="_blank">#{item.host}#</el-link>
+                                                        <el-link :href="'/matrix/log?cond='+item.id+'&preset='+item.preset" target="_blank">#{item.host}#</el-link>
                                                     </h6>
                                                     <p>
                                                         <el-button :style="'background:'+mx.global.register.log.severity[item.severity][2]+';color:#FFFFFF;'">#{mx.global.register.log.severity[item.severity][1]}#</el-button>
@@ -907,7 +907,7 @@ class Search {
                     },
                     methods:{
                         forward(item){
-                            let url = `/janesware/entity?term=${window.btoa(encodeURIComponent(item.id))}`;
+                            let url = `/matrix/entity?term=${window.btoa(encodeURIComponent(item.id))}`;
                             window.open(url,'_blank');
                         }
                     }

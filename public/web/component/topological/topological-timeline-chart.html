@@ -2,36 +2,8 @@
 
 	<style scoped>
 		/*----------  style  ----------*/
-        /* .pace{
-            display: none!important;
-        }
-         */
-        .topological-timeline {
-            height: 100%;
-            border: 1px solid #ddd;
-            border-top:unset;
-        }
-
-        .topological-timeline .vis-timeline {
-            border: unset;
-            border-top: 1px solid #ddd;
-            border-left: 1px solid #ddd;
-            background: #fff;
-            height: 100%;            
-        }
-
-        .vis-background.vis-item-content {
-            z-index: 11111;
-            height: 100%!important;
-            width: 100%!important;
-        }
-
-        .vis-item {
-            border-color: #ff0000;
-            background-color: #ff0000;
-        }
-
-        .topological-timeline .el-color-picker--mini > .el-color-picker__trigger {
+        
+        .topological-timeline-chart .el-color-picker--mini > .el-color-picker__trigger {
             height: 12px;
             width: 12px;
             margin: 0px 0px -1px 5px;
@@ -39,21 +11,20 @@
             border:unset;
         }
 
-        .topological-timeline .el-divider.el-divider--vertical{
+        .topological-timeline-chart .el-divider.el-divider--vertical{
             margin: 8px 12px;
             background: #333;
         }
 
-        .topological-timeline .el-radio-button__inner,
-        .topological-timeline .el-input__inner{
+        .topological-timeline-chart .el-radio-button__inner,
+        .topological-timeline-chart .el-input__inner{
             background: transparent;
             border:unset;
         }
-
 	</style>
 
 	
-	/*----------  最外层element会自动增加组件同名 class="topological-timeline"  ----------*/
+	/*----------  最外层element会自动增加组件同名 class="topological-timeline-chart"  ----------*/
 	<template>
         <el-container style="height:240px;width:100%;">
             <el-aside width="200px">
@@ -71,7 +42,7 @@
                     </span>  
                 </el-tree>
             </el-aside>
-            <el-container style="width:100%;height:100%;background: #fff;">
+            <el-container style="width:100%;height:100%;background: #ffffff;">
                 <el-header style="height:30px;line-height: 30px;display: flex;padding:0px;margin-right:14px;">
                     <div style="width:200px;">
                         <el-date-picker
@@ -83,12 +54,11 @@
                             style="width:200px;">
                         </el-date-picker>
                     </div>
-                    <div style="width:300px;">
+                    <div style="width:225px;">
                         <el-radio-group v-model="timeline.pickRange" size="mini">
                             <el-radio-button :label="30 * 60 * 1000">30 分钟</el-radio-button>
                             <el-radio-button :label="60 * 60 * 1000">60 分钟</el-radio-button>
                             <el-radio-button :label="120 * 60 * 1000">120 分钟</el-radio-button>
-                            <el-radio-button :label="-1">全部</el-radio-button>
                         </el-radio-group>
                     </div>
                     <div style="width:55%;">
@@ -108,17 +78,14 @@
                         </el-tooltip>
                     </div>
                 </el-header>
-                <el-main style="width:100%;height:100%;padding:0px;display: flex;overflow: hidden;">
-                    <el-button type="text" icon="el-icon-arrow-left" @click="onTimeLineMove(0.2)"></el-button>
-                    <div id="timeline" ref="timeline" style="width:100%;height:100%;position: relative;"></div>
-                    <el-button type="text" icon="el-icon-arrow-right" @click="onTimeLineMove(-0.2)"></el-button>
+                <el-main style="width:100%;height:100%;padding:0px;overflow: hidden;" ref="timeline">
                 </el-main>
             </el-container>
         </el-container>
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
-	<script id="topological-timeline">
+	<script id="topological-timeline-chart">
 	{
 	    delimiters: ['#{', '}#'],
 	    props: {
@@ -129,7 +96,7 @@
                 timeline:{
                     showDiff:false,
                     pickDate: _.now(),
-                    pickRange: -1,
+                    pickRange: 30 * 60 * 1000,
                     pickerOptions: {
                         shortcuts: [{
                             text: '今天',
@@ -152,23 +119,7 @@
                             }
                         }]
                     },
-                    inst: null,
-                    items:  new vis.DataSet(),
-                    options: {
-                        height: '100%',
-                        margin: {
-                            item: 20
-                        },
-                        type: "point",
-                        editable: true,
-                        zoomMin: 60 * 60 * 1000,
-                        zoomMax: 60 * 60 * 24 * 1000 * 365 * 5,
-                        showCurrentTime: true,
-                        showWeekScale: true,
-                        stack: false,
-                        locale: 'zh_CN'
-                        
-                    }
+                    inst: null
                 },
                 tree: {
                     data: [{
@@ -194,17 +145,16 @@
                         children: 'children',
                         label: 'label'
                     },
-                    selected:null,
-                    diagnosisData: null
+                    selected:null
                 }
             }
         },
         watch: {
             model: function(val,oldVal){
-                this.setItems();
+                
             },
             'tree.selected': function(val,oldVal){
-                this.setItems();
+                
             },
             'timeline.pickDate':function(val,oldVal){
                 this.setTimelineRange();
@@ -214,25 +164,66 @@
             }
         },
         created(){
-            this.setItems();
+            
 	    },
 	    mounted() {
             this.$nextTick(() => {
                 
                 _.delay(()=>{
-                    this.timeline.inst = new vis.Timeline(this.$refs.timeline, this.timeline.items, this.timeline.options);
-                    this.timeline.inst.fit();
-                    this.timeline.inst.on('select', this.onSelect);
-                    this.timeline.inst.on("doubleClick",(properties)=> {
-                        let props = this.timeline.inst.getEventProperties(properties.event)
-                        this.onClick(props);
-                    })
-                },50)
+                    this.init();
+                },500)
                 
             })
 	        
 	    },
 	    methods: {
+            init(){
+                let containerWidth = this.$refs.timeline.$el.clientWidth;
+                TimelinesChart()(this.$refs.timeline.$el)
+                    .xTickFormat(n => +n)
+                    .width(containerWidth)
+                    .topMargin(20)
+                    .rightMargin(60)
+                    .bottomMargin(20)
+                    .leftMargin(60)
+                    .timeFormat('%Y-%m-%d %I:%M:%S')
+                    .data(this.genRandomData());
+            },
+            genRandomData() {
+                const NLINES = 10,
+                    MAXSEGMENTS = 5,
+                    MIN_X = 0,
+                    MAX_X = 100;
+
+                return [{
+                    group: '',
+                    data: [...Array(NLINES).keys()].map(i => ({
+                    label: `line${i+1}`,
+                    data: getSegmentsData()
+                    }))
+                }];
+
+                //
+
+                function getSegmentsData() {
+                    const nSegments = Math.ceil(Math.random()*MAXSEGMENTS),
+                    segMaxLength = Math.round((MAX_X-MIN_X)/nSegments);
+                    let runLength = MIN_X;
+
+                    return [...Array(nSegments).keys()].map(i => {
+                    const tDivide = [Math.random(), Math.random()].sort(),
+                        start = runLength + tDivide[0]*segMaxLength,
+                        end = runLength + tDivide[1]*segMaxLength;
+
+                    runLength = runLength + segMaxLength;
+
+                    return {
+                        timeRange: [start, end],
+                        val: Math.random()
+                    };
+                    });
+                }
+            },
             onNodeCheckChange(data, checked, indeterminate){
                 this.tree.selected = _.groupBy(this.$refs.tree.getCheckedNodes(),'name');
             },
@@ -243,18 +234,8 @@
                 //this.timeline.items.pLOWERh();
             },
             setTimelineRange(){
-                let start,end = null;
-                if(this.timeline.pickRange == -1){
-                    if(!_.isEmpty(this.tree.diagnosisData)){
-                        let data = _.orderBy(_.filter(_.flatMap(this.tree.diagnosisData),null),['vtime'],['asc']);
-                        start = moment( _.head(data)['vtime'] ).add(-1,'days');;
-                        end = moment( _.last(data)['vtime'] ).add(1,'days');;
-                    }
-                    
-                } else {
-                    start = moment(this.timeline.pickDate - this.timeline.pickRange);
-                    end = moment(this.timeline.pickDate + this.timeline.pickRange);
-                }
+                let start = moment(this.timeline.pickDate - this.timeline.pickRange);
+                let end = moment(this.timeline.pickDate + this.timeline.pickRange);
                 this.timeline.inst.setOptions({start:start,end:end});
             },
             setItems(){
@@ -267,8 +248,8 @@
                 }
 
                 let term = this.model.join(";");
-                this.tree.diagnosisData = fsHandler.callFsJScript("/matrix/graph/getDiagnosisDataByIds.js",encodeURIComponent(term)).message;
-                _.forEach(this.tree.diagnosisData,(v,k)=>{
+                let diagnosisData = fsHandler.callFsJScript("/matrix/graph/getDiagnosisDataByIds.js",encodeURIComponent(term)).message;
+                _.forEach(diagnosisData,(v,k)=>{
                     
                     // 判断是否勾选，勾选的数据才显示到时间轴上
                     if(this.tree.selected[k]){

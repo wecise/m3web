@@ -865,18 +865,7 @@ class Topological {
                     },
                     file: {
                         show: false
-                    },
-                    doc:null,
-                    dialogOpen:{
-                        title: "打开",
-                        content: "",
-                        visible: false
-                    },
-                    dialogSaveAs:{
-                        title: "另存为",
-                        content: "",
-                        visible: false
-                    },
+                    }
                 }
             },
             template:   `<div>
@@ -917,13 +906,14 @@ class Topological {
                                         </el-button>
                                     </span>
                                     <el-dropdown-menu slot="dropdown">
-                                        <el-dropdown-item @click.native="onNew">新建</el-dropdown-item>
-                                        <el-dropdown-item @click.native="dialogOpen.visible=true" divided>打开</el-dropdown-item>
-                                        <el-dropdown-item @click.native="onSave" divided>保存</el-dropdown-item>
-                                        <el-dropdown-item @click.native="dialogSaveAs.visible=true">另存为</el-dropdown-item>
-                                        <el-dropdown-item @click.native="onDelete" divided>删除</el-dropdown-item>
-                                        <el-dropdown-item @click.native="onPrint" divided>打印</el-dropdown-item>
-                                        <el-dropdown-item @click.native="onClose" divided>关闭</el-dropdown-item>
+                                        <el-dropdown-item @click.native="$parent.$parent.onFileNew">新建</el-dropdown-item>
+                                        <el-dropdown-item @click.native="$parent.$parent.file.dialogOpen.visible=true" divided>打开</el-dropdown-item>
+                                        <el-dropdown-item @click.native="$parent.$parent.file.dialogOpenTo.visible=true">打开到</el-dropdown-item>
+                                        <el-dropdown-item @click.native="$parent.$parent.onFileSave" divided>保存</el-dropdown-item>
+                                        <el-dropdown-item @click.native="$parent.$parent.file.dialogSaveAs.visible=true">另存为</el-dropdown-item>
+                                        <el-dropdown-item @click.native="$parent.$parent.onFileDelete" divided>删除</el-dropdown-item>
+                                        <el-dropdown-item @click.native="$parent.$parent.onFilePrint" divided>打印</el-dropdown-item>
+                                        <el-dropdown-item @click.native="$parent.$parent.onFileClose" divided>关闭</el-dropdown-item>
                                     </el-dropdown-menu>
                                 </el-dropdown>
                             </el-header>
@@ -948,22 +938,6 @@ class Topological {
                             <el-footer ref="footerView" style="width:30vw;padding:0px;border-top:1px solid #409EFF;height:auto;" v-if="!_.isEmpty(search.selected)">
                                 <topological-graph class="graphAction" :model="$parent.$parent.mainView.search.model" ref="searchRef"></topological-graph>
                             </el-footer>
-                            <!-- 打开窗口 -->
-                            <el-dialog :title="dialogOpen.title" :visible.sync="dialogOpen.visible">
-                                <mx-fs-open dfsRoot="/home/admin/Documents/graph" ref="dfsOpen" v-if="dialogOpen.visible"></mx-fs-open>
-                                <div slot="footer" class="dialog-footer">
-                                    <el-button @click="dialogOpen.visible = false">取 消</el-button>
-                                    <el-button type="primary" @click="onOpen(false)">打 开</el-button>
-                                </div>
-                            </el-dialog>
-                            <!-- 保存窗口 -->
-                            <el-dialog :title="dialogSaveAs.title" :visible.sync="dialogSaveAs.visible">
-                                <mx-fs-saveas dfsRoot="/home/admin/Documents/graph" ref="dfsSaveas"></mx-fs-saveas>
-                                <div slot="footer" class="dialog-footer">
-                                    <el-button @click="dialogSaveAs.visible = false">取 消</el-button>
-                                    <el-button type="primary" @click="onSaveAs">保存</el-button>
-                                </div>
-                            </el-dialog>
                         </div>`,
             filters: {
                 pickIcon(item){
@@ -1032,137 +1006,6 @@ class Topological {
                     return (state) => {
                       return (state.value.toLowerCase().indexOf(term.toLowerCase()) === 0);
                     };
-                },
-                onNew(){
-                    this.deleteCells(true);
-                    this.doc = null;
-                },
-                onOpen(auto){
-                    try{
-                        
-                        let editor = inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.model.editor;
-
-                        // 选择文件打开
-                        if(!auto){
-                            this.doc = this.$refs.dfsOpen.node;
-                        }
-                        
-                        let xml = fsHandler.fsContent(this.doc.parent, this.doc.name);
-                        let doc = mxUtils.parseXml(xml);
-                        let codec = new mxCodec(doc);
-                        codec.decode(doc.documentElement, editor.graph.getModel());
-                    } catch(err){
-                        console.error(err);
-                    } finally {
-                        this.dialogOpen.visible = false;
-                    }
-                    
-                },
-                onSave(){
-                    if(this.doc){
-                        let editor = inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.model.editor;
-                        let enc = new mxCodec(mxUtils.createXmlDocument());
-                        let node = enc.encode(editor.graph.getModel());
-                        let xml = mxUtils.getPrettyXml(node);
-                        let attr = _.extend(this.doc, {});
-                        let rtn = fsHandler.fsNew('file',this.doc.parent, this.doc.name, xml, attr);
-                        if(rtn == 1){
-                            this.$message({
-                                type:"success",
-                                message: "保存成功！"
-                            })
-                        }
-                    } else {
-                        this.dialogSaveAs.visible = true;
-                    }
-                },
-                onSaveAs(){
-                    
-                    let editor = inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.model.editor;
-
-                    let enc = new mxCodec(mxUtils.createXmlDocument());
-                    let node = enc.encode(editor.graph.getModel());
-                    let xml = mxUtils.getPrettyXml(node);
-                    let attr = {};
-                    
-                    let parent = this.$refs.dfsSaveas.node.fullname;
-                    let name = this.$refs.dfsSaveas.node.name;
-                    let rtn = fsHandler.fsNew('file',parent, name, xml, attr);
-                    if(rtn == 1){
-                        this.$message({
-                            type:"success",
-                            message: "保存成功！"
-                        })
-                        
-                        this.doc = {parent:parent, name:name, fullname: [parent,name].join("/")};
-                    }
-    
-                    this.dialogSaveAs.visible = false;
-                },
-                onClose(){
-                    let editor = inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.model.editor;
-                    editor.execute("deleteAll");
-                    this.doc = null;
-                },
-                onPrint(){
-                    inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.model.editor.execute('print');
-                },
-                onDelete(){
-                    if(this.doc){
-    
-                        this.$confirm(`确认要删除该设计文档：${this.doc.name}？`, '提示', {
-                            confirmButtonText: '确定',
-                            cancelButtonText: '取消',
-                            type: 'warning'
-                        }).then(() => {
-                            let rtn = fsHandler.fsDelete(this.doc.parent,this.doc.name);
-        
-                            if (rtn == 1){
-                                this.$message({
-                                    type: "success",
-                                    message: "删除成功！"
-                                });
-                                this.deleteCells(true);
-                                this.doc = null;
-                                localStorage.setItem("CLASS-DESIGN-OPEN-FILE",'');
-                                this.summaryInfo();
-                            } else {
-                                this.$message({
-                                    type: "error",
-                                    message: "删除失败 " + rtn.message
-                                })
-                            } 
-                        }).catch(() => {
-                            
-                        });
-                    }
-                },
-                deleteCells(includeEdges){
-                    
-                    // Cancels interactive operations
-                    let editor = inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.model.editor;
-                    let graph = editor.graph;
-                    graph.escape();
-                    //var cells = graph.getDeletableCells(graph.getSelectionCells());
-                    let cells = graph.getChildVertices(graph.getDefaultParent());
-                    if (cells != null && cells.length > 0){
-                        var parents = graph.model.getParents(cells);
-                        graph.removeCells(cells, includeEdges);
-                        
-                        // Selects parents for easier editing of groups
-                        if (parents != null){
-                            var select = [];
-                            
-                            for (var i = 0; i < parents.length; i++){
-                                if (graph.model.contains(parents[i]) &&
-                                    (graph.model.isVertex(parents[i]) ||
-                                    graph.model.isEdge(parents[i]))){
-                                    select.push(parents[i]);
-                                }
-                            }
-                            graph.setSelectionCells(select);
-                        }
-                    }
                 }
             }
         })
@@ -1189,6 +1032,22 @@ class Topological {
                                 <el-button type="primary" @click="onSearch('')" style="margin-left:-1px;">
                                     <i class="el-icon-search"></i> <span>高级</span>
                                 </el-button>
+                                <el-dropdown trigger="click">
+                                    <span class="el-dropdown-link">
+                                        <el-button type="text" icon="el-icon-folder-opened" style="font-weight: 900;font-size:14px;padding:10px;">
+                                        </el-button>
+                                    </span>
+                                    <el-dropdown-menu slot="dropdown">
+                                        <el-dropdown-item @click.native="$parent.$parent.onFileNew">新建</el-dropdown-item>
+                                        <el-dropdown-item @click.native="$parent.$parent.file.dialogOpen.visible=true" divided>打开</el-dropdown-item>
+                                        <el-dropdown-item @click.native="$parent.$parent.file.dialogOpenTo.visible=true">打开到</el-dropdown-item>
+                                        <el-dropdown-item @click.native="$parent.$parent.onFileSave" divided>保存</el-dropdown-item>
+                                        <el-dropdown-item @click.native="$parent.$parent.file.dialogSaveAs.visible=true">另存为</el-dropdown-item>
+                                        <el-dropdown-item @click.native="$parent.$parent.onFileDelete" divided>删除</el-dropdown-item>
+                                        <el-dropdown-item @click.native="$parent.$parent.onFilePrint" divided>打印</el-dropdown-item>
+                                        <el-dropdown-item @click.native="$parent.$parent.onFileClose" divided>关闭</el-dropdown-item>
+                                    </el-dropdown-menu>
+                                </el-dropdown>
                             </el-header>
                             <el-main ref="mainView" 
                                 style="border-top:1px solid #409EFF;width:30vw;height:50vh;overflow:hidden;padding:0px 20px;">
@@ -1229,6 +1088,7 @@ class Topological {
                                     </el-col>
                                 </el-row>
                                 <!--topological-graphAdv class="graphAction" :model="$parent.$parent.mainView.search.model" ref="searchRef"></topological-graphAdv-->
+
                             </el-main>
                             <el-footer style="height:30px;line-height:30px;padding:0 5px;color:#999;">
                                 
@@ -1272,6 +1132,30 @@ class Topological {
             template:   `<el-container style="height:100%;">
                             <el-button type="text" icon="el-icon-arrow-right" @click="control.show=!control.show" v-show="control.show==false" style="width:30px;"></el-button>
                             <component v-bind:is="currentView" class="animated fadeIn" v-show="control.show==true"></component>
+                            <!-- 打开窗口 -->
+                            <el-dialog :title="file.dialogOpen.title" :visible.sync="file.dialogOpen.visible">
+                                <mx-fs-open dfsRoot="/home/admin/Documents/graph" ref="dfsOpen" v-if="file.dialogOpen.visible"></mx-fs-open>
+                                <div slot="footer" class="dialog-footer">
+                                    <el-button @click="file.dialogOpen.visible = false">取 消</el-button>
+                                    <el-button type="primary" @click="onFileOpen(false)">打 开</el-button>
+                                </div>
+                            </el-dialog>
+                            <!-- 打开到窗口 -->
+                            <el-dialog :title="file.dialogOpenTo.title" :visible.sync="file.dialogOpenTo.visible">
+                                <mx-fs-open dfsRoot="/home/admin/Documents/graph" ref="dfsOpen" v-if="file.dialogOpenTo.visible"></mx-fs-open>
+                                <div slot="footer" class="dialog-footer">
+                                    <el-button @click="file.dialogOpenTo.visible = false">取 消</el-button>
+                                    <el-button type="primary" @click="onFileOpenTo(false)">打 开 到</el-button>
+                                </div>
+                            </el-dialog>
+                            <!-- 保存窗口 -->
+                            <el-dialog :title="file.dialogSaveAs.title" :visible.sync="file.dialogSaveAs.visible">
+                                <mx-fs-saveas dfsRoot="/home/admin/Documents/graph" ref="dfsSaveas"></mx-fs-saveas>
+                                <div slot="footer" class="dialog-footer">
+                                    <el-button @click="file.dialogSaveAs.visible = false">取 消</el-button>
+                                    <el-button type="primary" @click="onFileSaveAs">保存</el-button>
+                                </div>
+                            </el-dialog>
                         </el-container>`,
             data(){
                 return{
@@ -1299,6 +1183,24 @@ class Topological {
                             show:false
                         },
                         show: true
+                    },
+                    file: {
+                        doc:null,
+                        dialogOpen:{
+                            title: "打开",
+                            content: "",
+                            visible: false
+                        },
+                        dialogOpenTo:{
+                            title: "打开到",
+                            content: "",
+                            visible: false
+                        },
+                        dialogSaveAs:{
+                            title: "另存为",
+                            content: "",
+                            visible: false
+                        }
                     }
                 }
             },
@@ -1388,6 +1290,172 @@ class Topological {
                 onClear(item) {
                     this.term = "";
                     this.search();
+                },
+                onFileNew(){
+                    this.deleteCells(true);
+                    this.file.doc = null;
+                },
+                onFileOpen(auto){
+                    try{
+                        
+                        let editor = inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.model.editor;
+
+                        // 选择文件打开
+                        if(!auto){
+                            this.file.doc = this.$refs.dfsOpen.node;
+                        }
+                        
+                        let xml = fsHandler.fsContent(this.file.doc.parent, this.file.doc.name);
+                        let doc = mxUtils.parseXml(xml);
+                        let codec = new mxCodec(doc);
+                        codec.decode(doc.documentElement, editor.graph.getModel());
+                    } catch(err){
+                        console.error(err);
+                    } finally {
+                        this.file.dialogOpen.visible = false;
+
+                        inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.toCenter();
+                    }
+                    
+                },
+                onFileOpenTo(auto){
+                    // 新建图
+                    let graph = new mxGraph();
+                    let parent = graph.getDefaultParent();
+                    
+                    try{
+                        
+                        
+
+                        // 选择文件打开
+                        if(!auto){
+                            this.file.doc = this.$refs.dfsOpen.node;
+                        }
+                        
+                        let xml = fsHandler.fsContent(this.file.doc.parent, this.file.doc.name);
+                        let doc = mxUtils.parseXml(xml);
+                        let codec = new mxCodec(doc);
+                        codec.decode(doc.documentElement, graph.getModel());
+
+                        // 合并到当前图
+                        let editor = inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.model.editor;
+                        editor.graph.getModel().mergeChildren(graph.getModel().getRoot().getChildAt(0), editor.graph.getDefaultParent());
+
+                        // Executes the layout handler
+                        _.delay(()=>{
+                            inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.executeLayout();
+                        },500)
+                    } catch(err){
+                        console.error(err);
+                    } finally {
+                        this.file.dialogOpenTo.visible = false;
+                    }
+                    
+                },
+                onFileSave(){
+                    if(this.file.doc){
+                        let editor = inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.model.editor;
+                        let enc = new mxCodec(mxUtils.createXmlDocument());
+                        let node = enc.encode(editor.graph.getModel());
+                        let xml = mxUtils.getPrettyXml(node);
+                        let attr = _.extend(this.file.doc, {});
+                        let rtn = fsHandler.fsNew('file',this.file.doc.parent, this.file.doc.name, xml, attr);
+                        if(rtn == 1){
+                            this.$message({
+                                type:"success",
+                                message: "保存成功！"
+                            })
+                        }
+                    } else {
+                        this.file.dialogSaveAs.visible = true;
+                    }
+                },
+                onFileSaveAs(){
+                    
+                    let editor = inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.model.editor;
+
+                    let enc = new mxCodec(mxUtils.createXmlDocument());
+                    let node = enc.encode(editor.graph.getModel());
+                    let xml = mxUtils.getPrettyXml(node);
+                    let attr = {};
+                    
+                    let parent = this.$refs.dfsSaveas.node.fullname;
+                    let name = this.$refs.dfsSaveas.node.name;
+                    let rtn = fsHandler.fsNew('file',parent, name, xml, attr);
+                    if(rtn == 1){
+                        this.$message({
+                            type:"success",
+                            message: "保存成功！"
+                        })
+                        
+                        this.file.doc = {parent:parent, name:name, fullname: [parent,name].join("/")};
+                    }
+    
+                    this.file.dialogSaveAs.visible = false;
+                },
+                onFileClose(){
+                    this.deleteCells(true);
+                    this.file.doc = null;
+                },
+                onFilePrint(){
+                    inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.model.editor.execute('print');
+                },
+                onFileDelete(){
+                    if(this.file.doc){
+    
+                        this.$confirm(`确认要删除该设计文档：${this.file.doc.name}？`, '提示', {
+                            confirmButtonText: '确定',
+                            cancelButtonText: '取消',
+                            type: 'warning'
+                        }).then(() => {
+                            let rtn = fsHandler.fsDelete(this.file.doc.parent,this.file.doc.name);
+        
+                            if (rtn == 1){
+                                this.$message({
+                                    type: "success",
+                                    message: "删除成功！"
+                                });
+                                this.deleteCells(true);
+                                this.file.doc = null;
+                                localStorage.setItem("CLASS-DESIGN-OPEN-FILE",'');
+                                this.summaryInfo();
+                            } else {
+                                this.$message({
+                                    type: "error",
+                                    message: "删除失败 " + rtn.message
+                                })
+                            } 
+                        }).catch(() => {
+                            
+                        });
+                    }
+                },
+                deleteCells(includeEdges){
+                    
+                    // Cancels interactive operations
+                    let editor = inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.model.editor;
+                    let graph = editor.graph;
+                    graph.escape();
+                    //var cells = graph.getDeletableCells(graph.getSelectionCells());
+                    let cells = graph.getChildVertices(graph.getDefaultParent());
+                    if (cells != null && cells.length > 0){
+                        var parents = graph.model.getParents(cells);
+                        graph.removeCells(cells, includeEdges);
+                        
+                        // Selects parents for easier editing of groups
+                        if (parents != null){
+                            var select = [];
+                            
+                            for (var i = 0; i < parents.length; i++){
+                                if (graph.model.contains(parents[i]) &&
+                                    (graph.model.isVertex(parents[i]) ||
+                                    graph.model.isEdge(parents[i]))){
+                                    select.push(parents[i]);
+                                }
+                            }
+                            graph.setSelectionCells(select);
+                        }
+                    }
                 }
             }
         })
@@ -1438,11 +1506,11 @@ class Topological {
                             <el-image style="width: 100px; height: 100px" :src="model | pickIcon" fit="scale-down" @error="onErrorPickIcon"></el-image>
                             <el-form label-position="left" label-width="80px" class="form-no-border">
                                 <el-form-item :label="key" v-for="(value,key) in model.rows[0]" style="margin-bottom: 10px;">
-                                    <el-select v-model="edges.value" placeholder="选择关系类型" v-if="key==='type'">
+                                    <el-select v-model="value" placeholder="选择关系类型" @change="onEdgeChange" v-if="key==='value'">
                                         <el-option v-for="item in edges.list" 
-                                        :key="item.name"
-                                        :value="item.name"
-                                        :label="item.remedy"></el-option>
+                                            :key="item.name"
+                                            :value="item.name"
+                                            :label="item.remedy"></el-option>
                                     </el-select>
                                     <el-input type="text" :placeholder="key" :value="value" disabled v-else></el-input>
                                 </el-form-item>
@@ -1464,6 +1532,11 @@ class Topological {
             methods:{
                 onErrorPickIcon(e){
                     _.extend(this.model.rows[0],{class:"/matrix"});
+                },
+                onEdgeChange(value){
+                    let id = this.model.rows[0].id;
+                    let oldValue = this.model.rows[0].value;
+                    inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.updateEntityEdgeType(id,value,oldValue);
                 }
             }
         });
@@ -1508,7 +1581,7 @@ class Topological {
             methods: {
                 onClick(item){
                     let term = item.id;
-                    let url = `/janesware/event?term=${window.btoa(encodeURIComponent(term))}`;
+                    let url = `/matrix/event?term=${window.btoa(encodeURIComponent(term))}`;
                     window.open(url,'_blank');
                 }
             }
@@ -1585,13 +1658,25 @@ class Topological {
                                 name: v,
                                 data: _.map(self.model.value.reverse(), v),
                                 type: 'line',
-                                smooth: true,
                                 color: mx.global.register.performance.chart.color[v],
                                 markLine: {
                                     data: [{
                                         type: 'average',
                                         name: '平均值'
                                     }]
+                                },
+                                areaStyle: {
+                                    normal: {
+                                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                            offset: 0,
+                                            color: mx.global.register.performance.chart.color[v]
+                                        }, {
+                                            offset: 0.9,
+                                            color: mx.global.register.performance.chart.color[v]
+                                        }], false),
+                                        shadowColor: mx.global.register.performance.chart.color[v],
+                                        shadowBlur: 10
+                                    }
                                 }
                             }
                         } else {
@@ -1601,7 +1686,20 @@ class Topological {
                                     data: _.map(self.model.baseline.reverse(), v=='avg'?'value':v),
                                     type: 'line',
                                     smooth: true,
-                                    color: mx.global.register.performance.chart.color[v]
+                                    color: mx.global.register.performance.chart.color[v],
+                                    areaStyle: {
+                                        normal: {
+                                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                                offset: 0,
+                                                color: mx.global.register.performance.chart.color[v]
+                                            }, {
+                                                offset: 0.9,
+                                                color: mx.global.register.performance.chart.color[v]
+                                            }], false),
+                                            shadowColor: mx.global.register.performance.chart.color[v],
+                                            shadowBlur: 10
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -2439,10 +2537,9 @@ class Topological {
                         if(node.cell.edge){
                             // 构建 edge 属性
                             _.extend(node,{
-                                type: node.class,
-                                class: `/${node.class}`
+                                type: node.type,
+                                class: `/${node.id}`
                             });
-                            
                             self.model = fsHandler.callFsJScript("/matrix/graph/diagnosis-by-edge-id.js", encodeURIComponent(JSON.stringify(_.omit(node,'cell')))).message;
                         } else {
                             // node
@@ -2625,6 +2722,7 @@ class Topological {
 
         VueLoader.onloaded(["ai-robot-component",
                             "topological-timeline",
+                            "topological-timeline-chart",
                             "topological-graph-component",
                             "omdb-path-datatables-component",
                             "event-datatable-component",

@@ -900,10 +900,11 @@
     
                 Vue.component('fs-editor-view-by-html',{
                     props:{
-                        id: String
+                        id: String,
+                        output: String
                     },
-                    template:   `<div class="embed-responsive embed-responsive-16by9" style="overflow-y:auto;">
-                                    <iframe class="embed-responsive-item" :src="src"></iframe>
+                    template:   `<div style="width:100%;height:100%;overflow-y:auto;">
+                                    <iframe style="border:unset;width:100%;height:100%;" :src="src"></iframe>
                                 </div>`,
                     data(){
                         return {
@@ -916,6 +917,10 @@
                         }
                     },
                     created() {
+                        setInterval(()=>{
+                            this.setSrc(self.output);
+                        },1500)
+
                         eventHub.$on(`FS-EDITOR-RUN-EVENT-${this.id}`, this.setSrc)
                     },
                     methods: {
@@ -949,10 +954,11 @@
                     },
                     watch: {
                         output: {
-                            handler(val,oldVal){
-                                _.extend(this.model,{newInput: JSON.stringify(this.output, null, 2)});
+                            handler:function(val,oldVal){
+                                //_.extend(this.model,{newInput: JSON.stringify(this.output, null, 2)});
+                                // console.log(88,val)
                                 //eventHub.$on(`FS-EDITOR-RUN-EVENT-${this.id}`, this.setData)
-                                //this.setData(val);
+                                this.setData(val);
                             },
                             deep:true,
                             immediate:true
@@ -960,9 +966,14 @@
                     },
                     mounted() {
                         const self = this;
-    
-                        self.$nextTick(function () {
-                            self.init();
+                        setInterval(()=>{
+                            console.log(88, typeof self.output)
+                            self.setData(self.output);
+                            console.log(88,self.output)
+                        },1500)
+
+                        this.$nextTick(function () {
+                            this.init();
                         })
                     },
                     methods: {
@@ -974,18 +985,21 @@
                             self.model.newInput = JSON.stringify(rtn.message, null, 4);
                         },
                         setData(event) {
-                            const self = this;
                             
-                            if(event.message) {
-                                
-                                if (typeof event.message === 'object') {
-                                    _.extend( self.model, {newInput: JSON.stringify(event.message, null, 2)} );
+                            try{
+                                if(event.output.message) {
+                                    
+                                    if (typeof event.output.message === 'object') {
+                                        _.extend( this.model, {newInput: JSON.stringify(event.output.message, null, 2)} );
+                                    } else {
+                                        _.extend( this.model, {newInput: JSON.stringify(event.output.message, null, 4)} );
+                                    }
+        
                                 } else {
-                                    _.extend( self.model, {newInput: JSON.stringify(event.message, null, 4)} );
+                                    _.extend( this.model, {newInput: event.output} );
                                 }
-    
-                            } else {
-                                _.extend( self.model, {newInput: event} );
+                            } catch(err){
+                                console.log(err)
                             }
                         }
                     }
@@ -1099,8 +1113,8 @@
                                                 <fs-editor-log-console :id="item.fullname" v-if="!_.isEmpty(item)"></fs-editor-log-console> 
                                             </el-tab-pane>
                                             <el-tab-pane label="预览" name="result" style="height:100%;overflow:auto;padding-top: 1px;">
-                                                <fs-editor-view-by-html :id="'output-'+id" :output="model.fs.output" v-if="item.ftype=='html'" style="height:100%;"></fs-editor-view-by-html>
-                                                <fs-editor-view-by-other :id="'output-'+id" :output="model.fs.output" style="height:100%;" v-else></fs-editor-view-by-other>
+                                                <fs-editor-view-by-html :id="'output-'+id" :output="item" v-if="item.ftype=='html'" style="height:100%;"></fs-editor-view-by-html>
+                                                <fs-editor-view-by-other :id="'output-'+id" :output="item" style="height:100%;" v-else></fs-editor-view-by-other>
                                             </el-tab-pane>
                                         </el-tabs>
                                     </el-footer>
@@ -1113,20 +1127,30 @@
                                 mode: "javascript",
                                 theme: "tomorrow",
                                 printMargin: false,
-                                readOnly: false
+                                readOnly: false,
+                                fs: {
+                                    output:{}
+                                }
                             }
                         }
                     },
                     watch: {
                         item: {
-                            handler(val,oldVal){
-                                _.extend(this.model,{fs: val, mode: this.mode()});
+                            handler:function(val,oldVal){
+                                console.log(33,_.now(),val)
+                                _.extend(this.model,{fs: val, mode: this.getMode()});
+                                console.log(33,_.now(),val,this.model)
                             },
                             deep: true,
                             immediate:true
                         }
                     },
                     mounted() {
+                        // 临时
+                        setInterval(()=>{
+                            _.extend(this.model,{  mode: this.getMode() });
+                        },5000)
+
                         this.init();
                         this.initSplit();
                     },
@@ -1150,9 +1174,14 @@
                             });
                         },
                         // 应用扩展名影射不同的编辑模式
-                        mode(){
-                            let list = {js:'javascript', ltsv: 'toml', file: 'text', html: 'html', md: 'markdown', json: 'json', csv: 'csv'};
-                            return list[this.item.ftype] || 'javascript';
+                        getMode(){
+                            try{
+                                let list = {js:'javascript', ltsv: 'toml', file: 'text', html: 'html', md: 'markdown', json: 'json', csv: 'csv'};
+                                return list[this.item.ftype] || 'javascript';
+                            } catch(err){
+                                return 'javascript';
+                            }
+                            
                         }
                     }
     

@@ -310,7 +310,7 @@ class Log extends Matrix {
                                                                             })
                                                     );
                                 window.open(
-                                        "/janesware/"+self.forward,
+                                        "/matrix/"+self.forward,
                                         "_blank"
                                     );
                             });

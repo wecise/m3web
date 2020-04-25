@@ -45,12 +45,14 @@
 	
 	/*----------  最外层element会自动增加组件同名 class="fs-editor-component"  ----------*/
 	<template>
-		<div class="editor-container">
-            <div class="editor-content">
+		<el-container class="editor-container">
+            <el-main class="editor-content" style="padding:0px;">
                 <div :id="id" ref="editor"></div>
-            </div>
-            <div id="statusBar"></div>
-        </div>
+            </el-main>
+            <el-footer style="height:30px;line-height: 30px;">
+                <div id="statusBar"></div>
+            </el-footer>
+        </el-container>
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/

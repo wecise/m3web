@@ -398,7 +398,7 @@
                     
                     if( v.cid === -1 ) {
 
-                        let _arr = _.map(rtn,(v)=>{ return _.merge(v,{rtype:'A1', open:true})});
+                        let _arr = _.map(rtn,(v)=>{ return _.merge(v,{rtype:'A1', open:true, isParent:true})});
 
                         _.merge(this.zNodes[0],{ children: _arr});
                         
@@ -415,7 +415,14 @@
                         }
                         
                         // 按name排序
-                        zTree.addNodes(v.treeNode, _.orderBy(_.map(rtn,(v)=>{ return _.merge(v,{rtype:'A1'});}),['name'],['asc']));
+                        zTree.addNodes(v.treeNode, _.orderBy(_.map(rtn,(v)=>{ 
+                                if(!_.isEmpty(v.child)){
+                                    return _.merge(v,{rtype:'A1', isParent:true});
+                                } else {
+                                    return _.merge(v,{rtype:'A1'});
+                                }
+                            }),['name'],['asc']
+                        ));
 
                     }
                 })

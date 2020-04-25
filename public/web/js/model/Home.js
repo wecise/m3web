@@ -120,7 +120,7 @@ class Home extends Matrix {
                                                         </span>
                                                         <el-dropdown-menu slot="dropdown">
                                                             <el-dropdown-item @click.native="onPlusCommand({type:'newGroup',url:''})">新建组</el-dropdown-item>
-                                                            <el-dropdown-item @click.native="onPlusCommand({type:'newApp',url:'/janesware/system'})">发布应用</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onPlusCommand({type:'newApp',url:'/matrix/system'})">发布应用</el-dropdown-item>
                                                         </el-dropdown-menu>
                                                     </el-dropdown>
                                                 </el-button>
@@ -242,7 +242,7 @@ class Home extends Matrix {
                                 return false;
                             }
 
-                            let url = `/janesware/search?preset=${window.btoa(encodeURIComponent(JSON.stringify(this.options)))}`;
+                            let url = `/matrix/search?preset=${window.btoa(encodeURIComponent(JSON.stringify(this.options)))}`;
                             
                             window.open(url,"_parent");
 

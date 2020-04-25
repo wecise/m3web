@@ -16,19 +16,6 @@
             line-height: 35px;
         }
 
-        .topological-graph-component .form-control-transparent{
-            border-bottom: unset;
-        }
-
-        
-
-        .topological-graph-component .tools-search .form-control,
-        .topological-graph-component .tools-search .text-muted {
-			color: #dddddd;
-            background: unset;
-            border: unset;
-		}
-
 		.topological-graph-component .node-menu{
 			width:20vw;
 		}
@@ -152,8 +139,7 @@
 
         .topological-graph-component .footerbar {
             width: 100%;
-            height: 200px!important;
-            line-height: 200px!important;
+            height: auto!important;
             padding: 0px;
             background: #f7f7f7;
         }
@@ -427,8 +413,17 @@
                         title="信息"
                         width="300"
                         trigger="click"
+                        @show="graphSummary"
+                        @hide="onResetStatus"
                         popper-class="info-popper">
                         <el-card>
+                            <div v-if="!_.isEmpty(fileInfo)">
+                                <el-divider content-position="left">文件</el-divider>
+                                <div style="display:flex;flex-wrap: wrap; align-items: flex-start;margin:10px 0px;">
+                                    <p>目录：${fileInfo.parent}</p>
+                                    <p>名称：${fileInfo.name}</p>
+                                </div>
+                            </div>
                             <el-divider content-position="left">实体类型</el-divider>
                             <div style="display:flex;flex-wrap: wrap; align-items: flex-start;margin:10px 0px;">
                                 <el-tag type="default" 
@@ -442,7 +437,7 @@
                             <el-divider content-position="left">关系</el-divider>
                             <div style="display:flex;flex-wrap: wrap; align-items: flex-start;margin:10px 0px;">
                                 <el-tag type="default" 
-                                    :key="v" v-for="v in allEdges" 
+                                    :key="v" v-for="v in model.graph.allNodesEdge" 
                                     style="margin:5px;width:auto;cursor:pointer;"
                                     effect="plain" 
                                     @click="onTagClick($event,'edge',v)">
@@ -562,7 +557,7 @@
                     <span slot="footer" class="dialog-footer">
                         <el-button @click="entity.dialog.ifClose = true;entity.dialog.show = false;">取消</el-button>
                         <el-button type="primary" @click="addEntity(null)" v-if="entity.target.type=='new'">创建实体和关系</el-button>
-                        <el-button type="primary" @click="updateEntityEdge" v-else>创建关系</el-button>
+                        <el-button type="primary" @click="createEntityEdge" v-else>创建关系</el-button>
                     </span>
                 </el-dialog>
 
@@ -610,7 +605,6 @@
 	    data() {
             
             return {
-                id: _.now(),
                 model:{
                     editor: null,
                     graph:{
@@ -626,6 +620,7 @@
                         },
                         allNodesIds: [],
                         allNodesClass: [],
+                        allNodesEdge: [],
                         nodes:null,
                         edges:null,                        
                         path: {
@@ -716,6 +711,9 @@
                 },
                 global: {
                     count: 0
+                },
+                fileInfo:{
+
                 }
 	        }
         },
@@ -735,28 +733,6 @@
                     return `el-icon-picture-outline`;
                 } else {
                     return `el-icon-s-help`;
-                }
-            }
-        },
-        computed: {
-            allNodes(){
-                try{
-                    let cells = this.model.editor.graph.getChildVertices(this.model.editor.graph.getDefaultParent());
-                    return  _.uniq(_.map(cells,(v,k)=>{
-                                return v.getId().split(":")[0];
-                            })).sort();
-                } catch(err){
-                    return [];
-                }
-
-            },
-            allEdges(){
-                try{
-                    return  _.uniq(_.map(this.model.graph.edges,(v,k)=>{
-                                return v.getValue();
-                            })).sort();
-                } catch(err){
-                    return [];
                 }
             }
         },
@@ -788,7 +764,14 @@
                     this.model.graph.allNodesClass = _.uniq(_.map(val,(v)=>{
                             return v.split(":")[0];
                         })).sort();
+
+                    try{
+                        this.fileInfo = this.$refs.searchToolbar.file.doc;
+                    } catch(err){
+
+                    }
                 },
+                deep:true,
                 immediate: true
             },
             'model.control.refresh.enable':{
@@ -818,12 +801,13 @@
             }
         },
         created(){
-
+            
             // 状态刷新频率
             this.model.control.refresh.interval = mx.global.register.topological.status_interval;
 
-            eventHub.$on(`PATH-TOGGLE-EVENT-${this.id}-graph-path`,this.addPath);
-
+            // 实体新建成功
+            eventHub.$on("ENTITY-ADD-EVENT", this.addEntityToGraph);
+            // 删除路径
             eventHub.$on("TOPOLOGICAL-ANALYSIS-CALLBACK", this.removePath);
             
             //初始化theme
@@ -876,8 +860,6 @@
                         this.nodeTitle();
                     },500)
 
-                    // 初始化滚轮图缩放事件监听
-                    this.addScrollListener(this.model.graph.container, this.wheelHandle);
                 },500)
 	            
 	        })
@@ -960,7 +942,7 @@
                     style[mxConstants.STYLE_SHAPE] = 'swimlane';
                     style[mxConstants.STYLE_SPACING] = '10';
                     style[mxConstants.STYLE_STARTSIZE] = 30;
-                    style[mxConstants.STYLE_GRADIENTCOLOR] = 'blue';
+                    style[mxConstants.STYLE_GRADIENTCOLOR] = '#419efe';
 
                     style = [];
                     style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_RECTANGLE;
@@ -1154,18 +1136,32 @@
                     } 
                     // edge
                     else {
+                        node = {id: id, value: value, type:'edge', cell: cell};
+
                         menu.addItem('实体关系分析', null, ()=>{
                             this.$root.$refs.graphDiagnosisRef.diagnosisAdd( node );
                         });
-
                         menu.addItem('实体关系删除', null, ()=>{
                             this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.removeEntity(cell);
+                        });
+                        menu.addSeparator();
+
+                        menu.addItem('新建关系类型', null, ()=>{
+                            this.entity.newEdgeType.show = true;
+                        });
+                        menu.addItem('更新关系类型', null, ()=>{
+                            this.$root.$refs.graphDiagnosisRef.diagnosisAdd( node );
                         });
                     }
                 } 
                 // container menu
                 else {
                     
+
+                    menu.addItem('居中', null, ()=>{
+                        this.toCenter();
+                    });
+                    menu.addSeparator();
 
                     if(!_.isEmpty(this.graphData.nodes)){
                         menu.addItem('刷新', null, ()=>{
@@ -1205,12 +1201,12 @@
                     menu.addItem('图标', null, ()=>{
                         this.model.control.ifIcon = true;
                         localStorage.setItem("TOPOLOGICAL-RENDER-TYPE",this.model.control.ifIcon);
-                        this.onReload();
+                        this.onToggleIcon();
                     }, submenuIcon);
                     menu.addItem('图形', null, ()=>{
                         this.model.control.ifIcon = false;
                         localStorage.setItem("TOPOLOGICAL-RENDER-TYPE",this.model.control.ifIcon);
-                        this.onReload();
+                        this.onToggleIcon();
                     }, submenuIcon);
 
                     menu.addSeparator();
@@ -1219,7 +1215,7 @@
                     _.forEach(this.model.graph.default.list,(v)=>{
                         menu.addItem(v.label, null, ()=>{
                             this.model.graph.default.title = v.label;
-                            this.onReload();
+                            this.onToggleLabel();
                         }, submenuLabel);
                     })
 
@@ -1474,10 +1470,15 @@
                     
                     this.model.editor.graph.getModel().endUpdate();
 
-                    this.toCenter();
+                    // 统计
+                    this.graphSummary();
 
-                    // 统计IDs
-                    this.getAllCellIds();
+                    // 刷新状态
+                    this.refreshEntityStatus();
+
+                    _.delay(()=>{
+                        this.toCenter();
+                    },1000)
 
                 }
             },
@@ -1951,8 +1952,8 @@
                     this.$refs.searchToolbar.term = term;
                     //this.$refs.searchToolbar.search();
 
-                    // 统计IDs
-                    this.getAllCellIds();
+                    // 统计
+                    this.graphSummary();
                     
                 }
             },
@@ -1974,12 +1975,17 @@
 
                     // Removes the source vertex 
                     graph.addListener(mxEvent.REMOVE_CELLS, (sender, evt)=> {
-                        this.getAllCellIds();
+                        this.graphSummary();
                     });
 
                     // Add the source vertex
                     graph.addListener(mxEvent.ADD_CELLS, (sender, evt)=> {
-                        this.getAllCellIds();
+                        this.graphSummary();
+                    });
+
+                    // 找一个图的触发机制，触发统计
+                    graph.addListener(mxEvent.MOUSE_MOVE, (sender, evt)=> {
+                        this.graphSummary();
                     });
 
                     // 关系编辑
@@ -2009,20 +2015,23 @@
                             _.extend(this.entity, {target: {id: tId, value: tValue, type: type}});
                             this.entity.dialog.show = true;
                         }
+
+                        // 统计
+                        this.graphSummary();
                     })
 
                     // 监听双击事件
-                    // graph.addListener(mxEvent.DOUBLE_CLICK, (sender, evt)=> {
-                    //     let cell = evt.getProperty('cell');
+                    graph.addListener(mxEvent.DOUBLE_CLICK, (sender, evt)=> {
+                        let cell = evt.getProperty('cell');
 
-                    //     if(!cell) return;
+                        if(!cell) return;
 
-                    //     let id = cell.getId();
-                    //     let value = cell.getValue();
+                        let id = cell.getId();
+                        let value = cell.getValue();
 
-                    //     // 点击获取关联信息
-                    //     this.$root.$refs.graphDiagnosisRef.diagnosisAdd( {id:id, value:value, type:'event', cell: cell} );
-                    // })
+                        // 点击获取关联信息
+                        this.$root.$refs.graphDiagnosisRef.diagnosisAdd( {id:id, value:value, type:'event', cell: cell} );
+                    })
 
                     // 监听单击事件
                     graph.addListener(mxEvent.CLICK, (sender, evt)=> {
@@ -2059,20 +2068,13 @@
                             this.refreshEntityStatus();
                         } catch(err){
 
-                        }
+                        } 
                         
                     },2000);
 
-                    // 滚轮缩放
-                    mxEvent.addMouseWheelListener((evt, up)=> {
-                        // if (up) {
-                        //     graph.zoomIn();
-                        // } else {
-                        //     graph.zoomOut();
-                        // }
-                        // mxEvent.consume(evt);
-                    });
-
+                    // 初始化滚轮图缩放事件监听
+                    this.addScrollListener(this.model.graph.container, this.wheelHandle);
+                    
                     // 监听拖拽事件
                     mxEvent.addListener(container, 'dragover', function(evt){
                         if (graph.isEnabled()){
@@ -2176,21 +2178,134 @@
                         }
                     });
 
+
+                    // 节点Hover菜单
+                    // Defines a new class for all icons
+                    function mxIconSet(state){
+                        this.images = [];
+                        var graph = state.view.graph;
+                        
+                        // Icon1
+                        var img = mxUtils.createImage('/fs/assets/images/tools/png/design.png?type=open&issys=true');
+                        img.setAttribute('title', 'Note');
+                        img.style.position = 'absolute';
+                        img.style.cursor = 'pointer';
+                        img.style.width = '16px';
+                        img.style.height = '16px';
+                        img.style.left = (state.x + state.width) + 'px';
+			            img.style.top = (state.y - 16) + 'px';
+                        
+                        mxEvent.addGestureListeners(img,
+                            mxUtils.bind(this, function(evt){
+                                // Disables dragging the image
+					            mxEvent.consume(evt);
+                            })
+                        );
+
+                        mxEvent.addListener(img, 'click',
+                            mxUtils.bind(this, function(evt){
+                                self.model.editor.execute("selectAll");
+                                mxEvent.consume(evt);
+                                this.destroy();
+                            })
+                        );
+                        
+                        state.view.graph.container.appendChild(img);
+                        this.images.push(img);
+                        
+                    }
+
+                    mxIconSet.prototype.destroy = function(){
+                        if (this.images != null) {
+                            for (var i = 0; i < this.images.length; i++) {
+                                var img = this.images[i];
+                                img.parentNode.removeChild(img);
+                            }
+                        }
+                        
+                        this.images = null;
+                    }
+                    // Defines the tolerance before removing the icons
+                    var iconTolerance = 20;
+
+                    // Shows icons if the mouse is over a cell
+                    graph.addMouseListener({
+                        currentState: null,
+                        currentIconSet: null,
+                        mouseDown: function(sender, me){
+                            // Hides icons on mouse down
+                            if (this.currentState != null){
+                                this.dragLeave(me.getEvent(), this.currentState);
+                                this.currentState = null;
+                            }
+                        },
+                        mouseMove: function(sender, me){
+                            if (this.currentState != null && (me.getState() == this.currentState ||
+                                me.getState() == null)){
+                                var tol = iconTolerance;
+                                var tmp = new mxRectangle(me.getGraphX() - tol,
+                                    me.getGraphY() - tol, 2 * tol, 2 * tol);
+
+                                if (mxUtils.intersects(tmp, this.currentState)){
+                                    return;
+                                }
+                            }
+                            
+                            var tmp = graph.view.getState(me.getCell());
+                            
+                            // Ignores everything but vertices
+                            if (graph.isMouseDown || (tmp != null && !graph.getModel().isVertex(tmp.cell))){
+                                tmp = null;
+                            }
+
+                            if (tmp != this.currentState){
+                                if (this.currentState != null){
+                                    this.dragLeave(me.getEvent(), this.currentState);
+                                }
+                            
+                                this.currentState = tmp;
+                            
+                                if (this.currentState != null){
+                                    this.dragEnter(me.getEvent(), this.currentState);
+                                }
+                            }
+                        },
+                        mouseUp: function(sender, me) { },
+                        dragEnter: function(evt, state){
+                            if (this.currentIconSet == null){
+                                this.currentIconSet = new mxIconSet(state);
+                            }
+                        },
+                        dragLeave: function(evt, state){
+                            if (this.currentIconSet != null){
+                                this.currentIconSet.destroy();
+                                this.currentIconSet = null;
+                            }
+                        }
+                    })
+
                 } catch(err){}
             },
-            // 获取所有cell ids
-            getAllCellIds(){
+            // 统计
+            graphSummary(){
                 try{
                     let parent = this.model.editor.graph.getDefaultParent();
-                    let cells = this.model.editor.graph.getChildVertices(parent);
+                    let vertices = this.model.editor.graph.getChildVertices(parent);
                     
-                    // IDs
-                    this.model.graph.allNodesIds = _.uniq(_.map(cells,(v,k)=>{
+                    // Summary All IDs
+                    this.model.graph.allNodesIds = _.uniq(_.map(vertices,(v,k)=>{
                                         return v.getId();
                                     })).sort();
                     
+                    // Summary All Edges
+                    let edges = this.model.editor.graph.getChildEdges(parent);
+                    this.model.graph.allNodesEdge = _.uniq(_.map(edges,(v,k)=>{
+                        return v.getValue();
+                    })).sort();
+                    
                 } catch(err){
                     this.model.graph.allNodesIds = [];
+                    this.model.graph.allNodesEdge = [];
                 }
             },
             onPosition(id){
@@ -2297,17 +2412,6 @@
                 _.delay(()=>{
                     this.model.editor.graph.center(true,false,0.5,0.5);//将画布放到容器中间
                 },500)
-                /* var cx = '50vw';//this.model.editor.graph.container.clientWidth / 2;
-                var cy = '50vh';//this.model.editor.graph.container.clientHeight / 2;
-
-                $("#graphContainer > svg").css({
-                    'transform': `translate(${cx},${cy})`
-                })*/
-
-                // this.model.editor.graph.fit();//自适应
-                // this.model.editor.graph.center(true,false,0.1,0.5);//将画布放到容器中间
-                // var sc = this.model.editor.graph.getView().getScale();//获取当前的缩放比例
-                // this.model.editor.graph.zoomTo(Math.round(sc/2));//在缩放一半，否则是满屏状态，不好看
             },
             // 绘制路径
             addPath(paths){
@@ -2598,10 +2702,66 @@
                 }
                 //this.model.control.ifFullScreen = mx.fullScreenByEl(this.$el);
             },
+            // 切换节点渲染类型 图标 or 图形
             onToggleIcon(){
-                this.model.control.ifIcon = !this.model.control.ifIcon;
-                localStorage.setItem("TOPOLOGICAL-RENDER-TYPE",this.model.control.ifIcon);
-                this.onReload();
+                try{
+                    let parent = this.model.editor.graph.getDefaultParent();
+                    let vertices = this.model.editor.graph.getChildVertices(parent);
+                    
+                    _.forEach(vertices, (v)=>{
+                        let style = this.model.editor.graph.getModel().getStyle(v);
+                        console.log(style)
+                        
+                        let type = _.head(v.id.split(":")) || 'matrix';
+                        let imageUrl = `${window.ASSETS_ICON}/entity/png/${type}.png?type=download&issys=${window.SignedUser_IsAdmin}`;
+                        
+                        // 图标
+                        if(this.model.control.ifIcon){
+                            if(this.checkImgExists(`${type}.png`)){
+                                this.model.editor.graph.getModel().setStyle(v,`shape=image;html=1;image=${imageUrl};verticalLabelPosition=bottom;verticalAlign=top;`)
+                            } else {
+                                this.model.editor.graph.getModel().setStyle(v,`shape=ellipse;perimeter=ellipsePerimeter;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=middle;`);
+                            }    
+                        } 
+                        // 图形
+                        else {
+                            this.model.editor.graph.getModel().setStyle(v,`shape=ellipse;perimeter=ellipsePerimeter;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=middle;`);
+                        }
+                        
+                    })
+                    
+                } catch(err){
+                    console.log(err)
+                } finally{
+                    this.model.control.ifIcon = !this.model.control.ifIcon;
+                    localStorage.setItem("TOPOLOGICAL-RENDER-TYPE",this.model.control.ifIcon);
+                }
+
+            },
+            // 切换节点显示名称
+            onToggleLabel(){
+                    
+                try{
+                    let parent = this.model.editor.graph.getDefaultParent();
+                    let vertices = this.model.editor.graph.getChildVertices(parent);
+                    
+                    _.forEach(vertices, (v)=>{
+                        let cell = this.model.editor.graph.getModel().getCell(v.getId());
+                        if(cell){
+                            // 可设置默认显示属性
+                            let node = _.find(this.graphData.nodes,{id: cell.getId()});
+                            let name = node[this.model.graph.default.title]?node[this.model.graph.default.title]:node["name"];
+
+                            this.model.editor.graph.getModel().setValue(cell, name);
+                        }
+                        
+                    })
+                    
+                } catch(err){
+                    console.log(err)
+                } finally {
+                    
+                }
             },
             saveEntityAndEdge(){
 
@@ -2627,6 +2787,57 @@
                 }
                 
             },  
+            // 添加实体到画布
+            addEntityToGraph(event){
+                
+                this.model.editor.graph.getModel().beginUpdate();
+                
+                try {
+
+                    let _type = event.id.split(":")[0] || 'matrix';
+                            
+                    // 可设置默认显示属性
+                    let _name =  '';
+                    
+                    try{
+                        _name = event[this.model.graph.default.title];
+                    } catch(err){
+                        _name = event["id"];
+                    }
+
+                    // normal
+                    // 选择节点渲染模式：icon/shape
+                    let node = null;
+                    let imageUrl = `${window.ASSETS_ICON}/entity/png/${_type}.png?type=download&issys=${window.SignedUser_IsAdmin}`;
+                    
+                    // icon渲染
+                    if(this.model.control.ifIcon){
+                        if(this.checkImgExists(`${_type}.png`)){
+                            node = this.model.editor.graph.insertVertex(this.model.graph.parent, event.id, _name, 350, 50, 60, 60,`shape=image;html=1;image=${imageUrl};verticalLabelPosition=bottom;verticalAlign=top;`);
+                        } else {
+                            node = this.model.editor.graph.insertVertex(this.model.graph.parent, event.id, _name, 350, 50, 50, 50,`shape=ellipse;perimeter=ellipsePerimeter;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=middle;`);
+                        }    
+                    } 
+                    // shape渲染
+                    else {
+                        node = this.model.editor.graph.insertVertex(this.model.graph.parent, event.id, _name, 350, 50, 50, 50,`shape=ellipse;perimeter=ellipsePerimeter;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=middle;`);
+                    }
+
+                    // node directory
+                    _.extend(this.model.graph.nodes,{[v.id]:node});
+
+                    
+                }
+                finally {
+                    
+                    this.model.editor.graph.getModel().endUpdate();
+
+                    // 统计
+                    this.graphSummary();
+
+                }
+            },
+            // 删除实体
             removeEntity(cell){
                 
                 if(!cell){
@@ -2726,9 +2937,10 @@
                     message: "实体插入成功！"
                 })
 
-                this.updateEntityEdge();
+                this.createEntityEdge();
             },
-            updateEntityEdge(){
+            // 创建实体关系
+            createEntityEdge(){
                 
                 if(!this.entity.edges.value){
                     this.$message({
@@ -2793,6 +3005,122 @@
                 }
 
             },
+            // 更新实体关系类型
+            updateEntityEdgeType(id,type,oldType){
+
+                let cell = this.model.editor.graph.getModel().getCell(id);
+                
+                if(!cell) {
+                    this.$message({
+                        type: "info",
+                        message: "请选择节点！"
+                    });
+                    return false;
+                }
+
+                let sId = cell.source.getId();
+                let tId = cell.target.getId();
+
+                if(!type){
+                    this.$message({
+                        type: "info",
+                        message: "请选择关系类型！"
+                    });
+                    return false;
+                }
+
+                if(!sId){
+                    this.$message({
+                        type: "info",
+                        message: "请确定起始节点！"
+                    });
+                    return false;
+                }
+
+                if(!tId){
+                    this.$message({
+                        type: "info",
+                        message: "请确定目标节点！"
+                    });
+                    return false;
+                }
+                
+                let rtn = null;
+
+                // 先减关系
+                let oldEdges = {
+                                id: sId, 
+                                type: oldType, 
+                                action: "-", 
+                                value: _.map([cell.target],(v)=>{
+                                    return {key: v.getId(), label: v.getValue()};
+                                })
+                            };
+                rtn = fsHandler.callFsJScript("/matrix/graph/edges-action.js",encodeURIComponent(JSON.stringify(oldEdges)));
+
+                // 后加关系
+                let edges = {
+                    id: sId, 
+                    type: type, 
+                    oldType: oldType,
+                    action: "+", 
+                    value: _.map([cell.target],(v)=>{
+                        return {key: v.getId(), label: v.getValue()};
+                    })
+                };                            
+                rtn = fsHandler.callFsJScript("/matrix/graph/edges-action.js",encodeURIComponent(JSON.stringify(edges)));
+                            
+                if(rtn.status == 'ok'){
+                    this.$message({
+                        type: "success",
+                        message: "更新关系成功！"
+                    })
+
+                    this.model.editor.graph.getModel().setValue(cell, type);
+                    this.model.editor.graph.refresh();
+
+                } else {
+                    this.$message({
+                        type: "error",
+                        message: "更新关系失败！"
+                    })
+                }
+            },
+            onResetStatus(){
+                const self = this;
+
+                let vertices = this.model.editor.graph.getChildVertices(this.model.editor.graph.getDefaultParent());
+                let edges = this.model.editor.graph.getChildEdges(this.model.editor.graph.getDefaultParent());
+
+                _.forEach(vertices,(v)=>{
+                    this.model.editor.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, "#419efe", [v]);
+                    this.model.editor.graph.setCellStyles(mxConstants.STYLE_FONTCOLOR, "#333333", [v]);
+                    this.model.editor.graph.setCellStyles(mxConstants.STYLE_GRADIENTCOLOR, "#419efe", [v]);
+                })
+                
+                _.forEach(edges,(v)=>{
+                    this.model.editor.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, "#888", [v]);
+                    this.model.editor.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, "1", [v]);
+                })
+                
+                let resetFlowEffect = function(edge){
+                    try{
+                        var state = self.model.editor.graph.view.getState(edge);
+                        // state.shape.node.getElementsByTagName('path')[0].setAttribute('visibility','visible');
+                        // state.shape.node.getElementsByTagName('path')[0].setAttribute('stroke-width', '1');
+                        // state.shape.node.getElementsByTagName('path')[0].setAttribute('stroke', '#333333');
+                        state.shape.node.getElementsByTagName('path')[1].removeAttribute('class');
+                    } catch(err){
+                        
+                    }
+                }
+
+                _.forEach(window.flowEdges,(v)=>{
+                    resetFlowEffect(v);
+                });
+
+                clearInterval(window.flowEffectInterval);
+            },
             onTagClick(event,type,value){
                 event.preventDefault();
                 event.stopPropagation();
@@ -2803,33 +3131,14 @@
                 this.model.control.ifIcon = false;
                 let vertices = this.model.editor.graph.getChildVertices(this.model.editor.graph.getDefaultParent());
                 let edges = this.model.editor.graph.getChildEdges(this.model.editor.graph.getDefaultParent());
-                
-
-                let reset = function(){
-                    _.forEach(vertices,(v)=>{
-                        self.model.editor.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, "blue", [v]);
-                        self.model.editor.graph.setCellStyles(mxConstants.STYLE_FONTCOLOR, "#333333", [v]);
-                        self.model.editor.graph.setCellStyles(mxConstants.STYLE_GRADIENTCOLOR, "blue", [v]);
-                    })
-                    
-                    _.forEach(edges,(v)=>{
-                        self.model.editor.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, "#000000", [v]);
-                        self.model.editor.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, "1", [v]);
-                    })
-                    
-                    _.forEach(window.flowEdges,(v)=>{
-                        resetFlowEffect(v);
-                    });
-
-                    clearInterval(window.flowEffectInterval);
-                }
+            
 
                 let setVertex = function(){
                     _.forEach(vertices,(v)=>{
                         if(!_.startsWith(v.getId(),value)){
-                            self.model.editor.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, "#f6f6f6", [v]);
+                            self.model.editor.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, "#c6dff9", [v]);
                             self.model.editor.graph.setCellStyles(mxConstants.STYLE_FONTCOLOR, "#333333", [v]);
-                            self.model.editor.graph.setCellStyles(mxConstants.STYLE_GRADIENTCOLOR, "#ffffff", [v]);
+                            self.model.editor.graph.setCellStyles(mxConstants.STYLE_GRADIENTCOLOR, "#c6dff9", [v]);
                         } 
                     })
                 }
@@ -2838,8 +3147,8 @@
                     
                     _.forEach(edges,(v)=>{
                         if(v.getValue() != value){
-                            self.model.editor.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, "#f6f6f6", [v]);
-                            self.model.editor.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, "3", [v]);
+                            self.model.editor.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, "#dddddd", [v]);
+                            self.model.editor.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, "1", [v]);
                         } else {
                             window.flowEdges.push(v);
                         }
@@ -2854,29 +3163,22 @@
 
 
                 let setFlowEffect = function(edge){
-                    // Adds animation to edge shape and makes "pipe" visible
-                    var state = self.model.editor.graph.view.getState(edge);
-                    state.shape.node.getElementsByTagName('path')[0].removeAttribute('visibility');
-                    state.shape.node.getElementsByTagName('path')[0].setAttribute('stroke-width', '6');
-                    state.shape.node.getElementsByTagName('path')[0].setAttribute('stroke', 'lightGray');
-                    state.shape.node.getElementsByTagName('path')[1].setAttribute('class', 'flow');
-                }
-
-                let resetFlowEffect = function(edge){
                     try{
+                        // Adds animation to edge shape and makes "pipe" visible
                         var state = self.model.editor.graph.view.getState(edge);
-                        console.log(edge,state.shape.node.getElementsByTagName('path')[1])
-                        // state.shape.node.getElementsByTagName('path')[0].setAttribute('visibility','visible');
-                        // state.shape.node.getElementsByTagName('path')[0].setAttribute('stroke-width', '1');
-                        // state.shape.node.getElementsByTagName('path')[0].setAttribute('stroke', '#333333');
-                        state.shape.node.getElementsByTagName('path')[1].removeAttribute('class');
+                        state.shape.node.getElementsByTagName('path')[0].removeAttribute('visibility');
+                        state.shape.node.getElementsByTagName('path')[0].setAttribute('stroke-width', '4');
+                        state.shape.node.getElementsByTagName('path')[0].setAttribute('stroke', 'lightGray');
+                        state.shape.node.getElementsByTagName('path')[1].setAttribute('class', 'flow');
                     } catch(err){
-                        console.log(err)
+
                     }
                 }
 
+
                 // 重置样式
-                reset();
+                this.onResetStatus();
+
                 // 设置样式
                 if(type == 'vertex'){
                     setVertex();

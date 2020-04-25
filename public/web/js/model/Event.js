@@ -1914,7 +1914,7 @@ class Event {
                             if(!term){
                                 term = 'remote_command';
                             }
-                            let url = `/janesware/job?term=${window.btoa(encodeURIComponent(term))}`;
+                            let url = `/matrix/job?term=${window.btoa(encodeURIComponent(term))}`;
                             window.open(url,'_blank');
                         }
                     }

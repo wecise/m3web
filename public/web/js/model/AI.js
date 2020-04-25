@@ -454,7 +454,7 @@ class AI {
                             }
                         },
                         job(term){
-                            let url = `/janesware/job?term=${window.btoa(encodeURIComponent(term))}`;
+                            let url = `/matrix/job?term=${window.btoa(encodeURIComponent(term))}`;
                             window.open(url,'_blank');
                         }
                     }
@@ -601,7 +601,7 @@ class AI {
                             if(!term){
                                 term = 'word';
                             }
-                            let url = `/janesware/job?term=${window.btoa(encodeURIComponent(term))}`;
+                            let url = `/matrix/job?term=${window.btoa(encodeURIComponent(term))}`;
                             window.open(url,'_blank');
                         }
                     }
@@ -748,7 +748,7 @@ class AI {
                             if(!term){
                                 term = 'word';
                             }
-                            let url = `/janesware/job?term=${window.btoa(encodeURIComponent(term))}`;
+                            let url = `/matrix/job?term=${window.btoa(encodeURIComponent(term))}`;
                             window.open(url,'_blank');
                         }
                     }
@@ -895,7 +895,7 @@ class AI {
                             if(!term){
                                 term = 'word';
                             }
-                            let url = `/janesware/job?term=${window.btoa(encodeURIComponent(term))}`;
+                            let url = `/matrix/job?term=${window.btoa(encodeURIComponent(term))}`;
                             window.open(url,'_blank');
                         }
                     }
@@ -1042,7 +1042,7 @@ class AI {
                             if(!term){
                                 term = 'word';
                             }
-                            let url = `/janesware/job?term=${window.btoa(encodeURIComponent(term))}`;
+                            let url = `/matrix/job?term=${window.btoa(encodeURIComponent(term))}`;
                             window.open(url,'_blank');
                         }
                     }
@@ -1260,7 +1260,7 @@ class AI {
                             if(!term){
                                 term = 'word';
                             }
-                            let url = `/janesware/job?term=${window.btoa(encodeURIComponent(term))}`;
+                            let url = `/matrix/job?term=${window.btoa(encodeURIComponent(term))}`;
                             window.open(url,'_blank');
                         }
                     }
@@ -1747,7 +1747,7 @@ class AI {
                             if(!term){
                                 term = 'neural_network';
                             }
-                            let url = `/janesware/job?term=${window.btoa(encodeURIComponent(term))}`;
+                            let url = `/matrix/job?term=${window.btoa(encodeURIComponent(term))}`;
                             window.open(url,'_blank');
                         }
                     }
