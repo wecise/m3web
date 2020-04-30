@@ -103,13 +103,17 @@ class Notes {
                         onInit(){
                             this.treeData = fsHandler.callFsJScript("/matrix/devops/getFsForTree.js", encodeURIComponent(this.root)).message;
                             
+                            let childrenData = fsHandler.fsList(this.treeData[2].fullname);
+                            this.$set(this.treeData[2], 'children', childrenData);
+
                             // 默认首页
-                            // let homeNode = _.find(_.flattenDeep(_.map(this.treeData,'children')),{name: '系统介绍.md'});
+                            let homeNode = _.find(_.flattenDeep(_.map(this.treeData,'children')),{name: '系统介绍.md'});
                             
-                            // let item = _.extend(homeNode,{
-                            //     size: _.find(fsHandler.fsList(homeNode.parent),{name: homeNode.name}).size || 0
-                            // });
-                            // this.$root.model = {item:homeNode, content:fsHandler.fsContent(homeNode.parent, homeNode.name)};
+                            let item = _.extend(homeNode,{
+                                size: _.find(fsHandler.fsList(homeNode.parent),{name: homeNode.name}).size || 0
+                            });
+                            
+                            this.$root.model = {item:homeNode, content:fsHandler.fsContent(homeNode.parent, homeNode.name)};
                         }
                     }
                 });

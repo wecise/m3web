@@ -18,9 +18,7 @@ class System {
 
     init() {
 
-        VueLoader.onloaded(["vue-base-datatables-component",
-							"vue-common-form-component",
-							"ai-robot-component"
+        VueLoader.onloaded(["ai-robot-component"
 							],function() {
 
 			$(function() {
@@ -792,7 +790,6 @@ class System {
 								}
 								
 							})});
-							console.log(1,rtn)
 							_.extend(this.dt, rtn);
 						},
 						rowClassName({row, rowIndex}){

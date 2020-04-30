@@ -556,8 +556,8 @@
                       </el-row>
                     <span slot="footer" class="dialog-footer">
                         <el-button @click="entity.dialog.ifClose = true;entity.dialog.show = false;">取消</el-button>
-                        <el-button type="primary" @click="addEntity(null)" v-if="entity.target.type=='new'">创建实体和关系</el-button>
-                        <el-button type="primary" @click="createEntityEdge" v-else>创建关系</el-button>
+                        <el-button type="primary" @click="addEntityHandler(null)" v-if="entity.target.type=='new'">创建实体和关系</el-button>
+                        <el-button type="primary" @click="createEntityEdgeHandler" v-else>创建关系</el-button>
                     </span>
                 </el-dialog>
 
@@ -590,6 +590,22 @@
                         <el-button @click="entity.newEdgeType.show = false">取 消</el-button>
                         <el-button type="primary" @click="onSaveEdgeType">确 定</el-button>
                       </div>
+                </el-dialog>
+
+                <el-dialog title="实体备注" :visible.sync="entity.dialogNoteForEntity.show">
+                    <h5>${entity.dialogNoteForEntity.model.id}</h5>
+                    <el-form>
+                      <el-form-item >
+                        <el-input type="textarea" :rows="10" 
+                            v-model="entity.dialogNoteForEntity.model.note.content" 
+                            placeholder="请输入备注"
+                            autofocus></el-input>
+                      </el-form-item>
+                    </el-form>
+                    <div slot="footer" class="dialog-footer">
+                      <el-button @click="entity.dialogNoteForEntity.show = false">取 消</el-button>
+                      <el-button type="primary" @click="addEntityNoteHandler">确 定</el-button>
+                    </div>
                 </el-dialog>
             </el-container>
 		</el-main>
@@ -697,6 +713,19 @@
                         model: {
                             name:"",
                             remedy: ""
+                        }
+                    },
+                    dialogNoteForEntity:{
+                        show:false,
+                        model: {
+                            id: "",
+                            note: {   
+                                parent: "",
+                                name: "",
+                                ftype: "md",
+                                item: "",
+                                content: ""
+                            }
                         }
                     },
                     source: {},
@@ -1044,7 +1073,7 @@
                         });
 
                         menu.addItem('实体删除', null, ()=>{
-                            this.removeEntity(cell);
+                            this.removeEntityHandler(cell);
                         });
                         
                         menu.addSeparator();
@@ -1142,7 +1171,7 @@
                             this.$root.$refs.graphDiagnosisRef.diagnosisAdd( node );
                         });
                         menu.addItem('实体关系删除', null, ()=>{
-                            this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.removeEntity(cell);
+                            this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.removeEntityHandler(cell);
                         });
                         menu.addSeparator();
 
@@ -1280,6 +1309,7 @@
                 let term = {parent:"/assets/images/entity/png", name:name};
                 return fsHandler.callFsJScript("/matrix/graph/checkHaveFile.js", encodeURIComponent(JSON.stringify(term))).message;
             },
+            // 初始化画布
             initGraph(){
                 
                 let allNodes = [];
@@ -1448,7 +1478,7 @@
                             }
                             
                             // edge directory
-                            try{
+                            try {
                                 let id = source.getId() + ':' + target.getId();
                                 _.extend(this.model.graph.edges, { [id]: edge });
                             } catch(err){
@@ -1495,6 +1525,7 @@
                 this.model.editor.execute("selectAll");
                 this.model.editor.execute("delete");
             },
+            // 设置布局
             executeLayout(){
                 let graph = this.model.editor.graph;
                 let parent = this.model.editor.graph.getDefaultParent();
@@ -1546,7 +1577,6 @@
                         layout.edgeStyle = 4;
                         layout.inst.execute(parent);
                         layout.inst.isVertexMovable = function(cell){
-                            console.log(1,cell)
                             return true;
                         };
                         var layoutMgr = new mxLayoutManager(graph);
@@ -1578,7 +1608,6 @@
                         var layoutMgr = new mxLayoutManager(graph);
 
                         layoutMgr.getLayout = function(cell){
-                            console.log(2,cell)
                             if (cell.getChildCount() > 0){
                                 return layout.inst;
                             }
@@ -2201,10 +2230,12 @@
 					            mxEvent.consume(evt);
                             })
                         );
-
+                        // bind事件到备注按钮    
                         mxEvent.addListener(img, 'click',
                             mxUtils.bind(this, function(evt){
-                                self.model.editor.execute("selectAll");
+                                self.entity.dialogNoteForEntity.model.id = state.cell.getId();
+                                self.entity.dialogNoteForEntity.model.note.content = "";
+                                self.entity.dialogNoteForEntity.show = true;
                                 mxEvent.consume(evt);
                                 this.destroy();
                             })
@@ -2411,7 +2442,7 @@
                 this.model.editor.execute("fit");
                 _.delay(()=>{
                     this.model.editor.graph.center(true,false,0.5,0.5);//将画布放到容器中间
-                },500)
+                },50)
             },
             // 绘制路径
             addPath(paths){
@@ -2710,8 +2741,6 @@
                     
                     _.forEach(vertices, (v)=>{
                         let style = this.model.editor.graph.getModel().getStyle(v);
-                        console.log(style)
-                        
                         let type = _.head(v.id.split(":")) || 'matrix';
                         let imageUrl = `${window.ASSETS_ICON}/entity/png/${type}.png?type=download&issys=${window.SignedUser_IsAdmin}`;
                         
@@ -2838,7 +2867,7 @@
                 }
             },
             // 删除实体
-            removeEntity(cell){
+            removeEntityHandler(cell){
                 
                 if(!cell){
                     this.$message({
@@ -2916,7 +2945,7 @@
                         });
                 }
             },
-            addEntity(entity){
+            addEntityHandler(entity){
                 let rtn = null;
 
                 if(!this.entity.edges.value){
@@ -2937,10 +2966,10 @@
                     message: "实体插入成功！"
                 })
 
-                this.createEntityEdge();
+                this.createEntityEdgeHandler();
             },
             // 创建实体关系
-            createEntityEdge(){
+            createEntityEdgeHandler(){
                 
                 if(!this.entity.edges.value){
                     this.$message({
@@ -3006,7 +3035,7 @@
 
             },
             // 更新实体关系类型
-            updateEntityEdgeType(id,type,oldType){
+            updateEntityEdgeTypeHandler(id,type,oldType){
 
                 let cell = this.model.editor.graph.getModel().getCell(id);
                 
@@ -3086,6 +3115,27 @@
                     })
                 }
             },
+            // 添加实体备注
+            addEntityNoteHandler(){
+                // 根据实体ID定义该实体note存储位置
+                this.entity.dialogNoteForEntity.model.note.parent = "/storage/entity/notes/" + this.entity.dialogNoteForEntity.model.id;
+                this.entity.dialogNoteForEntity.model.note.name = "note_" + moment().format("LLL")+".md";
+                // 文件存在
+                try{
+                    let rtn = fsHandler.fsCheck(this.entity.dialogNoteForEntity.model.note.parent,this.entity.dialogNoteForEntity.model.note.name); 
+                    if(!rtn){
+                        let attr = {remark: '', ctime: _.now(), author: window.SignedUser_UserName};
+                        let rtn = fsHandler.fsNew(this.entity.dialogNoteForEntity.model.note.ftype, this.entity.dialogNoteForEntity.model.note.parent, this.entity.dialogNoteForEntity.model.note.name, this.entity.dialogNoteForEntity.model.note.content, attr);
+                    }
+                } 
+                // 文件不存在则新建一个
+                catch(err){
+                    console.log(err)
+                } finally{
+                    this.entity.dialogNoteForEntity.show = false;
+                }
+            },
+            // 重置节点样式
             onResetStatus(){
                 const self = this;
 
@@ -3121,6 +3171,7 @@
 
                 clearInterval(window.flowEffectInterval);
             },
+            // 当前选择实体效果
             onTagClick(event,type,value){
                 event.preventDefault();
                 event.stopPropagation();

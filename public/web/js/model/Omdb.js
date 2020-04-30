@@ -1182,9 +1182,20 @@ class Omdb{
                                             </span>
                                         </template>
                                         <template slot-scope="scope">
-                                            #{scope.row[item['field']]}#
+                                            #{ scope.row[item['field']] }#
                                         </template>
                                     </el-table-column>
+                                    <!--el-table-column :prop="item['field']"  
+                                            show-overflow-tooltip="true" 
+                                            sortable
+                                            resizable
+                                            :formatter="item.render"
+                                            v-for="item in dt.columns"
+                                            min-width="180">
+                                        <template slot-scope="scope">
+                                            #{ scope.row[item['field']] }#
+                                        </template>
+                                    </el-table-column-->
                                 </el-table>
                             </el-main>
                             <el-footer  style="height:30px;line-height:30px;">
@@ -1269,7 +1280,6 @@ class Omdb{
                         return v;
                     });
 
-                    console.log(11,this.dt)
                 }
             },
             mounted(){

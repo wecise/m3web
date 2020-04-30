@@ -1133,7 +1133,9 @@ class Topological {
                             <el-button type="text" icon="el-icon-arrow-right" @click="control.show=!control.show" v-show="control.show==false" style="width:30px;"></el-button>
                             <component v-bind:is="currentView" class="animated fadeIn" v-show="control.show==true"></component>
                             <!-- 打开窗口 -->
-                            <el-dialog :title="file.dialogOpen.title" :visible.sync="file.dialogOpen.visible">
+                            <el-dialog :title="file.dialogOpen.title" 
+                                    :visible.sync="file.dialogOpen.visible"
+                                    modal="false">
                                 <mx-fs-open dfsRoot="/home/admin/Documents/graph" ref="dfsOpen" v-if="file.dialogOpen.visible"></mx-fs-open>
                                 <div slot="footer" class="dialog-footer">
                                     <el-button @click="file.dialogOpen.visible = false">取 消</el-button>
@@ -1313,7 +1315,6 @@ class Topological {
                         console.error(err);
                     } finally {
                         this.file.dialogOpen.visible = false;
-
                         inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.toCenter();
                     }
                     
@@ -1536,7 +1537,7 @@ class Topological {
                 onEdgeChange(value){
                     let id = this.model.rows[0].id;
                     let oldValue = this.model.rows[0].value;
-                    inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.updateEntityEdgeType(id,value,oldValue);
+                    inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.updateEntityEdgeTypeHandler(id,value,oldValue);
                 }
             }
         });
@@ -1801,9 +1802,10 @@ class Topological {
             },
             data(){
                 return {
+                    noteList: [],
                     note: {   
                         parent: "",
-                        name: "note.md",
+                        name: "",
                         ftype: "md",
                         item: "",
                         content: ""
@@ -1811,24 +1813,41 @@ class Topological {
                 }
             },
             template: `<el-container style="height: calc(100vh - 120px);">
-                            <el-main style="padding:10px 0px;">
-                                <md-editor-component :model="{item:note,content:note.content}"></md-editor-component>
+                            <el-header style="height: 30px;text-align: right;line-height: 30px;padding-right: 40px;">
+                                <el-tooltip content="新建" open-delay="500">
+                                    <el-button type="text" icon="el-icon-plus" @click="onAddNote"></el-button>
+                                </el-tooltip>
+                            </el-header>
+                            <el-main style="padding-top:0px;display:flex;flex-wrap:wrap;align-content:flex-start;">
+                                <md-editor-component :model="{item:item,content:item.content}" 
+                                    style="width:25em;height:25em;margin:10px;"
+                                    v-for="item in noteList"></md-editor-component>
                             </el-main>
                         </el-container>`,
             created(){
+                // 初始化备注列表
+                this.initNoteList();
+
                 // 根据实体ID定义该实体note存储位置
                 this.note.parent = "/storage/entity/notes/" + this.model.node.id;
+
+                // 删除后刷新列表
+                eventHub.$on("ENTITY-NOTE-DELETE-EVENT",this.initNoteList);
             },
             mounted(){
                 this.initNote();
             },
             methods: {
+                initNoteList(){
+                    let temp = fsHandler.callFsJScript("/matrix/notes/noteAction.js",encodeURIComponent(this.model.node.id)).message; 
+                    this.noteList = _.orderBy(temp,['vtime'],['desc']);
+                },
                 initNote(){
                     // 文件存在
                     try{
                         let rtn = fsHandler.fsCheck(this.note.parent,this.note.name); 
                         if(!rtn){
-                            this.newNote();
+                            //this.newNote();
                         } else {
                             this.note.content = fsHandler.fsContent(this.note.parent,this.note.name); 
                         }
@@ -1842,6 +1861,10 @@ class Topological {
                     let attr = {remark: '', ctime: _.now(), author: window.SignedUser_UserName};
                     let rtn = fsHandler.fsNew(this.note.ftype, this.note.parent, this.note.name, this.model.title, attr);
                     this.note.content = this.model.title;
+                },
+                onAddNote(){
+                    this.note.name = "note_" + moment().format("LLL")+".md";
+                    this.noteList.unshift(this.note);
                 }
             }
         });

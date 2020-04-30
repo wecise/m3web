@@ -1780,7 +1780,7 @@ class Event {
                             mxTopo.mount(`#topological-app-${this.id}`);
                             
                             _.delay(()=>{
-                                mxTopo.app.contextMenu();
+                                // mxTopo.app.contextMenu();
                             },500)
 
                         }
@@ -2165,7 +2165,7 @@ class Event {
                                 show: false,
                                 // 类
                                 class: {
-                                    value: "/matrix/devops/event",
+                                    value: "/matrix/devops/alert",
                                     list:[]
                                 },
                                 // 当前视图name
@@ -2498,7 +2498,7 @@ class Event {
                             // 输入
                             term: "",
                             // 指定类
-                            class: "#/matrix/devops/event/:",
+                            class: "#/matrix/devops/alert/:",
                             // 指定api
                             api: {parent: "event",name: "event_list.js"},
                             // 其它设置

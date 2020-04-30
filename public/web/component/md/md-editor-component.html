@@ -8,7 +8,7 @@
 	
 	/*----------  最外层element会自动增加组件同名 class="md-editor-component"  ----------*/
 	<template>
-		<el-container style="height:calc(100vh - 85px);background:#ffffff;">
+		<el-container style="height:calc(100vh - 85px);background:#ffffff;box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);">
             <el-main style="padding:0px;overflow:hidden;" ref="mainView">
                 <notes-view :model="model" ref="viewRef"></notes-view>
             </el-main>
@@ -114,32 +114,6 @@
                 props: {
                     model: Object
                 },
-                template:   `<el-container style="height:100%;" class="notes-view-container">
-                                <el-header style="height:40px;line-height:40px;">
-                                    <span style="font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;" v-if="!_.isEmpty(model)">
-                                        #{model.item.name | pickName}#
-                                    </span>
-                                    <el-button type="text" icon="el-icon-s-platform" @click="mode='view'" style="margin-left:10px;float:right;"></el-button>
-                                    <el-button type="text" icon="el-icon-edit" @click="mode='edit'" style="float:right;"></el-button>
-                                </el-header>
-                                <el-main style="height:100%;overflow:hidden;">
-                                    <el-container style="height:100%;box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);" class="notes-view-content">
-                                        <el-aside style="width:50%;" ref="editor">
-                                        </el-aside>
-                                        <el-main style="width:50%;height:100%;" ref="content" v-html="compiledMarkdown">
-                                        </el-main>
-                                    </el-container>
-                                </el-main>
-                            </el-container>`,
-                filters: {
-                    pickName(name){
-                        try{
-                            return _.head(name.split(".md"));
-                        } catch(err){
-                            return name;
-                        }
-                    }
-                },
                 data(){
                     return {
                         editor: null,
@@ -155,8 +129,52 @@
                             smartLists: true,
                             smartypants: false
                         },
-                        mode:"view"
+                        mode:"view",
+                        control: {
+                            ifFullScreen:false
+                        }
                     }
+                },
+                template:   `<el-container style="height:100%;background: #f9f9f5;box-shadow: rgba(0, 0, 0, 0.12) 0px 2px 4px, rgba(0, 0, 0, 0.04) 0px 0px 6px;" 
+                                class="notes-view-container"
+                                ref="container">
+                                <el-header style="height:40px;line-height:40px;">
+                                    <!--span style="font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;" v-if="!_.isEmpty(model)">
+                                        #{model.item.name | pickName}#
+                                    </span-->
+                                    <el-button type="text" icon="el-icon-s-platform" @click="mode='view'" style="margin-left:10px;float:right;"></el-button>
+                                    <el-button type="text" icon="el-icon-edit" @click="mode='edit'" style="float:right;"></el-button>
+                                    <el-button type="text" icon="el-icon-delete" @click="onDelete" style="float:right;"></el-button>
+                                    <el-tooltip content="全屏显示" open-delay="500" placement="left">
+                                        <el-button type="text" :icon="control.ifFullScreen | pickScreenStyle" 
+                                                    @click="onFullScreen" style="float:right;">
+                                        </el-button>
+                                    </el-tooltip>
+                                </el-header>
+                                <el-main style="padding-top:0px;height:100%;overflow:hidden;">
+                                    <el-container style="height:100%!important;" class="notes-view-content">
+                                        <el-aside style="width:50%;" ref="editor">
+                                        </el-aside>
+                                        <el-main style="width:50%;height:100%;" ref="content" v-html="compiledMarkdown">
+                                        </el-main>
+                                    </el-container>
+                                </el-main>
+                            </el-container>`,
+                filters: {
+                    pickName(name){
+                        try{
+                            return _.head(name.split(".md"));
+                        } catch(err){
+                            return name;
+                        }
+                    },
+                    pickScreenStyle(evt){
+                        if(evt){
+                            return `el-icon-full-screen`;
+                        } else {
+                            return `el-icon-copy-document`;
+                        }
+                    },
                 },
                 watch:{
                     model:{
@@ -231,7 +249,35 @@
                                 if(_.isEmpty(this.model.item.parent)) return false;
                                 let attr = {remark: '', ctime: _.now(), author: window.SignedUser_UserName};
                                 let rtn = fsHandler.fsNew(this.model.item.ftype, this.model.item.parent, this.model.item.name, this.editor.getValue(), attr);
-                            },2000)
+                            },2000),
+                    onDelete(){
+                        this.$confirm(`确定要删除 ${this.model.item.name} 文件?`, '提示', {
+                            confirmButtonText: '确定',
+                            cancelButtonText: '取消',
+                            type: 'warning'
+                            }).then(() => {
+                                let rtn = fsHandler.fsDelete(this.model.item.parent,this.model.item.name);
+                                
+                                if (rtn == 1){
+                                    this.$message({
+                                        type: "success",
+                                        message: "删除成功！"
+                                    });
+                                    eventHub.$emit("ENTITY-NOTE-DELETE-EVENT");
+                                } else {
+                                    this.$message({
+                                        type: "error",
+                                        message: "删除失败 " + rtn.message
+                                    })
+                                }
+
+                            }).catch(() => {
+                                
+                            });
+                    },
+                    onFullScreen(){
+                        this.control.ifFullScreen = mx.fullScreenByEl(this.$refs.container.$el);
+                    }
 
                 }
             });
