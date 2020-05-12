@@ -12,8 +12,8 @@
 
         
 		.topological-graph-component .el-input--small .el-input__inner {
-            height: 35px;
-            line-height: 35px;
+            height: 35px!important;
+            line-height: 35px!important;
         }
 
 		.topological-graph-component .node-menu{
@@ -380,6 +380,20 @@
 		    stroke-dashoffset: -16;
 		  }
 		}
+
+        /* report */
+        .topological-graph-component .topological-report{
+            background: #f7f7f7;
+            margin: 20px 120px;
+            height: 95%!important;
+            overflow: auto;
+            outline-style: none;
+        }
+
+        .topological-graph-component .topological-report .el-drawer__header > span{
+            font-size: 18px;
+            outline-style: none;
+        }
     }
 
 	</style>
@@ -402,6 +416,9 @@
                     <topological-search-toolbar ref="searchToolbar" style="width:100%;"></topological-search-toolbar>
                 </div>
                 <div id="controlBar" class="controlBar">
+                    <el-tooltip content="分析报告" open-delay="500">
+                        <el-button type="text" icon="el-icon-notebook-2" @click="report.show=!report.show"></el-button>
+                    </el-tooltip>
                     <el-tooltip content="切换显示工具栏" open-delay="500">
                         <el-button type="text" icon="el-icon-menu" @click="model.control.show=!model.control.show"></el-button>
                     </el-tooltip>
@@ -514,7 +531,19 @@
                         </el-button>
                     </el-tooltip>
                </div>
-               
+               <!--  -->
+               <el-drawer
+                    :title="report.title"
+                    :visible.sync="report.show"
+                    modal="false"
+                    modal-append-to-body="false"
+                    direction="rtl"
+                    size="80%"
+                    custom-class="topological-report"
+                    @open="onReportOpen">
+                    <iframe :src="report.content" style="width: 100%;height: 100%;" frameborder="0"></iframe>
+                    <entity-diagnosis-notes :model="null"></entity-diagnosis-notes>
+                </el-drawer>
                <el-dialog
                     title="实体/关系编辑"
                     :visible.sync="entity.dialog.show"
@@ -533,14 +562,31 @@
                                 </el-form-item>
                             </el-form>
                         </el-col>
-                        <el-col :span="8">
+                        <el-col :span="8" style="border-left:1px solid #dddddd;border-right:1px solid #dddddd;">
                             <h4>选择关系</h4>
-                            <el-select v-model="entity.edges.value" placeholder="选择关系类型">
-                              <el-option v-for="item in entity.edges.list" 
-                                :key="item.name"
-                                :value="item.name"
-                                :label="item.remedy"></el-option>
-                            </el-select>
+                            <el-form label-width="80" v-if="entity.source">
+                                <el-form-item label="选择关系类型">
+                                    <el-select v-model="entity.edges.value" placeholder="选择关系类型">
+                                        <el-option v-for="item in entity.edges.list" 
+                                            :key="item.name"
+                                            :value="item.name"
+                                            :label="item.remedy">
+                                        </el-option>
+                                    </el-select>
+                                </el-form-item>
+                                <el-form-item label="关系属性" v-if="!_.isEmpty(item)" v-for="item in entity.edges.properties.list">
+                                    <el-input :value="item | pickEdgeProperty" 
+                                        placeholder="属性=值" >
+                                        <el-button slot="append" type="text" icon="el-icon-delete" @click="onDeleteEdgesProperty(item)" style="padding-left: 10px;color:#ff0000;"></el-button>
+                                    </el-input>
+                                </el-form-item>
+                                <el-form-item label="添加关系属性" >
+                                    <el-input v-model="entity.edges.properties.value"
+                                        placeholder="属性=值">
+                                        <el-button slot="append" type="text" icon="el-icon-plus"  @click="onAddEdgesProperty" style="padding-left: 10px;color:rgb(40, 240, 40)"></el-button>
+                                    </el-input>
+                                </el-form-item>
+                            </el-form>
                         </el-col>
                         <el-col :span="8">
                             <h4>目标点</h4>
@@ -732,7 +778,11 @@
                     target: {},
                     edges: {
                         value: "",
-                        list: fsHandler.callFsJScript("/matrix/graph/edges.js",null).message
+                        list: fsHandler.callFsJScript("/matrix/graph/edges.js",null).message,
+                        properties: {
+                            value: "",
+                            list: []
+                        }
                     }
                 },
                 layout: {
@@ -741,8 +791,11 @@
                 global: {
                     count: 0
                 },
-                fileInfo:{
-
+                fileInfo: {},
+                report:{
+                    show: false,
+                    content: "",
+                    title: "汇总报告"
                 }
 	        }
         },
@@ -762,6 +815,14 @@
                     return `el-icon-picture-outline`;
                 } else {
                     return `el-icon-s-help`;
+                }
+            },
+            pickEdgeProperty(item) {
+                
+                try {
+                    return `${ [item.name,item.value].join("=") }`;
+                } catch(err){
+                    console.log(err);
                 }
             }
         },
@@ -862,7 +923,7 @@
 
             // Defines an icon for creating new connections in the connection handler.
             // This will automatically disable the highlighting of the source vertex.
-            mxConnectionHandler.prototype.connectImage = new mxImage('/fs/assets/images/tools/down.gif?type=open&issys=true', 16, 16);
+            mxConnectionHandler.prototype.connectImage = new mxImage('/fs/assets/images/tools/down.gif?type=open&issys=true', 14, 14);
 
             // Sets the collapse and expand icons. The values below are the default
             // values, but this is how to replace them if you need to.
@@ -1525,6 +1586,40 @@
                 this.model.editor.execute("selectAll");
                 this.model.editor.execute("delete");
             },
+            // 关系属性添加
+            onAddEdgesProperty(){
+                try{
+                    let tmp = this.entity.edges.properties.value.split("=");
+                    
+                    let ifHave = _.find(this.entity.edges.properties.list,{name:tmp[0]});
+
+                    if(!ifHave){
+                        this.entity.edges.properties.list.push({name:tmp[0],value:tmp[1]});
+                    } else {
+                        this.$message({
+                            type: "info",
+                            message: "属性已经存在"
+                        })
+                        return false;
+                    }
+                    
+                } catch(err){
+
+                } finally{
+                    this.entity.edges.properties.value = "";
+                }
+            },
+            // 关系属性删除
+            onDeleteEdgesProperty(item){
+                try{
+                    
+                    this.entity.edges.properties.list.splice(this.entity.edges.properties.list.indexOf(item), 1);
+                    
+                } catch(err){
+
+                }
+                
+            },
             // 设置布局
             executeLayout(){
                 let graph = this.model.editor.graph;
@@ -1990,6 +2085,7 @@
             graphEvent(graph){
 
                 try{
+
                     // 自定义ToolTip
                     graph.getTooltipForCell = function(cell){
                         if(!cell.edge){
@@ -2010,6 +2106,14 @@
                     // Add the source vertex
                     graph.addListener(mxEvent.ADD_CELLS, (sender, evt)=> {
                         this.graphSummary();
+                    });
+
+                    // Move the source vertex
+                    graph.addListener(mxEvent.MOVE_CELLS, (sender, evt)=> {
+                        // Executes the layout handler
+                        _.delay(()=>{
+                            this.executeLayout();
+                        },500)
                     });
 
                     // 找一个图的触发机制，触发统计
@@ -2243,6 +2347,26 @@
                         
                         state.view.graph.container.appendChild(img);
                         this.images.push(img);
+
+                        /* // connect img
+                        var connectImg = mxUtils.createImage('/fs/assets/images/tools/down.gif?type=open&issys=true');
+                        connectImg.setAttribute('title', 'Connect');
+                        connectImg.style.position = 'absolute';
+                        connectImg.style.cursor = 'pointer';
+                        connectImg.style.width = '16px';
+                        connectImg.style.height = '16px';
+                        connectImg.style.left = (state.x + state.width) + 'px';
+                        connectImg.style.top = (state.y + state.height) + 'px';
+                        
+                        mxEvent.addGestureListeners(connectImg,
+                            mxUtils.bind(this, function(evt){
+                                mxEvent.consume(evt);
+                                this.destroy();
+                            })
+                        );
+                        
+                        state.view.graph.container.appendChild(connectImg);
+                        this.images.push(connectImg); */
                         
                     }
 
@@ -3119,7 +3243,7 @@
             addEntityNoteHandler(){
                 // 根据实体ID定义该实体note存储位置
                 this.entity.dialogNoteForEntity.model.note.parent = "/storage/entity/notes/" + this.entity.dialogNoteForEntity.model.id;
-                this.entity.dialogNoteForEntity.model.note.name = "note_" + moment().format("LLL")+".md";
+                this.entity.dialogNoteForEntity.model.note.name = "note_" + moment().format("YYYY-MM-DD HH:MM:SS")+".md";
                 // 文件存在
                 try{
                     let rtn = fsHandler.fsCheck(this.entity.dialogNoteForEntity.model.note.parent,this.entity.dialogNoteForEntity.model.note.name); 
@@ -3170,6 +3294,79 @@
                 });
 
                 clearInterval(window.flowEffectInterval);
+            },
+            // 生成报告
+            onReportOpen(){
+                const self = this;
+                html2canvas(this.$refs.graphContainer.$el,{
+					allowTaint: true,
+					useCORS: true,
+					letterRendering: 1
+				}).then(
+                    function (canvas) {
+
+                        var image = canvas.toDataURL();
+                        var byteString = atob(image.substring(22));
+                        var buffer = new ArrayBuffer(byteString.length);
+                        var intArray = new Uint8Array(buffer);
+
+                        for ( var i = 0; i < byteString.length; i++ ){
+                            intArray[i] = byteString.charCodeAt(i);
+                        }
+
+
+                        let ftype = "html";
+                        let attr = {remark: "", ctime: _.now(), author: window.SignedUser_UserName, type: ftype};
+                        let name = '报告_' + moment().format("YYYY-MM-DD HH:MM:SS");
+                        let html = `<!DOCTYPE html>
+                                    <html>
+                                        <head>
+                                            <meta charset="UTF-8">
+                                        </head>
+                                        <style>
+                                            body{
+                                                padding:10px 30px;
+                                            }
+                                        </style>
+                                        <body>
+                                            <section>
+                                                <h3 style="background:#f7f7f7;">图</h3>
+                                                <p>
+                                                    <img src="${canvas.toDataURL()}" style="width:100%;height:100%;"/>
+                                                </p>
+                                                <p>
+                                                    <h3 style="background:#f7f7f7;">事件</h3>
+                                                </p>
+                                                <p>
+                                                    <h3 style="background:#f7f7f7;">性能</h3>
+                                                </p>
+                                            </section>
+                                            
+                                        </body>
+                                    </html>`;
+
+                        let url = fsHandler.fsReport(ftype, name + "." + ftype, html, attr);
+                        
+                        // 保存失败
+                        if(!url){
+                            self.$message({
+                                type: "error",
+                                message: "保存失败，请确认！",
+                                showClose: true
+                            });
+                            return false;
+                        }
+                        
+                        self.report.content = `/fs${url}?type=open&issys=${window.SignedUser_IsAdmin}`;
+                        // self.$notify({
+                        //     title: '报告已生成',
+                        //     dangerouslyUseHTMLString: true,
+                        //     duration: 10*1000,
+                        //     message: `<p>目录：${url} </p>
+                        //                 <p>点击 <a href="/fs${url}?type=open&issys=${window.SignedUser_IsAdmin}" class="el-button el-button--success el-button--mini" style="text-decoration: none;" target="_blank">确认</a> 查看详细</p>`,
+                        //     position: 'bottom-right'
+                        // });
+                });
             },
             // 当前选择实体效果
             onTagClick(event,type,value){

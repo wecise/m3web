@@ -56,7 +56,7 @@ class ConfigHandler {
     *
     */
    configAdd(event) {
-        let rtn = 0;
+        let rtn = null;
 
         jQuery.ajax({
             url: '/config/set',
@@ -79,14 +79,11 @@ class ConfigHandler {
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
-                    alertify.success("添加成功：" + event.key + " " + moment().format("LLL"));
                 }
                 
             },
             error: function(xhr, textStatus, errorThrown) {
-                rtn = 0;
-                alertify.error("添加失败：" + event.key + " " + xhr.responseText);
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
+                rtn = xhr.responseText;
             }
         });
         return rtn;

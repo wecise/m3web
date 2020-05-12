@@ -776,7 +776,7 @@ class System {
 					},
 					methods:{
 						initData(){
-							let rtn = fsHandler.callFsJScript("/matrix/notification/getRuleList.js").message;
+							let rtn = fsHandler.callFsJScript("/matrix/notify/getRuleList.js").message;
 							_.extend(rtn, {columns: _.map(rtn.columns, (v)=>{
                                     
 								if(_.isUndefined(v.visible)){
@@ -1278,7 +1278,8 @@ class System {
 									<el-main  style="padding:0px;height:100%;">
 										<el-table
 											:data="dt.rows"
-											style="width: 100%">
+											style="width: 100%"
+											v-if="dt.rows">
 											<el-table-column type="index"></el-table-column>
 											</el-table-column>
 											<el-table-column 
@@ -1303,30 +1304,7 @@ class System {
 						return {
 							dt: {
 								rows:[],
-								columns: [
-									{
-										field: "name",
-										title: "级别",
-										width: 50,
-										visible: true
-									},
-									{
-										field: "title_en",
-										title: "名称",
-										width: 120,
-										visible:true
-									},
-									{
-										field: "title_cn",
-										title: "中文名称",
-										width: 120,
-										visible:true
-									},
-									{
-										field: "color",
-										title: "颜色",
-										visible:true
-									}],
+								columns: [],
 								selected: []
 							}
 						}
@@ -1339,8 +1317,12 @@ class System {
 					},
 					methods:{
 						initData(){
-							let term = {action:"list", user:window.SignedUser_UserName};
-							this.dt.rows = fsHandler.callFsJScript("/matrix/system/severity-action.js",encodeURIComponent(JSON.stringify(term))).message;
+							let term = {action:"list"};
+							console.log(1,term)
+							let rtn = fsHandler.callFsJScript("/matrix/system/severity-action.js",encodeURIComponent(JSON.stringify(term))).message;
+							console.log(2,rtn)
+							this.$set(this.dt,'rows',rtn.rows);
+							this.$set(this.dt,'columns',rtn.columns);
 						}
 					}
 				})
@@ -1365,30 +1347,29 @@ class System {
 									<el-main style="height:100%;padding:0px;">
 										<el-table
 											:data="dt.rows"
+											:row-class-name="rowClassName"
 											style="width: 100%">
 											<el-table-column type="index"></el-table-column>
-											<el-table-column type="expand">
-											<template slot-scope="props">
-												<el-form label-position="left">
-													
-												</el-form>
-											</template>
-											</el-table-column>
 											<el-table-column 
 												node-key="id"
 												:label="item.title" 
 												:prop="item.field" 
+												:formatter="item.render" 
 												v-for="item in dt.columns"
 												v-if="item.visible">
 												<template slot-scope="scope">
-													<span v-if="item.field=='status'">
-														<el-button type="danger" v-if="scope.row.status==0">禁用</el-button>
-														<el-button type="success" v-else>启用</el-button>
-													</span>
-													<span v-else>
+													<div v-html='item.render(scope.row, scope.column, scope.row[item.field], scope.$index)' 
+														v-if="typeof item.render === 'function'">
+													</div>
+													<div v-else>
 														#{scope.row[item.field]}#
-													</span>
-												</template>		
+													</div>
+												</template>	
+											</el-table-column>
+											<el-table-column type="expand" label="模板定义" width="300">
+												<template slot-scope="scope">
+													<notify-manage-editor :render="scope.row.template" :index="scope.$index" @update:render="scope.row.template = $event"></notify-manage-editor>
+												</template>
 											</el-table-column>
 										</el-table>
 									</el-main>
@@ -1396,67 +1377,39 @@ class System {
 					data(){
 						return {
 							dt: {
-								rows:[{
-									id: '1',
-									class: "/matrix/system/notify",
-									name: '运维开放',
-									status: '1',
-									template: '@serverial @severity @msg @vtime',
-									config: ''
-								},
-								{
-									id: '2',
-									class: "/matrix/system/notify",
-									name: '运维主机',
-									status: '1',
-									template: '@serverial @severity @msg @vtime',
-									config: ''
-								}],
-								columns: [
-									{
-										field: "status",
-										title: "状态",
-										width: 50,
-										visible: true
-									},
-									{
-										field: "id",
-										title: "ID",
-										width: 120,
-										visible:false
-									},
-									{
-										field: "class",
-										title: "CLASS",
-										width: 120,
-										visible:false
-									},
-									{
-										field: "name",
-										title: "模板名称",
-										width: 160,
-										visible: true
-									},
-									{
-										field: "template",
-										title: "模板定义",
-										visible: true
-									},
-									{
-										field: "config",
-										title: "其它",
-										width: 160,
-										visible: true
-									}],
+								rows:[],
+								columns: [],
 								selected: []
 							}
 						}
+					},
+					created(){
+						this.initData();
 					},
 					mounted() {
 						
 					},
 					methods:{
-						
+						rowClassName({row, rowIndex}){
+                            return `row-${rowIndex}`;
+                        },
+						initData(){
+							let rtn = fsHandler.callFsJScript("/matrix/notify/getTemplateList.js",null).message;
+							this.$set(this.dt,'rows', rtn.rows);
+							this.$set(this.dt,'columns', _.map(rtn.columns, (v)=>{
+                                    
+								if(_.isUndefined(v.visible)){
+									_.extend(v, { visible: true });
+								}
+
+								if(!v.render){
+									return v;
+								} else {
+									return _.extend(v, { render: eval(v.render) });
+								}
+								
+							}));
+						}
 					}
 				})
 				// 通知管理-voice
@@ -1492,13 +1445,15 @@ class System {
 											<el-table-column 
 												:label="item.title" 
 												:prop="item.field" 
+												:formatter="item.render" 
 												v-for="item in dt.columns"
 												v-if="item.visible">
 											</el-table-column>
-											<el-table-column>
+											<el-table-column label="操作">
 												<template slot-scope="scope">
-													<el-button type="success">播放</el-button>
-													<el-button type="danger">删除</el-button>
+													<el-button type="text" icon="el-icon-video-play"  @click="onPlay(scope.$index, scope.row)" v-if="!scope.row.isPlay"> 播放</el-button>
+													<el-button type="text" icon="el-icon-video-pause"  @click="onStop(scope.$index, scope.row)" v-else> 停止</el-button>
+													<el-button type="text" icon="el-icon-delete"  @click="onDelete(scope.$index, scope.row)"> 删除</el-button>
 												</template>
 											</el-table-column>
 										</el-table>
@@ -1507,51 +1462,62 @@ class System {
 					data(){
 						return {
 							dt: {
-								rows:[{
-									id: '1',
-									class: "/matrix/system/notify",
-									name: 'voice1',
-									remark: ""
-								},
-								{
-									id: '2',
-									class: "/matrix/system/notify",
-									name: 'voice2',
-									remark: ""
-								}],
-								columns: [
-									{
-										field: "id",
-										title: "ID",
-										width: 120,
-										visible:false
-									},
-									{
-										field: "class",
-										title: "CLASS",
-										width: 120,
-										visible:false
-									},
-									{
-										field: "name",
-										title: "声音名称",
-										width: 160,
-										visible: true
-									},
-									{
-										field: "remark",
-										title: "备注",
-										visible: true
-									}],
+								rows:[],
+								columns: [],
 								selected: []
-							}
+							},
+							sound: null
 						}
+					},
+					created(){
+						this.initData();
 					},
 					mounted() {
 						
 					},
 					methods:{
-						
+						initData(){
+							let rtn = fsHandler.callFsJScript("/matrix/notify/getVoiceList.js",null).message;
+							this.$set(this.dt,'rows', rtn.rows);
+							this.$set(this.dt,'columns', _.map(rtn.columns, (v)=>{
+                                    
+								if(_.isUndefined(v.visible)){
+									_.extend(v, { visible: true });
+								}
+
+								if(!v.render){
+									return v;
+								} else {
+									return _.extend(v, { render: eval(v.render) });
+								}
+								
+							}));
+						},
+						onPlay(index){
+							
+							if(this.sound){
+								this.sound.stop();
+							}
+
+							let src = `/fs${this.dt.rows[index].fullname}?type=open&issys=true`;
+							this.sound = new Howl({
+								src: [src],
+								volume: 1,
+								
+								onend: function() {
+									console.log('Finished!');
+								}
+							});
+							this.sound.play();
+							this.$set(this.dt.rows[index],'isPlay',true);
+						},
+						onStop(index){
+							this.sound.stop();
+							this.$set(this.dt.rows[index],'isPlay',false);
+						},
+						onDelete(){
+							
+						}
 					}
 				})
 				// 通知管理-log
@@ -1569,30 +1535,24 @@ class System {
 									<el-main  style="padding:0px;height:100%;">
 										<el-table
 											:data="dt.rows"
+											:row-class-name="rowClassName"
 											style="width: 100%">
 											<el-table-column type="index"></el-table-column>
-											<el-table-column type="expand">
-											<template slot-scope="props">
-												<el-form label-position="left">
-													
-												</el-form>
-											</template>
-											</el-table-column>
 											<el-table-column 
 												node-key="id"
 												sortable
 												:label="item.title" 
 												:prop="item.field" 
+												:formatter="item.render" 
 												v-for="item in dt.columns"
 												v-if="item.visible">
 												<template slot-scope="scope">
-													<span v-if="item.field=='status'">
-														<el-button type="danger" v-if="scope.row.status==0">失败</el-button>
-														<el-button type="success" v-else>成功</el-button>
-													</span>
-													<span v-else>
+													<div v-html='item.render(scope.row, scope.column, scope.row[item.field], scope.$index)' 
+														v-if="typeof item.render === 'function'">
+													</div>
+													<div v-else>
 														#{scope.row[item.field]}#
-													</span>
+													</div>
 												</template>
 											</el-table-column>
 										</el-table>
@@ -1601,102 +1561,90 @@ class System {
 					data(){
 						return {
 							dt: {
-								rows:[{
-									id: '1',
-									class: "/matrix/system/notify",
-									status: '1',
-									serial: '2234234',
-									name: '规则名称',
-									vtime: _.now(),
-									person: '李勇',
-									phones: '13923234366',
-									emails: 'wz@13.com',
-									template: '开放'
-								},
-								{
-									id: '2',
-									class: "/matrix/system/notify",
-									status: '0',
-									serial: '2234234',
-									name: '规则名称',
-									vtime: _.now(),
-									person: '李勇',
-									phones: '13923234366',
-									emails: 'wz@13.com',
-									template: '开放'
-								}],
-								columns: [
-									{
-										field: "status",
-										title: "状态",
-										width: 50,
-										visible: true
-									},
-									{
-										field: "id",
-										title: "ID",
-										width: 120,
-										visible:false
-									},
-									{
-										field: "class",
-										title: "CLASS",
-										width: 120,
-										visible:false
-									},
-									{
-										field: "serial",
-										title: "事件ID",
-										width: 160,
-										visible: true
-									},
-									{
-										field: "name",
-										title: "规则名称",
-										width: 160,
-										visible: true
-									},
-									{
-										field: "vtime",
-										title: "发送时间",
-										width: 160,
-										visible: true
-									},
-									{
-										field: "person",
-										title: "接收人",
-										width: 160,
-										visible: true
-									},
-									{
-										field: "phones",
-										title: "接收人电话",
-										width: 160,
-										visible: true
-									},
-									{
-										field: "emails",
-										title: "接收人邮件",
-										width: 160,
-										visible: true
-									},
-									{
-										field: "template",
-										title: "引用模板",
-										width: 160,
-										visible: true
-									}],
+								rows:[],
+								columns: [],
 								selected: []
 							}
 						}
+					},
+					created(){
+						this.initData();
 					},
 					mounted() {
 						
 					},
 					methods:{
-						
+						rowClassName({row, rowIndex}){
+                            return `row-${rowIndex}`;
+                        },
+						initData(){
+							let rtn = fsHandler.callFsJScript("/matrix/notify/getLogList.js",null).message;
+							this.$set(this.dt,'rows', rtn.rows);
+							this.$set(this.dt,'columns', _.map(rtn.columns, (v)=>{
+                                    
+								if(_.isUndefined(v.visible)){
+									_.extend(v, { visible: true });
+								}
+
+								if(!v.render){
+									return v;
+								} else {
+									return _.extend(v, { render: eval(v.render) });
+								}
+								
+							}));
+						}
 					}
 				})
+
+				// 通知管理 Editor
+                Vue.component("notify-manage-editor",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        render: String,
+                        index: Number
+                    },
+                    data(){
+                        return {
+                            editor: null
+                        }
+                    },
+                    template: `<div style="width:100%;height:200px;" ref="editor"></div>`,
+                    beforeDestroy() {
+                        this.editor.destroy();
+                        this.editor.container.remove();
+                    },
+                    mounted(){
+                        this.$nextTick(()=>{
+                            this.init();
+                        })
+                    },
+                    methods:{
+                        init(){
+                            this.editor = ace.edit(this.$refs.editor);
+                            this.editor.setOptions({
+                                // maxLines: 1000,
+                                // minLines: 20,
+                                autoScrollEditorIntoView: true,
+                                enableBasicAutocompletion: true,
+                                enableSnippets: true,
+                                enableLiveAutocompletion: false
+                            });
+                            
+                            this.editor.getSession().setMode("ace/mode/text");
+                            this.editor.getSession().setUseSoftTabs(true);
+                            this.editor.getSession().setTabSize(2);
+                            this.editor.getSession().setUseWrapMode(true);
+
+                            this.editor.setValue(this.render);
+
+                            this.editor.on("change", _.debounce((v)=>{
+                                this.$emit('update:render', this.editor.getValue());
+                            },500));
+                        }
+                    }
+
+                })
 
                 // 事件处理-log
 				Vue.component("event-manage-log",{
@@ -1827,7 +1775,8 @@ class System {
 									<el-main  style="height:100%;">
 										<el-table
 											:data="dt.rows"
-											style="width: 100%">
+											style="width: 100%"
+											v-if="dt.rows">
 											<el-table-column type="index"></el-table-column>
 											</el-table-column>
 											<el-table-column 
@@ -1852,30 +1801,7 @@ class System {
 						return {
 							dt: {
 								rows:[],
-								columns: [
-									{
-										field: "name",
-										title: "级别",
-										width: 50,
-										visible: true
-									},
-									{
-										field: "title_en",
-										title: "名称",
-										width: 120,
-										visible:true
-									},
-									{
-										field: "title_cn",
-										title: "中文名称",
-										width: 120,
-										visible:true
-									},
-									{
-										field: "color",
-										title: "颜色",
-										visible:true
-									}],
+								columns: [],
 								selected: []
 							}
 						}
@@ -1888,8 +1814,11 @@ class System {
 					},
 					methods:{
 						initData(){
-							let term = {action:"list", user:window.SignedUser_UserName};
-							this.dt.rows = fsHandler.callFsJScript("/matrix/system/severity-action.js",encodeURIComponent(JSON.stringify(term))).message;
+							let term = {action:"list"};
+							let rtn = fsHandler.callFsJScript("/matrix/system/severity-action.js",encodeURIComponent(JSON.stringify(term))).message;
+							
+							this.$set(this.dt,'rows',rtn.rows);
+							this.$set(this.dt,'columns',rtn.columns);
 						}
 					}
                 })
@@ -2015,7 +1944,13 @@ class System {
 											style="width: 100%"
 											:row-class-name="rowClassName"
 											:header-cell-style="headerRender"
-											@current-change="onSelectionChange">
+											@current-change="onSelectionChange"
+											ref="table">
+											<el-table-column align="center" width="55">
+												<template slot-scope="scope">
+													<el-radio  v-model="dt.radio" :label="scope.row.enableFlag">&nbsp;</el-radio>
+												</template>
+											</el-table-column>     
 											<el-table-column type="index" label="序号" sortable align="center">
 												<template slot-scope="scope">
 													<div style="width:100%; text-align: center;"> <b> #{scope.$index + 1}# </b> </div>
@@ -2056,7 +1991,8 @@ class System {
 							dt: {
 								rows: [],
 								columns: [],
-								selected: null
+								selected: null,
+								radio:''
 							}
 						}
 					},
@@ -2078,11 +2014,21 @@ class System {
 						},
 						onSelectionChange(val) {
 							this.dt.selected = val;
-						},
+							
+							// 单选设置
+							_.forEach(this.dt.rows,(v)=>{
+								this.$set(v,'enableFlag','0');
+							})
+							this.$set(_.find(this.dt.rows,{name: val.name}),'enableFlag','1');
+							this.dt.radio = '1';
+						},					
 						initData(){
 							try {
 								// rows
 								_.extend(this.dt, {rows:companyHandler.companyList().message});
+								this.dt.rows = _.map(this.dt.rows,(v)=>{
+									return _.extend(v,{enableFlag: '0'});
+								});
 
 								// columns
 								let ext = fsHandler.callFsJScript("/matrix/company/company-list.js",null).message;

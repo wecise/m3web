@@ -24,14 +24,14 @@ class Robot {
                 model: Object
             },
             template:   `<el-container>
-                            <el-main>
+                            <el-main style="overflow:hidden;">
                             <el-row>
                                 <el-col :span="24">
                                     
                                     <el-card style="padding: 20px 15em;">
                                         <img src='${window.ASSETS_ICON}/robot/png/robot.png?issys=true&type=download' style="width:180px;">
                                         <div>
-                                            <h2>唯简运维机器人</h2>
+                                            <h2>${window.COMPANY_NAME} 运维机器人</h2>
                                             <p>在岗：9个月</p>
                                             <p>入岗：2017-02-03</p>
                                             <p>专注于IT运维领域的日常运维</p>

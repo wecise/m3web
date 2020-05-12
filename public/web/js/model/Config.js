@@ -672,7 +672,7 @@ class Config {
                                 let term = encodeURIComponent(JSON.stringify( {mode:self.mode, class:className} ));
                                 let snippetText = fsHandler.callFsJScript("/matrix/config/snippets.js",term).message;
                                 snippetManager.register(snippetText, self.mode);
-                            }catch(err){
+                            } catch(err){
 
                             }
                             
@@ -788,7 +788,16 @@ class Config {
                             
                             let rtn = configHandler.configAdd(this.etcd);
                             if(rtn === 1){
+                                self.$message({
+                                    type: "success",
+                                    message: "添加成功！"
+                                })
                                 eventHub.$emit("CONFIG-TREE-REFRESH-EVENT",key);
+                            } else {
+                                self.$message({
+                                    type: "error",
+                                    message: "添加失败：" + rtn
+                                })
                             }
                         },
                         removeNode: function() {
@@ -940,7 +949,7 @@ class Config {
                                                 <el-button type="text" @click="configDelete" v-show="!_.isEmpty(configTabs.tabs)" icon="el-icon-delete"></el-button>
                                             </el-tooltip>
                                             <el-tooltip content="保存" open-delay="500">
-                                                <el-button type="text" @click="configUpdate" v-show="!_.isEmpty(configTabs.tabs)" icon="el-icon-edit-outline"></el-button>
+                                                <el-button type="text" @click="configUpdate" v-show="!_.isEmpty(configTabs.tabs)" icon="el-icon-position"></el-button>
                                             </el-tooltip>
                                             <!--el-button type="text" @click="configDegug" v-show="!_.isEmpty(configTabs.tabs)" icon="fas fa-tv"></el-button-->
                                         </el-button-group>
@@ -1274,18 +1283,25 @@ class Config {
 
                                         me.formItem.key = [me.parent, me.name].join("/").replace(/\/\//g,'/');
                                         
-                                        alertify.confirm(`确认要新增以下配置?<br><br>
+                                        alertify.confirm(`确认要添加以下配置?<br><br>
                                             位置：${me.formItem.key}<br><br>
                                             值：${_.truncate(me.formItem.value)}<br><br>
                                             TTL：${me.formItem.ttl}<br><br>`, function (e) {
                                             if (e) {
                                                 let rtn = configHandler.configAdd(me.formItem);
                                                 if(rtn == 1){
+                                                    me.$message({
+                                                        type: "success",
+                                                        message: "保存成功！"
+                                                    })
                                                     eventHub.$emit("CONFIG-TREE-REFRESH-EVENT",me.formItem.key);
                                                     me.cancel();
                                                 }
-                                            } else {
-                                                
+                                            }  else {
+                                                me.$message({
+                                                    type: "error",
+                                                    message: "保存失败：" + rtn
+                                                })
                                             }
                                         });
 
@@ -1310,11 +1326,20 @@ class Config {
                             alertify.confirm(`确认要更新以下配置?<br><br>
                                 位置：${item.key}<br><br>
                                 值：${_.truncate(item.value)}<br><br>
-                                TTL：${item.ttl}<br><br>`, function (e) {
+                                TTL：${item.ttl}<br><br>`,  (e)=>{
                                 if (e) {
                                     let rtn = configHandler.configAdd(item);
                                     if(rtn == 1){
+                                        this.$message({
+                                            type: "success",
+                                            message: "更新成功！"
+                                        })
                                         eventHub.$emit("CONFIG-TREE-REFRESH-EVENT", item.key);
+                                    } else {
+                                        this.$message({
+                                            type: "error",
+                                            message: "更新失败：" + rtn
+                                        })
                                     }
                                 } else {
                                     

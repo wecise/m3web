@@ -244,6 +244,16 @@ class AI {
                     },
                     template: `<el-container :id="id" style="height:100%;">
                                     <el-header style="line-height:40px;height:40px;text-align:right;">
+                                        <el-tooltip content="保存规则">
+                                            <el-button type="text" @click="save" icon="el-icon-position"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="删除规则">
+                                            <el-button type="text" @click="remove" icon="el-icon-delete"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="查看作业">
+                                            <el-button type="text" @click="job(content.name)" icon="el-icon-date"></el-button>
+                                        </el-tooltip>
+                                        <el-divider direction="vertical"></el-divider>
                                         <span>#{content.status==1?'启用中':'关闭中'}#</span>
                                         <el-switch v-model="content.status"
                                                 active-color="#13ce66"
@@ -252,15 +262,6 @@ class AI {
                                                 inactive-value=0
                                                 @change="statusUpdate">
                                         </el-switch>
-                                        <el-tooltip content="保存规则">
-                                            <el-button type="text" @click="save" icon="el-icon-edit"></el-button>
-                                        </el-tooltip>
-                                        <el-tooltip content="删除规则">
-                                            <el-button type="text" @click="remove" icon="el-icon-delete"></el-button>
-                                        </el-tooltip>
-                                        <el-tooltip content="查看作业">
-                                            <el-button type="text" @click="job(content.name)" icon="el-icon-date"></el-button>
-                                        </el-tooltip>
                                     </el-header>
                                     <el-main style="height:100%;">
                                         <el-form :model="content" label-width="80px">
@@ -336,7 +337,7 @@ class AI {
                                                 <el-input type="textarea" v-model="content.msg"></textarea></el-input>
                                             </el-form-item>
                                             <el-form-item label="时间" prop="time">
-                                                <small>#{moment(content.time).format('LLL')}#</small>
+                                                <small>#{moment(content.time).format(mx.global.register.format)}#</small>
                                             </el-form-item>
                                             <el-form-item label="用户" prop="user">
                                                 <small>#{content.user}#</small>
@@ -469,6 +470,16 @@ class AI {
                     },
                     template:   `<el-container :id="id" style="height:100%;" v-if="model.content">
                                     <el-header style="line-height:40px;height:40px;text-align:right;">
+                                        <el-tooltip content="保存规则">
+                                            <el-button type="text" @click="save" icon="el-icon-position"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="删除规则">
+                                            <el-button type="text" @click="remove" icon="el-icon-delete"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="查看作业">
+                                            <el-button type="text" @click="job(content.name)" icon="el-icon-date"></el-button>
+                                        </el-tooltip>
+                                        <el-divider direction="vertical"></el-divider>
                                         <span>#{content.status==1?'启用中':'关闭中'}#</span>
                                         <el-switch v-model="content.status"
                                                 active-color="#13ce66"
@@ -477,15 +488,6 @@ class AI {
                                                 inactive-value=0
                                                 @change="statusUpdate">
                                         </el-switch>
-                                        <el-tooltip content="保存规则">
-                                            <el-button type="text" @click="save" icon="el-icon-edit"></el-button>
-                                        </el-tooltip>
-                                        <el-tooltip content="删除规则">
-                                            <el-button type="text" @click="remove" icon="el-icon-delete"></el-button>
-                                        </el-tooltip>
-                                        <el-tooltip content="查看作业">
-                                            <el-button type="text" @click="job(content.name)" icon="el-icon-date"></el-button>
-                                        </el-tooltip>
                                     </el-header>
                                     <el-main style="height:100%;">
                                         <el-form :model="content" label-width="80px">
@@ -518,7 +520,7 @@ class AI {
                                                 <el-switch v-model="content.isversion"></el-switch>
                                             </el-form-item>
                                             <el-form-item label="时间" prop="time">
-                                                <small>#{moment(content.time).format('LLL')}#</small>
+                                                <small>#{moment(content.time).format(mx.global.register.format)}#</small>
                                             </el-form-item>
                                             <el-form-item label="用户" prop="user">
                                                 <small>#{content.user}#</small>
@@ -616,6 +618,16 @@ class AI {
                     },
                     template:   `<el-container :id="id" style="height:100%;">
                                     <el-header style="line-height:40px;height:40px;text-align:right;">
+                                        <el-tooltip content="保存规则">
+                                            <el-button type="text" @click="save"icon="el-icon-position"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="删除规则">
+                                            <el-button type="text"  @click="remove" icon="el-icon-delete"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="查看作业">
+                                            <el-button type="text" @click="job(content.name)" icon="el-icon-date"></el-button>
+                                        </el-tooltip>
+                                        <el-divider direction="vertical"></el-divider>
                                         <span>#{content.status==1?'启用中':'关闭中'}#</span>
                                         <el-switch v-model="content.status"
                                                 active-color="#13ce66"
@@ -624,15 +636,6 @@ class AI {
                                                 inactive-value=0
                                                 @change="statusUpdate">
                                         </el-switch>
-                                        <el-tooltip content="保存规则">
-                                            <el-button type="text" @click="save"icon="el-icon-edit"></el-button>
-                                        </el-tooltip>
-                                        <el-tooltip content="删除规则">
-                                            <el-button type="text"  @click="remove" icon="el-icon-delete"></el-button>
-                                        </el-tooltip>
-                                        <el-tooltip content="查看作业">
-                                            <el-button type="text" @click="job(content.name)" icon="el-icon-date"></el-button>
-                                        </el-tooltip>
                                     </el-header>
                                     <el-main>
                                         <el-form :model="content" label-width="80px">
@@ -665,7 +668,7 @@ class AI {
                                                 <el-input type="textarea" v-model="content.msg"></textarea></el-input>
                                             </el-form-item>
                                             <el-form-item label="时间" prop="time">
-                                                <small>#{moment(content.time).format('LLL')}#</small>
+                                                <small>#{moment(content.time).format(mx.global.register.format)}#</small>
                                             </el-form-item>
                                             <el-form-item label="用户" prop="user">
                                                 <small>#{content.user}#</small>
@@ -763,6 +766,16 @@ class AI {
                     },
                     template:   `<el-container :id="id" style="height:100%;">
                                     <el-header style="line-height:40px;height:40px;text-align:right;">
+                                        <el-tooltip content="保存规则">
+                                            <el-button type="text"  @click="save"icon="el-icon-position"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="删除规则">
+                                            <el-button type="text" @click="remove" icon="el-icon-delete"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="查看作业">
+                                            <el-button type="text"  @click="job(content.name)" icon="el-icon-date"></el-button>
+                                        </el-tooltip>
+                                        <el-divider direction="vertical"></el-divider>
                                         <span>#{content.status==1?'启用中':'关闭中'}#</span>
                                         <el-switch v-model="content.status"
                                                 active-color="#13ce66"
@@ -771,15 +784,6 @@ class AI {
                                                 inactive-value=0
                                                 @change="statusUpdate">
                                         </el-switch>
-                                        <el-tooltip content="保存规则">
-                                            <el-button type="text"  @click="save"icon="el-icon-edit"></el-button>
-                                        </el-tooltip>
-                                        <el-tooltip content="删除规则">
-                                            <el-button type="text" @click="remove" icon="el-icon-delete"></el-button>
-                                        </el-tooltip>
-                                        <el-tooltip content="查看作业">
-                                            <el-button type="text"  @click="job(content.name)" icon="el-icon-date"></el-button>
-                                        </el-tooltip>
                                     </el-header>
                                     <el-main>
                                         <el-form :model="content" label-width="80px">
@@ -812,7 +816,7 @@ class AI {
                                                 <el-input type="textarea" v-model="content.msg"></textarea></el-input>
                                             </el-form-item>
                                             <el-form-item label="时间" prop="time">
-                                                <small>#{moment(content.time).format('LLL')}#</small>
+                                                <small>#{moment(content.time).format(mx.global.register.format)}#</small>
                                             </el-form-item>
                                             <el-form-item label="用户" prop="user">
                                                 <small>#{content.user}#</small>
@@ -910,6 +914,16 @@ class AI {
                     },
                     template:   `<el-container :id="id" style="height:100%;">
                                     <el-header style="line-height:40px;height:40px;text-align:right;">
+                                        <el-tooltip content="保存规则">
+                                            <el-button type="text" @click="save"icon="el-icon-position"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="删除规则">
+                                            <el-button type="text" @click="remove" icon="el-icon-delete"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="查看作业">
+                                            <el-button type="text" @click="job(content.name)" icon="el-icon-date"></el-button>
+                                        </el-tooltip>
+                                        <el-divider direction="vertical"></el-divider>
                                         <span>#{content.status==1?'启用中':'关闭中'}#</span>
                                         <el-switch v-model="content.status"
                                                 active-color="#13ce66"
@@ -918,15 +932,6 @@ class AI {
                                                 inactive-value=0
                                                 @change="statusUpdate">
                                         </el-switch>
-                                        <el-tooltip content="保存规则">
-                                            <el-button type="text" @click="save"icon="el-icon-edit"></el-button>
-                                        </el-tooltip>
-                                        <el-tooltip content="删除规则">
-                                            <el-button type="text" @click="remove" icon="el-icon-delete"></el-button>
-                                        </el-tooltip>
-                                        <el-tooltip content="查看作业">
-                                            <el-button type="text" @click="job(content.name)" icon="el-icon-date"></el-button>
-                                        </el-tooltip>
                                     </el-header>
                                     <el-main>
                                         <el-form :model="content" label-width="80px">
@@ -959,7 +964,7 @@ class AI {
                                                 <el-input type="textarea" v-model="content.msg"></textarea></el-input>
                                             </el-form-item>
                                             <el-form-item label="时间" prop="time">
-                                                <small>#{moment(content.time).format('LLL')}#</small>
+                                                <small>#{moment(content.time).format(mx.global.register.format)}#</small>
                                             </el-form-item>
                                             <el-form-item label="用户" prop="user">
                                                 <small>#{content.user}#</small>
@@ -1057,6 +1062,16 @@ class AI {
                     },
                     template:   `<el-container :id="id" style="height:100%;">
                                     <el-header style="line-height:40px;height:40px;text-align:right;">
+                                        <el-tooltip content="保存规则">
+                                            <el-button type="text" @click="save"icon="el-icon-position"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="删除规则">
+                                            <el-button type="text" @click="remove" icon="el-icon-delete"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="查看作业">
+                                            <el-button type="text" @click="job(content.name)" icon="el-icon-date"></el-button>
+                                        </el-tooltip>
+                                        <el-divider direction="vertical"></el-divider>
                                         <span>#{content.status==1?'启用中':'关闭中'}#</span>
                                         <el-switch v-model="content.status"
                                                 active-color="#13ce66"
@@ -1065,15 +1080,6 @@ class AI {
                                                 inactive-value=0
                                                 @change="statusUpdate">
                                         </el-switch>
-                                        <el-tooltip content="保存规则">
-                                            <el-button type="text" @click="save"icon="el-icon-edit"></el-button>
-                                        </el-tooltip>
-                                        <el-tooltip content="删除规则">
-                                            <el-button type="text" @click="remove" icon="el-icon-delete"></el-button>
-                                        </el-tooltip>
-                                        <el-tooltip content="查看作业">
-                                            <el-button type="text" @click="job(content.name)" icon="el-icon-date"></el-button>
-                                        </el-tooltip>
                                     </el-header>
                                     <el-main>
                                         <el-form :model="content" label-width="80px">
@@ -1119,7 +1125,7 @@ class AI {
                                                 <el-input type="textarea" v-model="content.msg"></textarea></el-input>
                                             </el-form-item>
                                             <el-form-item label="时间" prop="time">
-                                                <small>#{moment(content.time).format('LLL')}#</small>
+                                                <small>#{moment(content.time).format(mx.global.register.format)}#</small>
                                             </el-form-item>
                                             <el-form-item label="用户" prop="user">
                                                 <small>#{content.user}#</small>
@@ -1304,14 +1310,6 @@ class AI {
                     },
                     template:   `<el-container :id="id" style="height:100%;">
                                     <el-header style="line-height:40px;height:40px;text-align:right;">
-                                        <span>#{content.status==1?'启用中':'关闭中'}#</span>
-                                        <el-switch v-model="content.status"
-                                                active-color="#13ce66"
-                                                inactive-color="#dddddd"
-                                                active-value=1
-                                                inactive-value=0
-                                                @change="statusUpdate">
-                                        </el-switch>
                                         <el-tooltip content="保存规则">
                                             <el-button type="text" @click="save"><i class="fas fa-save"></i></el-button>
                                         </el-tooltip>
@@ -1324,6 +1322,15 @@ class AI {
                                         <el-tooltip content="查看作业">
                                             <el-button type="text" @click="job(content.name)" icon="el-icon-date"></el-button>
                                         </el-tooltip>
+                                        <el-divider direction="vertical"></el-divider>
+                                        <span>#{content.status==1?'启用中':'关闭中'}#</span>
+                                        <el-switch v-model="content.status"
+                                                active-color="#13ce66"
+                                                inactive-color="#dddddd"
+                                                active-value=1
+                                                inactive-value=0
+                                                @change="statusUpdate">
+                                        </el-switch>
                                     </el-header>
                                     <el-main>
                                         <el-form :model="model" label-width="80px">
@@ -1346,7 +1353,7 @@ class AI {
                                                 <el-input type="textarea" v-model="content.msg"></textarea></el-input>
                                             </el-form-item>
                                             <el-form-item label="时间" prop="time">
-                                                <small>#{moment(content.time).format('LLL')}#</small>
+                                                <small>#{moment(content.time).format(mx.global.register.format)}#</small>
                                             </el-form-item>
                                             <el-form-item label="输入">
                                                 <el-tag

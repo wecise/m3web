@@ -215,7 +215,7 @@ class Job extends Matrix {
                                                                     实体ID：${row.entity}<br><br>
                                                                     模板ID：b223c78b-3107-11e6-8487-446d577ed81c<br><br>
                                                                     告警摘要：${row.msg}<br><br>
-                                                                    告警时间：${moment(row.vtime).format("LLL")}<br><br>`, function (e) {
+                                                                    告警时间：${moment(row.vtime).format("YYYY-MM-DD HH:MM:SS")}<br><br>`, function (e) {
                                                     if (e) {
                                                         try{
                                                             let rtn = fsHandler.callFsJScript("/matrix/readysoft/eventToTicket.js", encodeURIComponent(JSON.stringify(row).replace(/%/g,'%25'))).message.data;
@@ -475,28 +475,30 @@ class Job extends Matrix {
                         id: String,
                         model: Object
                     },
-                    template:   `<div class="block"><el-timeline>
-                                    <el-timeline-item :timestamp="moment(item.vtime).format('LLL')" placement="top" v-for="item in model">
-                                        <el-card style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);">
-                                            <h4>名称：#{item.name}#</h4>
-                                            <p style="font-size:12px;"><code>命令：#{item.cmd}#</code></p>
-                                            <p style="font-size:12px;">位置：#{item.dir}#</p>
-                                            <p style="font-size:12px;">源：#{item.source}#</p>
-                                            <p style="font-size:12px;">服务器：#{item.host}#</p>
-                                            <p style="font-size:12px;">进程ID：#{item.pid}#</p>
-                                            <p style="font-size:12px;">RUNID：#{item.runid}#</p>
-                                            <p style="font-size:12px;">SID：#{item.sid}#</p>
-                                            <p v-if="item.stauts" style="font-size:12px;">状态：#{mx.global.register.jobs.status[item.stauts][1]}#</p>
-                                            <p v-if="item.type" style="font-size:12px;">类型：#{mx.global.register.jobs.type[item.type][1]}#</p>
-                                            <p style="font-size:12px;">开始时间：#{moment(item.stime).format("LLL")}#  结束时间：#{moment(item.etime).format("LLL")}#</p>
-                                            <p style="font-size:12px;">耗时：#{moment(item.etime).from(item.etime,true)}#</p>
-                                            <p style="font-size:12px;">命令：#{item.cmds}#</p>
-                                            <p style="font-size:12px;">输出：#{item.output}#</p>
-                                            <p style="font-size:12px;">错误：#{item.err}#</p>
-                                            <p style="font-size:12px;">代码：#{item.code}#</p>
-                                        </el-card>
-                                    </el-timeline-item>
-                                </el-timeline></div>`
+                    template:   `<div class="block">
+                                    <el-timeline>
+                                        <el-timeline-item :timestamp="moment(item.vtime).format('YYYY-MM-DD HH:MM:SS')" placement="top" v-for="item in model">
+                                            <el-card style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);">
+                                                <h4>名称：#{item.name}#</h4>
+                                                <p style="font-size:12px;"><code>命令：#{item.cmd}#</code></p>
+                                                <p style="font-size:12px;">位置：#{item.dir}#</p>
+                                                <p style="font-size:12px;">源：#{item.source}#</p>
+                                                <p style="font-size:12px;">服务器：#{item.host}#</p>
+                                                <p style="font-size:12px;">进程ID：#{item.pid}#</p>
+                                                <p style="font-size:12px;">RUNID：#{item.runid}#</p>
+                                                <p style="font-size:12px;">SID：#{item.sid}#</p>
+                                                <p v-if="item.stauts" style="font-size:12px;">状态：#{mx.global.register.jobs.status[item.stauts][1]}#</p>
+                                                <p v-if="item.type" style="font-size:12px;">类型：#{mx.global.register.jobs.type[item.type][1]}#</p>
+                                                <p style="font-size:12px;">开始时间：#{moment(item.stime).format("YYYY-MM-DD HH:MM:SS")}#  结束时间：#{moment(item.etime).format("YYYY-MM-DD HH:MM:SS")}#</p>
+                                                <p style="font-size:12px;">耗时：#{moment(item.etime).from(item.etime,true)}#</p>
+                                                <p style="font-size:12px;">命令：#{item.cmds}#</p>
+                                                <p style="font-size:12px;">输出：#{item.output}#</p>
+                                                <p style="font-size:12px;">错误：#{item.err}#</p>
+                                                <p style="font-size:12px;">代码：#{item.code}#</p>
+                                            </el-card>
+                                        </el-timeline-item>
+                                    </el-timeline>
+                                </div>`
                 })
 
                 // 时间轴
@@ -507,14 +509,18 @@ class Job extends Matrix {
                         model: Object
                     },
                     template:   `<div class="block"><el-timeline>
-                                    <el-timeline-item :timestamp="moment(item.vtime).format('LLL')" placement="top" v-for="item in model">
+                                    <el-timeline-item :timestamp="moment(item.vtime).format('YYYY-MM-DD HH:MM:SS')" placement="top" v-for="item in model">
                                         <el-card style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);">
                                             <h4>#{item.name}#</h4>
                                             <p v-if="item.stauts" style="font-size:12px;">状态：#{mx.global.register.jobs.status[item.stauts][1]}#</p>
                                             <p v-if="item.type" style="font-size:12px;">类型：#{mx.global.register.jobs.type[item.type][1]}#</p>
-                                            <p style="font-size:12px;">开始时间：#{moment(item.stime).format("LLL")}#  结束时间：#{moment(item.etime).format("LLL")}#</p>
+                                            <p style="font-size:12px;">开始时间：#{moment(item.stime).format("YYYY-MM-DD HH:MM:SS")}# </p>
+                                            <p style="font-size:12px;">结束时间：#{moment(item.etime).format("YYYY-MM-DD HH:MM:SS")}# </p>
                                             <p style="font-size:12px;">耗时：#{moment(item.etime).from(item.etime,true)}#</p>
                                             <p style="font-size:12px;">命令：#{item.cmds}#</p>
+                                            <p style="font-size:12px;" v-if="item.output">输出：#{item.output}#</p>
+                                            <p style="font-size:12px;" v-if="item.err">错误：#{item.err}#</p>
+                                            <p style="font-size:12px;" v-if="item.code">代码：#{item.code}#</p>
                                         </el-card>
                                     </el-timeline-item>
                                 </el-timeline></div>`
@@ -575,7 +581,7 @@ class Job extends Matrix {
                             // 2019-03-13T21:35:31.678Z
                             // 检查是否是UTC格式
                             if(_.indexOf(evt,'T') === 10 && (_.indexOf(evt,'Z') === 23 || _.indexOf(evt,'Z') === 19) ){
-                                return moment(evt).format("LLL");
+                                return moment(evt).format("YYYY-MM-DD HH:MM:SS");
                             } else {
                                 return evt;
                             }
@@ -598,7 +604,7 @@ class Job extends Matrix {
                                         <el-card class="box-card">
                                             <div slot="header" class="clearfix">
                                                 <span>作业轨迹
-                                                    <small>#{moment(_.head(model.journal.rows).vtime).format("LLL")}# - #{moment(_.last(model.journal.rows).vtime).format("LLL")}#</small>
+                                                    <small>#{moment(_.head(model.journal.rows).vtime).format("YYYY-MM-DD HH:MM:SS")}# - #{moment(_.last(model.journal.rows).vtime).format("YYYY-MM-DD HH:MM:SS")}#</small>
                                                 </span>
                                                 <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
                                             </div>
@@ -623,7 +629,7 @@ class Job extends Matrix {
                                         <el-card class="box-card">
                                             <div slot="header" class="clearfix">
                                                 <span id="event-diagnosis-cmds">执行命令
-                                                    <small>#{moment(_.head(model.cmds.rows).vtime).format("LLL")}# - #{moment(_.last(model.cmds.rows).vtime).format("LLL")}#</small>
+                                                    <small>#{moment(_.head(model.cmds.rows).vtime).format("YYYY-MM-DD HH:MM:SS")}# - #{moment(_.last(model.cmds.rows).vtime).format("YYYY-MM-DD HH:MM:SS")}#</small>
                                                 </span>
                                                 <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
                                             </div>
@@ -910,8 +916,6 @@ class Job extends Matrix {
                             
                             // RESIZE Summary
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
-                            // RESIZE Console
-                            maxJob.resizeEventConsole();
                         },
                         toggleSummaryBySmart(evt){
                             if(evt==1) {
@@ -923,8 +927,6 @@ class Job extends Matrix {
                             
                             // RESIZE Summary
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
-                            // RESIZE Console
-                            maxJob.resizeEventConsole();
                         },
                         detailAdd(event){
                             try {
@@ -972,8 +974,6 @@ class Job extends Matrix {
                             _.delay(function(){
                                 // RESIZE Event Summary
                                 eventHub.$emit("WINDOW-RESIZE-EVENT");
-                                // RESIZE Event Console
-                                event.resizeEventConsole();
                             },500)
                         }
                     }
@@ -983,26 +983,13 @@ class Job extends Matrix {
         })
 
         window.addEventListener('resize', () => { 
-            maxJob.resizeEventConsole();
+            
             
             // RESIZE Event Summary
             eventHub.$emit("WINDOW-RESIZE-EVENT");
         })
 
         
-    }
-
-    resizeEventConsole(){
-        let evwH = $(window).height();
-        let evcH = $("#job-view-container").height();
-        let evsH = $("#job-view-summary").height();
-        
-        $("#job-view-console .dataTables_scrollBody").css("max-height", evwH + "px")
-                                                        .css("max-height","-=230px")
-                                                        .css("max-height","-=" + evsH + "px")
-                                                        .css("min-height", evwH + "px")
-                                                        .css("min-height","-=230px")
-                                                        .css("min-height","-=" + evsH + "px");
     }
 
 }

@@ -1118,6 +1118,7 @@ class Omdb{
                                             <i class="el-icon-download el-icon--right"></i>
                                         </span>
                                         <el-dropdown-menu slot="dropdown">
+                                            <el-dropdown-item command="mql">MQL</el-dropdown-item>
                                             <el-dropdown-item command="csv">CSV</el-dropdown-item>
                                             <el-dropdown-item command="json">JSON</el-dropdown-item>
                                             <el-dropdown-item command="png">PNG</el-dropdown-item>
@@ -1154,8 +1155,8 @@ class Omdb{
                                                 <el-main>
                                                     <el-form label-position="right" label-width="120px">
                                                         <el-form-item v-for="v,k in props.row" :label="k" :key="k">
-                                                            <el-input :type="k,dt.columns | pickType" :value="v"  v-if="_.includes(['class','ctime', 'day','id','name', 'vtime'],k)"></el-input>
-                                                            <el-input :type="k,dt.columns | pickType" :rows="6" :value="JSON.stringify(v,null,2)"  v-else-if="typeof v =='object'"></el-input>
+                                                        <el-input :type="k,dt.columns | pickType" :value="v"  v-if="_.includes(['class','ctime', 'day','id','name', 'vtime'],k)"></el-input>
+                                                            <el-input :type="k,dt.columns | pickType" :rows="6" :value="JSON.stringify(v,null,4)"  v-else-if="typeof v =='object'"></el-input>
                                                             <el-input :type="k,dt.columns | pickType" :value="v"  v-else></el-input>
                                                         </el-form-item>
                                                     </el-form>
@@ -1217,7 +1218,7 @@ class Omdb{
                     let rtn = 'text';
                     try{
                         let type = _.find(columns,{field:key}).type;
-                        if(_.includes(['map','list','set'],type)){
+                        if(_.includes(['map','list','set','bucket'],type)){
                             rtn = 'textarea';
                         }
                     } catch(err){
@@ -1341,8 +1342,9 @@ class Omdb{
                         fileName: `tableExport_${moment().format("YYYY-MM-DD HH:MM:SS")}`,
                         type: type,
                     };
-
-                    if(type === 'png'){
+                    if(type === 'mql'){
+                        this.$root.classDataExport(this.model.rootclass);
+                    } else if(type === 'png'){
                         //$(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
                         $(this.$refs.table.$el.querySelector("table.el-table__body")).tableExport(options);
                     } else if(type === 'pdf'){

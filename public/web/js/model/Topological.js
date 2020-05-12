@@ -911,6 +911,8 @@ class Topological {
                                         <el-dropdown-item @click.native="$parent.$parent.file.dialogOpenTo.visible=true">打开到</el-dropdown-item>
                                         <el-dropdown-item @click.native="$parent.$parent.onFileSave" divided>保存</el-dropdown-item>
                                         <el-dropdown-item @click.native="$parent.$parent.file.dialogSaveAs.visible=true">另存为</el-dropdown-item>
+                                        <el-dropdown-item @click.native="$parent.$parent.classDataImport" divided>导入</el-dropdown-item>
+                                        <el-dropdown-item @click.native="$parent.$parent.classDataExport('/matrix/entity')" >导出</el-dropdown-item>
                                         <el-dropdown-item @click.native="$parent.$parent.onFileDelete" divided>删除</el-dropdown-item>
                                         <el-dropdown-item @click.native="$parent.$parent.onFilePrint" divided>打印</el-dropdown-item>
                                         <el-dropdown-item @click.native="$parent.$parent.onFileClose" divided>关闭</el-dropdown-item>
@@ -931,6 +933,10 @@ class Topological {
                                     <div style="height:48px;line-height:48px;width:60%;padding-left:10px;">#{ item.value }#</span></div>
                                     <el-tooltip content="拖动到画布" open-delay="500">
                                         <el-button type="text" icon="el-icon-menu" style="padding-left:10px;cursor:pointer;">
+                                        </el-button>
+                                    </el-tooltip>
+                                    <el-tooltip content="实体分析" open-delay="500">
+                                        <el-button type="text" icon="el-icon-postcard" style="padding-left:10px;cursor:pointer;" @click="onDiagnosis(item)">
                                         </el-button>
                                     </el-tooltip>
                                 </div>
@@ -1006,6 +1012,11 @@ class Topological {
                     return (state) => {
                       return (state.value.toLowerCase().indexOf(term.toLowerCase()) === 0);
                     };
+                },
+                onDiagnosis(node){
+                    const self = this;
+
+                    inst.app.$refs.graphDiagnosisRef.diagnosisAdd( node );
                 }
             }
         })
@@ -1043,6 +1054,8 @@ class Topological {
                                         <el-dropdown-item @click.native="$parent.$parent.file.dialogOpenTo.visible=true">打开到</el-dropdown-item>
                                         <el-dropdown-item @click.native="$parent.$parent.onFileSave" divided>保存</el-dropdown-item>
                                         <el-dropdown-item @click.native="$parent.$parent.file.dialogSaveAs.visible=true">另存为</el-dropdown-item>
+                                        <el-dropdown-item @click.native="$parent.$parent.classDataImport" divided>导入</el-dropdown-item>
+                                        <el-dropdown-item @click.native="$parent.$parent.classDataExport('/matrix/entity')" >导出</el-dropdown-item>
                                         <el-dropdown-item @click.native="$parent.$parent.onFileDelete" divided>删除</el-dropdown-item>
                                         <el-dropdown-item @click.native="$parent.$parent.onFilePrint" divided>打印</el-dropdown-item>
                                         <el-dropdown-item @click.native="$parent.$parent.onFileClose" divided>关闭</el-dropdown-item>
@@ -1081,6 +1094,12 @@ class Topological {
                                         </el-popover>
                                         <el-button
                                             type="text"
+                                            icon="el-icon-s-platform"
+                                            style="width:15%;text-align:right;color:#999;"
+                                            @click="onSetDefault(item)">
+                                        </el-button>
+                                        <el-button
+                                            type="text"
                                             icon="el-icon-close"
                                             style="width:15%;text-align:right;color:#999;"
                                             @click="onDeleteHistory(item)">
@@ -1090,8 +1109,8 @@ class Topological {
                                 <!--topological-graphAdv class="graphAction" :model="$parent.$parent.mainView.search.model" ref="searchRef"></topological-graphAdv-->
 
                             </el-main>
-                            <el-footer style="height:30px;line-height:30px;padding:0 5px;color:#999;">
-                                
+                            <el-footer style="height:30px;line-height:30px;padding:0 5px;color:#999999;">
+                                <el-button type="text" icon="el-icon-delete" @click="onDeleteAllHistory">清空历史</el-button>
                             </el-footer>
                         </div>`,
             created(){
@@ -1117,6 +1136,18 @@ class Topological {
                     try{
                         let term = _.extend(item, {action:"delete"});
                         fsHandler.callFsJScript("/matrix/graph/history-action.js",encodeURIComponent(JSON.stringify(term))).message;
+                    }catch(err){
+
+                    } finally{
+                        this.loadHistory();
+                    }
+                },
+                onDeleteAllHistory(){
+                    try{
+                        _.forEach(this.history,(v)=>{
+                            let term = _.extend(v, {action:"delete"});
+                            fsHandler.callFsJScript("/matrix/graph/history-action.js",encodeURIComponent(JSON.stringify(term))).message;
+                        })
                     }catch(err){
 
                     } finally{
@@ -1457,6 +1488,193 @@ class Topological {
                             graph.setSelectionCells(select);
                         }
                     }
+                },
+                classDataExport(selectedNode){
+                    const me = this;
+                    let wnd = null;
+
+                    try{
+                        if(jsPanel.activePanels.getPanel('jsPanel-class-template')){
+                            jsPanel.activePanels.getPanel('jsPanel-class-template').close();
+                        }
+                    } catch(error){
+
+                    }
+                    finally{
+                        wnd = maxWindow.winClassTemplate('导出数据结构', `<div id="class-template-export"></div>`, null, null, null);
+                    }
+
+                    new Vue({
+                        delimiters: ['#{', '}#'],
+                        data:{
+                            classList: fsHandler.callFsJScript("/matrix/omdb/getClassListForTree.js",encodeURIComponent(selectedNode)).message,
+                            defaultProps: {
+                                children: 'children',
+                                label: 'class'
+                            },
+                            model: {
+                                ifData: false, 
+                                ifAllData: false,
+                                limit: 10,
+                                recursive: true,
+                                filetype: 'mql',
+                                template: true,
+                                class: '',
+                                ignoreClass: '/matrix/filesystem'
+                            }
+                        },
+                        watch: {
+                            'model.ifData':function(val,oldVal){
+                                if(!val){
+                                    this.model.limit = 0;
+                                }
+                            },
+                            'model.ifAllData':function(val,oldVal){
+                                if(val){
+                                    this.model.limit = -1;
+                                }
+                            }
+                        },
+                        template: `<el-container style="height:100%;">
+                                        <el-header style="height:auto;line-height:40px;min-height:40px;background: #f6f6f6;">
+                                            <el-checkbox v-model="model.ifData" label="导出数据"></el-checkbox>
+                                            <p v-if="model.ifData">
+                                                <el-radio-group v-model="model.ifAllData">
+                                                    <el-radio :label="true" border>导出所有数据</el-radio>
+                                                    <el-radio :label="false" border>导出部分数据</el-radio>
+                                                </el-radio-group>
+                                                <el-input-number v-model="model.limit" v-if="!model.ifAllData && model.ifData != -1" style="width:30%;margin-left:10px;"></el-input-number>  
+                                            </p>
+                                        </el-header>
+                                        <el-main style="padding:10px;">
+                                            <el-tree
+                                                :data="classList"
+                                                ref="classTree"
+                                                show-checkbox
+                                                node-key="class"
+                                                check-strictly="true"
+                                                :default-expanded-keys="[_.first(classList).id]"
+                                                :default-expanded-keys="[model.class]"
+                                                :props="defaultProps"
+                                                check-on-click-node="true"
+                                                style="background-color:transparent;">
+                                            </el-tree>
+                                        </el-main>
+                                        <el-footer style="line-height:60px;text-align:center;">
+                                            <el-button type="default" @click="onCancel">取消</el-button>
+                                            <el-button type="primary" @click="onExport('mql')">导出MQL</el-button>
+                                            <el-button type="primary" @click="onExport('xlsx')">导出Excel</el-button>
+                                        </el-footer>
+                                    </el-container>`,
+                        created(){
+                            if(!_.isEmpty(selectedNode)){
+                                this.model.class = selectedNode;
+                            }
+                        },
+                        mounted(){
+                            let allNodes = fsHandler.callFsJScript("/matrix/omdb/getClassList.js",encodeURIComponent(this.model.class)).message;
+                            this.$refs.classTree.setCheckedKeys(allNodes);
+                        },
+                        methods:{
+                            onCancel(){
+                                wnd.close();
+                            },
+                            onExport(type){
+
+                                this.model.filetype = type;
+
+                                //获取所有Class
+                                let allNodes = fsHandler.callFsJScript("/matrix/omdb/getClassList.js",encodeURIComponent(this.model.class)).message;
+                                //checked Class
+                                let checkedClass = _.map(this.$refs.classTree.getCheckedNodes(),'class');
+                                
+                                // 交集
+                                _.extend(this.model, {ignoreClass: _.concat(this.model.ignoreClass,_.xor(allNodes,checkedClass)) } );
+
+                                if(this.model.ifData){
+                                    //this.model.limit = -1;
+                                    this.model.template = false;
+                                } else {
+                                    this.model.template = true;
+                                   // this.model.limit = 0;
+                                }
+                                let rtn = omdbHandler.classDataExport(this.model);
+                                this.$message({
+                                    type: "info",
+                                    message: "导出操作将提交至后台，请稍后。。。"
+                                })
+                                if(rtn == 1){
+                                    wnd.close();
+                                }
+                            }
+                        }
+                    }).$mount("#class-template-export");
+                },
+                classDataImport(){
+                    const me = this;
+                    let wnd = null;
+
+                    try{
+                        if(jsPanel.activePanels.getPanel('jsPanel-class-template')){
+                            jsPanel.activePanels.getPanel('jsPanel-class-template').close();
+                        }
+                    } catch(error){
+
+                    }
+                    finally{
+                        wnd = maxWindow.winClassTemplate('导入数据结构', `<div id="class-template-import"></div>`, null, null, null);
+                    }
+
+                    new Vue({
+                        delimiters: ['#{', '}#'],
+                        data:{
+                            fileList: [],
+                            rtnInfo: null
+                        },
+                        template: `<el-container style="height:100%;">
+                                        <el-main style="padding:10px;">
+                                            <div v-if="!_.isEmpty(rtnInfo)">
+                                                <el-button type="text" icon="el-icon-close" @click="clearInfo"></el-button>
+                                                <section>
+                                                    <code>#{rtnInfo.message.join(",")}#</code>
+                                                </section>
+                                            </div>
+                                            <el-upload
+                                                class="upload-demo"
+                                                drag
+                                                :auto-upload="false"
+                                                :on-change="onChange"
+                                                :file-list="fileList"
+                                                v-else>
+                                                <i class="el-icon-upload"></i>
+                                                <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                                                <div class="el-upload__tip" slot="tip">只能上传Mql/Excel文件</div>
+                                            </el-upload>
+                                        </el-main>
+                                        <el-footer style="line-height:60px;text-align:center;">
+                                            <el-button type="default" @click="onCancel">取消</el-button>
+                                            <el-button type="primary" @click="onImport">导入</el-button>
+                                        </el-footer>
+                                    </el-container>`,
+                        methods:{
+                            onChange(file) {
+                                this.fileList = [file.raw];
+                            },
+                            onCancel(){
+                                wnd.close();
+                            },
+                            onImport(){
+                                this.rtnInfo = JSON.parse(omdbHandler.classDataImport(this.fileList[0]));
+                                this.$message({
+                                    type: "info",
+                                    message: "导入操作将提交至后台，请稍后。。。"
+                                })
+                            },
+                            clearInfo(){
+                                this.rtnInfo = null;
+                            }
+                        }
+                    }).$mount("#class-template-import");
                 }
             }
         })
@@ -1548,10 +1766,44 @@ class Topological {
             props: {
                 model: Object
             },
+            data(){
+                return {
+                    result: null,
+                    options: {
+                        // 视图定义
+                        view: {
+                            eidtEnable: false,
+                            show: false,
+                            value: "all"
+                        },
+                        // 搜索窗口
+                        window: { name:"所有", value: ""},
+                        // 输入
+                        term: "",
+                        // 指定类
+                        class: "#/matrix/devops/alert/:",
+                        // 指定api
+                        api: {parent: "event",name: "event_list.js"},
+                        // 其它设置
+                        others: {
+                            // 是否包含历史数据
+                            ifHistory: false,
+                            // 是否包含Debug信息
+                            ifDebug: false,
+                            // 指定时间戳
+                            forTime:  ' for vtime ',
+                        }
+                    }
+                }
+            },
             template:   `<el-container style="height: calc(100vh - 120px);">
+                            <el-header style="height: 42px;line-height: 42px;margin: 10px;padding: 0px 1px;background: #ddd;">
+                                <search-base-component :options="options" ref="searchRef" class="grid-content"></search-base-component>
+                            </el-header>
                             <el-main style="padding:10px;">
                                 <el-card :style="item | pickBgStyle" 
-                                    v-for="item in model.rows" :key="item.id">
+                                    v-for="item in result.rows" :key="item.id"
+                                    v-if="result.rows">
                                     <span class="el-icon-warning" :style="item | pickStyle"></span>
                                     <p>服务器:#{item.host}#</p>
                                     <p>IP地址:#{item.ip}#</p>
@@ -1579,11 +1831,29 @@ class Topological {
                     return `color:${mx.global.register.event.severity[item.severity][2]};font-size:40px;float:right;`;
                 }
             },
+            created(){
+                this.result = this.model;
+            },
+            mounted(){
+                // watch数据更新
+                this.$watch(
+                    "$refs.searchRef.result",(val, oldVal) => {
+                        this.setData();
+                    }
+                );
+            },
             methods: {
                 onClick(item){
                     let term = item.id;
                     let url = `/matrix/event?term=${window.btoa(encodeURIComponent(term))}`;
                     window.open(url,'_blank');
+                },
+                setData(){
+                    if(_.isEmpty(this.$refs.searchRef.options.term)){
+                        this.$set(this.result,'rows',[]);    
+                    } else {
+                        this.result = this.$refs.searchRef.result;
+                    }
                 }
             }
         })
@@ -1724,6 +1994,32 @@ class Topological {
             },
             data(){
                 return {
+                    result: null,
+                    options: {
+                        // 视图定义
+                        view: {
+                            eidtEnable: false,
+                            show: false,
+                            value: "all"
+                        },
+                        // 搜索窗口
+                        window: { name:"所有", value: ""},
+                        // 输入
+                        term: "",
+                        // 指定类
+                        class: "#/matrix/devops/alert/:",
+                        // 指定api
+                        api: {parent: "event",name: "event_list.js"},
+                        // 其它设置
+                        others: {
+                            // 是否包含历史数据
+                            ifHistory: false,
+                            // 是否包含Debug信息
+                            ifDebug: false,
+                            // 指定时间戳
+                            forTime:  ' for vtime ',
+                        }
+                    },
                     baseLine: {
                         type: {
                             value: [],
@@ -1740,6 +2036,9 @@ class Topological {
                 }
             },
             template: `<el-container style="height: calc(100vh - 120px);">
+                            <el-header style="height: 42px;line-height: 42px;margin: 10px;padding: 0px 1px;background: #ddd;">
+                                <search-base-component :options="options" ref="searchRef" class="grid-content"></search-base-component>
+                            </el-header>
                             <!--el-header style="height: 30px;padding: 5px;line-height: 20px;">
                                 <el-select v-model="baseLine.type.value" placeholder="选择基线" class="el-select">
                                     <el-option
@@ -1777,6 +2076,11 @@ class Topological {
                             
                             </el-main>
                         </el-container>`,
+            created(){
+                if(this.model){
+                    this.result = this.model;
+                }
+            },
             mounted(){
                 _.delay(()=>{
                     let grid = GridStack.init({
@@ -1788,9 +2092,22 @@ class Topological {
                         eventHub.$emit("WINDOW-RESIZE-EVENT");
                     });
                 },500)
+
+                // watch数据更新
+                this.$watch(
+                    "$refs.searchRef.result",(val, oldVal) => {
+                        this.setData();
+                    }
+                );
             },
             methods: {
-                
+                setData(){
+                    if(_.isEmpty(this.$refs.searchRef.options.term)){
+                        this.$set(this.result,'rows',[]);    
+                    } else {
+                        this.result = this.$refs.searchRef.result;
+                    }
+                }
             }
         });
 

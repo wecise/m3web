@@ -508,6 +508,25 @@ class FsHandler {
         return rtn;
     };
 
+    /*
+    *   文件系统
+    *
+    *   创建临时文件
+    *
+    *
+    */
+   fsReport(ftype, name, content, attr){
+    let rtn = null;
+
+    let _tmp = fsHandler.fsNew(ftype, `/home/${window.SignedUser_UserName}/Documents/report`, name, content, attr);
+
+    if(_tmp === 1){
+        rtn = `/home/${window.SignedUser_UserName}/Documents/report/${name}`;
+    }
+
+    return rtn;
+};
+
 
     /*
     *   文件系统
