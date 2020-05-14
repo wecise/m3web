@@ -719,18 +719,18 @@ class System {
 					delimiters: ['#{', '}#'],
 					template: 	`<el-container>
 									<el-header style="height:40px;line-height:40px;">
+										<el-tooltip content="刷新">
+											<el-button type="text" icon="el-icon-refresh" @click="onRefresh"></el-button>
+										</el-tooltip>
 										<el-tooltip content="新建规则">
-											<el-button type="text" icon="el-icon-plus"></el-button>
+											<el-button type="text" icon="el-icon-plus" @click="onNew"></el-button>
 										</el-tooltip>
-										<el-tooltip content="删除规则">
-											<el-button type="text" icon="el-icon-delete"></el-button>
-										</el-tooltip>
-										<el-tooltip content="导出规则">
+										<!--el-tooltip content="导出规则">
 											<el-button type="text" icon="el-icon-upload2"></el-button>
 										</el-tooltip>
 										<el-tooltip content="导入规则">
 											<el-button type="text" icon="el-icon-download"></el-button>
-										</el-tooltip>
+										</el-tooltip-->
 									</el-header>
 									<el-main  style="padding:0px;">
 										<el-table
@@ -756,6 +756,11 @@ class System {
 												v-for="item in dt.columns"
 												v-if="item.visible">
 												
+											</el-table-column>
+											<el-table-column label="操作">
+												<template slot-scope="scope">
+													<el-button type="text" icon="el-icon-delete"  @click="onDelete(scope.$index, scope.row)"> 删除</el-button>
+												</template>
 											</el-table-column>
 										</el-table>
 									</el-main>
@@ -799,7 +804,78 @@ class System {
                             if (rowIndex === 0) {
                                 //return 'text-align:center;';
                             }
-                        }
+						},
+						onRefresh(){
+							this.initData();
+						},
+						onNew(){
+							
+							this.$prompt('请输入规则名称', '提示', {
+								confirmButtonText: '确定',
+								cancelButtonText: '取消',
+							  }).then(({ value }) => {
+
+								if(_.isEmpty(value)){
+									this.$message({
+										type: "info",
+										message: "请输入规则名称"
+									})
+									return false;
+								}
+
+								let term = {
+									action: "new",
+									model: {
+										name: value,
+										persons:"",
+										rtype:"",
+										situation:"",
+										status:1,
+										template:""
+									}
+								};
+
+								let rtn = fsHandler.callFsJScript("/matrix/notify/ruleAction.js",encodeURIComponent(JSON.stringify(term))).message;
+								this.$message({
+									type: "success",
+									message: "新建规则成功！"
+								})
+								_.delay((v)=>{
+									this.initData();
+								},500)
+							
+							  }).catch(() => {
+								
+							  });
+						},
+						onDelete(index,item){
+							this.$confirm(`确认要删除该规则：${item.name}？`, '提示', {
+                                confirmButtonText: '确定',
+                                cancelButtonText: '取消',
+                                type: 'warning'
+                            }).then(() => {
+								
+								let term = {action:"delete",model:item};
+                                let rtn = fsHandler.callFsJScript("/matrix/notify/ruleAction.js",encodeURIComponent(JSON.stringify(term))).message;
+                                
+                                if(rtn==1){
+                                    this.$message({
+                                        type: 'success',
+                                        message: '删除规则成功!'
+									});
+									_.delay(()=>{
+										this.initData();
+									},500)
+                                }else {
+									this.$message({
+                                        type: 'error',
+                                        message: '删除规则失败!'
+                                    });
+								}
+                            }).catch(() => {
+                                
+                            });
+						}
 					}
 				})
 				// 通知管理-type
@@ -1331,24 +1407,30 @@ class System {
 					delimiters: ['#{', '}#'],
 					template: 	`<el-container style="height:100%;">
 									<el-header style="height:40px;line-height:40px;">
+										<el-tooltip content="刷新模板">
+											<el-button type="text" icon="el-icon-refresh" @click="onRefresh"></el-button>
+										</el-tooltip>
 										<el-tooltip content="新建模板">
-											<el-button type="text" icon="el-icon-plus"></el-button>
+											<el-button type="text" icon="el-icon-plus" @click="onNew"></el-button>
 										</el-tooltip>
-										<el-tooltip content="删除模板">
-											<el-button type="text" icon="el-icon-delete"></el-button>
-										</el-tooltip>
-										<el-tooltip content="导出模板">
+										<!--el-tooltip content="导出模板">
 											<el-button type="text" icon="el-icon-upload2"></el-button>
 										</el-tooltip>
 										<el-tooltip content="导入模板">
 											<el-button type="text" icon="el-icon-download"></el-button>
-										</el-tooltip>
+										</el-tooltip-->
 									</el-header>
 									<el-main style="height:100%;padding:0px;">
 										<el-table
 											:data="dt.rows"
 											:row-class-name="rowClassName"
+											@current-change="onSelectionChange"
 											style="width: 100%">
+											<!--el-table-column align="center" width="55">
+												<template slot-scope="scope">
+													<el-radio  v-model="dt.radio" :label="scope.row.enableFlag">&nbsp;</el-radio>
+												</template>
+											</el-table-column--> 
 											<el-table-column type="index"></el-table-column>
 											<el-table-column 
 												node-key="id"
@@ -1368,7 +1450,21 @@ class System {
 											</el-table-column>
 											<el-table-column type="expand" label="模板定义" width="300">
 												<template slot-scope="scope">
-													<notify-manage-editor :render="scope.row.template" :index="scope.$index" @update:render="scope.row.template = $event"></notify-manage-editor>
+													<el-container>
+														<el-header style="height:30px;line-height:30px;">
+															<el-tooltip content="点击更新模板内容" open-delay="500">
+																<el-button type="text" icon="el-icon-refresh" @click="onUpdate(scope.row)"></el-button>
+															</el-tooltip>
+														</el-header>
+														<el-main style="padding:0px;">
+															<notify-manage-editor :render="scope.row.template" :index="scope.$index" @update:render="scope.row.template = $event"></notify-manage-editor>
+														</el-main>
+													</el-container>
+												</template>
+											</el-table-column>
+											<el-table-column label="操作">
+												<template slot-scope="scope">
+													<el-button type="text" icon="el-icon-delete"  @click="onDelete(scope.$index, scope.row)"> 删除</el-button>
 												</template>
 											</el-table-column>
 										</el-table>
@@ -1379,7 +1475,8 @@ class System {
 							dt: {
 								rows:[],
 								columns: [],
-								selected: []
+								selected: [],
+								radio:''
 							}
 						}
 					},
@@ -1409,6 +1506,122 @@ class System {
 								}
 								
 							}));
+						},
+						onSelectionChange(val) {
+							this.dt.selected = val;
+							
+							// 单选设置
+							_.forEach(this.dt.rows,(v)=>{
+								this.$set(v,'enableFlag','0');
+							})
+							this.$set(_.find(this.dt.rows,{name: val.name}),'enableFlag','1');
+							this.dt.radio = '1';
+						},
+						onRefresh(){
+							this.initData();
+						},
+						onNew(){
+							let ftype = "json";
+							let attr = {remark: "模板", ctime: _.now(), author: window.SignedUser_UserName, type: ftype, status:0};
+							let parent = `/home/${window.SignedUser_UserName}/Documents/notify`;
+							let content = JSON.stringify({template: ""},null,2);
+
+							this.$prompt('请输入模板名称', '提示', {
+								confirmButtonText: '确定',
+								cancelButtonText: '取消',
+							  }).then(({ value }) => {
+
+								if(_.isEmpty(value)){
+									this.$message({
+										type: "info",
+										message: "请输入名称"
+									})
+									return false;
+								}
+
+								let rtn = fsHandler.fsNew(ftype, parent, [value,ftype].join("."), content, attr);
+							
+								if(rtn == 1){
+									
+									this.$message({
+										type: "success",
+										message: "新建模板成功！"
+									})
+									_.delay((v)=>{
+										this.initData();
+									},500)
+									
+								} else {
+									this.$message({
+										type: "error",
+										message: "新建模板失败，" + rtn.message
+									})
+								}
+							  }).catch(() => {
+								
+							  });
+							
+						},
+						onUpdate(item){
+							
+							if(_.isEmpty(item)){
+								this.$message({
+									type: "info",
+									message: "请选择模板"
+								});
+								return false;
+							}
+							
+							let ftype = item.ftype;
+							let parent = item.parent;
+							let name = item.name;
+							let content = JSON.stringify({template:item.template},null,2);
+							let attr = item.attr;
+							
+							let rtn = fsHandler.fsNew(ftype, parent, name, content, attr);
+							
+							if(rtn == 1){
+								this.$message({
+									type: "success",
+									message: "更新模板成功！"
+								})
+								_.delay((v)=>{
+									this.initData();
+								},500)
+								
+							} else {
+								this.$message({
+									type: "error",
+									message: "更新模板失败，" + rtn.message
+								})
+							}
+						},
+						onDelete(index,item){
+							this.$confirm(`确认要删除该模板：${item.name}？`, '提示', {
+                                confirmButtonText: '确定',
+                                cancelButtonText: '取消',
+                                type: 'warning'
+                            }).then(() => {
+                                
+                                let rtn = fsHandler.fsDelete(item.parent,item.name);
+                                
+                                if(rtn==1){
+                                    this.$message({
+                                        type: 'success',
+                                        message: '删除模板成功!'
+									});
+									_.delay((v)=>{
+										this.initData();
+									},500)
+                                }else {
+									this.$message({
+                                        type: 'error',
+                                        message: '删除模板失败!'
+                                    });
+								}
+                            }).catch(() => {
+                                
+                            });
 						}
 					}
 				})
@@ -1417,31 +1630,26 @@ class System {
 					delimiters: ['#{', '}#'],
 					template: 	`<el-container>
 									<el-header style="height:40px;line-height:40px;">
+										<el-tooltip content="刷新">
+											<el-button type="text" icon="el-icon-refresh" @click="onRefresh"></el-button>
+										</el-tooltip>
 										<el-tooltip content="上传新媒介">
-											<el-button type="text" icon="el-icon-upload"></el-button>
+											<el-button type="text" @click="onUpload">
+											 	<i class="el-icon-upload" style="color:#3ae23a;font-size:16px;"></i>
+											</el-button>
 										</el-tooltip>
-										<el-tooltip content="删除选择的媒介">
-											<el-button type="text" icon="el-icon-delete"></el-button>
-										</el-tooltip>
-										<el-tooltip content="导出媒介">
+										<!--el-tooltip content="导出媒介">
 											<el-button type="text" icon="el-icon-upload2"></el-button>
 										</el-tooltip>
 										<el-tooltip content="导入媒介">
 											<el-button type="text" icon="el-icon-download"></el-button>
-										</el-tooltip>
+										</el-tooltip-->
 									</el-header>
 									<el-main  style="padding:0px;">
 										<el-table
 											:data="dt.rows"
 											style="width: 100%">
 											<el-table-column type="index"></el-table-column>
-											<el-table-column type="expand">
-											<template slot-scope="props">
-												<el-form label-position="left">
-													
-												</el-form>
-											</template>
-											</el-table-column>
 											<el-table-column 
 												:label="item.title" 
 												:prop="item.field" 
@@ -1493,6 +1701,75 @@ class System {
 								
 							}));
 						},
+						onRefresh(){
+							this.initData();
+						},
+						onUpload(){
+                            const self = this;
+                            let wnd = null;
+
+                            try{
+                                if(jsPanel.activePanels.getPanel('jsPanel-class-template')){
+                                    jsPanel.activePanels.getPanel('jsPanel-class-template').close();
+                                }
+                            } catch(error){
+
+                            }
+                            finally{
+                                wnd = maxWindow.winClassTemplate('导入声音文件', `<div id="class-template-import"></div>`, null, null, null);
+                            }
+
+                            new Vue({
+                                delimiters: ['#{', '}#'],
+                                data:{
+                                    fileList: [],
+                                    rtnInfo: null
+                                },
+                                template: `<el-container style="height:100%;">
+                                                <el-main style="padding:10px;">
+                                                    <div v-if="!_.isEmpty(rtnInfo)">
+                                                        <el-button type="text" icon="el-icon-close" @click="clearInfo"></el-button>
+                                                        <section>
+                                                            <code>#{rtnInfo.message.join(",")}#</code>
+                                                        </section>
+                                                    </div>
+													<el-upload
+														name="uploadfile"
+                                                        class="upload-demo"
+                                                        drag
+                                                        :auto-upload="true"
+														:on-change="onChange"
+														:on-success="onUploadSuccess"
+														:file-list="fileList"
+														accept=".mp3,.wav"
+														action="/fs/assets/audio?issys=true"
+														ref="upload"
+                                                        v-else>
+                                                        <i class="el-icon-upload"></i>
+                                                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                                                        <div class="el-upload__tip" slot="tip">只能上传声音文件</div>
+                                                    </el-upload>
+                                                </el-main>
+                                                <el-footer style="line-height:60px;text-align:center;">
+                                                    <el-button type="default" @click="onCancel">取消</el-button>
+                                                </el-footer>
+                                            </el-container>`,
+                                methods:{
+                                    onChange(file) {
+                                        this.fileList = [file.raw];
+                                    },
+                                    onCancel(){
+                                        wnd.close();
+									},
+									onUploadSuccess(res, file){
+										self.initData();
+									},
+                                    clearInfo(){
+                                        this.rtnInfo = null;
+                                    }
+                                }
+                            }).$mount("#class-template-import");
+                        },
 						onPlay(index){
 							
 							if(this.sound){
@@ -1515,8 +1792,32 @@ class System {
 							this.sound.stop();
 							this.$set(this.dt.rows[index],'isPlay',false);
 						},
-						onDelete(){
-							
+						onDelete(index,item){
+							this.$confirm(`确认要删除该声音文件：${item.name}？`, '提示', {
+                                confirmButtonText: '确定',
+                                cancelButtonText: '取消',
+                                type: 'warning'
+                            }).then(() => {
+                                
+                                let rtn = fsHandler.fsDelete(item.parent,item.name);
+                                
+                                if(rtn==1){
+                                    this.$message({
+                                        type: 'success',
+                                        message: '删除声音文件成功!'
+									});
+									_.delay((v)=>{
+										this.initData();
+									},500)
+                                }else {
+									this.$message({
+                                        type: 'error',
+                                        message: '删除声音文件失败!'
+                                    });
+								}
+                            }).catch(() => {
+                                
+                            });
 						}
 					}
 				})

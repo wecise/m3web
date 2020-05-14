@@ -55,8 +55,8 @@
 	
 	/*----------  最外层element会自动增加组件同名 class="topological-timeline"  ----------*/
 	<template>
-        <el-container style="height:240px;width:100%;">
-            <el-aside width="200px">
+        <el-container style="height:240px;width:100%;" ref="container">
+            <el-aside width="200px" style="background: #ffffff;">
                 <el-tree 
                     show-checkbox
                     default-expand-all 
@@ -73,7 +73,7 @@
             </el-aside>
             <el-container style="width:100%;height:100%;background: #fff;">
                 <el-header style="height:30px;line-height: 30px;display: flex;padding:0px;margin-right:14px;">
-                    <div style="width:95%;">
+                    <div style="width:90%;">
                         <el-date-picker
                             v-model="timeline.pickDate"
                             type="datetime"
@@ -97,11 +97,23 @@
                             <el-button type="text" icon="el-icon-zoom-out" @click="onTimelineZoomout(0.2)" style="padding:5px 0px;"></el-button>
                         </el-tooltip>
                         <el-divider direction="vertical"></el-divider>
-                        <el-checkbox v-model="timeline.showDiff">显示差异</el-checkbox>
+                        <!--el-checkbox v-model="timeline.showDiff">显示差异</el-checkbox-->
+                        <el-popover
+                            placement="top-start"
+                            width="200"
+                            trigger="hover"
+                            content="双击时间轴上任意点可将图回溯到当前时间点">
+                            <span slot="reference" class="el-icon-question" style="font-size:16px;"></span>
+                        </el-popover>
                     </div>
-                    <div style="width:5%;text-align: right;">
+                    <div style="width:10%;text-align: right;">
                         <el-tooltip content="关闭" open-delay="500">
-                            <el-button type="text" icon="el-icon-close" style="float:right;" @click="onClose"></el-button>
+                            <el-button type="text" icon="el-icon-close" style="float:right;padding-left:10px;" @click="onClose"></el-button>
+                        </el-tooltip>
+                        <el-tooltip content="全屏显示" open-delay="500" placement="left">
+                            <el-button type="text" :icon="control.ifFullScreen | pickScreenStyle" 
+                                        @click="onFullScreen" style="float:right;">
+                            </el-button>
                         </el-tooltip>
                     </div>
                 </el-header>
@@ -181,6 +193,12 @@
                             children: [],
                             color:"#ff0000"
                         },{
+                            id: 111,
+                            name: 'call',
+                            label: '电话',
+                            children: [],
+                            color:"#ff0000"
+                        },{
                             id: 12,
                             name: 'event',
                             label: '事件',
@@ -212,6 +230,18 @@
                     },
                     selected:null,
                     diagnosisData: null
+                },
+                control: {
+                    ifFullScreen:false
+                }
+            }
+        },
+        filters:{
+            pickScreenStyle(evt){
+                if(evt){
+                    return `el-icon-full-screen`;
+                } else {
+                    return `el-icon-copy-document`;
                 }
             }
         },
@@ -255,6 +285,9 @@
             onNodeClick(data) {
                 console.log(data);
             },
+            onFullScreen(){
+                this.control.ifFullScreen = mx.fullScreenByEl(this.$refs.container.$el);
+            },
             add(){
                 //this.timeline.items.pLOWERh();
             },
@@ -278,6 +311,15 @@
                     this.timeline.inst.setOptions({start:start,end:end});
                 } catch(err){
                     
+                } finally{
+                    let customDate = moment(this.timeline.pickDate).format("YYYY-MM-DD HH:MM:SS");
+                    try {                    
+                        this.timeline.inst.removeCustomTime('当前');
+                    } catch (err) {
+                        
+                    } finally{
+                        this.timeline.inst.addCustomTime(customDate, '当前');
+                    }
                 }
             },
             setItems(){
@@ -305,6 +347,42 @@
                                                 ${val.host}<br>
                                                 ${val.msg || val.desc}<br>
                                                 ${moment(val.vtime).format("YYY-MM-DD HH:MM:SS")}
+                                            </button>`,
+                                    start: val.vtime
+                                };
+                                return item;
+                            });
+                            this.timeline.items.add(items);
+                        } else if(k==='performance'){
+                            let items  = _.map(v,(val)=>{
+                                let bgColor = "#f7f7f7";
+                                let value = _.endsWith(val.param,'usedpercent')?val.value+'%':mx.bytesToSize(val.value);
+                                let item = {
+                                    id: v.id,
+                                    group: k,
+                                    content: `<button type="button" class="el-button el-button--mini" style="background:${bgColor};float:left;text-align:left;">
+                                                ${val.host}<br>
+                                                ${val.param}<br>
+                                                ${value}<br>
+                                                ${moment(val.vtime).format("YYY-MM-DD HH:MM:SS")}
+                                            </button>`,
+                                    start: val.vtime
+                                };
+                                return item;
+                            });
+                            this.timeline.items.add(items);
+                        } else if(k==='call'){
+                            let items  = _.map(v,(val)=>{
+                                let bgColor = "#f7f7f7";
+                                let item = {
+                                    id: v.id,
+                                    group: k,
+                                    content: `<button type="button" class="el-button el-button--mini" style="background:${bgColor};float:left;text-align:left;">
+                                                呼叫：${val.oppositenumber}<br>
+                                                被叫：${val.name}<br>
+                                                时长：${val.timeperiod} 秒<br>
+                                                位置：${val.location}<br>
+                                                时间：${moment(val.vtime).format("YYY-MM-DD HH:MM:SS")}
                                             </button>`,
                                     start: val.vtime
                                 };

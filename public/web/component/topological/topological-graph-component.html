@@ -1017,6 +1017,9 @@
                     this.model.editor.graph.setHtmlLabels(true);
 
 
+                    // 去锯齿效果
+				    mxRectangleShape.prototype.crisp = true;
+
                     // 鼠标框选
                     new mxRubberband(this.model.editor.graph);
 
@@ -1136,6 +1139,17 @@
                         menu.addItem('实体删除', null, ()=>{
                             this.removeEntityHandler(cell);
                         });
+
+                        menu.addSeparator();
+
+                        var submenuBsearch= menu.addItem('业务查询', null, null);
+                        menu.addItem('电话拨入', null, ()=>{
+                            this.loadSubGraphByBiz({direction:"bycall",node:node,step:1});
+                        },submenuBsearch);
+                        menu.addItem('电话拨出', null, ()=>{
+                            this.loadSubGraphByBiz({direction:"callto",node:node,step:1});
+                            
+                        },submenuBsearch);
                         
                         menu.addSeparator();
 
@@ -1532,7 +1546,7 @@
 
                             let edge = null;
                             try {
-                                let edgeName = _.find(allEdges,{name:k.class}).remedy;
+                                let edgeName = _.find(this.entity.edges.list,{name:k.class}).remedy;
                                 edge = this.model.editor.graph.insertEdge(this.model.graph.parent, k.id, edgeName, source, target, baseEdgeStyle+direction);
                             } catch(err){
                                 edge = this.model.editor.graph.insertEdge(this.model.graph.parent, k.id, k.class, source, target, baseEdgeStyle+direction);
@@ -2026,9 +2040,236 @@
                             return;
                         }
 
+                        // 检查是否已经存在edge
+                        let ifHaveEdge = this.model.editor.graph.getModel().getCell(k.id);
+                        if(ifHaveEdge) return ;
+
                         let edge = null;
                         try {
-                            let edgeName = _.find(allEdges,{name:k.class}).remedy;
+                            let edgeName = _.find(this.entity.edges.list,{name:k.class}).remedy;
+                            edge = graph.insertEdge(parent, k.id, edgeName, source, target, baseEdgeStyle+direction);
+                        } catch(err){
+                            edge = graph.insertEdge(parent, k.id, k.class, source, target, baseEdgeStyle+direction);
+                        }
+                        
+                        // edge directory
+                        try{
+                            let id = source.getId() + ':' + target.getId();
+                            _.extend(edges, { [id]: edge });
+                        } catch(err){
+                            console.log(err)
+                        }
+                        
+                    })
+                    
+                }
+                finally {
+                    
+                    graph.getModel().endUpdate();
+
+                    // 合并图
+                    this.model.editor.graph.getModel().mergeChildren(graph.getModel().getRoot().getChildAt(0), this.model.editor.graph.getDefaultParent());
+
+                    // Executes the layout handler
+                    _.delay(()=>{
+                        this.executeLayout();
+                    },500)
+
+                    // Search journal
+                    let cell = node.node.cell;
+                    if (cell != null) {
+                            
+                        this.model.editor.graph.removeCellOverlays(cell);
+                        let overlay = new mxCellOverlay(new mxImage(`/fs/assets/images/others/png/${this.global.count}.png?issys=true&type=open`,20,20), '', mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(10,10));
+                        this.model.editor.graph.addCellOverlay(cell, overlay);
+
+                        // 定位cell
+                        this.onPosition(cell.getId());
+                    
+                    }
+                    // Search Step
+                    this.global.count = this.global.count + 1;
+
+                    // 加入高级搜索定义
+                    this.$refs.searchToolbar.term = term;
+                    //this.$refs.searchToolbar.search();
+
+                    // 统计
+                    this.graphSummary();
+                    
+                }
+            },
+            // 子图
+            loadSubGraphByBiz(node){
+                
+                let term = `match (:call)  - [${node.direction}*${node.step}] -> ('${node.node.id}')`;
+
+                let rtn = fsHandler.callFsJScript("/matrix/graph/graph_service.js", encodeURIComponent(term)).message[0].graph;
+                
+                let allNodes = [];
+                let allEdges = [];
+
+                var graph = new mxGraph();
+                var parent = graph.getDefaultParent();
+
+                // Sets global styles
+                var style = graph.getStylesheet().getDefaultEdgeStyle();
+                style[mxConstants.STYLE_GRADIENTCOLOR] = _.sample(this.model.graph.path.color);
+
+                this.model.editor.graph.getStylesheet().putCellStyle('column', style);
+                
+                graph.getModel().beginUpdate();
+                
+                try{
+
+                    graph.getModel();
+                    let nodes = {};
+                    
+                    // 添加节点类型，是否是新增、删除或者正常
+                    allNodes =  _.map(rtn.nodes,(v)=>{
+                                        return _.extend(v,{type:'normal'});
+                                });
+                    
+                    //合并新增节点
+                    try{
+                        allNodes = _.extend(allNodes,_.map(rtn.diff.add.nodes,(v)=>{
+                            return _.extend(v,{type:'add'});
+                        }))
+                    }catch(err){
+                        
+                    }
+                    
+                    //合并删除的节点
+                    try{
+                        allNodes =  _.concat(allNodes,_.map(rtn.diff.del.nodes,(v)=>{
+                                        return _.extend(v,{type:'del'});
+                                    }))
+                    } catch(err){
+                        
+                    }
+
+                    // 添加edge类型，包括正常的、新增的、删除的
+                    allEdges = _.map(rtn.edges,(v)=>{
+                        return _.extend(v,{type:"normal"});
+                    });
+
+                    //合并新增edge
+                    try{
+                        allEdges = _.map(allEdges,(v)=> {
+                            if(_.find(rtn.diff.add.edges,{id:v.id})){
+                                return _.extend(v,{type:'add'});
+                            } else {
+                                return v;
+                            }
+                        });
+                    }catch(err){
+
+                    }
+                    
+                    // 合并删除edge
+                    try {
+                        allEdges =  _.concat(allEdges,_.map(rtn.diff.del.edges,(v)=> {
+                                        return _.extend(v,{type:'del'});
+                                    }));
+                    } catch(err){
+                        
+                    }
+
+                    // 绘制节点
+                    let fillColor = "";//`fillColor=${_.sample(this.model.graph.theme.predefineColors)}`;
+                    let size = 50;
+                    _.forEach(allNodes,(v)=>{
+
+                        let _type = v._icon || 'matrix';
+                        
+                        // 可设置默认显示属性
+                        let _name =  '';
+                        
+                        try{
+                            if(window.URL_PARAMS_GRAPH){
+                                _name = v[window.URL_PARAMS_GRAPH.title];
+                            } else {
+                                _name = v[this.model.graph.default.title];
+                            }
+                        } catch(err){
+                            _name = v["id"];
+                        }
+
+                        // normal
+                        // 选择节点渲染模式：icon/shape
+                        let node = null;
+                        let imageUrl = `${window.ASSETS_ICON}/entity/png/${_type}.png?type=download&issys=${window.SignedUser_IsAdmin}`;
+                        
+                        // icon渲染
+                        if(this.model.control.ifIcon){
+                            if(this.checkImgExists(`${_type}.png`)){
+                                node = graph.insertVertex(parent, v.id, _name, 50, 50, 50, 50,`shape=image;html=1;image=${imageUrl};verticalLabelPosition=bottom;verticalAlign=top;`);
+                            } else {
+                                node = graph.insertVertex(parent, v.id, _name, 50, 50, size, size,`shape=ellipse;perimeter=ellipsePerimeter;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=middle;${fillColor}`);
+                            }    
+                        } 
+                        // shape渲染
+                        else {
+                            node = graph.insertVertex(parent, v.id, _name, 50, 50, size, size,`shape=ellipse;perimeter=ellipsePerimeter;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=middle;${fillColor}`);
+                        }
+
+                        this.model.graph.allNodesIds.push(node.getId());
+
+                        // node directory
+                        _.extend(nodes,{[v.id]:node});
+
+
+                        //add
+                        if(v.type && v.type === 'add'){
+                            let overlay = new mxCellOverlay(new mxImage(`/fs/assets/images/apps/png/flag/add.png?issys=true&type=download`,24,24), "新增", mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
+                            graph.addCellOverlay(node, overlay);
+                        }
+
+                        //delete
+                        if(v.type && v.type === 'del'){
+                            let overlay = new mxCellOverlay(new mxImage(`/fs/assets/images/apps/png/flag/delete.png?issys=true&type=download`,24,24), "删除", mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
+                            graph.addCellOverlay(node, overlay);
+                        }
+
+                    })
+
+                    // 边界
+                    let edges = {};
+                    _.forEach(allEdges,(k,index)=>{
+                        
+                        let source = nodes[k.source];
+                        let target = nodes[k.target];
+
+                        let baseEdgeStyle = 'edgeStyle=elbowEdgeStyle;html=1;dashed=1;rounded=1;jettySize=auto;orthogonalLoop=1;endArrow=block;endFill=1;';
+                        let direction = '';
+
+                        if(k.twoway){
+                            direction = 'startArrow=block;endArrow=block;endFill=1;';
+                        }
+
+                        if(k.type=='add'){
+                            direction += 'strokeColor=#47fa28;strokeWidth=2;';
+                        } else if(k.type=='del'){
+                            direction += 'dashed=1;strokeColor=#ff0000;strokeWidth=2;';
+                        } else {
+                            direction += ''; 
+                        }
+
+                        // edge为path的样式
+                        if(k.class === "path"){
+                            baseEdgeStyle = 'edgeStyle=elbowEdgeStyle;orthogonalLoop=1;strokeWidth=1;dashed=1;startFill=0;endArrow=none;endFill=0;startArrow=none;orthogonal=1;elbow=vertical;';
+                            let strokeColor = this.model.graph.path.colors[index] || _.sample(this.model.graph.path.colors);
+                            let edge = graph.insertEdge(parent, k.id, k.class, source, target, baseEdgeStyle+direction+`strokeColor=${strokeColor}`);
+                            return;
+                        }
+
+                        // 检查是否已经存在edge
+                        let ifHaveEdge = this.model.editor.graph.getModel().getCell(k.id);
+                        if(ifHaveEdge) return ;
+
+                        let edge = null;
+                        try {
+                            let edgeName = _.find(this.entity.edges.list,{name:k.class}).remedy;
                             edge = graph.insertEdge(parent, k.id, edgeName, source, target, baseEdgeStyle+direction);
                         } catch(err){
                             edge = graph.insertEdge(parent, k.id, k.class, source, target, baseEdgeStyle+direction);
@@ -2859,6 +3100,9 @@
             },
             // 切换节点渲染类型 图标 or 图形
             onToggleIcon(){
+                
+                this.model.control.ifIcon = !this.model.control.ifIcon;
+
                 try{
                     let parent = this.model.editor.graph.getDefaultParent();
                     let vertices = this.model.editor.graph.getChildVertices(parent);
@@ -2886,7 +3130,6 @@
                 } catch(err){
                     console.log(err)
                 } finally{
-                    this.model.control.ifIcon = !this.model.control.ifIcon;
                     localStorage.setItem("TOPOLOGICAL-RENDER-TYPE",this.model.control.ifIcon);
                 }
 

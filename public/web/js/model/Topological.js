@@ -321,7 +321,7 @@ class Topological {
                                         </el-popover>
                                     </el-form-item>
                                     <el-form-item label="几跳" style="font-weight:normal;">
-                                        <el-input-number v-model="edge.edgeStep" :min="0"></el-input-number>
+                                        <el-input-number v-model="edge.edgeStep" :min="1"></el-input-number>
                                         <el-popover
                                             placement="top-start"
                                             width="200"
@@ -491,13 +491,6 @@ class Topological {
                                     <topological-analysis-input v-for="item in _.uniqBy(trace.nodes,'id')" :model="item" :data-id="item.id" :ref="item.id"></topological-analysis-input>
                                 </div>
                                 <topological-analysis-new-input></topological-analysis-new-input>
-                                <!--div style="padding:0px 10px;">
-                                    <el-tooltip content="路劲查询" open-delay="500" placement="top">
-                                        <el-button type="primary" @click="onSearch" style="float:right;">
-                                            <el-image src="/fs/assets/images/tools/png/path-white.png?type=open&issys=true" style="width:16px;"></el-image>
-                                        </el-button>
-                                    </el-tooltip> 
-                                </div-->
                             </el-header>
                             <el-main style="padding:0px 10px;" class="topological-analysis">
                                 <el-table :data="trace.paths.rows" 
@@ -607,39 +600,21 @@ class Topological {
             delimiters: ['#{', '}#'],
             template:  `<el-container>
                             <el-header style="height:100%;line-height:100%;padding:10px;display:flex;flex-direction: column;">
-                                <div ref="topologicalAnalysisInputList">    
-                                    <topological-analysis-input v-for="item in _.uniqBy(trace.nodes,'id')" :model="item" :data-id="item.id" :ref="item.id"></topological-analysis-input>
+                                <div ref="topologicalAnalysisInputList" style="height:100%;">    
+                                    <topological-analysis-input 
+                                        v-for="item in _.uniqBy(trace.nodes,'id')" 
+                                        :model="item" 
+                                        :data-id="item.id" 
+                                        :ref="item.id"
+                                        style="height:100%;"></topological-analysis-input>
                                 </div>
                                 <topological-analysis-new-input></topological-analysis-new-input>
-                                <div style="padding:0px 10px;">
-                                    <el-tooltip content="图查询" open-delay="500" placement="top">
-                                        <el-button type="primary" @click="onSearch" style="float:right;" icon="el-icon-search"></el-button>
-                                    </el-tooltip> 
-                                </div>
                             </el-header>
-                            <el-main style="padding:0px 10px;" class="topological-analysis">
-                                <el-table :data="trace.paths.rows" 
-                                        ref="multipleTable"
-                                        tooltip-effect="dark"
-                                        @selection-change="onSelectionChange"
-                                        style="width: 100%"
-                                        v-if="trace.paths.rows.length > 0">
-                                    <el-table-column type="expand">
-                                        <template slot-scope="props">
-                                          <el-form>
-                                            <el-form-item v-for="v,k in _.omit(props.row,['num','class'])">
-                                                <template slot="label">
-                                                    <i class="el-icon-place" style="color: #67c239;"></i>
-                                                </template>
-                                                <span>#{ v }#</span>
-                                            </el-form-item>
-                                          </el-form>
-                                        </template>
-                                    </el-table-column>
-                                    <el-table-column type="selection" width="55"></el-table-column>
-                                    <el-table-column :prop="col.data" :label="col.title" v-for="col in trace.paths.columns"></el-table-column>
-                                </el-table>
-                            </el-main>
+                            <el-footer style="padding:0px 10px;height:40px;line-height:40px;">
+                                <el-tooltip content="图查询" open-delay="500" placement="top">
+                                    <el-button type="primary" @click="onSearch" style="float:right;" icon="el-icon-search"></el-button>
+                                </el-tooltip> 
+                            </el-footer>
                         </el-container>`,
             data(){
                 return {
@@ -1092,18 +1067,22 @@ class Topological {
                                                 #{item.value}#
                                             </el-button>
                                         </el-popover>
-                                        <el-button
-                                            type="text"
-                                            icon="el-icon-s-platform"
-                                            style="width:15%;text-align:right;color:#999;"
-                                            @click="onSetDefault(item)">
-                                        </el-button>
-                                        <el-button
-                                            type="text"
-                                            icon="el-icon-close"
-                                            style="width:15%;text-align:right;color:#999;"
-                                            @click="onDeleteHistory(item)">
-                                        </el-button>
+                                        <el-tooltip content="设置为默认图例" open-delay="500">
+                                            <el-button
+                                                type="text"
+                                                icon="el-icon-s-platform"
+                                                style="width:15%;text-align:right;color:#999;"
+                                                @click="onSetDefault(item)">
+                                            </el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="删除历史" open-delay="500">
+                                            <el-button
+                                                type="text"
+                                                icon="el-icon-close"
+                                                style="width:15%;text-align:right;color:#999;"
+                                                @click="onDeleteHistory(item)">
+                                            </el-button>
+                                        </el-tooltip>
                                     </el-col>
                                 </el-row>
                                 <!--topological-graphAdv class="graphAction" :model="$parent.$parent.mainView.search.model" ref="searchRef"></topological-graphAdv-->
@@ -1130,6 +1109,16 @@ class Topological {
                     } else {
                         this.$parent.$parent.term = term;
                         this.$parent.$parent.search();
+                    }
+                },
+                onSetDefault(item){
+                    let term = {key: "topological.default.match", value:item.value };
+                    let rtn = fsHandler.callFsJScript("/matrix/system/global-update.js",encodeURIComponent(JSON.stringify(term)));
+                    if(rtn.status=='ok'){
+                        this.$message({
+                            type: "success",
+                            message: "已设为默认图例"
+                        })
                     }
                 },
                 onDeleteHistory(item){
@@ -1809,6 +1798,105 @@ class Topological {
                                     <p>IP地址:#{item.ip}#</p>
                                     <p>告警时间：#{moment(item.vtime).format("LLL")}#</p>
                                     <p>告警内容：#{item.msg}#</p>
+                                    <el-button type="text" @click="onClick(item)">详细</el-button>
+                                </el-card>
+                            </el-main>
+                        </el-container>`,
+            filters: {
+                pickBgStyle(item){
+                    let hexToRgba = function(hex, opacity) {
+                        var RGBA = "rgba(" + parseInt("0x" + hex.slice(1, 3)) + "," + parseInt("0x" + hex.slice(3, 5)) + "," + parseInt( "0x" + hex.slice(5, 7)) + "," + opacity + ")";
+                        return {
+                            red: parseInt("0x" + hex.slice(1, 3)),
+                            green: parseInt("0x" + hex.slice(3, 5)),
+                            blue: parseInt("0x" + hex.slice(5, 7)),
+                            rgba: RGBA
+                        }
+                    };
+                    let rgbaColor = hexToRgba(mx.global.register.event.severity[item.severity][2],0.1).rgba;
+                    return `background:linear-gradient(to top, ${rgbaColor}, rgb(255,255,255));border: 1px solid rgb(247, 247, 247);border-radius: 5px;box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px 0px;line-height:1.5;`;
+                },
+                pickStyle(item) {
+                    return `color:${mx.global.register.event.severity[item.severity][2]};font-size:40px;float:right;`;
+                }
+            },
+            created(){
+                this.result = this.model;
+            },
+            mounted(){
+                // watch数据更新
+                this.$watch(
+                    "$refs.searchRef.result",(val, oldVal) => {
+                        this.setData();
+                    }
+                );
+            },
+            methods: {
+                onClick(item){
+                    let term = item.id;
+                    let url = `/matrix/event?term=${window.btoa(encodeURIComponent(term))}`;
+                    window.open(url,'_blank');
+                },
+                setData(){
+                    if(_.isEmpty(this.$refs.searchRef.options.term)){
+                        this.$set(this.result,'rows',[]);    
+                    } else {
+                        this.result = this.$refs.searchRef.result;
+                    }
+                }
+            }
+        })
+
+        // 实体人员
+        Vue.component("entity-diagnosis-people",{
+            delimiters: ['#{', '}#'],
+            props: {
+                model: Object
+            },
+            data(){
+                return {
+                    result: null,
+                    options: {
+                        // 视图定义
+                        view: {
+                            eidtEnable: false,
+                            show: false,
+                            value: "all"
+                        },
+                        // 搜索窗口
+                        window: { name:"所有", value: ""},
+                        // 输入
+                        term: "",
+                        // 指定类
+                        class: "#/matrix/devops/alert/call/:",
+                        // 指定api
+                        api: {parent: "call",name: "call_list.js"},
+                        // 其它设置
+                        others: {
+                            // 是否包含历史数据
+                            ifHistory: false,
+                            // 是否包含Debug信息
+                            ifDebug: false,
+                            // 指定时间戳
+                            forTime:  ' for vtime ',
+                        }
+                    }
+                }
+            },
+            template:   `<el-container style="height: calc(100vh - 120px);">
+                            <el-header style="height: 42px;line-height: 42px;margin: 10px;padding: 0px 1px;background: #ddd;">
+                                <search-base-component :options="options" ref="searchRef" class="grid-content"></search-base-component>
+                            </el-header>
+                            <el-main style="padding:10px;">
+                                <el-card :style="item | pickBgStyle" 
+                                    v-for="item in result.rows" :key="item.id"
+                                    v-if="result.rows">
+                                    <span class="el-icon-warning" :style="item | pickStyle"></span>
+                                    <p>名称:#{item.name}#</p>
+                                    <p>位置:#{item.location}#</p>
+                                    <p>联系:#{item.oppositenumber}#</p>
+                                    <p>告警时间：#{moment(item.vtime).format("LLL")}#</p>
+                                    <p>电话：#{item.phonenumbe}#</p>
                                     <el-button type="text" @click="onClick(item)">详细</el-button>
                                 </el-card>
                             </el-main>
@@ -2801,6 +2889,8 @@ class Topological {
                                         <entity-diagnosis-profile :id="item.name" :model="it.model[it.type]" v-if="it.type === 'profile'"></entity-diagnosis-profile>
                                         
                                         <entity-diagnosis-event :model="it.model[it.type]" v-if=" _.includes(['event','log'],it.type) "></entity-diagnosis-event>
+
+                                        <entity-diagnosis-people :model="it.model[it.type]" v-if=" _.includes(['call'],it.type) "></entity-diagnosis-people>
 
                                         <entity-diagnosis-performance :model="it.model[it.type]" v-if="it.type === 'history'"></entity-diagnosis-performance>
                                         
