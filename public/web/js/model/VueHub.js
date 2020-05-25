@@ -45,6 +45,8 @@ setInterval(()=>{
     $(".has-time").addClass("el-picker-panel el-date-range-picker el-popper");
     $(".el-dialog__wrapper.transition.ElDialog").removeClass("transition ElDialog");
     $(".el-message-box__wrapper").removeClass("transition");
+    $(".el-checkbox-group > label").addClass("el-checkbox");
+    $(".el-radio-group > label").addClass("el-radio");
     $("i[class^='elicon']").css("font-size","14px");
 //    $(".el-tabs__nav.is-left > div:eq(0)").addClass("el-tabs__active-bar");
 },50)

@@ -31,6 +31,21 @@
             background-color: #ff0000;
         }
 
+        /* alternating column backgrounds */
+        .vis-time-axis .vis-grid.vis-odd {
+            background: #f5f5f5;
+        }
+
+        /* gray background in weekends, white text color */
+        .vis-time-axis .vis-grid.vis-saturday,
+        .vis-time-axis .vis-grid.vis-sunday {
+            background: #f6f6f6;
+        }
+        .vis-time-axis .vis-text.vis-saturday,
+        .vis-time-axis .vis-text.vis-sunday {
+            color: white;
+        }
+
         .topological-timeline .el-color-picker--mini > .el-color-picker__trigger {
             height: 12px;
             width: 12px;
@@ -97,7 +112,7 @@
                             <el-button type="text" icon="el-icon-zoom-out" @click="onTimelineZoomout(0.2)" style="padding:5px 0px;"></el-button>
                         </el-tooltip>
                         <el-divider direction="vertical"></el-divider>
-                        <!--el-checkbox v-model="timeline.showDiff">显示差异</el-checkbox-->
+                        <el-checkbox v-model="timeline.showDiff">显示差异</el-checkbox>
                         <el-popover
                             placement="top-start"
                             width="200"
@@ -137,6 +152,7 @@
             return {
                 timeline:{
                     showDiff:false,
+                    id: 'current',
                     pickDate: _.now(),
                     pickRange: -1,
                     pickerOptions: {
@@ -166,67 +182,30 @@
                     options: {
                         height: '100%',
                         margin: {
-                            item: 10
+                            item: 20
                         },
+                        
+                        editable: false,
                         type: "point",
-                        editable: true,
                         zoomMin: 60 * 60 * 1000,
                         zoomMax: 60 * 60 * 24 * 1000 * 365 * 5,
-                        showCurrentTime: true,
+                        showCurrentTime: false,
                         showWeekScale: true,
-                        zoomable: false,
+                        zoomable: true,
                         stack: true,
                         verticalScroll: true,
                         locale: 'zh_CN'
                         
+                    },
+                    customTime:{
+                        marker: '拖动进行回溯查询，双击取消'
                     }
                 },
                 tree: {
-                    data: [{
-                        id: 1,
-                        name: 'all',
-                        label:'实体关联数据',
-                        children: [{
-                            id: 11,
-                            name: 'profile',
-                            label: '配置',
-                            children: [],
-                            color:"#ff0000"
-                        },{
-                            id: 111,
-                            name: 'call',
-                            label: '电话',
-                            children: [],
-                            color:"#ff0000"
-                        },{
-                            id: 12,
-                            name: 'event',
-                            label: '事件',
-                            children: [],
-                            color:"#ff0000"
-                        },{
-                            id: 13,
-                            name: 'performance',
-                            label: '性能',
-                            children: [],
-                            color:"#ff0000"
-                        },{
-                            id: 14,
-                            name: 'tips',
-                            label: '备注',
-                            children: [],
-                            color:"#ff0000"
-                        },{
-                            id: 15,
-                            name: 'files',
-                            label: '附件',
-                            children: [],
-                            color:"#ff0000"
-                        }]
-                    }],
+                    data: [],
                     defaultProps: {
                         children: 'children',
-                        label: 'label'
+                        label: 'title'
                     },
                     selected:null,
                     diagnosisData: null
@@ -257,10 +236,25 @@
             },
             'timeline.pickRange':function(val,oldVal){
                 this.setTimelineRange();
+            },
+            'timeline.showDiff':function(val,oldVal){
+                if(!val){
+                    this.timeline.inst.removeCustomTime(this.timeline.id);
+                } else {
+                    this.setCustomTimeline();
+                }
             }
         },
         created(){
             this.setItems();
+            this.initDiagnosisData();
+
+            // ReDraw Timeline
+            eventHub.$on("TIMELINE-REDRAW-EVENT",()=>{
+                _.delay(()=>{
+                    this.timeline.inst.redraw();
+                },500)
+            });
 	    },
 	    mounted() {
             this.$nextTick(() => {
@@ -269,16 +263,23 @@
                     this.timeline.inst = new vis.Timeline(this.$refs.timeline, this.timeline.items, this.timeline.options);
                     this.timeline.inst.fit({animation: true});
                     this.timeline.inst.on('select', this.onSelect);
-                    this.timeline.inst.on("doubleClick",(properties)=> {
+                    this.timeline.inst.on('timechanged', (properties)=> {
                         let props = this.timeline.inst.getEventProperties(properties.event)
                         this.onClick(props);
-                    })
+                    });
+                    // this.timeline.inst.on("doubleClick",(properties)=> {
+                    //     let props = this.timeline.inst.getEventProperties(properties.event)
+                    //     this.onClick(props);
+                    // });
                 },50)
                 
             })
 	        
 	    },
 	    methods: {
+            initDiagnosisData(){
+                this.tree.data = fsHandler.callFsJScript("/matrix/graph/getEntityDiagnosisDataType.js",null).message;
+            },
             onNodeCheckChange(data, checked, indeterminate){
                 this.tree.selected = _.groupBy(this.$refs.tree.getCheckedNodes(),'name');
             },
@@ -287,6 +288,7 @@
             },
             onFullScreen(){
                 this.control.ifFullScreen = mx.fullScreenByEl(this.$refs.container.$el);
+                this.timeline.inst.redraw();
             },
             add(){
                 //this.timeline.items.pLOWERh();
@@ -296,31 +298,52 @@
 
                     let start,end = null;
 
+                    // 全部 可缩放时间轴
                     if(this.timeline.pickRange == -1){
+
                         if(!_.isEmpty(this.tree.diagnosisData)){
                             let data = _.orderBy(_.filter(_.flatMap(this.tree.diagnosisData),null),['vtime'],['asc']);
                             start = moment( _.head(data)['vtime'] ).add(-1,'days');;
                             end = moment( _.last(data)['vtime'] ).add(1,'days');;
+                            this.timeline.inst.setOptions({start:start,end:end});
                         }
-                        
+                        this.timeline.inst.setOptions({zoomable:true});
                     } else {
                         start = moment(this.timeline.pickDate).add(-this.timeline.pickRange);
                         end = moment(this.timeline.pickDate).add(+this.timeline.pickRange);
+                        this.timeline.inst.setOptions({start:start,end:end});
+                        this.timeline.inst.setOptions({zoomable:false});
                     }
-                    
-                    this.timeline.inst.setOptions({start:start,end:end});
+                     
                 } catch(err){
                     
                 } finally{
-                    let customDate = moment(this.timeline.pickDate).format("YYYY-MM-DD HH:MM:SS");
-                    try {                    
-                        this.timeline.inst.removeCustomTime('当前');
-                    } catch (err) {
-                        
-                    } finally{
-                        this.timeline.inst.addCustomTime(customDate, '当前');
-                    }
+                    if(this.timeline.showDiff){
+                        this.setCustomTimeline();
+                    }                    
                 }
+            },
+            setCustomTimeline(){
+                
+                let customDate = moment(this.timeline.pickDate).format("YYYY-MM-DD HH:MM:SS");
+                let id = this.timeline.id;
+                try {                    
+                    // 删除自定义时间点
+                    this.timeline.inst.removeCustomTime(id);
+
+                    // 设置选择的时间点窗口
+                    let start,end = null;
+                    start = moment(this.timeline.pickDate).add(-this.timeline.pickRange);
+                    end = moment(this.timeline.pickDate).add(+this.timeline.pickRange);
+                    this.timeline.inst.setWindow(start,end);
+
+                } catch (err) {
+                    
+                } finally{
+                    // 设置自定义时间点
+                    this.timeline.inst.addCustomTime(customDate, id);
+                    this.timeline.inst.setCustomTimeMarker(`${this.timeline.pickDate}(${this.timeline.customTime.marker})`, id);
+                } 
             },
             setItems(){
 
@@ -331,83 +354,48 @@
                     return false;
                 }
                 
-                let term = this.model.join(";");
-                this.tree.diagnosisData = fsHandler.callFsJScript("/matrix/graph/getDiagnosisDataByIds.js",encodeURIComponent(term)).message;
+                let term = {
+                    model: _.keys(this.tree.selected),
+                    ids:this.model.join(";")
+                };
+                this.tree.diagnosisData = fsHandler.callFsJScript("/matrix/graph/getDiagnosisDataByIds.js",encodeURIComponent(JSON.stringify(term))).message;
+                
                 _.forEach(this.tree.diagnosisData,(v,k)=>{
-                    
-                    // 判断是否勾选，勾选的数据才显示到时间轴上
-                    if(this.tree.selected[k]){
-                        if(k==='event'){
-                            let items  = _.map(v,(val)=>{
-                                let bgColor = mx.global.register.event.severity[val.severity][2];
-                                let item = {
-                                    id: v.id,
-                                    group: k,
-                                    content: `<button type="button" class="el-button el-button--mini" style="background:${bgColor};float:left;text-align:left;">
-                                                ${val.host}<br>
-                                                ${val.msg || val.desc}<br>
-                                                ${moment(val.vtime).format("YYY-MM-DD HH:MM:SS")}
-                                            </button>`,
-                                    start: val.vtime
-                                };
-                                return item;
-                            });
-                            this.timeline.items.add(items);
-                        } else if(k==='performance'){
-                            let items  = _.map(v,(val)=>{
-                                let bgColor = "#f7f7f7";
-                                let value = _.endsWith(val.param,'usedpercent')?val.value+'%':mx.bytesToSize(val.value);
-                                let item = {
-                                    id: v.id,
-                                    group: k,
-                                    content: `<button type="button" class="el-button el-button--mini" style="background:${bgColor};float:left;text-align:left;">
-                                                ${val.host}<br>
-                                                ${val.param}<br>
-                                                ${value}<br>
-                                                ${moment(val.vtime).format("YYY-MM-DD HH:MM:SS")}
-                                            </button>`,
-                                    start: val.vtime
-                                };
-                                return item;
-                            });
-                            this.timeline.items.add(items);
-                        } else if(k==='call'){
-                            let items  = _.map(v,(val)=>{
-                                let bgColor = "#f7f7f7";
-                                let item = {
-                                    id: v.id,
-                                    group: k,
-                                    content: `<button type="button" class="el-button el-button--mini" style="background:${bgColor};float:left;text-align:left;">
-                                                呼叫：${val.oppositenumber}<br>
-                                                被叫：${val.name}<br>
-                                                时长：${val.timeperiod} 秒<br>
-                                                位置：${val.location}<br>
-                                                时间：${moment(val.vtime).format("YYY-MM-DD HH:MM:SS")}
-                                            </button>`,
-                                    start: val.vtime
-                                };
-                                return item;
-                            });
-                            this.timeline.items.add(items);
-                        } else {
-                            let items  = _.map(v,(val)=>{
-                                let item = {
-                                    id: v.id,
-                                    group: k,
-                                    content: `<button type="button" class="el-button el-button--mini" style="float:left;text-align:left;">
-                                                ${val.host}<br>
-                                                ${val.msg || val.desc}<br>
-                                                ${moment(val.vtime).format("YYY-MM-DD HH:MM:SS")}
-                                            </button>`,
-                                    start: val.vtime
-                                };
-                                return item;
-                            });
-                            this.timeline.items.add(items);
+                    let items  = [];
+                    _.forEach(v,(val)=>{
+                        if(val.id){
+                            let id = val.id;
+                            let item = {
+                                id: id,
+                                group: k,
+                                content: `<div id="timeline_${objectHash.sha1(id)}">${id}</div>`,
+                                start: val.vtime
+                            };
+                            
+                            items.push(item);
                         }
-                    }
+                    });
+                    this.timeline.items.add(items);
+                })
+                _.delay(()=>{
+                    _.forEach(this.tree.diagnosisData,(v,k)=>{
+                    
+                        _.forEach(v,(val)=>{
+                            if(val.id){
+                                let id = val.id;
+                                new Vue({
+                                    data: {
+                                        src: id,
+                                    },
+                                    template: `<form-card-component :term="src" cHeight="20" style="width:auto;height:auto;"></form-card-componetn>`
+                                }).$mount(`#timeline_${objectHash.sha1(id)}`)
+                            }
+                        });
+                        
+                    })
+                },2000)
 
-                }); 
+                this.timeline.inst.redraw();
 
             },
             onTimelineZoomin(percentage){
@@ -433,39 +421,31 @@
                 try{
                     let timeline = this.timeline.inst;
                     
-                    if (props.what === 'custom-time') {
-                        timeline.removeCustomTime(props.customTime);
-                    } else {
-                        
-                        let id = moment(props.time.toString()).format("YYYY-MM-DD HH:MM:SS");
-
-                        let oldTerm = this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.$refs.searchToolbar.term.split(" diff ");
-                        oldTerm[1] = `'${id}'`;
-                        let term = oldTerm.join(" diff ")
-                        
-                        this.$message({
-                            type: "info",
-                            message: " 图查询: " + term
-                        });
-
-                        _.delay(()=>{
-                            this.$root.$refs.graphViewRef.search( encodeURIComponent(term) );
-                            this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.$refs.searchToolbar.term = term;
-                        },500)
-
-                        // 添加标注
-                        timeline.addCustomTime(props.time, id);
-                        timeline.setCustomTimeMarker(term, id);
-                    }
+                    let id = this.timeline.pickDate = moment(props.time.toString()).format("YYYY-MM-DD HH:MM:SS");
+                    console.log(props,this.timeline.pickDate)    
+                    let oldTerm = this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.$refs.searchToolbar.term.split(" diff ");
+                    oldTerm[1] = `'${id}'`;
+                    let term = oldTerm.join(" diff ")
+                    
+                    this.$message({
+                        type: "info",
+                        message: " 图查询: " + term
+                    });
+                    
+                    _.delay(()=>{
+                        this.$root.$refs.graphViewRef.search( encodeURIComponent(term) );
+                        this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.$refs.searchToolbar.term = term;
+                    },500)
+                    
 
                 } catch(err){
-
+                    console.log(err)
                 }
 
             },
             onClose(){
                 this.$parent.$parent.$parent.$parent.model.graph.footbar.show = false;
-                this.$parent.$parent.$parent.$parent.model.control.show = true;
+                this.$parent.$parent.$parent.$parent.model.control.toolbar.show = true;
             }
 	    }
 	

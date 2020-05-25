@@ -1,0 +1,196 @@
+<code>
+
+	<style scoped>
+		/*----------  style  ----------*/
+        
+        .topological-timeline-mini .vis-timeline {
+            border: 1px solid #ddd;
+            font-size: 12px;
+            background: #fff;
+        }
+
+        
+        .topological-timeline-mini .rangeBg{
+            background: rgba(0,10,133,0.3);
+            border: #dddddd;
+            height:100%;
+        }
+        .topological-timeline-mini .vis-item-content{
+            padding: 5px 20px;
+        }
+
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="topological-timeline-mini"  ----------*/
+	<template>
+        <el-container style="height:60px;width:100%;" ref="container">
+            <el-main style="width:100%;height:100%;padding:0px;display: flex;overflow: hidden;">
+                <el-button type="text" icon="el-icon-arrow-left" @click="onTimeLineMove(0.2)"></el-button>
+                <div id="timeline" ref="timeline" style="width:100%;height:100%;position: relative;"></div>
+                <el-button type="text" icon="el-icon-arrow-right" @click="onTimeLineMove(-0.2)"></el-button>
+            </el-main>
+        </el-container>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="topological-timeline-mini">
+	{
+	    delimiters: ['#{', '}#'],
+	    props: {
+	        model: Array
+	    },
+	    data() {
+            return {
+                timeline:{
+                    inst: null,
+                    start: moment().add(-2,'hours'),
+                    end: moment().add(-2,'hours'),
+                    items:  new vis.DataSet(),
+                    options: {
+                        height: '100%',
+                        editable: true,
+                        clickToUse: true,
+                        zoomMin: 60 * 5 * 1000,
+                        zoomMax: 60 * 60 * 24 * 1000,
+                        zoomable: true,
+                        locale: 'zh_CN',
+                        type: 'range',
+                        onMove: (item, callback)=> {
+                            this.updateItem(item.start,item.end); 
+                        }
+                        
+                    }
+                },
+                control: {
+                    ifFullScreen:false
+                }
+            }
+        },
+        filters:{
+            pickScreenStyle(evt){
+                if(evt){
+                    return `el-icon-full-screen`;
+                } else {
+                    return `el-icon-copy-document`;
+                }
+            }
+        },
+        mounted() {
+            this.$nextTick(() => {
+                _.delay(()=>{
+
+                    this.timeline.inst = new vis.Timeline(this.$refs.timeline, this.timeline.items, this.timeline.options);
+                    this.timeline.inst.fit({animation: true});
+                    //this.timeline.inst.on('select', this.onSelect);
+                    this.timeline.inst.on('timechanged', (props)=> {
+                        let temp = this.timeline.inst.getEventProperties(props.event)
+                    });
+                    
+                    this.timeline.inst.on('rangechanged', (props)=> {
+                        let start = props.start;
+                        let end = props.end;
+                        this.initItem(start,end);
+                    });
+                    /* this.timeline.inst.on("doubleClick",(properties)=> {
+                        let props = this.timeline.inst.getEventProperties(properties.event)
+                        this.onClick(props);
+                    }); */
+                    this.initWindow();
+                },500)
+                
+            })
+	        
+	    },
+	    methods: {
+            initWindow(){
+                this.timeline.inst.setOptions({start:this.timeline.start,end:this.timeline.end});
+            },
+            initItem(start,end){
+
+                if(this.timeline.items.length > 0){
+                    return false;
+                }
+
+                this.timeline.items.add({
+                    id: '1', 
+                    title: `时间窗口：${moment(this.timeline.start).format(mx.global.register.format)} 至 ${moment(this.timeline.end).format(mx.global.register.format)}`, 
+                    start: start, end: end, 
+                    className: 'rangeBg',
+                    align: 'center'
+                });
+                this.timeline.inst.redraw();
+
+            },
+            updateItem(start,end){
+
+                this.timeline.items.clear();
+
+                this.timeline.items.add({
+                    id: '1', 
+                    title: `时间窗口：${moment(start).format(mx.global.register.format)} 至 ${moment(end).format(mx.global.register.format)}`, 
+                    start: start, end: end, 
+                    className: 'rangeBg',
+                    align: 'center'
+                });
+                this.timeline.inst.redraw();
+                
+                this.timeline.start = start;
+                this.timeline.end = end;
+
+            },
+            onFullScreen(){
+                this.control.ifFullScreen = mx.fullScreenByEl(this.$refs.container.$el);
+                this.timeline.inst.redraw();
+            },
+            setTimelineRange(){
+                try{
+
+                    let start,end = null;
+
+                    // 全部 可缩放时间轴
+                    if(this.timeline.pickRange == -1){
+
+                        if(!_.isEmpty(this.tree.diagnosisData)){
+                            let data = _.orderBy(_.filter(_.flatMap(this.tree.diagnosisData),null),['vtime'],['asc']);
+                            start = moment( _.head(data)['vtime'] ).add(-1,'days');;
+                            end = moment( _.last(data)['vtime'] ).add(1,'days');;
+                            this.timeline.inst.setOptions({start:start,end:end});
+                        }
+                        this.timeline.inst.setOptions({zoomable:true});
+                    } else {
+                        start = moment(this.timeline.pickDate).add(-this.timeline.pickRange);
+                        end = moment(this.timeline.pickDate).add(+this.timeline.pickRange);
+                        this.timeline.inst.setOptions({start:start,end:end});
+                        this.timeline.inst.setOptions({zoomable:false});
+                    }
+                     
+                } catch(err){
+                    
+                } finally{
+                    if(this.timeline.showDiff){
+                        this.setCustomTimeline();
+                    }                    
+                }
+            },
+            onTimelineZoomin(percentage){
+                this.timeline.inst.zoomIn(percentage);
+            },
+            onTimelineZoomout(percentage){
+                this.timeline.inst.zoomOut(percentage);
+            },
+            onTimeLineMove(percentage){
+                let range = this.timeline.inst.getWindow();
+                let interval = range.end - range.start;
+
+                this.timeline.inst.setWindow({
+                    start: range.start.valueOf() - interval * percentage,
+                    end:   range.end.valueOf()   - interval * percentage
+                });
+            }
+	    }
+	
+	}
+	</script>
+
+</code>

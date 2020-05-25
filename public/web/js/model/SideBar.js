@@ -634,7 +634,7 @@ class SideBar {
                                     <img :src="item.icon | pickIcon" style="width:18px;"></img>
                                     <span slot="title">
                                         #{item.cnname}#
-                                        <el-tooltip content="在新窗口中打开">
+                                        <el-tooltip content="在新窗口中打开" open-delay="500"  placement="right-start">
                                             <el-button type="text" icon="el-icon-position" @click.stop.prevent="onClick(item.url)" style="float:right;transform:scale(0.6);color:#ffffff;"></el-button>
                                         </el-tooltip>
                                     </span>

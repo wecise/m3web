@@ -710,7 +710,7 @@ class FsHandler {
 
         // 打标签
         if(_.endsWith(name,'tag_service.js')){
-            let system = window.location.pathname.replace(/\/janesware\//,'');
+            let system = window.location.pathname.replace(/\/matrix\//,'');
             term = encodeURIComponent(JSON.stringify(_.merge(JSON.parse(decodeURIComponent(term)), {
                 system:system,
                 user:window.SignedUser_UserName
@@ -743,6 +743,46 @@ class FsHandler {
 
         return rtn;
     };
+
+    /*
+    *   Server端脚本调用
+    *
+    *       参数：
+    *
+    */
+   callFsJScriptString(term,content){
+
+    let rtn = null;
+
+    // 打标签
+    if(_.endsWith(name,'tag_service.js')){
+        let system = window.location.pathname.replace(/\/matrix\//,'');
+        term = encodeURIComponent(JSON.stringify(_.merge(JSON.parse(decodeURIComponent(term)), {
+            system:system,
+            user:window.SignedUser_UserName
+        })));
+    }
+
+    jQuery.ajax({
+        url: `/script/exec/js?input=${term}`,
+        type: "POST",
+        data: content,
+        async: false,
+        dataType: 'json',
+        contentType: false,
+        beforeSend: function(xhr) {},
+        complete: function(xhr, textStatus) {},
+        success: function(data, textStatus, xhr) {
+            userHandler.ifSignIn(data);
+            rtn = data;
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            rtn = xhr.responseText;
+        }
+    });
+
+    return rtn;
+};
 
     callFsJScriptAsync(name,term){
 

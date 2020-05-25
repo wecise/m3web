@@ -108,131 +108,137 @@ Sidebar.prototype.init = function()
 		  'Router_Icon': 'router switch'});*/
 
 
-    var dir = STENCIL_PATH;
-    let entity = null;
-    let self = this;
-    let conds = `#&className/: | top &top`;
-    let ospace = window.COMPANY_NAME;
-	
-	if(window.URL_PARAMS_ITEM.ftype == 'imap'){
+	try{
 
-        self.addSearchPalette(true);
-
-		// entity
-		let temp = omdbHandler.classList("/matrix/entity");
+		var dir = STENCIL_PATH;
+		let entity = null;
+		let self = this;
+		let conds = `#&className/: | top &top`;
+		let ospace = window.COMPANY_NAME;
 		
-		entity = _.sortBy(_.map(temp,function(v){
-			return { name:v.name, alias: v.alias };
-		}),['alias'],['asc']);
 		
-        this.imapConfig = _.map(entity,'alias')
+		if(window.URL_PARAMS_ITEM.ftype == 'imap'){
 
-        _.delay(function(){
+			self.addSearchPalette(true);
 
-            if(!_.isEmpty(entity)){
+			// entity
+			let temp = omdbHandler.classList("/matrix/entity");
+			
+			entity = _.sortBy(_.map(temp,function(v){
+				return { name:v.name, alias: v.alias };
+			}),['alias'],['asc']);
+			
+			this.imapConfig = _.map(entity,'alias')
 
-                let _data = null;
-                _.forEach(entity,function(v,k){
-                    let _tmp = omdbHandler.fetchData(conds.replace(/&className/,v.name).replace(/&top/,500));
+			_.delay(function(){
 
-                    if(_.isNull(_tmp.message)) {
-                        return;
-                    }
-                    _data = _tmp.message;
+				if(!_.isEmpty(entity)){
 
-                    let tags = {};
-                    _.forEach(_data,function(val,key){
-                        tags[val.name] = _.values(val).join(" ");
-                    })
+					let _data = null;
+					_.forEach(entity,function(v,k){
+						let _tmp = omdbHandler.fetchData(conds.replace(/&className/,v.name).replace(/&top/,500));
 
-                    self.addEntitiesMatrixPalette('entities', v.alias, dir + '/matrix/12/', v.alias, '.png', _data, _data, tags, false);
-                })
+						if(_.isNull(_tmp.message)) {
+							return;
+						}
+						_data = _tmp.message;
 
-            }
+						let tags = {};
+						_.forEach(_data,function(val,key){
+							tags[val.name] = _.values(val).join(" ");
+						})
 
-			self.addBimPalette('bim', mxResources.get('mx-menu-shape-bim'), dir + '', '.png',
-                ['bim_01', 'bim_02', 'bim_03', 'bim_04'], ['bim_01', 'bim_02', 'bim_03', 'bim_04'],
-                {'Wireless_Router_N': 'wireless router switch wap wifi access point wlan',
-                    'Router_Icon': 'router switch'});
+						self.addEntitiesMatrixPalette('entities', v.alias, dir + '/matrix/12/', v.alias, '.png', _data, _data, tags, false);
+					})
 
-            self.addSvgPalette('map', mxResources.get('mx-menu-shape-map'), dir + '/map/', '.svg',
-                ['China', 'ChinaGrey', 'Singapore', 'UnitedKingdom', 'Usa'], ['China', 'ChinaGrey', 'Singapore', 'UnitedKingdom', 'Usa'],
-                {'Wireless_Router_N': 'wireless router switch wap wifi access point wlan',
-                    'Router_Icon': 'router switch'});
+				}
 
-            self.addGeneralPalette(false);
-            self.addMiscPalette(false);
-            self.addAdvancedPalette(false);
-            self.addBasicPalette(dir);
-            self.addStencilPalette('arrows', mxResources.get('arrows'), dir + '/arrows.xml',
-                ';whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=1');
-            self.addUmlPalette(false);
-            self.addBpmnPalette(dir, false);
-            self.addStencilPalette('flowchart', mxResources.get('mx-menu-shape-flowchart'), dir + '/flowchart.xml',
-                ';whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=1');
-            self.addImagePalette('clipart', mxResources.get('clipart'), dir + '/clipart/', '_128x128.png',
-                ['Earth_globe', 'Empty_Folder', 'Full_Folder', 'Gear', 'Lock', 'Software', 'Virus', 'Email',
-                    'Database', 'Router_Icon', 'iPad', 'iMac', 'Laptop', 'MacBook', 'Monitor_Tower', 'Printer',
-                    'Server_Tower', 'Workstation', 'Firewall_02', 'Wireless_Router_N', 'Credit_Card',
-                    'Piggy_Bank', 'Graph', 'Safe', 'Shopping_Cart', 'Suit1', 'Suit2', 'Suit3', 'Pilot1',
-                    'Worker1', 'Soldier1', 'Doctor1', 'Tech1', 'Security1', 'Telesales1'], null,
-                {'Wireless_Router_N': 'wireless router switch wap wifi access point wlan',
-                    'Router_Icon': 'router switch'});
-        },500)
-    } else if(window.URL_PARAMS_ITEM.ftype == 'iepc'){
+				self.addBimPalette('bim', mxResources.get('mx-menu-shape-bim'), dir + '', '.png',
+					['bim_01', 'bim_02', 'bim_03', 'bim_04'], ['bim_01', 'bim_02', 'bim_03', 'bim_04'],
+					{'Wireless_Router_N': 'wireless router switch wap wifi access point wlan',
+						'Router_Icon': 'router switch'});
 
-        self.addSearchPalette(false);
+				self.addSvgPalette('map', mxResources.get('mx-menu-shape-map'), dir + '/map/', '.svg',
+					['China', 'ChinaGrey', 'Singapore', 'UnitedKingdom', 'Usa'], ['China', 'ChinaGrey', 'Singapore', 'UnitedKingdom', 'Usa'],
+					{'Wireless_Router_N': 'wireless router switch wap wifi access point wlan',
+						'Router_Icon': 'router switch'});
 
-        _.delay(function(){
-            $("#imap-tabs ul").remove();
+				self.addGeneralPalette(false);
+				self.addMiscPalette(false);
+				self.addAdvancedPalette(false);
+				self.addBasicPalette(dir);
+				self.addStencilPalette('arrows', mxResources.get('arrows'), dir + '/arrows.xml',
+					';whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=1');
+				self.addUmlPalette(false);
+				self.addBpmnPalette(dir, false);
+				self.addStencilPalette('flowchart', mxResources.get('mx-menu-shape-flowchart'), dir + '/flowchart.xml',
+					';whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=1');
+				self.addImagePalette('clipart', mxResources.get('clipart'), dir + '/clipart/', '_128x128.png',
+					['Earth_globe', 'Empty_Folder', 'Full_Folder', 'Gear', 'Lock', 'Software', 'Virus', 'Email',
+						'Database', 'Router_Icon', 'iPad', 'iMac', 'Laptop', 'MacBook', 'Monitor_Tower', 'Printer',
+						'Server_Tower', 'Workstation', 'Firewall_02', 'Wireless_Router_N', 'Credit_Card',
+						'Piggy_Bank', 'Graph', 'Safe', 'Shopping_Cart', 'Suit1', 'Suit2', 'Suit3', 'Pilot1',
+						'Worker1', 'Soldier1', 'Doctor1', 'Tech1', 'Security1', 'Telesales1'], null,
+					{'Wireless_Router_N': 'wireless router switch wap wifi access point wlan',
+						'Router_Icon': 'router switch'});
+			},500)
+		} else if(window.URL_PARAMS_ITEM.ftype == 'iepc'){
 
-            $("#imap-config").removeClass("active");
-            $("#imap-shape").addClass("active");
+			self.addSearchPalette(false);
 
-            self.addEpcPalette(true);
+			_.delay(function(){
+				$("#imap-tabs ul").remove();
 
-        },500)
-    } else if(window.URL_PARAMS_ITEM.ftype == 'iflow'){
+				$("#imap-config").removeClass("active");
+				$("#imap-shape").addClass("active");
 
-        self.addSearchPalette(false);
+				self.addEpcPalette(true);
 
-        _.delay(function(){
-            $("#imap-tabs ul").remove();
+			},500)
+		} else if(window.URL_PARAMS_ITEM.ftype == 'iflow'){
 
-            $("#imap-config").removeClass("active");
-            $("#imap-shape").addClass("active");
+			self.addSearchPalette(false);
 
-            self.addEpcPalette(true);
+			_.delay(function(){
+				$("#imap-tabs ul").remove();
 
-        },500)
-    } else if(window.URL_PARAMS_ITEM.ftype == 'itask'){
+				$("#imap-config").removeClass("active");
+				$("#imap-shape").addClass("active");
 
-        self.addSearchPalette(false);
+				self.addEpcPalette(true);
 
-        _.delay(function(){
-            $("#imap-tabs ul").remove();
+			},500)
+		} else if(window.URL_PARAMS_ITEM.ftype == 'itask'){
 
-            $("#imap-config").removeClass("active");
-            $("#imap-shape").addClass("active");
+			self.addSearchPalette(false);
 
-            self.addJobPalette(true);
+			_.delay(function(){
+				$("#imap-tabs ul").remove();
 
-        },500)
-    } else if(window.URL_PARAMS_ITEM.ftype == 'itask'){
+				$("#imap-config").removeClass("active");
+				$("#imap-shape").addClass("active");
 
-        self.addSearchPalette(false);
+				self.addJobPalette(true);
 
-        _.delay(function(){
-            $("#imap-tabs ul").remove();
+			},500)
+		} else if(window.URL_PARAMS_ITEM.ftype == 'itask'){
 
-            $("#imap-config").removeClass("active");
-            $("#imap-shape").addClass("active");
+			self.addSearchPalette(false);
 
-            self.addJobPalette(true);
+			_.delay(function(){
+				$("#imap-tabs ul").remove();
 
-        },500)
-    }
-    $(".geTitle").insertAfter($("#imap-config"));
+				$("#imap-config").removeClass("active");
+				$("#imap-shape").addClass("active");
+
+				self.addJobPalette(true);
+
+			},500)
+		}
+		$(".geTitle").insertAfter($("#imap-config"));
+	} catch(err){
+		console.log(err)
+	}
 };
 
 /**

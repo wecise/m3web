@@ -36,6 +36,13 @@ Vue.component("mx-fs-editor",{
             },
             tree: {
                 root: "/"
+            },
+            file: {
+                dialogSaveAs:{
+                    title: "另存为",
+                    content: "",
+                    visible: false
+                }
             }
         }
     },
@@ -54,7 +61,7 @@ Vue.component("mx-fs-editor",{
                                 <el-dropdown-item @click.native="onReload">重打开</el-dropdown-item>
                                 
                                 <el-dropdown-item @click.native="onSave" divided>保存  ctrl+s</el-dropdown-item>
-                                <el-dropdown-item @click.native="onSaveAs">另存为</el-dropdown-item>
+                                <el-dropdown-item @click.native="file.dialogSaveAs.visible=true">另存为</el-dropdown-item>
 
                                 <el-dropdown-item @click.native="onCloseTab" divided>关闭当前页</el-dropdown-item>
                                 <el-dropdown-item @click.native="onCloseWin">关闭窗口</el-dropdown-item>
@@ -97,17 +104,31 @@ Vue.component("mx-fs-editor",{
                         <el-tooltip content="主题" open-delay="500">
                             <el-button type="text" :class="'editor-select-theme-'+tabs.activeIndex" v-show="!_.isEmpty(tabs.list)" style="float:right;"><i class="fas fa-tshirt"></i> 主题</el-button>
                         </el-tooltip>
+
+                        <!-- 保存窗口 -->
+                        <el-dialog :title="file.dialogSaveAs.title" :visible.sync="file.dialogSaveAs.visible">
+                            <mx-fs-saveas :dfsRoot="tree.root" ref="dfsSaveas"></mx-fs-saveas>
+                            <div slot="footer" class="dialog-footer">
+                                <el-button @click="file.dialogSaveAs.visible = false">取 消</el-button>
+                                <el-button type="primary" @click="onFileSaveAs">另存为</el-button>
+                            </div>
+                        </el-dialog>
                     </el-header>
                     <el-container style="height: 100%;min-height:300px;border-top:1px solid #fff;">
                         <el-aside style="background-color:#f6f6f6;width:200px;overflow:hidden;" ref="leftView">
-                            <mx-fs-tree :root="tree.root" :defaultExpandedKeys="[tabs.activeNode.fullname]" v-if="!_.isEmpty(tabs.activeNode)"></mx-fs-tree>
+                            <mx-fs-tree :root="tree.root" v-if="!_.isEmpty(tabs.activeNode)"></mx-fs-tree>
                         </el-aside>
                         <el-main style="padding:0px;overflow:hidden;" ref="mainView">
+                            <el-card v-if="_.isEmpty(tabs.list)">
+                                <h1>欢迎使用 M³ 在线编辑器</h1>
+                                <el-button type="default" @click="onNewProject">新建文件夹</el-button>
+                                <el-button type="default" @click="onNewFile">新建文件</el-button>
+                            </el-card>
                             <el-tabs v-model="tabs.activeIndex" type="border-card" 
                                     style="height:100%;" 
                                     closable 
                                     @tab-click="onTabClick"
-                                    @tab-remove="tabRemove">
+                                    @tab-remove="tabRemove" v-else>
                                 <el-tab-pane
                                     :key="item.name"
                                     v-for="(item, index) in tabs.list"
@@ -115,13 +136,14 @@ Vue.component("mx-fs-editor",{
                                     :name="item.name"
                                     style="height:100%;">
                                     <span slot="label">
-                                        <i class="fas fa-code" style="color:rgb(64, 158, 255);"></i> #{item.title}#
+                                        <i class="fas fa-code" style="color:rgb(64, 158, 255);"></i> #{item.model.name}#
                                         <el-dropdown trigger="click">
                                             <span class="el-dropdown-link">
                                                 <i class="el-icon-arrow-down"></i>
                                             </span>
                                             <el-dropdown-menu slot="dropdown">
-                                                <el-dropdown-item @click.native="tabClose(0,item)">关闭</el-dropdown-item>
+                                                <el-dropdown-item @click.native="onFormat">格式化</el-dropdown-item>
+                                                <el-dropdown-item @click.native="tabClose(0,item)" divided>关闭</el-dropdown-item>
                                                 <el-dropdown-item @click.native="tabClose(1,item)">关闭其它标签页</el-dropdown-item>
                                                 <el-dropdown-item @click.native="tabClose(2,item)">关闭右侧标签页</el-dropdown-item>
                                                 <el-dropdown-item divided>
@@ -138,6 +160,10 @@ Vue.component("mx-fs-editor",{
                             </el-tabs>
                         </el-main>
                     </el-container>
+                    <el-footer style="height:30px;line-height:30px;background:#f6f6f6;"> 
+                        <span>#{moment().format(mx.global.register.format)}#</span>
+
+                    </el-footer>
                 </el-container>`,
     created() {
         this.tree.root = this.root;
@@ -204,7 +230,6 @@ Vue.component("mx-fs-editor",{
                 // 添加tab
                 this.tabs.list.push({name: pID, title: [item.parent,item.name].join("/"), model: _.extend(item,{output:null})})
                 this.tabs.activeIndex = _.last(this.tabs.list).name;
-
                 _.delay(()=>{
                     this.initTheme();
                 },500)
@@ -281,6 +306,41 @@ Vue.component("mx-fs-editor",{
                     return editor.getValue();
                 }
             });
+        },
+        onFormat(){
+            let editor = ace.edit('editor-'+this.tabs.activeIndex);
+            let content = editor.getValue();
+            let IsJsonString = function(str) {
+                try {
+                    JSON.parse(str);
+                } catch (e) {
+                    return false;
+                }
+                return true;
+            };
+            
+            if(IsJsonString(content)){
+                editor.setValue(JSON.stringify(JSON.parse(content),null,2));
+            }
+        },
+        onFileSaveAs(){
+                    
+            let editor = ace.edit('editor-'+this.tabs.activeIndex);
+            let content = editor.getValue();
+            let attr = {remark: '', ctime: _.now(), author: window.SignedUser_UserName};
+            let ftype = this.tabs.activeNode.ftype;
+            let parent = this.$refs.dfsSaveas.node.fullname;
+            let name = this.$refs.dfsSaveas.node.name;
+            
+            let rtn = fsHandler.fsNew(ftype, this.tabs.activeNode.parent, this.tabs.activeNode.name, content, attr);
+            if(rtn == 1){
+                this.$message({
+                    type:"success",
+                    message: "另存成功！"
+                })
+            }
+
+            this.file.dialogSaveAs.visible = false; 
         },
         onPaste(){
             document.execCommand("paste");
@@ -833,8 +893,9 @@ Vue.component("mx-fs-tree",{
                         <el-tree :data="treeData" 
                                 :props="defaultProps" 
                                 node-key="fullname"
-                                highlight-current="true"
-                                default-expand-all="true"
+                                highlight-current
+                                default-expand-all
+                                auto-expand-parent
                                 @node-click="onNodeClick"
                                 :filter-node-method="onFilterNode"
                                 style="background:transparent;"
@@ -887,13 +948,20 @@ Vue.component("mx-fs-tree",{
                     eventHub.$emit("FS-FORWARD-EVENT", data, data.fullname);
                     
                 }
+
+                window.FS_TREE_DATA = this.$refs.tree.data;
+
             } catch(err){
 
             }
 
         },
         onInit(){
-            this.treeData = fsHandler.callFsJScript("/matrix/devops/getFsForTree.js", encodeURIComponent(this.root)).message;
+            if(window.FS_TREE_DATA){
+                this.treeData = window.FS_TREE_DATA;//fsHandler.callFsJScript("/matrix/devops/getFsForTree.js", encodeURIComponent(this.root)).message;
+            } else {
+                this.treeData = fsHandler.callFsJScript("/matrix/devops/getFsForTree.js", encodeURIComponent(this.root)).message;
+            }
         }
     }
 })
@@ -1044,6 +1112,105 @@ Vue.component("mx-entity-new",{
                     message: "实体插入失败 " + rtn.message
                 })
             }
+        }
+    }
+})
+
+/* Common Entity Tree */
+Vue.component("mx-entity-tree",{
+    delimiters: ['#{', '}#'],
+    props: {
+        root: String
+    },
+    data(){
+        return {
+            treeData: [],
+            defaultProps: {
+                children: 'children',
+                label: 'alias'
+            },
+            filterText: ""
+        }
+    },
+    template:   `<el-container style="height:60vh;">
+                    <el-header style="height:40px;line-height:40px;padding:0px 10px;">
+                        <el-input v-model="filterText" 
+                            placeholder="搜索" size="mini"
+                            clearable></el-input>
+                    </el-header>
+                    <el-main style="padding:0px 10px; height: 100%;">
+                        <el-tree :data="treeData" 
+                                :props="defaultProps" 
+                                node-key="id"
+                                highlight-current
+                                default-expand-all
+                                auto-expand-parent
+                                @node-click="onNodeClick"
+                                :filter-node-method="onFilterNode"
+                                style="background:transparent;"
+                                ref="tree">
+                            <span slot-scope="{ node, data }" style="width:100%;">
+                                <span v-if="data">
+                                    <i class="el-icon-c-scale-to-original" style="color:#0088cc;"></i> #{ node.label }#
+                                </span>
+                                <span v-else>
+                                    <i class="el-icon-folder" style="color:#ffa500;"></i> #{ node.label }#
+                                </span>
+                            </span>
+                        </el-tree>
+                    </el-main>
+                </el-container>`,
+    watch: {
+        filterText(val) {
+            if(_.isEmpty(val)){
+                this.initData();
+            } else {
+                this.$refs.tree.filter(val);
+            }
+        }
+    },
+    created(){
+        this.initData();
+    },
+    methods: {
+        initData(){
+            this.treeData = fsHandler.callFsJScript("/matrix/entity/entity_class.js",encodeURIComponent(this.root)).message;
+        },
+        onFilterNode:_.debounce(function(value, data) {
+            if (!value) return true;
+            try{
+                let rtn = fsHandler.callFsJScript("/matrix/graph/entity-search-by-term.js",encodeURIComponent(value)).message;
+                this.treeData = _.map(rtn,(v)=>{
+                    return _.extend(v,{ children:[], alias:_.last(v.class.split("/"))});
+                });
+            } catch(err){
+                this.treeData = [];
+            }
+        },1000),
+        onNodeClick(data){
+            try{
+
+                if(!data.isdir) {
+                    eventHub.$emit("FS-NODE-OPENIT-EVENT", data, data.parent);
+
+                } else {
+
+                    let childrenData = _.sortBy(fsHandler.fsList(data.fullname),'fullname');
+
+                    this.$set(data, 'children', childrenData);
+
+                    eventHub.$emit("FS-FORWARD-EVENT", data, data.fullname);
+                    
+                }
+
+                window.FS_TREE_DATA = this.$refs.tree.data;
+
+                eventHub.$emit("MX-ENTITY-TREE-NODE",data);
+
+            } catch(err){
+
+            }
+
         }
     }
 })

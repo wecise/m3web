@@ -23,15 +23,15 @@
 	<script src="/web/vendor/jquery/jquery-3.3.1.min.js"></script>
 
 	<!-- Bootstrap core CSS -->
-	<link href="/web/css/dist/css/bootstrap_wecise.css" rel="stylesheet">
+	<!-- <link href="/web/css/dist/css/bootstrap_wecise.css" rel="stylesheet">
 	<link href="/web/css/dist/css/theme_wecise.css" rel="stylesheet">
-	<script src="/web/css/dist/js/bootstrap.min.js"></script>
+	<script src="/web/css/dist/js/bootstrap.min.js"></script> -->
 
 
 	<!-- Color Theme core CSS -->
 	<!--<link href="/web/css/color/color_style.min.css" rel="stylesheet">
 	<link href="/web/css/color/color_style_responsive.min.css" rel="stylesheet">-->
-	<link href="/web/css/color/style.min.css" rel="stylesheet">
+	<!-- <link href="/web/css/color/style.min.css" rel="stylesheet"> -->
 
 	<!-- Bootstrap ICON  CSS -->
 	<link href="/web/vendor/font-awesome/5.4.1/css/all.min.css" rel="stylesheet" >
@@ -102,9 +102,9 @@
 
 	<script type="text/javascript" src="/web/vendor/lodash/dist/lodash.min.js"></script>
 
-	<!--Panel JS & CSS -->
-	<script src="/web/vendor/jsPanel/jquery.jspanel.min.js" type="text/javascript"></script>
-	<link href="/web/vendor/jsPanel/jquery.jspanel.min.css" type="text/css" rel="stylesheet" />
+    <!--jsPanel3 JS & CSS -->
+	<script src="/web/vendor/jsPanel/3.11.3/jquery.jspanel.min.js" type="text/javascript"></script>
+	<link href="/web/vendor/jsPanel/3.11.3/jquery.jspanel.min.css" type="text/css" rel="stylesheet" />
 
 	<!--Moment JS-->
 	<script src="/web/vendor/moment/min/moment.min.js"></script>
@@ -165,8 +165,13 @@
 <script type="text/javascript">
     
     (function(){
-        window.URL_PARAMS_ITEM = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(mx.urlParams['item']))));
-        window.URL_PARAMS_CFG = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(mx.urlParams['cfg']))));
+        
+        try{
+            window.URL_PARAMS_ITEM = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(mx.urlParams['item']))));
+            window.URL_PARAMS_CFG = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(mx.urlParams['cfg']))));
+        } catch(err){
+
+        }
 
         var editorUiInit = EditorUi.prototype.init;
 

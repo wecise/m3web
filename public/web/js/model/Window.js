@@ -281,9 +281,9 @@ class Window {
             onclosed: function(){
                 window.editorApp = null;
             },
-            footerToolbar: function (footer) {
+            /* footerToolbar: function (footer) {
                 return `<div style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format(mx.global.register.format)}</div>`;
-            }
+            } */
         });
 
         return win;
@@ -597,9 +597,52 @@ class Window {
         return win;
     }
 
+    winEntityInfo(title, template, position, container){
+
+        this.lrwh[2] = this.width * 0.3;
+        this.lrwh[3] = this.height * 0.6;
+
+        let win = $.jsPanel({
+            id: 'jsPanel-entity-info',
+            theme:          maxWindow.theme.dark,
+            headerTitle:   title,
+            contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
+            position: "center 0 0",
+            container: 'body',
+            headerControls: { maximize: 'remove' },
+            headerRemove:  false,
+            content:        template,
+            callback: function(){
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "1000"
+                });
+                
+                $(".jsPanel-headerbar",this).css({
+                    "min-height": "28px",
+                    "border-bottom": "none"
+                });
+                $(".jsPanel-content",this).css({
+                    "border-top": "none"
+                });
+                
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                
+                $(".jsPanel-titlebar h3",this).css({
+                    "font-size": "12px"
+                });
+
+            }
+        });
+
+        return win;
+    }
+
     winEntityTemplate(title, template, position, container){
 
-        this.lrwh[2] = this.width * 0.4;
+        this.lrwh[2] = this.width * 0.37;
         this.lrwh[3] = this.height * 0.6;
 
         let win = $.jsPanel({

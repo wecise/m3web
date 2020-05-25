@@ -1,47 +1,33 @@
 <code>
 
 	<style scoped>
-        .form-component .el-button--text{
+        .form-card-component .el-button--text{
             padding: 0 5px;
         }
 
-        .form-component .el-input__inner{
+        .form-card-component .el-input__inner{
             border-radius: 4px!important;
             border: 1px solid #ddd!important;
         }
         
-        .form-component .el-input--small .el-input__inner {
+        .form-card-component .el-input--small .el-input__inner {
             height: 32px!important;
             line-height: 32px!important;
+        }
+        .form-card-component .show{
+            box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
         }
 	</style>
 
 
-	/*----------  最外层element会自动增加组件同名 class="form-component"  ----------*/
+	/*----------  最外层element会自动增加组件同名 class="form-card-component"  ----------*/
 	<template>
-        <el-container :style="cHeight | pickStyle">
-            <el-header style="height:40px;line-height: 40px;text-align:right;">
-                <span>
-                    <el-tooltip content="刷新">
-                        <el-button type="text" icon="el-icon-refresh" @click="loadForm"></el-button>
-                    </el-tooltip>
-                    <el-tooltip content="更新">
-                        <el-button type="text" icon="el-icon-position"></el-button>
-                    </el-tooltip>
-                    <el-tooltip content="添加">
-                        <el-button type="text" icon="el-icon-plus"></el-button>
-                    </el-tooltip>
-                    <el-tooltip content="删除">
-                        <el-button type="text" icon="el-icon-delete"></el-button>
-                    </el-tooltip>
-                    <el-tooltip content="表单样式">
-                        <el-button type="text" icon="el-icon-bank-card" @click="toggleFormStyle"></el-button>
-                    </el-tooltip>
-                </span>
-            </el-header>
-            <el-main ref="mainView" style="padding:0px 20px;">
-                <el-image style="width: 80px; height: 80px;position: absolute;top:5px;left:5px;" :src="model | pickIcon" fit="scale-down" @error="onErrorPickIcon" v-if="model"></el-image>
-                <el-form :model="model" ref="form" label-width="140px" :label-position="labelPosition">
+        <el-container style="max-height:200px;height:200px;" :class="show?'show':''">
+            <el-main ref="mainView">
+                <el-button type="text" style="position: absolute;top:15px;left:25px;z-index: 100;" @click="onToggleShow">
+                    <el-image style="width: 64px; height: 64px;" :src="term | pickIcon" fit="scale-down" @error="onErrorPickIcon" v-if="term"></el-image>
+                </el-button>
+                <el-form :model="model" ref="form" label-width="140px" :label-position="labelPosition" style="animated fadeIn fadeOut" v-if="show">
                     <el-form-item :label="item.label" v-for="item in model.components" v-if="item.visible">
                         <el-select v-model="item.data" :placeholder="item.placeholder" v-if="item.type==='select'">
                             <el-option v-for="data in item.data" :key="data">#{data}#</el-option>
@@ -58,7 +44,7 @@
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
-	<script id="form-component">
+	<script id="form-card-component">
         {
             delimiters: ['#{', '}#'],
 			props: {
@@ -68,12 +54,15 @@
             data(){
                 return {
                     model:null,
+                    show: false,
                     labelPosition: 'right'
                 }
             },
             watch: {
-                term(val,oldVal){
-                    this.loadForm();
+                show(val,oldVal){
+                    if(val){
+                        this.loadForm();
+                    }
                 }
             },
             filters: {
@@ -82,31 +71,23 @@
                 },
                 pickIcon(evt){
                     try {
-                        return `/fs/assets/images/entity/png/${_.last(evt.path.split("/"))}.png?issys=true&type=open`;
+                        return `/fs/assets/images/entity/png/${_.head(evt.split(":"))}.png?issys=true&type=open`;
                     } catch(err){
                         return `/fs/assets/images/entity/png/matrix.png?issys=true&type=open`;
                     }
                     
                 }
             },
-            created(){
-                this.loadForm();
-            },
-            mounted() {
-                this.$nextTick(()=>{
-                    
-                })
-            },
-            computed: {
-                
-            },
             methods: {
+                onToggleShow(){
+                    this.show=!this.show;
+                    eventHub.$emit("TIMELINE-REDRAW-EVENT");
+                },
                 onErrorPickIcon(e){
                     _.extend(this.model,{path:"/matrix"});
                 },
                 loadForm(){
                     this.model = fsHandler.callFsJScript("/matrix/omdb/form.js", encodeURIComponent(this.term)).message;
-                    console.log(this.model)
                 },
                 toggleFormStyle(){
                     this.labelPosition = _.sample(_.xor(['top','right','left'],[this.labelPosition]));
