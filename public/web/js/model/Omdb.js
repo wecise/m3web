@@ -708,7 +708,7 @@ class Omdb{
                 model: Object
             },
             template: `<el-container style="height: 100%;">
-                            <el-header style="height:30px;line-height:30px;background: #f6f6f6;">
+                            <el-header style="height:30px;line-height:30px;background: #f2f3f5;">
                                 <el-button-group>
                                     <el-tooltip content="复制" placement="bottom" open-delay="500">
                                         <el-button type="text" icon="fas fa-copy" class="btn-copy"></el-button>
@@ -790,7 +790,7 @@ class Omdb{
                 model: Object
             },
             template:   `<el-container style="height: calc(100vh - 110px);">
-                            <el-main style="padding:0px;overflow:hidden;background:#f6f6f6;">
+                            <el-main style="padding:0px;overflow:hidden;background:#f2f3f5;">
                                 <el-form label-width="80px" :model="formModel" style="width:70%;padding: 10px 0px;">
                                     <el-form-item label="类名称">
                                         <el-input v-model="formModel.name" :disabled="true"></el-input>
@@ -1853,7 +1853,7 @@ class Omdb{
                                     }
                                 },
                                 template: `<el-container style="height:100%;">
-                                                <el-header style="height:auto;line-height:40px;min-height:40px;background: #f6f6f6;">
+                                                <el-header style="height:auto;line-height:40px;min-height:40px;background: #f2f3f5;">
                                                     <el-checkbox v-model="model.ifData" label="导出数据"></el-checkbox>
                                                     <p v-if="model.ifData">
                                                         <el-radio-group v-model="model.ifAllData">

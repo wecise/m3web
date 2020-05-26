@@ -58,7 +58,7 @@ class Api {
                 mxApi.app = new Vue({
                     delimiters: ['${', '}'],
                     template:   `<el-container style="height:calc(100vh - 80px);background:#ffffff;">
-                                    <el-aside style="width:240px;overflow:hidden;background:#f7f7f7;" ref="leftView">
+                                    <el-aside style="width:240px;overflow:hidden;background:#f2f3f5;" ref="leftView">
                                         <api-view-tree id="api-view-tree" ref="treeRef"></api-view-tree>
                                     </el-aside>
                                     <el-main style="padding:0px;overflow:hidden;" ref="mainView">

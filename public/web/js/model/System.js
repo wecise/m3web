@@ -741,7 +741,7 @@ class System {
 											<el-table-column type="index"></el-table-column>
 											<el-table-column type="expand">
 												<template slot-scope="props">
-													<el-form label-width="120px" style="width:100%;height:300px;overflow:auto;padding:10px;background:#f7f7f7;" >
+													<el-form label-width="120px" style="width:100%;height:300px;overflow:auto;padding:10px;background:#f2f3f5;" >
 														<el-form-item v-for="v,k in props.row" :label="k">
 															<el-input v-model="v"></el-input>
 														</el-form-item>
@@ -2261,7 +2261,7 @@ class System {
 											</el-table-column--> 
 											<el-table-column type="expand">
 												<template slot-scope="props">
-													<el-form label-width="120px" style="width:100%;height:300px;overflow:auto;padding:10px;background:#f7f7f7;" >
+													<el-form label-width="120px" style="width:100%;height:300px;overflow:auto;padding:10px;background:#f2f3f5;" >
 														<el-form-item v-for="v,k in props.row" :label="k">
 															<el-input v-model="v"></el-input>
 														</el-form-item>
@@ -3003,7 +3003,7 @@ class System {
 											</el-table-column--> 
 											<el-table-column type="expand">
 												<template slot-scope="props">
-													<el-form label-width="120px" style="width:100%;height:300px;overflow:auto;padding:10px;background:#f7f7f7;" >
+													<el-form label-width="120px" style="width:100%;height:300px;overflow:auto;padding:10px;background:#f2f3f5;" >
 														<el-form-item v-for="v,k in props.row" :label="k">
 															<el-input v-model="v"></el-input>
 														</el-form-item>

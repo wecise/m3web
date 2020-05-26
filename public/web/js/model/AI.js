@@ -1781,7 +1781,7 @@ class AI {
                     },
                     template:   `<el-container style="background:#ffffff;height:calc(100vh - 85px);">
                                     
-                                    <el-aside width="20%" style="height:100%;overflow: hidden;background:#f6f6f6" ref="leftView">
+                                    <el-aside width="20%" style="height:100%;overflow: hidden;background:#f2f3f5" ref="leftView">
                                         <el-container style="height:100%;">
                                             <el-header style="height: 30px;line-height: 30px;padding: 0px 5px;font-weight: 900;">
                                                 <span><i class="el-icon-s-grid"></i> 规则分类</span>

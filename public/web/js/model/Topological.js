@@ -94,7 +94,7 @@ class Topological {
                                     <!--el-table-column type="selection" align="center"></el-table-column--> 
                                     <el-table-column type="expand">
                                         <template slot-scope="props">
-                                            <el-form label-width="120px" style="width:100%;height:300px;overflow:auto;padding:10px;background:#f7f7f7;" >
+                                            <el-form label-width="120px" style="width:100%;height:300px;overflow:auto;padding:10px;background:#f2f3f5;" >
                                                 <el-form-item v-for="v,k in props.row" :label="k">
                                                     <el-input v-model="v"></el-input>
                                                 </el-form-item>
@@ -299,7 +299,7 @@ class Topological {
                                     </el-button>
                                 </el-autocomplete>
                             </el-header>
-                            <el-main v-if="edge.show" style="padding:10px;background:#f6f6f6;">
+                            <el-main v-if="edge.show" style="padding:10px;background:#f2f3f5;">
                                 <el-form label-width="50px" label-position="top" class="topological-analysis-form">
                                     <el-form-item label="关系" style="font-weight:noomal;">
                                         <el-select v-model="edge.edgeType" placeholder="请选择关系类型">
@@ -1543,7 +1543,7 @@ class Topological {
                             }
                         },
                         template: `<el-container style="height:100%;">
-                                        <el-header style="height:auto;line-height:40px;min-height:40px;background: #f6f6f6;">
+                                        <el-header style="height:auto;line-height:40px;min-height:40px;background: #f2f3f5;">
                                             <el-checkbox v-model="model.ifData" label="导出数据"></el-checkbox>
                                             <p v-if="model.ifData">
                                                 <el-radio-group v-model="model.ifAllData">
@@ -2218,7 +2218,7 @@ class Topological {
                                         data-gs-auto-position="true"
                                         data-gs-width="12" data-gs-height="3"
                                         v-for="item,index in model.trends">
-                                            <div class="grid-stack-item-content" style="border:1px solid #f7f7f7;border-radius:5px;box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);">
+                                            <div class="grid-stack-item-content" style="border:1px solid #f2f3f5;border-radius:5px;box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);">
                                                 <el-card class="box-card" style="width: 100%;height:100%;overflow:hidden;" >
                                                     <div slot="header" class="clearfix" style="padding:5px;">
                                                         <span>#{item.param.param}#  历史性能 <small>#{item.title}#</small></span>

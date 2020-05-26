@@ -71,7 +71,7 @@
 	/*----------  最外层element会自动增加组件同名 class="topological-timeline"  ----------*/
 	<template>
         <el-container style="height:240px;width:100%;" ref="container">
-            <el-aside width="200px" style="background: #ffffff;">
+            <el-aside width="200px" style="background: transparent;">
                 <el-tree 
                     show-checkbox
                     default-expand-all 
@@ -86,7 +86,7 @@
                     </span>  
                 </el-tree>
             </el-aside>
-            <el-container style="width:100%;height:100%;background: #fff;">
+            <el-container style="width:100%;height:100%;background:transparent;">
                 <el-header style="height:30px;line-height: 30px;display: flex;padding:0px;margin-right:14px;">
                     <div style="width:90%;">
                         <el-date-picker
