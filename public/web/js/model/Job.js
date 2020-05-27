@@ -107,7 +107,7 @@ class Job extends Matrix {
                                             <el-table-column type="selection" align="center"></el-table-column> 
                                             <el-table-column type="expand">
                                                 <template slot-scope="props">
-                                                    <el-form label-width="120px" style="width:100%;height:300px;overflow:auto;padding:10px;background:#f7f7f7;" >
+                                                    <el-form label-width="120px" style="width:100%;height:300px;overflow:auto;padding:10px;background:#f2f3f5;" >
                                                         <el-form-item v-for="v,k in props.row" :label="k">
                                                             <el-input v-model="v"></el-input>
                                                         </el-form-item>
@@ -698,7 +698,7 @@ class Job extends Matrix {
                                                             </el-main>
                                                         </el-container>
                                                         <el-container id="job-view-console">
-                                                            <el-aside class="tree-view" style="background-color:#f6f6f6;" ref="leftView">
+                                                            <el-aside class="tree-view" style="background-color:#f2f3f5;" ref="leftView">
                                                                 <probe-tree-component id="job-tree" :model="{parent:'/job',name:'job_tree_data.js',domain:'job'}"></probe-tree-component>
                                                             </el-aside>
                                                             <el-main class="table-view" style="padding:5px;" ref="mainView">

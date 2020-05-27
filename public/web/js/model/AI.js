@@ -264,102 +264,161 @@ class AI {
                                         </el-switch>
                                     </el-header>
                                     <el-main style="height:100%;">
-                                        <el-form :model="content" label-width="80px">
-                                            <el-form-item label="指定类">
-                                                <el-select v-model="content.rawclass" placeholder="请选择类">
-                                                    <el-option
-                                                        v-for="item in select.rawclass"
-                                                        :key="item.value"
-                                                        :label="item.label"
-                                                        :value="item.value">
-                                                    </el-option>
-                                                </el-select>
-                                            </el-form-item>
-                                            <el-form-item label="基线类">
-                                                <el-select v-model="content.baselineclass" placeholder="基线类">
-                                                    <el-option
-                                                        v-for="item in select.baselineclass"
-                                                        :key="item.value"
-                                                        :label="item.label"
-                                                        :value="item.value">
-                                                    </el-option>
-                                                </el-select>
-                                            </el-form-item>
-                                            <el-form-item label="黑名单">
-                                                <el-tag
-                                                    :key="tag"
-                                                    closable
-                                                    type=""
-                                                    @close="nameRemove(tag)"
-                                                    style="margin:0 2px;" v-for="tag in content.blacklist">
-                                                    #{tag}#
-                                                </el-tag>
-                                                <el-input
-                                                    class="input-new-tag"
-                                                    v-if="names.inputVisible"
-                                                    v-model="names.inputValue"
-                                                    ref="saveTagInput"
-                                                    size="small"
-                                                    @keyup.enter.native="nameAdd"
-                                                    @blur="nameAdd">
-                                                </el-input>
-                                                <el-button v-else class="button-new-tag" size="small" @click="nameInputShow">+</el-button>
-                                            </el-form-item>
-                                            <el-form-item label="Interval" prop="interval">
-                                                <el-input-number v-model="content.interval" controls-position="right" :min="1"></el-input-number> 秒
-                                            </el-form-item>
-                                            <el-form-item label="Limitday" prop="limitday">
-                                                <el-input-number v-model="content.limitday" controls-position="right" :min="1"></el-input-number>
-                                            </el-form-item>
-                                            <el-form-item label="计算属性">
-                                                <el-checkbox-group v-model="content.ctypelist">
-                                                    <el-checkbox label="max" class="el-checkbox">Max</el-checkbox>
-                                                    <el-checkbox label="avg" class="el-checkbox">Avg</el-checkbox>
-                                                    <el-checkbox label="min" class="el-checkbox">Min</el-checkbox>
-                                                </el-checkbox-group>
-                                            </el-form-item>
-                                            <el-form-item label="Avgtype">
-                                                <el-radio-group v-model="content.avgtype">
-                                                    <el-radio label="avg" class="el-radio">Avg</el-radio>
-                                                    <el-radio label="median" class="el-radio">Median</el-radio>
-                                                </el-radio-group>    
-                                            </el-form-item>
-                                            <el-form-item label="服务器组" prop="group">
-                                                <el-input type="text" v-model="content.job.group"></textarea></el-input>
-                                            </el-form-item>
-                                            <el-form-item label="定时器" prop="cron">
-                                                <el-input type="text" v-model="content.job.cron"></textarea></el-input>
-                                            </el-form-item>
-                                            <el-form-item label="作业名称" prop="name">
-                                                <el-input type="text" v-model="content.name"></textarea></el-input>
-                                            </el-form-item>
-                                            <el-form-item label="消息模板" prop="msg">
-                                                <el-input type="textarea" v-model="content.msg"></textarea></el-input>
-                                            </el-form-item>
-                                            <el-form-item label="时间" prop="time">
-                                                <small>#{moment(content.time).format(mx.global.register.format)}#</small>
-                                            </el-form-item>
-                                            <el-form-item label="用户" prop="user">
-                                                <small>#{content.user}#</small>
-                                            </el-form-item>
-                                        </el-form>
+                                        <el-tabs tab-position="left" style="height: 100%;">
+                                            <el-tab-pane label="基本设置">
+                                                <el-form :model="content" label-width="80px" style="height:100%;overflow:auto;">
+                                                    <el-form-item label="指定类" style="width:80%;">
+                                                        
+                                                        <el-input v-model="content.rawclass" clearable autofocus size="small">
+                                                            <template slot="prepend">
+                                                                <el-dropdown placement="top-end"  :hide-on-click="false">
+                                                                    <el-tooltip content="指定类" open-delay="500">
+                                                                        <el-button type="text" style="padding:15px;">
+                                                                            <i class="el-icon-office-building" style="font-size:16px;"></i>
+                                                                        </el-button>
+                                                                    </el-tooltip>
+                                                                    <el-dropdown-menu slot="dropdown">
+                                                                        <el-dropdown-item>
+                                                                            <template scope="scope">
+                                                                                <mx-class-tree :root="select.rawclass" ref="rawClassTree"></mx-class-tree>
+                                                                            </template>
+                                                                        </el-dropdown-item>
+                                                                    </el-dropdown-menu>
+                                                                </el-dropdown>
+                                                            </template>
+                                                        </el-input>
+                                                        
+                                                    </el-form-item>
+                                                    <el-form-item label="基线类" style="width:80%;">
+
+                                                        <el-input v-model="content.baselineclass" clearable autofocus size="small">
+                                                            <template slot="prepend">
+                                                                <el-dropdown placement="top-end"  :hide-on-click="false">
+                                                                    <el-tooltip content="指定基线类" open-delay="500">
+                                                                        <el-button type="text" style="padding:15px;">
+                                                                            <i class="el-icon-office-building" style="font-size:16px;"></i>
+                                                                        </el-button>
+                                                                    </el-tooltip>
+                                                                    <el-dropdown-menu slot="dropdown">
+                                                                        <el-dropdown-item>
+                                                                            <template scope="scope">
+                                                                                <mx-class-tree :root="select.baselineclass" ref="baselineClassTree"></mx-class-tree>
+                                                                            </template>
+                                                                        </el-dropdown-item>
+                                                                    </el-dropdown-menu>
+                                                                </el-dropdown>
+                                                            </template>
+                                                        </el-input>
+                                                        
+                                                    </el-form-item>
+                                                    <el-form-item label="黑名单" style="width:80%;">
+                                                        <el-input v-model="content.blacklist" clearable autofocus size="small">
+                                                            <template slot="prepend">
+                                                                <el-dropdown placement="top-end"  :hide-on-click="false">
+                                                                    <el-tooltip content="指定黑名单类" open-delay="500">
+                                                                        <el-button type="text" style="padding:15px;">
+                                                                            <i class="el-icon-office-building" style="font-size:16px;"></i>
+                                                                        </el-button>
+                                                                    </el-tooltip>
+                                                                    <el-dropdown-menu slot="dropdown">
+                                                                        <el-dropdown-item>
+                                                                            <template scope="scope">
+                                                                                <mx-class-muilt-tree :root="select.rawclass" showCheckBox="true" ref="blacklistClassTree"></mx-class-muilt-tree>
+                                                                            </template>
+                                                                        </el-dropdown-item>
+                                                                    </el-dropdown-menu>
+                                                                </el-dropdown>
+                                                            </template>
+                                                        </el-input>
+                                                        <!--el-tag
+                                                            :key="tag"
+                                                            closable
+                                                            type=""
+                                                            @close="nameRemove(tag)"
+                                                            style="margin:0 2px;" v-for="tag in content.blacklist">
+                                                            #{tag}#
+                                                        </el-tag>
+                                                        <el-input
+                                                            class="input-new-tag"
+                                                            v-if="names.inputVisible"
+                                                            v-model="names.inputValue"
+                                                            ref="saveTagInput"
+                                                            size="small"
+                                                            @keyup.enter.native="nameAdd"
+                                                            @blur="nameAdd">
+                                                        </el-input>
+                                                        <el-button v-else class="button-new-tag" size="small" @click="nameInputShow">+</el-button-->
+                                                    </el-form-item>
+                                                    <el-form-item label="Interval" prop="interval">
+                                                        <el-input-number v-model="content.interval" controls-position="right" :min="1"></el-input-number> 秒
+                                                    </el-form-item>
+                                                    <el-form-item label="Limitday" prop="limitday">
+                                                        <el-input-number v-model="content.limitday" controls-position="right" :min="1"></el-input-number>
+                                                    </el-form-item>
+                                                    <el-form-item label="计算属性">
+                                                        <el-checkbox-group v-model="content.ctypelist">
+                                                            <el-checkbox label="max" class="el-checkbox">Max</el-checkbox>
+                                                            <el-checkbox label="avg" class="el-checkbox">Avg</el-checkbox>
+                                                            <el-checkbox label="min" class="el-checkbox">Min</el-checkbox>
+                                                        </el-checkbox-group>
+                                                    </el-form-item>
+                                                    <el-form-item label="Avgtype">
+                                                        <el-radio-group v-model="content.avgtype">
+                                                            <el-radio label="avg" class="el-radio">Avg</el-radio>
+                                                            <el-radio label="median" class="el-radio">Median</el-radio>
+                                                        </el-radio-group>    
+                                                    </el-form-item>
+                                                    
+                                                    <el-form-item label="作业名称" prop="name">
+                                                        <el-input type="text" v-model="content.name"></textarea></el-input>
+                                                    </el-form-item>
+                                                    
+                                                    <el-form-item label="时间" prop="time">
+                                                        <small>#{moment(content.time).format(mx.global.register.format)}#</small>
+                                                    </el-form-item>
+                                                    <el-form-item label="用户" prop="user">
+                                                        <small>#{content.user}#</small>
+                                                    </el-form-item>
+                                                </el-form>
+                                            </el-tab-pane>
+                                            <el-tab-pane label="服务器组">
+                                                <el-form :model="content" label-width="80px" style="height:100%;overflow:auto;">
+                                                    
+                                                    <el-form-item label="服务器组" prop="group">
+                                                        <el-input type="text" v-model="content.job.group"></textarea></el-input>
+                                                    </el-form-item>
+                                                    
+                                                </el-form>
+                                            </el-tab-pane>
+                                            <el-tab-pane label="定时任务">
+
+                                                <el-form :model="content" label-width="80px" style="height:100%;overflow:auto;">
+                                                    
+                                                    <el-form-item label="定时器" prop="cron">
+                                                        <el-input type="text" v-model="content.job.cron"></textarea></el-input>
+                                                    </el-form-item>
+                                                    
+                                                </el-form>
+                                            
+                                            </el-tab-pane>
+                                            <el-tab-pane label="消息模板">
+                                                <el-form :model="content" label-width="80px" style="height:100%;overflow:auto;">
+                                                            
+                                                    <el-form-item label="消息模板" prop="msg">
+                                                        <el-input type="textarea" rows="10" v-model="content.msg"></textarea></el-input>
+                                                    </el-form-item>
+                                                    
+                                                </el-form>
+                                            </el-tab-pane>
+                                        </el-tabs>
+                                        
                                     </el-main>
                                 </el-container>`,
-                    data: function(){
+                    data(){
                         return {
                             select:{
-                                rawclass: [
-                                    {
-                                        value: '/matrix/devops/performance',
-                                        label: '所有性能'
-                                    }
-                                ],
-                                baselineclass: [
-                                    {
-                                        value: '/matrix/devops/performance/baseline',
-                                        label: '/matrix/devops/performance/baseline'
-                                    }
-                                ],
+                                rawclass: '/matrix/devops',
+                                baselineclass: '/matrix/devops/performance',
                                 blacklist: []
                             },
                             names:{
@@ -369,10 +428,41 @@ class AI {
                             content: null
                         }
                     },
+                    filters: {
+                        formatByJoin(item){
+                            return item.join(",");
+                        }
+                    },
                     created(){
                         this.content = this.model.content;
                     },
                     mounted(){
+                        // watch数据更新
+                        this.$watch(
+                            "$refs.rawClassTree.selected",{
+                                handler:(val, oldVal) => {
+                                    this.$set(this.content,'rawclass', val.class);
+                                },
+                                deep:true
+                            }
+                        );
+                        this.$watch(
+                            "$refs.baselineClassTree.selected",{
+                                handler:(val, oldVal) => {
+                                    this.$set(this.content,'baselineclass', val.class);
+                                },
+                                deep:true
+                            }
+                        );
+                        this.$watch(
+                            "$refs.blacklistClassTree.selected",{
+                                handler:(val, oldVal) => {
+                                    this.$set(this.content, 'blacklist', _.map(val,'class'));
+                                    console.log(val,_.map(val,'class'))
+                                },
+                                deep:true
+                            }
+                        );
                         
                     },
                     methods: {
