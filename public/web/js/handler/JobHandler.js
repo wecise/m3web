@@ -17,6 +17,132 @@ class  JobHandler {
     /*
     *   作业管理
     *
+    *   添加作业
+    *
+    *
+    */
+    jobAdd(job) {
+        let rtn = null;
+
+        jQuery.ajax({
+            url: '/job',
+            dataType: 'json',
+            type: 'POST',
+            async:false,
+            data: job,
+            beforeSend:function(xhr){},
+            complete: function(xhr, textStatus) {},
+            success: function (data, status) {
+
+                userHandler.ifSignIn(data);
+
+                rtn = data;
+
+            },
+            error: function(xhr, textStatus, errorThrown){
+                rtn = xhr.responseJSON;
+            }
+        });
+        return rtn;
+    };
+
+    /*
+    *   作业管理
+    *
+    *   更新作业
+    *
+    *
+    */
+   jobMerge(job) {
+        let rtn = null;
+
+        jQuery.ajax({
+            url: '/job/merge',
+            dataType: 'json',
+            type: 'POST',
+            async:false,
+            data: job,
+            beforeSend:function(xhr){},
+            complete: function(xhr, textStatus) {},
+            success: function (data, status) {
+
+                userHandler.ifSignIn(data);
+
+                rtn = data;
+
+            },
+            error: function(xhr, textStatus, errorThrown){
+                rtn = xhr.responseJSON;
+            }
+        });
+        return rtn;
+    };
+
+    /*
+    *   作业管理
+    *
+    *   删除作业
+    *
+    *
+    */
+    jobDelete(job) {
+        let rtn = null;
+
+        jQuery.ajax({
+            url: `/job/${job.name}@${job.dir}`,
+            dataType: 'json',
+            type: 'DELETE',
+            async:false,
+            beforeSend:function(xhr){},
+            complete: function(xhr, textStatus) {},
+            success: function (data, status) {
+
+                userHandler.ifSignIn(data);
+
+                rtn = data;
+
+            },
+            error: function(xhr, textStatus, errorThrown){
+                rtn = xhr.responseJSON;
+            }
+        });
+        return rtn;
+    };
+
+    /*
+    *   作业管理
+    *
+    *   检查作业是否存在
+    *
+    *
+    */
+    jobExist(job) {
+        let rtn = null;
+
+        jQuery.ajax({
+            url: `/job/exist/${job.name}@${job.dir}`,
+            dataType: 'json',
+            type: 'GET',
+            async:false,
+            beforeSend:function(xhr){},
+            complete: function(xhr, textStatus) {},
+            success: function (data, status) {
+
+                userHandler.ifSignIn(data);
+
+                rtn = data;
+
+            },
+            error: function(xhr, textStatus, errorThrown){
+                rtn = xhr.responseJSON;
+            }
+        });
+        return rtn;
+    };
+
+    /*
+    *   作业管理
+    *
     *   获取作业
     *
     *

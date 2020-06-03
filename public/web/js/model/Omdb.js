@@ -1155,10 +1155,18 @@ class Omdb{
                                                 <el-main>
                                                     <el-form label-position="right" label-width="120px">
                                                         <el-form-item v-for="v,k in props.row" :label="k" :key="k">
-                                                        <el-input :type="k,dt.columns | pickType" :value="v"  v-if="_.includes(['class','ctime', 'day','id','name', 'vtime'],k)"></el-input>
-                                                            <el-input :type="k,dt.columns | pickType" :rows="6" :value="JSON.stringify(v,null,4)"  v-else-if="typeof v =='object'"></el-input>
+                                                            <el-input :type="k,dt.columns | pickType" :value="moment(v).format(mx.global.register.format)"  v-if="pickFtype(k) == 'timestamp'"></el-input>
+                                                            <el-input :type="k,dt.columns | pickType" :value="moment(v).format('YYYY-MM-DD')"  v-else-if="pickFtype(k) == 'date'"></el-input>
+                                                            <el-input :type="k,dt.columns | pickType" :rows="6" :value="arrayToCsv(v)"  v-else-if="pickFtype(k) == 'bucket'"></el-input>
+                                                            <el-input :type="k,dt.columns | pickType" :rows="6" :value="JSON.stringify(v,null,4)"  v-else-if="_.includes(['map','set','list'],pickFtype(k))"></el-input>
                                                             <el-input :type="k,dt.columns | pickType" :value="v"  v-else></el-input>
                                                         </el-form-item>
+                                                        <!--el-form-item v-for="v,k in props.row" :label="k" :key="k">
+                                                            <el-input :type="k,dt.columns | pickType" :value="v"  v-if=" _.includes(['class','ctime', 'day','id','name', 'vtime'],k)"></el-input>
+                                                            <el-input :type="k,dt.columns | pickType" :rows="6" :value="v"  v-else-if="typeof v =='bucket'"></el-input>
+                                                            <el-input :type="k,dt.columns | pickType" :rows="6" :value="JSON.stringify(v,null,4)"  v-else-if="typeof v =='object'"></el-input>
+                                                            <el-input :type="k,dt.columns | pickType" :value="v"  v-else></el-input>
+                                                        </el-form-item-->
                                                     </el-form>
                                                 </el-main>
                                             </el-container>
@@ -1183,20 +1191,28 @@ class Omdb{
                                             </span>
                                         </template>
                                         <template slot-scope="scope">
-                                            #{ scope.row[item['field']] }#
+                                            <div v-if="pickFtype(item['field']) == 'timestamp'">#{moment(scope.row[item['field']]).format(mx.global.register.format)}#</div>
+                                            <div v-else-if="pickFtype(item['field']) == 'date'">#{moment(scope.row[item['field']]).format('YYYY-MM-DD')}#</div>
+                                            <el-popover
+                                                placement="top"
+                                                width="550"
+                                                trigger="click"
+                                                popper-class="dataTablePopper"
+                                                v-else-if="pickFtype(item['field']) == 'bucket'">
+                                                <el-container>
+                                                    <el-header style="height:30px;line-height:30px;padding:0px;">
+                                                        <el-button type="text" icon="el-icon-timer" @click="arrayToCsvByLocal(item['field'],scope.$index)"></el-button>
+                                                    </el-header>
+                                                    <el-main style="padding:0px;">
+                                                        <el-input type="textarea" rows="10" :value="arrayToCsv(scope.row[item['field']])"></el-input>
+                                                    </el-main>
+                                                </el-container>
+                                                <el-button type="text" icon="el-icon-date" slot="reference"></el-button>
+                                            </el-popover>
+                                            <div v-else-if="_.includes(['map','set','list'],pickFtype(item['field']))">#{JSON.stringify(scope.row[item['field']],null,4)}#</div>
+                                            <div v-else>#{scope.row[item['field']]}#</div>
                                         </template>
                                     </el-table-column>
-                                    <!--el-table-column :prop="item['field']"  
-                                            show-overflow-tooltip="true" 
-                                            sortable
-                                            resizable
-                                            :formatter="item.render"
-                                            v-for="item in dt.columns"
-                                            min-width="180">
-                                        <template slot-scope="scope">
-                                            #{ scope.row[item['field']] }#
-                                        </template>
-                                    </el-table-column-->
                                 </el-table>
                             </el-main>
                             <el-footer  style="height:30px;line-height:30px;">
@@ -1287,6 +1303,42 @@ class Omdb{
                 this.info.push(`共 ${this.dt.rows.length} 项`);
             },
             methods: {
+                arrayToCsv(data){
+                    
+                    let lineArray = [];
+                    _.forEach(data, (infoArray, index)=> {
+                        let line = infoArray.join(", ");
+                        lineArray.push(line);
+                    });
+                    
+                    return lineArray.join("\n");
+                    
+                },
+                arrayToCsvByLocal(data,index){
+                    
+                    _.forEach(this.dt.rows[index][data], (infoArray, index)=> {
+                        let valid = (new Date(infoArray[0])).getTime() > 0;
+                        
+                        if(valid){
+                            if(typeof infoArray[0] == 'string'){
+                                this.$set(infoArray, 0, moment(infoArray[0]).valueOf());
+                            } else {
+                                this.$set(infoArray, 0, moment(infoArray[0]).format(mx.global.register.format));
+                            }
+                            
+                        }
+                    });
+                    
+                },
+                pickFtype(key){
+                    let rtn = 'string';
+                    try{
+                        rtn = _.find(this.dt.columns,{field:key}).type;
+                    } catch(err){
+                        return rtn;
+                    }
+                    return rtn;
+                },
                 rowClassName({row, rowIndex}){
                     return `row-${rowIndex}`;
                 },

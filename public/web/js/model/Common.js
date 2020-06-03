@@ -1418,3 +1418,421 @@ Vue.component("mx-class-muilt-tree",{
     }
 })
 
+/* Common Class Select Cascader */
+Vue.component("mx-class-cascader",{
+    delimiters: ['#{', '}#'],
+    props: {
+        root: String,
+        multiplenable: {
+            default:false,
+            type:Boolean
+        },
+        value: Object
+    },
+    data(){
+        return {
+            options: [],
+            defaultProps: {
+                multiple: false
+            },
+            selected: null
+        }
+    },
+    template:   `<el-cascader
+                    v-model="value"
+                    :options="options"
+                    :props="defaultProps"
+                    @change="onChange"
+                    clearable
+                    style="width:100%;"
+                    ref="cascader">
+                    <template slot-scope="{ node, data }">
+                        <span>#{ data.label }#</span>
+                        <span v-if="!node.isLeaf"> (#{ data.children.length }#) </span>
+                    </template>
+                </el-cascader>`,
+    created(){
+        this.defaultProps.multiple = this.multiplenable;
+        this.initData();
+    },
+    methods: {
+        initData(){
+            this.options = fsHandler.callFsJScript("/matrix/ai/getClassList.js",encodeURIComponent(this.root)).message;
+        },
+        onChange(val){
+            this.selected = val;
+        },
+        onNodeClick(data){
+            try{
+
+                if(!data.isdir) {
+                    eventHub.$emit("FS-NODE-OPENIT-EVENT", data, data.parent);
+
+                } else {
+
+                    let childrenData = _.sortBy(fsHandler.fsList(data.fullname),'fullname');
+
+                    this.$set(data, 'children', childrenData);
+                    
+                }
+
+            } catch(err){
+
+            }
+
+        }
+    }
+})
+
+/* Common Class Keys Select Cascader By ClassName */
+Vue.component("mx-classkeys-cascader",{
+    delimiters: ['#{', '}#'],
+    props: {
+        root: String,
+        multiplenable: {
+            default:false,
+            type:Boolean
+        },
+        value: Object
+    },
+    data(){
+        return {
+            options: [],
+            defaultProps: {multiple: false },
+            selected: null
+        }
+    },
+    template:   `<el-cascader
+                    :value="value"
+                    :options="options"
+                    :props="defaultProps"
+                    @change="onChange"
+                    clearable
+                    filterable
+                    style="width:100%;">
+                    <template slot-scope="{ node, data }">
+                        <span>#{ data.label }#</span>
+                        <span v-if="!node.isLeaf"> (#{ data.children.length }#) </span>
+                        <span style="color:#999999;font-size:10px;text-align:right;" v-else>#{ data.ftype }#</span>
+                    </template>
+                </el-cascader>`,
+    watch:{
+        root(val,oldVal){
+            this.initData();
+        }
+    },
+    created(){
+        this.defaultProps.multiple = this.multiplenable;
+        this.initData();
+    },
+    methods: {
+        initData(){
+            this.options = fsHandler.callFsJScript("/matrix/ai/getClassKeysByClassName.js",encodeURIComponent(this.root)).message;
+        },
+        onChange(val){
+            this.selected = val;
+        },
+        onNodeClick(data){
+            try{
+
+                if(!data.isdir) {
+                    eventHub.$emit("FS-NODE-OPENIT-EVENT", data, data.parent);
+
+                } else {
+
+                    let childrenData = _.sortBy(fsHandler.fsList(data.fullname),'fullname');
+
+                    this.$set(data, 'children', childrenData);
+                    
+                }
+
+            } catch(err){
+
+            }
+
+        }
+    }
+})
+
+/* Common Server Transfer */
+Vue.component("mx-server-transfer",{
+    delimiters: ['#{', '}#'],
+    props: {
+        model: Array
+    },
+    data(){
+        return {
+            serverList: [],
+            selected: []
+        }
+    },
+    template:   `<el-transfer 
+                    filterable
+                    :filter-method="onFilterMethod"
+                    filter-placeholder="请输入关键字"
+                    v-model="selected" 
+                    :data="serverList"
+                    :titles="['所有服务器', '已选择服务器']"
+                    :button-texts="['取消', '选择']"
+                    @change="onChange"
+                    ref="transfer"></el-transfer>`,
+    mounted(){
+        this.initData();
+    },
+    methods: {
+        initData(){
+            this.serverList = fsHandler.callFsJScript("/matrix/ai/getServerList.js",null).message;
+
+            this.selected =  _.map(this.model,'host');
+            
+        },
+        onFilterMethod(query, item){
+            return item.value.indexOf(query) > -1;
+        },
+        onChange(value, direction, movedKeys){
+            console.log(value,direction,movedKeys)
+        }
+    }
+
+})
+
+/* Common Job Group & Server Transfer */
+Vue.component("mx-job-group",{
+    delimiters: ['#{', '}#'],
+    props: {
+        value: String
+    },
+    data(){
+        return {
+            dt: {
+                rows:[],
+                columns: [
+                            {field:"name", title: "组名称", width: 160},
+                            {field:"gtype", title: "类型", width: 160},
+                            {field:"hosts", title: "服务器", visible:false}
+                        ],
+                selected: [],
+            }
+        }
+    },
+    template:   `<el-container style="height: calc(100% - 20px);">
+                    <el-header style="height:40px;line-height:40px;">
+                        <el-tooltip content="刷新">
+                            <el-button type="text" icon="el-icon-refresh" @click="onRefresh"></el-button>
+                        </el-tooltip>
+                        <el-tooltip content="新建">
+                            <el-button type="text" icon="el-icon-plus" @click="onNew"></el-button>
+                        </el-tooltip>
+                    </el-header>
+                    <el-main style="height:100%;padding:0px;">
+                        <el-table
+                            :data="dt.rows"
+                            :row-class-name="rowClassName"
+                            @selection-change="onSelectionChange"
+                            border
+                            style="width: 100%"
+                            ref="table">
+                            <el-table-column type="selection" width="55"></el-table-column> 
+                            <el-table-column 
+                                node-key="id"
+                                :label="item.title" 
+                                :prop="item.field" 
+                                :formatter="item.render" 
+                                v-for="item in dt.columns"
+                                v-if="item.visible">
+                                <template slot-scope="scope">
+                                    #{scope.row[item.field]}#
+                                </template>	
+                            </el-table-column>
+                            <el-table-column type="expand" label="服务器" width="300">
+                                <template slot-scope="scope">
+                                    <mx-server-transfer :model="scope.row.hosts"></el-transfer>
+                                </template>
+                            </el-table-column>
+                            <el-table-column label="操作">
+                                <template slot-scope="scope">
+                                    <el-button type="text" icon="el-icon-delete"  @click="onDelete(scope.$index, scope.row)"> 删除</el-button>
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </el-main>
+                </el-container>`,
+    created(){
+        this.initData();
+    },
+    methods: {
+        rowClassName({row, rowIndex}){
+            return `row-${rowIndex}`;
+        },
+        initData(){
+
+            let rtn = groupHandler.serverGroupList().message;
+            
+            this.$set(this.dt,'rows', rtn);
+            
+            this.$set(this.dt,'columns', _.map(this.dt.columns, (v)=>{
+                    
+                if(_.isUndefined(v.visible)){
+                    _.extend(v, { visible: true });
+                }
+
+                if(!v.render){
+                    return v;
+                } else {
+                    return _.extend(v, { render: eval(v.render) });
+                }
+                
+            }));
+
+            _.delay(()=>{
+                this.onToggleSelection(_.filter(this.dt.rows,{name:this.value}));
+            },500)
+            
+        },
+        onSelectionChange(val){
+            this.dt.selected = val;
+        },
+        onToggleSelection(rows) {
+            
+            if (rows) {
+                _.forEach(rows,(row) => {
+                    this.$refs.table.toggleRowSelection(row);
+                });
+            } else {
+                this.$refs.table.clearSelection();
+            }
+        },
+        onRefresh(){
+            this.initData();
+        },
+        onNew(){}
+    }
+})
+
+/* Common Job Cron */
+Vue.component("mx-job-cron",{
+    delimiters: ['#{', '}#'],
+    props: {
+        value: String
+    },
+    data(){
+        return {
+            cron: [],
+            human: "",
+            options: { 
+                locale: window.MATRIX_LANG.replace(/-/,'_'),
+                use24HourTimeFormat: true 
+            },
+            defaultCron:{
+                List: [],
+                value: "",
+                cron: ""
+            }
+        }
+    },
+    template:   `<el-container style="height: calc(100% - 20px);">
+                    <el-header>
+                        <h3>定时设置</h3>
+                        <el-row :gutter="5">
+                            <el-col :span="3">
+                                秒
+                            </el-col>
+                            <el-col :span="3">
+                                分钟
+                            </el-col>
+                            <el-col :span="3">
+                                小时
+                            </el-col>
+                            <el-col :span="3">
+                                日
+                            </el-col>
+                            <el-col :span="3">
+                                月
+                            </el-col>
+                            <el-col :span="3">
+                                周
+                            </el-col>
+                            <el-col :span="3">
+                                年
+                            </el-col>
+                        </el-row>
+                        <el-row :gutter="5">
+                            <el-col :span="3">
+                                <el-input v-model="cron[0]" @change="onChange"></el-input>
+                            </el-col>
+                            <el-col :span="3">
+                                <el-input v-model="cron[1]" @change="onChange"></el-input>
+                            </el-col>
+                            <el-col :span="3">
+                                <el-input v-model="cron[2]" @change="onChange"></el-input>
+                            </el-col>
+                            <el-col :span="3">
+                                <el-input v-model="cron[3]" @change="onChange"></el-input>
+                            </el-col>
+                            <el-col :span="3">
+                                <el-input v-model="cron[4]" @change="onChange"></el-input>
+                            </el-col>
+                            <el-col :span="3">
+                                <el-input v-model="cron[5]" @change="onChange"></el-input>
+                            </el-col>
+                            <el-col :span="3">
+                                <el-input v-model="cron[6]" @change="onChange"></el-input>
+                            </el-col>
+                        </el-row>
+                    </el-header>
+                    <el-main style="height:100%;width:87.5%;padding-top: 40px;">
+                        <h3>定时说明</h3>#{this.cron.join(" ")}#
+                        <el-input v-model="human"></el-input>
+
+                        <h3>常用Cron示例</h3>
+                        <el-input placeholder="选择示例" v-model="defaultCron.cron">
+                            <el-select slot="prepend" 
+                                v-model="defaultCron.value" 
+                                placeholder="选择示例" 
+                                @change="onSetDefaultCron">
+                                <el-option v-for="item in defaultCron.list"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                            <el-button slot="append" @click="onSetCron">设置</el-button>
+                        </el-input>
+                    </el-main>
+                </el-container>`,
+    watch: {
+        cron:function(val){
+            this.onCronstrue();
+        }
+    },
+    mounted(){
+        this.initData();
+    },
+    methods: {
+        initData(){
+            if(!_.isEmpty(this.value)){
+                this.cron = this.value.split(" ").slice(1);
+            } else {
+                this.cron = ['5', '*',  '*',  '*',  '*',  '*', '*'];
+            }
+
+            this.onCronstrue();
+
+            this.defaultCron.list = fsHandler.callFsJScript("/matrix/ai/getDefaultCronList.js",null).message;
+        },
+        onCronstrue(){
+            let cronstrue = window.cronstrue;
+            this.human = cronstrue.toString(this.cron.join(" "),this.options);
+        },
+        onChange(val){
+            this.onCronstrue();
+        },
+        onSetDefaultCron(value){
+            this.defaultCron.cron = value.split(" ");
+        },
+        onSetCron(){
+            this.cron = this.defaultCron.cron;
+        }
+    }
+})
+

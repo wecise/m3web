@@ -235,7 +235,7 @@ class AI {
                     },
                 });
                 
-                // 基线计算
+                
                 Vue.component('matrix-ai-setup-baseline',{
                     delimiters: ['#{', '}#'],
                     props:{
@@ -245,10 +245,10 @@ class AI {
                     template: `<el-container :id="id" style="height:100%;">
                                     <el-header style="line-height:40px;height:40px;text-align:right;">
                                         <el-tooltip content="保存规则">
-                                            <el-button type="text" @click="save" icon="el-icon-position"></el-button>
+                                            <el-button type="text" @click="onSave" icon="el-icon-position"></el-button>
                                         </el-tooltip>
                                         <el-tooltip content="删除规则">
-                                            <el-button type="text" @click="remove" icon="el-icon-delete"></el-button>
+                                            <el-button type="text" @click="onRemove" icon="el-icon-delete"></el-button>
                                         </el-tooltip>
                                         <el-tooltip content="查看作业">
                                             <el-button type="text" @click="job(content.name)" icon="el-icon-date"></el-button>
@@ -260,116 +260,71 @@ class AI {
                                                 inactive-color="#dddddd"
                                                 active-value=1
                                                 inactive-value=0
-                                                @change="statusUpdate">
+                                                @change="onStatusUpdate">
                                         </el-switch>
                                     </el-header>
                                     <el-main style="height:100%;">
                                         <el-tabs tab-position="left" style="height: 100%;">
                                             <el-tab-pane label="基本设置">
-                                                <el-form :model="content" label-width="80px" style="height:100%;overflow:auto;">
-                                                    <el-form-item label="指定类" style="width:80%;">
-                                                        
-                                                        <el-input v-model="content.rawclass" clearable autofocus size="small">
-                                                            <template slot="prepend">
-                                                                <el-dropdown placement="top-end"  :hide-on-click="false">
-                                                                    <el-tooltip content="指定类" open-delay="500">
-                                                                        <el-button type="text" style="padding:15px;">
-                                                                            <i class="el-icon-office-building" style="font-size:16px;"></i>
-                                                                        </el-button>
-                                                                    </el-tooltip>
-                                                                    <el-dropdown-menu slot="dropdown">
-                                                                        <el-dropdown-item>
-                                                                            <template scope="scope">
-                                                                                <mx-class-tree :root="select.rawclass" ref="rawClassTree"></mx-class-tree>
-                                                                            </template>
-                                                                        </el-dropdown-item>
-                                                                    </el-dropdown-menu>
-                                                                </el-dropdown>
-                                                            </template>
-                                                        </el-input>
-                                                        
+                                                <el-form :model="content" label-position="top" label-width="160px" style="width:95%;height:100%;overflow:auto;">
+                                                    <el-form-item label="指定计算类" style="width:80%;">
+                                                        <mx-class-cascader root="/matrix/entity" :value="content.model.class" ref="class"></mx-class-cascader>
                                                     </el-form-item>
-                                                    <el-form-item label="基线类" style="width:80%;">
-
-                                                        <el-input v-model="content.baselineclass" clearable autofocus size="small">
-                                                            <template slot="prepend">
-                                                                <el-dropdown placement="top-end"  :hide-on-click="false">
-                                                                    <el-tooltip content="指定基线类" open-delay="500">
-                                                                        <el-button type="text" style="padding:15px;">
-                                                                            <i class="el-icon-office-building" style="font-size:16px;"></i>
-                                                                        </el-button>
-                                                                    </el-tooltip>
-                                                                    <el-dropdown-menu slot="dropdown">
-                                                                        <el-dropdown-item>
-                                                                            <template scope="scope">
-                                                                                <mx-class-tree :root="select.baselineclass" ref="baselineClassTree"></mx-class-tree>
-                                                                            </template>
-                                                                        </el-dropdown-item>
-                                                                    </el-dropdown-menu>
-                                                                </el-dropdown>
-                                                            </template>
-                                                        </el-input>
-                                                        
+                                                    <el-form-item label="指定计算属性和值" style="width:80%;">
+                                                        <mx-classkeys-cascader :root="content.class" :value="content.model.bucketkeys" multiplenable="true"  ref="bucketkeys"></mx-classkeys-cascader>
                                                     </el-form-item>
-                                                    <el-form-item label="黑名单" style="width:80%;">
-                                                        <el-input v-model="content.blacklist" clearable autofocus size="small">
-                                                            <template slot="prepend">
-                                                                <el-dropdown placement="top-end"  :hide-on-click="false">
-                                                                    <el-tooltip content="指定黑名单类" open-delay="500">
-                                                                        <el-button type="text" style="padding:15px;">
-                                                                            <i class="el-icon-office-building" style="font-size:16px;"></i>
-                                                                        </el-button>
-                                                                    </el-tooltip>
-                                                                    <el-dropdown-menu slot="dropdown">
-                                                                        <el-dropdown-item>
-                                                                            <template scope="scope">
-                                                                                <mx-class-muilt-tree :root="select.rawclass" showCheckBox="true" ref="blacklistClassTree"></mx-class-muilt-tree>
-                                                                            </template>
-                                                                        </el-dropdown-item>
-                                                                    </el-dropdown-menu>
-                                                                </el-dropdown>
-                                                            </template>
-                                                        </el-input>
-                                                        <!--el-tag
-                                                            :key="tag"
-                                                            closable
-                                                            type=""
-                                                            @close="nameRemove(tag)"
-                                                            style="margin:0 2px;" v-for="tag in content.blacklist">
-                                                            #{tag}#
-                                                        </el-tag>
-                                                        <el-input
-                                                            class="input-new-tag"
-                                                            v-if="names.inputVisible"
-                                                            v-model="names.inputValue"
-                                                            ref="saveTagInput"
-                                                            size="small"
-                                                            @keyup.enter.native="nameAdd"
-                                                            @blur="nameAdd">
-                                                        </el-input>
-                                                        <el-button v-else class="button-new-tag" size="small" @click="nameInputShow">+</el-button-->
-                                                    </el-form-item>
-                                                    <el-form-item label="Interval" prop="interval">
-                                                        <el-input-number v-model="content.interval" controls-position="right" :min="1"></el-input-number> 秒
-                                                    </el-form-item>
-                                                    <el-form-item label="Limitday" prop="limitday">
-                                                        <el-input-number v-model="content.limitday" controls-position="right" :min="1"></el-input-number>
-                                                    </el-form-item>
-                                                    <el-form-item label="计算属性">
+                                                    <el-form-item label="计算属性" style="width:80%;display:none;">
                                                         <el-checkbox-group v-model="content.ctypelist">
                                                             <el-checkbox label="max" class="el-checkbox">Max</el-checkbox>
                                                             <el-checkbox label="avg" class="el-checkbox">Avg</el-checkbox>
                                                             <el-checkbox label="min" class="el-checkbox">Min</el-checkbox>
                                                         </el-checkbox-group>
                                                     </el-form-item>
-                                                    <el-form-item label="Avgtype">
+                                                    <el-form-item label="指定基线计算属性和值" style="width:80%;">
+                                                        <mx-classkeys-cascader :root="content.class" :value="content.model.baselinebucketkeys" multiplenable="true"  ref="baselinebucketkeys"></mx-classkeys-cascader>
+                                                    </el-form-item>
+                                                    <el-form-item label="指定不参与计算属性" style="width:80%;">
+                                                        <mx-classkeys-cascader :root="content.class" :value="content.model.copykeys" multiplenable="true"  ref="copykeys"></mx-classkeys-cascader>
+                                                    </el-form-item>
+                                                    <el-form-item label="指定不参与计算对象黑名单" style="width:80%;">
+                                                        <mx-class-cascader root="/" :value="content.model.blacklist" multiplenable="true" ref="blacklist"></mx-class-cascader>
+                                                    </el-form-item>
+                                                    
+                                                    <el-form-item label="基线类型" style="width:80%;">
+                                                        <el-radio v-model="content.limitday" :label="7">周基线</el-radio>
+                                                        <el-radio v-model="content.limitday" :label="30">月基线</el-radio>
+                                                    </el-form-item>
+                                                    <el-form-item label="计算平均值的算法类型" style="width:80%;">
                                                         <el-radio-group v-model="content.avgtype">
                                                             <el-radio label="avg" class="el-radio">Avg</el-radio>
                                                             <el-radio label="median" class="el-radio">Median</el-radio>
                                                         </el-radio-group>    
                                                     </el-form-item>
                                                     
-                                                    <el-form-item label="作业名称" prop="name">
+                                                </el-form>
+                                            </el-tab-pane>
+                                            <el-tab-pane label="服务器组">
+                                                <mx-job-group :value="content.job.group" ref="jobGroup"></mx-job-group>
+                                            </el-tab-pane>
+                                            <el-tab-pane label="定时任务">
+                                                <mx-job-cron :value="content.job.cron" style="height:100%;" ref="jobCron"></mx-job-cron>
+                                            </el-tab-pane>
+                                            <el-tab-pane label="消息模板">
+                                                <el-form :model="content" label-width="80px" style="height:100%;overflow:auto;">
+                                                            
+                                                    <el-form-item label="消息模板" prop="msg">
+                                                        <el-input type="textarea" rows="10" v-model="content.msg"></textarea></el-input>
+                                                    </el-form-item>
+                                                    
+                                                </el-form>
+                                            </el-tab-pane>
+                                            <el-tab-pane label="其它设置">
+                                                <el-form :model="content" label-width="140px" style="width:95%;height:100%;overflow:auto;">
+                                                    <el-form-item label="采集间隔" prop="interval">
+                                                        <el-input-number v-model="content.interval" controls-position="right" :min="1"></el-input-number> 秒
+                                                    </el-form-item>
+                                                    
+                                                    <el-form-item label="作业名称" prop="name" style="display:none;">
                                                         <el-input type="text" v-model="content.name"></textarea></el-input>
                                                     </el-form-item>
                                                     
@@ -381,56 +336,13 @@ class AI {
                                                     </el-form-item>
                                                 </el-form>
                                             </el-tab-pane>
-                                            <el-tab-pane label="服务器组">
-                                                <el-form :model="content" label-width="80px" style="height:100%;overflow:auto;">
-                                                    
-                                                    <el-form-item label="服务器组" prop="group">
-                                                        <el-input type="text" v-model="content.job.group"></textarea></el-input>
-                                                    </el-form-item>
-                                                    
-                                                </el-form>
-                                            </el-tab-pane>
-                                            <el-tab-pane label="定时任务">
-
-                                                <el-form :model="content" label-width="80px" style="height:100%;overflow:auto;">
-                                                    
-                                                    <el-form-item label="定时器" prop="cron">
-                                                        <el-input type="text" v-model="content.job.cron"></textarea></el-input>
-                                                    </el-form-item>
-                                                    
-                                                </el-form>
-                                            
-                                            </el-tab-pane>
-                                            <el-tab-pane label="消息模板">
-                                                <el-form :model="content" label-width="80px" style="height:100%;overflow:auto;">
-                                                            
-                                                    <el-form-item label="消息模板" prop="msg">
-                                                        <el-input type="textarea" rows="10" v-model="content.msg"></textarea></el-input>
-                                                    </el-form-item>
-                                                    
-                                                </el-form>
-                                            </el-tab-pane>
                                         </el-tabs>
                                         
                                     </el-main>
                                 </el-container>`,
                     data(){
                         return {
-                            select:{
-                                rawclass: '/matrix/devops',
-                                baselineclass: '/matrix/devops/performance',
-                                blacklist: []
-                            },
-                            names:{
-                                inputVisible: false,
-                                inputValue: ''
-                            },
                             content: null
-                        }
-                    },
-                    filters: {
-                        formatByJoin(item){
-                            return item.join(",");
                         }
                     },
                     created(){
@@ -439,26 +351,90 @@ class AI {
                     mounted(){
                         // watch数据更新
                         this.$watch(
-                            "$refs.rawClassTree.selected",{
+                            "$refs.class.selected",{
                                 handler:(val, oldVal) => {
-                                    this.$set(this.content,'rawclass', val.class);
+                                    this.$set(this.content,'class', _.last(val));
+                                    this.$set(this.content.model,'class', _.last(val));
                                 },
                                 deep:true
                             }
                         );
+
+                        // bucket && bucketkeys
                         this.$watch(
-                            "$refs.baselineClassTree.selected",{
+                            "$refs.bucketkeys.selected",{
                                 handler:(val, oldVal) => {
-                                    this.$set(this.content,'baselineclass', val.class);
+                                    this.$set(this.content,'bucket', _.head(_.head(val)));
+                                    this.$set(this.content,'bucketkeys', _.map(val,(v)=>{ return _.last(v);}));
+
+                                    this.$set(this.content.model,'bucketkeys', val);
                                 },
                                 deep:true
                             }
                         );
+
+                        // baselinebucket && baselinebucketkeys
                         this.$watch(
-                            "$refs.blacklistClassTree.selected",{
+                            "$refs.baselinebucketkeys.selected",{
                                 handler:(val, oldVal) => {
-                                    this.$set(this.content, 'blacklist', _.map(val,'class'));
-                                    console.log(val,_.map(val,'class'))
+
+                                    // baselinebucket
+                                    this.$set(this.content,'baselinebucket',  _.head(_.head(val)));
+                                    
+                                    // baselinebucketkeys
+                                    let baselineBucketKeys = {};
+                                    let keys = _.map(val,(v)=>{ return _.last(v);});
+                                    let ctypelist = this.content.ctypelist;
+                                    _.forEach(keys,(v)=>{ 
+                                        let tmp = {};
+                                        _.forEach(ctypelist,(w)=>{ _.extend(tmp, { [w]: `${w}_${v}` }); });
+                                        _.extend(baselineBucketKeys, { [v]: tmp } );
+                                    });
+                                    this.$set(this.content,'baselinebucketkeys', baselineBucketKeys);
+
+                                    this.$set(this.content.model,'baselinebucketkeys', val);
+                                },
+                                deep:true
+                            }
+                        );
+                        // copykeys
+                        this.$watch(
+                            "$refs.copykeys.selected",{
+                                handler:(val, oldVal) => {
+
+                                    // copykeys
+                                    this.$set(this.content,'copykeys',  _.map(val,(v)=>{ return _.last(v);}));
+                                    this.$set(this.content.model,'copykeys',  val);
+                                },
+                                deep:true
+                            }
+                        );
+                        // blacklist
+                        this.$watch(
+                            "$refs.blacklist.selected",{
+                                handler:(val, oldVal) => {
+                                    this.$set(this.content, 'blacklist',  _.map(val,(v)=>{ return _.last(v);}))
+                                    this.$set(this.content.model,'blacklist', val);
+                                },
+                                deep:true
+                            }
+                        );
+
+                        // job Group
+                        this.$watch(
+                            "$refs.jobGroup.dt.selected",{
+                                handler:(val, oldVal) => {
+                                    this.$set(this.content.job, 'group',  _.map(val,'name')[0])
+                                },
+                                deep:true
+                            }
+                        );
+
+                        // job cron
+                        this.$watch(
+                            "$refs.jobCron.cron",{
+                                handler:(val, oldVal) => {
+                                    this.$set(this.content.job, 'cron',  _.concat(['cron'],val).join(" "));
                                 },
                                 deep:true
                             }
@@ -466,83 +442,111 @@ class AI {
                         
                     },
                     methods: {
-                        save(){
-                            const self = this;
-
+                        onSave(){
                             let attr = {ctime: _.now()};
-                            let rtn = fsHandler.fsNew('json', self.model.parent, self.model.name, JSON.stringify(self.content,null,2), attr);
+                            
+                            console.log(JSON.stringify(this.content,null,2))
+                            
+                            let rt = fsHandler.fsNew('json', this.model.parent, this.model.name, JSON.stringify(this.content,null,2), attr);
+                            if(rt == 1){
+
+                                if(_.isEmpty(this.content.job.group)){
+                                    this.$message({
+                                        type: "info",
+                                        message: "请选择服务器组"
+                                    })
+                                    return false;
+                                }
+                                
+                                let name = this.model.name.split(".")[0];
+                                let jobObj = { 
+                                    name: name, 
+                                    dir: this.content.job.dir, 
+                                    exec: [this.content.job.exec[0], this.model.fullname].join(" "), 
+                                    group: this.content.job.group, 
+                                    schedule: `${this.content.job.cron}`, // 'cron 0 0 * * *'
+                                    timeout: 43200
+                                };
+
+                                // 检查job是否存在
+                                // let check = jobHandler.jobExist(jobObj);
+                                // console.log(23,check)
+
+                                // 如果不存在，生成Job
+                                //let rtn = jobHandler.jobAdd(jobObj);
+                                let rtn = jobHandler.jobMerge(jobObj);
+                                
+                                if(rtn.status == 'ok'){
+                                    this.$message({
+                                        type: 'success',
+                                        message: '作业提交成功！'
+                                    })
+                                } else {
+                                    this.$message({
+                                        type: 'error',
+                                        message: '作业提交失败：' + rtn.message
+                                    })
+                                }
+
+                            } else {
+                                this.$message({
+                                    type: 'warning',
+                                    message: '保存失败:' + rt.message
+                                })
+                            }
                         },
                         // 删除规则
-                        remove() {
+                        onRemove() {
                             
-                            alertify.confirm(`确认要删除该规则? <br><br> ${this.model.name}`,  (e)=> {
-                                if (e) {
-                                    // 删除文件系统
-                                    let rtn = fsHandler.fsDelete(this.model.parent, this.model.name);
-                                    if (rtn == 1){
-                                        // 刷新rules
-                                        this.$root.$refs.aiSetup.load();
-                                        this.$root.$refs.aiSetup.close(this.model.id);
+                            this.$confirm(`确认要删除该规则：${this.model.name}？`, '提示', {
+                                confirmButtonText: '确定',
+                                cancelButtonText: '取消',
+                                type: 'warning'
+                            }).then(() => {
+								
+								// 删除文件系统
+                                let rtn = fsHandler.fsDelete(this.model.parent, this.model.name);
+                                if (rtn == 1){
+                                    // 刷新rules
+                                    this.$root.$refs.aiSetup.load();
+                                    this.$root.$refs.aiSetup.close(this.model.id);
 
-                                        this.$message({
-                                            type: "success",
-                                            message: "删除成功！"
-                                        })
-                                    } else {
-                                        this.$message({
-                                            type: "error",
-                                            message: "删除失败 " + rtn.message
-                                        })
-                                    }
+                                    this.$message({
+                                        type: "success",
+                                        message: "删除成功！"
+                                    })
                                 } else {
-                                    
+                                    this.$message({
+                                        type: "error",
+                                        message: "删除失败 " + rtn.message
+                                    })
                                 }
-                            })
-                        },
-                        nameRemove(tag) {
-                            const self = this;
-        
-                            self.content.blacklist.splice($.inArray(tag,self.content.blacklist), 1)
-        
-                            // 更新规则，没有关键字时status=0
-                            _.extend(self.content, {blacklist: self.content.blacklist});
-                            
-                        },
-                        nameInputShow() {
-                            const self = this;
-        
-                            self.names.inputVisible = true;
-                            self.$nextTick(_ => {
-                                self.$refs.saveTagInput.$refs.input.focus();
+                            }).catch(() => {
+                                
                             });
+
                         },
-                        nameAdd() {
-                            const self = this;
-        
-                            let inputValue = self.names.inputValue;
-                            if (inputValue) {
-                                self.content.blacklist.push(inputValue);
-                            }
-        
-                             // 更新规则，没有关键字时status=0
-                             _.extend(self.content, {blacklist: self.content.blacklist});
-        
-                             self.names.inputVisible = false;
-                             self.names.inputValue = '';
-                        },
-                        statusUpdate(evt){
-                            const self = this;
+                        onStatusUpdate(evt){
                             
-                            _.extend(self.content,{status:evt+'', ospace:window.COMPANY_OSPACE, user: window.SignedUser_UserName,time: _.now()});
+                            _.extend(this.content,{status:evt+'', ospace:window.COMPANY_OSPACE, user: window.SignedUser_UserName,time: _.now()});
                             
                             // 更新到文件系统
                             let attr = {ctime: _.now()};
-                            let rtn = fsHandler.fsNew('json', self.model.parent, self.model.name, JSON.stringify(self.content,null,2), attr);
-
+                            let rtn = fsHandler.fsNew('json', this.model.parent, this.model.name, JSON.stringify(this.content,null,2), attr);
+                            
                             // 生成JOB
-                            if(evt == 1){
-                                let rtn = baseLineHandler.baseLineToJob(self.content);
+                            if(rtn == 1){
+                                this.$message({
+                                    type: 'success',
+                                    message: '作业提交成功！'
+                                })
+                            } else {
+                                this.$message({
+                                    type: 'error',
+                                    message: '作业提交失败!'
+                                })        
                             }
+                            
                         },
                         job(term){
                             let url = `/matrix/job?term=${window.btoa(encodeURIComponent(term))}`;

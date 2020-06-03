@@ -2079,7 +2079,6 @@ class System {
 											style="width: 100%"
 											v-if="dt.rows">
 											<el-table-column type="index"></el-table-column>
-											</el-table-column>
 											<el-table-column 
 												:label="item.title" 
 												:prop="item.field" 

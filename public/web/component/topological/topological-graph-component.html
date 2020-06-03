@@ -480,32 +480,21 @@
                                     </el-tab-pane>
                                     <el-tab-pane label="节点" name="vertex">
                                         <el-form>
-                                            <el-form-item label="工具栏">
-                                                
-                                            </el-form-item>
-                                            <el-form-item label="自动刷新">
-                                                
-                                            </el-form-item>
-                                            <el-form-item label="手动刷新">
-                                                
+                                            <el-form-item label="排列">
+                                                <el-select v-model="model.graph.style.vertex.align.value" placeholder="请选择" @change="onVertexAlignChange">
+                                                    <el-option :key="item.name" :value="item.value" :label="item.name" v-for="item in model.graph.style.vertex.align.list"></el-option>
+                                                </el-select>
                                             </el-form-item>
                                         </el-form>
                                     </el-tab-pane>
                                     <el-tab-pane label="边线" name="edge">
                                         <el-form>
                                             <el-form-item label="样式">
-                                                <el-select v-model="model.graph.style.edge.edgeStyle" placeholder="请选择">
-                                                    <el-option
-                                                      >
-                                                    </el-option>
-                                                  </el-select>
+                                                <el-select v-model="model.graph.style.edge.value" placeholder="请选择" @change="onEdgeStyleChange">
+                                                    <el-option :key="item.name" :value="item" :label="item.name" v-for="item in model.graph.style.edge.list"></el-option>
+                                                </el-select>
                                             </el-form-item>
-                                            <el-form-item label="自动刷新">
-                                                
-                                            </el-form-item>
-                                            <el-form-item label="手动刷新">
-                                                
-                                            </el-form-item>
+                                            
                                         </el-form>
                                     </el-tab-pane>
                                 </el-tabs>
@@ -784,12 +773,50 @@
                             grid: {
                                 show: false
                             },
-                            vertex:{},
+                            vertex:{
+                                align: {
+                                    value: '',
+                                    list: [
+                                        {name: '左对齐', icon:'', value:'mxConstants.ALIGN_LEFT'},
+                                        {name: '居中', icon:'', value:'mxConstants.ALIGN_CENTER'},
+                                        {name: '右对齐', icon:'', value:'mxConstants.ALIGN_RIGHT'},
+                                        {name: '上对齐', icon:'', value:'mxConstants.ALIGN_TOP'},
+                                        {name: '中间', icon:'', value:'mxConstants.ALIGN_MIDDLE'},
+                                        {name: '下对齐', icon:'', value:'mxConstants.ALIGN_BOTTOM'}
+                                    ]
+                                }
+                            },
                             edge: {
-                                style: 'elbowEdgeStyle',//orthogonalEdgeStyle
+                                style: 'elbowEdgeStyle',
                                 endArrow: 'classic',
                                 strokeWidth: 1,
-                                strokeColor: '#333333'
+                                strokeColor: '#333333',
+                                value: {
+                                        name: '样式1', title:'isometricEdgeStyle', keys:[mxConstants.STYLE_EDGE, mxConstants.STYLE_CURVED, mxConstants.STYLE_NOEDGESTYLE], values:[null, null, null]
+                                },
+                                list: [
+                                    {
+                                        name: '样式1', title:'isometricEdgeStyle', keys:[mxConstants.STYLE_EDGE, mxConstants.STYLE_CURVED, mxConstants.STYLE_NOEDGESTYLE], values:[null, null, null]
+                                    },
+                                    {
+                                        name: '样式2', title:'orthogonalEdgeStyle', keys:[mxConstants.STYLE_EDGE, mxConstants.STYLE_CURVED, mxConstants.STYLE_NOEDGESTYLE], values:['orthogonalEdgeStyle', null, null]
+                                    },
+                                    {
+                                        name: '样式3', title:'elbowEdgeStyle', keys:[mxConstants.STYLE_EDGE, mxConstants.STYLE_ELBOW, mxConstants.STYLE_CURVED, mxConstants.STYLE_NOEDGESTYLE], values:['elbowEdgeStyle', null, null, null]
+                                    },
+                                    {
+                                        name: '样式4', title:'elbowEdgeStyle', keys:[mxConstants.STYLE_EDGE, mxConstants.STYLE_ELBOW, mxConstants.STYLE_CURVED, mxConstants.STYLE_NOEDGESTYLE], values:['elbowEdgeStyle', 'vertical', null, null]
+                                    },
+                                    {
+                                        name: '样式5', title:'isometricEdgeStyle', keys:[mxConstants.STYLE_EDGE, mxConstants.STYLE_ELBOW, mxConstants.STYLE_CURVED, mxConstants.STYLE_NOEDGESTYLE], values:['isometricEdgeStyle', null, null, null]
+                                    },
+                                    {
+                                        name: '样式6', title:'isometricEdgeStyle', keys:[mxConstants.STYLE_EDGE, mxConstants.STYLE_ELBOW, mxConstants.STYLE_CURVED, mxConstants.STYLE_NOEDGESTYLE], values:['isometricEdgeStyle', 'vertical', null, null]
+                                    },
+                                    {
+                                        name: '样式7', title:'entityRelationEdgeStyle', keys:[mxConstants.STYLE_EDGE, mxConstants.STYLE_CURVED, mxConstants.STYLE_NOEDGESTYLE], values:['entityRelationEdgeStyle', null, null]
+                                    }
+                                ]
                             }
                         },                 
                         path: {
@@ -999,8 +1026,12 @@
             'model.graph.style.grid.show':{
 
                 handler:function(val,oldVal){
+                    
                     if(val){
-                        $("#graphContainer>svg").addClass("grid-pattern");
+                        _.delay(()=>{
+                            $("#graphContainer>svg").addClass("grid-pattern");
+                        },2000)
+                        
                     } else{
                         $("#graphContainer>svg").removeClass("grid-pattern");
                     }
@@ -1011,29 +1042,11 @@
         },
         created(){
             
-            // 状态刷新频率
-            this.model.control.refresh.interval = mx.global.register.topological.status_interval;
-            // 状态刷新标志
-            this.model.control.refresh.enable = (localStorage.getItem("GRAPH-STATUS-IFREFRESH") == 'true');
-            // 画布背景
-            this.model.graph.style.grid.show = (localStorage.getItem("GRAPH-GRID-SHOW") == 'true');
-
             // 实体新建成功
             eventHub.$on("ENTITY-ADD-EVENT", this.addEntityToGraph);
             // 删除路径
             eventHub.$on("TOPOLOGICAL-ANALYSIS-CALLBACK", this.removePath);
             
-            //初始化theme
-            this.model.graph.theme.color = localStorage.getItem(`GRAPH-VIEW-THEME-${window.SignedUser_UserName}`);
-
-
-            // 节点渲染方式
-            this.model.control.ifIcon = (localStorage.getItem("TOPOLOGICAL-RENDER-TYPE"))=='true'?true:false;
-            // 布局类型
-            this.model.graph.layout.default = localStorage.getItem("GRAPH-LAYOUT");
-            // 关系渲染类型
-            this.model.graph.layout.edgeStyle = localStorage.getItem("TOPOLOGICAL-RENDER-EDGESTYLE") || 4;
-
             // 节点是否可以移动 
             mxGraphHandler.prototype.setMoveEnabled(true);
             //显示节点位置标尺  
@@ -1275,6 +1288,22 @@
                 
                 return cell;
             };
+
+            // 状态刷新频率
+            this.model.control.refresh.interval = mx.global.register.topological.status_interval;
+            // 状态刷新标志
+            this.model.control.refresh.enable = (localStorage.getItem("GRAPH-STATUS-IFREFRESH") == 'true');
+            //初始化theme
+            this.model.graph.theme.color = localStorage.getItem(`GRAPH-VIEW-THEME-${window.SignedUser_UserName}`);
+            // 画布背景
+            this.model.graph.style.grid.show = (localStorage.getItem("GRAPH-GRID-SHOW") == 'true');
+
+            // 节点渲染方式
+            this.model.control.ifIcon = (localStorage.getItem("TOPOLOGICAL-RENDER-TYPE"))=='true'?true:false;
+            // 布局类型
+            this.model.graph.layout.default = localStorage.getItem("GRAPH-LAYOUT");
+            // 关系渲染类型
+            this.model.graph.layout.edgeStyle = localStorage.getItem("TOPOLOGICAL-RENDER-EDGESTYLE") || 4;
 
         },
         mounted() {
@@ -2833,8 +2862,7 @@
             loadSubGraphBySameRecord(node){
                 
                 let rtn = node.model.data[0].graph;
-                console.log(node,rtn)
-
+                
                 let allNodes = [];
                 let allEdges = [];
 
@@ -3048,6 +3076,8 @@
 
                     // 统计
                     this.graphSummary();
+
+                    this.toCenter(false);
                     
                 }
             },
@@ -3771,6 +3801,57 @@
                     this.model.editor.graph.setCellStyle(newStyle,cs);
                 })
 
+            },
+            // 节点排列
+            onVertexAlignChange(evt){
+                this.model.editor.graph.alignCells(evt);
+            },
+            // 边样式调整
+            onEdgeStyleChange(evt){
+                
+                let keys = evt.keys;
+                let values = evt.values;
+                let graph = this.model.editor.graph;
+                
+                graph.stopEditing(false);
+                
+                graph.getModel().beginUpdate();
+                try{
+                    let cells = graph.getSelectionCells();
+
+                    if(_.isEmpty(cells)){
+                        graph.selectEdges();
+                    }
+
+                    let edges = [];
+                    
+                    for (var i = 0; i < cells.length; i++){
+                        var cell = cells[i];
+                        
+                        if (graph.getModel().isEdge(cell)){
+                            
+                            var geo = graph.getCellGeometry(cell);
+                
+                            // Resets all edge points
+                            if (geo != null){
+                                geo = geo.clone();
+                                geo.points = null;
+                                graph.getModel().setGeometry(cell, geo);
+                            }
+                            
+                            for (var j = 0; j < keys.length; j++){
+                                graph.setCellStyles(keys[j], values[j], [cell]);
+                            }
+                            
+                            edges.push(cell);
+                        }
+                    }
+                    
+                }
+                finally{
+                    graph.getModel().endUpdate();
+                }
+            
             },
             setThemeFont(hexcolor){
                 try{
