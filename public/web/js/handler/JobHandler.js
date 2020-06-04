@@ -89,7 +89,7 @@ class  JobHandler {
         let rtn = null;
 
         jQuery.ajax({
-            url: `/job/${job.name}@${job.dir}`,
+            url: `/job/${job.name}@${job.job.dir}`,
             dataType: 'json',
             type: 'DELETE',
             async:false,

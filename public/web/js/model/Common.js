@@ -1484,6 +1484,73 @@ Vue.component("mx-class-cascader",{
     }
 })
 
+/* Common Class To Keys Select Cascader */
+Vue.component("mx-class-keys-cascader",{
+    delimiters: ['#{', '}#'],
+    props: {
+        root: String,
+        multiplenable: {
+            default:false,
+            type:Boolean
+        },
+        value: Object
+    },
+    data(){
+        return {
+            options: [],
+            defaultProps: {
+                multiple: false
+            },
+            selected: null
+        }
+    },
+    template:   `<el-cascader
+                    v-model="value"
+                    :options="options"
+                    :props="defaultProps"
+                    @change="onChange"
+                    clearable
+                    style="width:100%;"
+                    ref="cascader">
+                    <template slot-scope="{ node, data }">
+                        <span>#{ data.label }#</span>
+                        <span v-if="!node.isLeaf"> (#{ data.children.length }#) </span>
+                    </template>
+                </el-cascader>`,
+    created(){
+        this.defaultProps.multiple = this.multiplenable;
+        this.initData();
+    },
+    methods: {
+        initData(){
+            this.options = fsHandler.callFsJScript("/matrix/ai/getClassList.js",encodeURIComponent(this.root)).message;
+        },
+        onChange(val){
+            console.log(11,val)
+            this.selected = val;
+        },
+        onNodeClick(data){
+            try{
+
+                if(!data.isdir) {
+                    eventHub.$emit("FS-NODE-OPENIT-EVENT", data, data.parent);
+
+                } else {
+
+                    let childrenData = _.sortBy(fsHandler.fsList(data.fullname),'fullname');
+
+                    this.$set(data, 'children', childrenData);
+                    
+                }
+
+            } catch(err){
+
+            }
+
+        }
+    }
+})
+
 /* Common Class Keys Select Cascader By ClassName */
 Vue.component("mx-classkeys-cascader",{
     delimiters: ['#{', '}#'],

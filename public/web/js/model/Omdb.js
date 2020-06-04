@@ -1161,12 +1161,6 @@ class Omdb{
                                                             <el-input :type="k,dt.columns | pickType" :rows="6" :value="JSON.stringify(v,null,4)"  v-else-if="_.includes(['map','set','list'],pickFtype(k))"></el-input>
                                                             <el-input :type="k,dt.columns | pickType" :value="v"  v-else></el-input>
                                                         </el-form-item>
-                                                        <!--el-form-item v-for="v,k in props.row" :label="k" :key="k">
-                                                            <el-input :type="k,dt.columns | pickType" :value="v"  v-if=" _.includes(['class','ctime', 'day','id','name', 'vtime'],k)"></el-input>
-                                                            <el-input :type="k,dt.columns | pickType" :rows="6" :value="v"  v-else-if="typeof v =='bucket'"></el-input>
-                                                            <el-input :type="k,dt.columns | pickType" :rows="6" :value="JSON.stringify(v,null,4)"  v-else-if="typeof v =='object'"></el-input>
-                                                            <el-input :type="k,dt.columns | pickType" :value="v"  v-else></el-input>
-                                                        </el-form-item-->
                                                     </el-form>
                                                 </el-main>
                                             </el-container>
@@ -1202,12 +1196,13 @@ class Omdb{
                                                 <el-container>
                                                     <el-header style="height:30px;line-height:30px;padding:0px;">
                                                         <el-button type="text" icon="el-icon-timer" @click="arrayToCsvByLocal(item['field'],scope.$index)"></el-button>
+                                                        <el-button type="text" icon="el-icon-copy-document" class="el-button-copy" @click="onCopy(item['field'],scope.$index)"></el-button>
                                                     </el-header>
                                                     <el-main style="padding:0px;">
-                                                        <el-input type="textarea" rows="10" :value="arrayToCsv(scope.row[item['field']])"></el-input>
+                                                        <textarea rows="10" style="width:98%;" :id="'textarea_'+scope.$index">#{arrayToCsv(scope.row[item['field']])}#</textarea>
                                                     </el-main>
                                                 </el-container>
-                                                <el-button type="text" icon="el-icon-date" slot="reference"></el-button>
+                                                <el-button type="text" icon="el-icon-date" slot="reference">#{scope.row[item['field']].length}#</el-button>
                                             </el-popover>
                                             <div v-else-if="_.includes(['map','set','list'],pickFtype(item['field']))">#{JSON.stringify(scope.row[item['field']],null,4)}#</div>
                                             <div v-else>#{scope.row[item['field']]}#</div>
@@ -1303,6 +1298,19 @@ class Omdb{
                 this.info.push(`共 ${this.dt.rows.length} 项`);
             },
             methods: {
+                onCopy(data,index){
+                    try{
+                        let tx = document.getElementById('textarea_'+index);
+                        tx.select(); 
+                        document.execCommand("Copy"); 
+                        this.$message({
+                            type: "info",
+                            message: "已复制"
+                        });
+                    } catch(err){
+
+                    }
+                },
                 arrayToCsv(data){
                     
                     let lineArray = [];

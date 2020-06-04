@@ -266,7 +266,7 @@ class AI {
                                     <el-main style="height:100%;">
                                         <el-tabs tab-position="left" style="height: 100%;">
                                             <el-tab-pane label="基本设置">
-                                                <el-form :model="content" label-position="top" label-width="160px" style="width:95%;height:100%;overflow:auto;">
+                                                <el-form :model="content" label-position="top" label-width="160px" style="width:95%;height:100%;overflow:auto;padding: 0 20px; border-left: 1px solid #dddddd;">
                                                     <el-form-item label="指定计算类" style="width:80%;">
                                                         <mx-class-cascader root="/matrix/entity" :value="content.model.class" ref="class"></mx-class-cascader>
                                                     </el-form-item>
@@ -309,9 +309,14 @@ class AI {
                                             <el-tab-pane label="定时任务">
                                                 <mx-job-cron :value="content.job.cron" style="height:100%;" ref="jobCron"></mx-job-cron>
                                             </el-tab-pane>
-                                            <el-tab-pane label="消息模板">
-                                                <el-form :model="content" label-width="80px" style="height:100%;overflow:auto;">
+                                            <el-tab-pane label="阈值消息">
+                                                <el-form :model="content" label-width="80px" label-position="top" style="height:100%;overflow:auto;padding: 0 20px; border-left: 1px solid #dddddd;">
                                                             
+                                                    <el-form-item label="阈值" prop="threshold">
+                                                        <el-input-number v-model="content.threshold" controls-position="right" :min="1"></el-input-number>
+                                                        <small>超过阈值，发送消息</small>
+                                                    </el-form-item>
+
                                                     <el-form-item label="消息模板" prop="msg">
                                                         <el-input type="textarea" rows="10" v-model="content.msg"></textarea></el-input>
                                                     </el-form-item>
@@ -319,13 +324,14 @@ class AI {
                                                 </el-form>
                                             </el-tab-pane>
                                             <el-tab-pane label="其它设置">
-                                                <el-form :model="content" label-width="140px" style="width:95%;height:100%;overflow:auto;">
+                                                <el-form :model="content" label-width="140px" label-position="top" style="width:95%;height:100%;overflow:auto;padding: 0 20px; border-left: 1px solid #dddddd;">
+                                                    
+                                                    <el-form-item label="作业名称">
+                                                        <el-input type="text" v-model="content.name" disabled></el-input>
+                                                    </el-form-item>
+
                                                     <el-form-item label="采集间隔" prop="interval">
                                                         <el-input-number v-model="content.interval" controls-position="right" :min="1"></el-input-number> 秒
-                                                    </el-form-item>
-                                                    
-                                                    <el-form-item label="作业名称" prop="name" style="display:none;">
-                                                        <el-input type="text" v-model="content.name"></textarea></el-input>
                                                     </el-form-item>
                                                     
                                                     <el-form-item label="时间" prop="time">
@@ -467,6 +473,7 @@ class AI {
                                     schedule: `${this.content.job.cron}`, // 'cron 0 0 * * *'
                                     timeout: 43200
                                 };
+                                this.$set(this.content,'name',name);
 
                                 // 检查job是否存在
                                 // let check = jobHandler.jobExist(jobObj);
@@ -504,23 +511,34 @@ class AI {
                                 type: 'warning'
                             }).then(() => {
 								
-								// 删除文件系统
-                                let rtn = fsHandler.fsDelete(this.model.parent, this.model.name);
-                                if (rtn == 1){
-                                    // 刷新rules
-                                    this.$root.$refs.aiSetup.load();
-                                    this.$root.$refs.aiSetup.close(this.model.id);
+                                let rt = jobHandler.jobDelete(this.content);
+                                if(rt.status == 'ok'){
+                                    
+                                    // 删除文件系统
+                                    let rtn = fsHandler.fsDelete(this.model.parent, this.model.name);
+                                    if (rtn == 1){
+                                    
+                                        // 刷新rules
+                                        this.$root.$refs.aiSetup.load();
+                                        this.$root.$refs.aiSetup.close(this.model.id);
 
-                                    this.$message({
-                                        type: "success",
-                                        message: "删除成功！"
-                                    })
+                                        this.$message({
+                                            type: "success",
+                                            message: "删除成功！"
+                                        })
+                                    } else {
+                                        this.$message({
+                                            type: "error",
+                                            message: "删除失败 " + rtn.message
+                                        })
+                                    }
                                 } else {
                                     this.$message({
                                         type: "error",
-                                        message: "删除失败 " + rtn.message
+                                        message: "删除失败：" + rt.message
                                     })
                                 }
+
                             }).catch(() => {
                                 
                             });
@@ -1387,31 +1405,16 @@ class AI {
                                 }
                             },
                             nodes: [],
-                            input:{
-                                inputVisible: false,
-                                inputValue: ''
-                            },
-                            hidden:{
-                                inputVisible: false,
-                                inputValue: ''
-                            },
-                            output:{
-                                inputVisible: false,
-                                inputValue: ''
-                            },
                             content: null
                         }
                     },
                     template:   `<el-container :id="id" style="height:100%;">
                                     <el-header style="line-height:40px;height:40px;text-align:right;">
                                         <el-tooltip content="保存规则">
-                                            <el-button type="text" @click="save"><i class="fas fa-save"></i></el-button>
+                                            <el-button type="text" @click="onSave" icon="el-icon-position"></el-button>
                                         </el-tooltip>
                                         <el-tooltip content="删除规则">
-                                            <el-button type="text" @click="remove" icon="el-icon-delete"></el-button>
-                                        </el-tooltip>
-                                        <el-tooltip content="设置">
-                                            <el-button type="text" @click="toggle" icon="el-icon-setting"></el-button>
+                                            <el-button type="text" @click="onDelete" icon="el-icon-delete"></el-button>
                                         </el-tooltip>
                                         <el-tooltip content="查看作业">
                                             <el-button type="text" @click="job(content.name)" icon="el-icon-date"></el-button>
@@ -1427,331 +1430,78 @@ class AI {
                                         </el-switch>
                                     </el-header>
                                     <el-main>
-                                        <el-form :model="model" label-width="80px">
-                                            <el-form-item label="关键词">
-                                                <el-input type="text" v-model="content.name"></el-input>
-                                            </el-form-item>
-                                            <el-form-item label="采集间隔" prop="threshold">
-                                                <el-input-number v-model="content.interval" controls-position="right" :min="1"></el-input-number> 次
-                                                <small>采集时间间隔</small>
-                                            </el-form-item>
-                                            <el-form-item label="阈值" prop="threshold">
-                                                <el-input-number v-model="content.threshold" controls-position="right" :min="1"></el-input-number> 次
-                                                <small>发生次数，超过阈值，发送消息</small>
-                                            </el-form-item>
-                                            <el-form-item label="最近" prop="nearest">
-                                                <el-input-number v-model="content.nearest" controls-position="right" :min="10*60"></el-input-number> 秒
-                                                <small>统计窗口，默认最近10分钟</small>
-                                            </el-form-item>
-                                            <el-form-item label="消息模板" prop="msg">
-                                                <el-input type="textarea" v-model="content.msg"></textarea></el-input>
-                                            </el-form-item>
-                                            <el-form-item label="时间" prop="time">
-                                                <small>#{moment(content.time).format(mx.global.register.format)}#</small>
-                                            </el-form-item>
-                                            <el-form-item label="输入">
-                                                <el-tag
-                                                    :key="tag"
-                                                    closable
-                                                    type=""
-                                                    @close="inputRemove(tag)"
-                                                    style="margin:0 2px;" v-for="tag in content.nodes.input">
-                                                    #{tag}#
-                                                </el-tag>
-                                                <el-input
-                                                    class="input-new-tag"
-                                                    v-if="input.inputVisible"
-                                                    v-model="input.inputValue"
-                                                    ref="saveInputInput"
-                                                    size="small"
-                                                    @keyup.enter.native="inputAdd"
-                                                    @blur="inputAdd">
-                                                </el-input>
-                                                <el-button v-else class="button-new-tag" size="small" @click="inputInputShow">+</el-button>
-                                            </el-form-item>
-                                            <el-form-item>
-                                                <div :id="id"></div>
-                                            </el-form-item>
-                                        </el-form>
+                                        <el-tabs tab-position="left" style="height: 100%;">
+                                            <el-tab-pane label="计算模型">
+                                                <el-form :model="model" label-width="140px" label-position="top" style="width:95%;height:100%;overflow:auto;padding: 0 20px; border-left: 1px solid #dddddd;">
+                                            
+                                                    <el-form-item label="输入层设置">
+                                                        <mx-class-keys-cascader root="/matrix/entity" :value="content.model.bucketkeys" multiplenable="true"  ref="bucketkeys"></mx-classkeys-cascader>
+                                                    </el-form-item>
+
+                                                    <el-form-item label="计算层">
+                                                        <el-input-number v-model="content.nodes.hiddencount" :min="0"></el-input-number>
+                                                    </el-form-item>
+
+                                                    <el-form-item label="输出层设置">
+                                                        <mx-class-cascader root="/matrix/entity" :value="content.model.class" ref="output"></mx-class-cascader>
+                                                        <br><br>
+                                                        <mx-classkeys-cascader :root="content.nodes.output[0].class" :value="content.model.bucketkeys" multiplenable="true"  ref="bucketkeys"></mx-classkeys-cascader>
+                                                    </el-form-item>
+
+                                                    <el-form-item label="模型">
+                                                        <div :id="id"></div>
+                                                    </el-form-item>
+                                                </el-form>
+                                            </el-tab-pane>
+                                            
+                                            <el-tab-pane label="阈值消息">
+                                                <el-form :model="model" label-width="140px" label-position="top" style="width:95%;height:100%;overflow:auto;padding: 0 20px; border-left: 1px solid #dddddd;">
+                                                    
+                                                    <el-form-item label="阈值" prop="threshold">
+                                                        <el-input-number v-model="content.threshold" controls-position="right" :min="1"></el-input-number> 次
+                                                        <small>发生次数，超过阈值，发送消息</small>
+                                                    </el-form-item>
+                                                    
+                                                    <el-form-item label="最近" prop="nearest">
+                                                        <el-input-number v-model="content.nearest" controls-position="right" :min="10*60"></el-input-number> 秒
+                                                        <small>统计窗口，默认最近10分钟</small>
+                                                    </el-form-item>
+
+                                                    <el-form-item label="消息模板" prop="msg">
+                                                        <el-input type="textarea" v-model="content.msg"></textarea></el-input>
+                                                    </el-form-item>
+                                                </el-form>
+                                            </el-tab-pane>
+                                            <el-tab-pane label="其它设置">
+                                                <el-form :model="content" label-width="140px" label-position="top" style="width:95%;height:100%;overflow:auto;padding: 0 20px; border-left: 1px solid #dddddd;">
+                                                    
+                                                    <el-form-item label="作业名称">
+                                                        <el-input type="text" v-model="content.name" disabled></el-input>
+                                                    </el-form-item>
+
+                                                    <el-form-item label="采集间隔" prop="interval">
+                                                        <el-input-number v-model="content.interval" controls-position="right" :min="1"></el-input-number> 秒
+                                                    </el-form-item>
+                                                    
+                                                    <el-form-item label="时间" prop="time">
+                                                        <small>#{moment(content.time).format(mx.global.register.format)}#</small>
+                                                    </el-form-item>
+                                                    <el-form-item label="用户" prop="user">
+                                                        <small>#{content.user}#</small>
+                                                    </el-form-item>
+                                                </el-form>
+                                            </el-tab-pane>
+                                        </el-tabs>
                                     </el-main>
                                 </el-container>`,
                     created(){
                         this.content = this.model.content;
                     },
                     mounted(){
-                        this.checkContainer();
+                        
                     },
                     methods:{
-                        checkContainer(){
-                            const self = this;
-        
-                            if($(`#${self.id}`).is(':visible')) {
-                                self.drawing();
-                                self.toggle();
-                            } else {
-                                setTimeout(self.checkContainer, 50);
-                            }
-                        },
-                        drawGraph(svg) {
-                            const self = this;
-
-                            var nodes = _.union(_.union(self.content.nodes.input,self.content.nodes.hidden),self.content.nodes.output);
-                    
-                            // get network size
-                            var netsize = {};
-                            
-                            nodes.forEach(function (d) {
-                                if(d.layer in netsize) {
-                                    netsize[d.layer] += 1;
-                                } else {
-                                    netsize[d.layer] = 1;
-                                }
-                                d["lidx"] = netsize[d.layer];
-                            });
-                    
-                            // calc distances between nodes
-                            var largestLayerSize = Math.max.apply(
-                                null, Object.keys(netsize).map(function (i) { return netsize[i]; }));
-                    
-                            var xdist = this.draw.width / Object.keys(netsize).length,
-                                ydist = (this.draw.height-15) / largestLayerSize;
-                    
-                            // create node locations
-                            nodes.map(function(d) {
-                                d["x"] = (d.layer - 0.5) * xdist;
-                                d["y"] = ( ( (d.lidx - 0.5) + ((largestLayerSize - netsize[d.layer]) /2 ) ) * ydist )+10 ;
-                            });
-                    
-                            // autogenerate links
-                            let links = [];
-                            nodes.map(function(d, i) {
-                                for (var n in nodes) {
-                                    if (d.layer + 1 == nodes[n].layer) {
-                                    links.push({"source": parseInt(i), "target": parseInt(n), "value": 1}) }
-                                }
-                            }).filter(function(d) { return typeof d !== "undefined"; });
                         
-                            // draw links
-                            let link = svg.selectAll(".link")
-                                .data(links)
-                                .enter().append("line")
-                                .attr("class", "link")
-                                .attr("x1", function(d) { return nodes[d.source].x; })
-                                .attr("y1", function(d) { return nodes[d.source].y; })
-                                .attr("x2", function(d) { return nodes[d.target].x; })
-                                .attr("y2", function(d) { return nodes[d.target].y; })
-                                .style("stroke-width", function(d) { return Math.sqrt(d.value); })
-                                .style("stroke", function(d) { return '#dddddd'; });
-                    
-                            // draw nodes
-                            var node = svg.selectAll(".node")
-                                        .data(nodes)
-                                        .enter().append("g")
-                                        .attr("transform", function(d) {
-                                            let x = d.x - 20;
-                                            let y = d.y - 20;
-                                            return "translate(" + x + "," + y + ")"; }
-                                        );
-                    
-                            let image = node.append("svg:image")
-                                            .attr('width', 48)
-                                            .attr('height', 48)
-                                            .attr("xlink:href", function(d){
-                                                if(d.type==='h'){
-                                                    return "/fs/assets/images/files/png/neural.png?type=download&issys=true";
-                                                } else {
-                                                    return "/fs/assets/images/files/png/cpu.png?type=download&issys=true";
-                                                }
-                                            })
-                                            .attr("class",function(d){
-                                                if(d.type === 'h'){
-                                                    return 'animated fadeIn';
-                                                }
-                                            });
-                            
-                            let fo = node.append("foreignObject")
-                                        .attr("dx", "1.5em")
-                                        .attr("dy", "5em")
-                                        .attr("width", "100px")
-                                        .attr("x", "-2.5em")
-                                        .attr("height", "4em")
-                                        .attr("y", "4.5em");
-                    
-                            let div = fo.append('xhtml:div');
-                            
-                            div.append('p')
-                                .style("text-align","center")
-                                .html(function(d){ 
-                                    if(d.type==='h'){
-                                        return d.label; 
-                                    } else {
-                                        return d.id; 
-                                    }
-                            });
-
-                        },
-                        drawing(){
-                            const self = this;
-
-                            if (!d3.select("svg")[0]) {
-                    
-                            } else {
-                                //clear d3
-                                d3.select('svg').remove();
-                            }
-
-                            this.draw.width = $(self.$el).parent().width();
-                            this.draw.height = $(self.$el).parent().height();
-
-                            this.draw.color = d3.scale.category20();
-
-                            window.addEventListener('resize', () => { 
-                                this.draw.width = $(self.$el).parent().width();
-                                this.draw.height = $(self.$el).parent().height()
-                                self.draw();
-                            });
-
-                            let svg = d3.select(`#${self.id}`).append("svg")
-                                        .attr("width", this.draw.width)
-                                        .attr("height", this.draw.height);
-                            
-                            
-                            this.drawGraph(svg);
-                            
-                        },
-                        initNet(){
-                            const self = this;
-        
-                            self.nodes = self.content.nodes;
-        
-                            let width = $(self.$el).parent().width(),
-                                height = $(self.$el).parent().height(),
-                                nodeSize = 48;
-                            
-                            let color = d3.scale.category20();
-                            
-                            let svg = d3.select(`#${self.id}`).append("svg")
-                                .attr("width", width)
-                                .attr("height", height)
-                                .attr("padding", "20px");
-        
-                            let nodes = _.union(_.union(self.nodes.input,self.nodes.hidden),self.nodes.output);
-                            let groups = _.groupBy(nodes,'layer');
-
-                            // get network size
-                            let netsize = {};
-                            nodes.forEach(function (d) {
-                                if(d.layer in netsize) {
-                                    netsize[d.layer] += 1;
-                                } else {
-                                    netsize[d.layer] = 1;
-                                }
-                                d["lidx"] = netsize[d.layer];
-                            });
-                        
-                            // calc distances between nodes
-                            let largestLayerSize = Math.max.apply(
-                                null, Object.keys(netsize).map(function (i) { return netsize[i]; }));
-                        
-                            let xdist = width / Object.keys(netsize).length,
-                                ydist = height / largestLayerSize;
-                        
-                            // create node locations
-                            nodes.map(function(d) {
-                                d["x"] = (d.layer - 0.5) * xdist;
-                                d["y"] = (d.lidx - 0.5) * ydist;
-                            });
-                        
-                            // autogenerate links
-                            let links = [];
-                            nodes.map(function(d, i) {
-                                for (var n in nodes) {
-                                    if (d.layer + 1 == nodes[n].layer) {
-                                    links.push({"source": parseInt(i), "target": parseInt(n), "value": 1}) }
-                                }
-                            }).filter(function(d) { return typeof d !== "undefined"; });
-                        
-                            // draw links
-                            let link = svg.selectAll(".link")
-                                .data(links)
-                                .enter().append("line")
-                                .attr("class", "link")
-                                .attr("x1", function(d) { return nodes[d.source].x; })
-                                .attr("y1", function(d) { return nodes[d.source].y; })
-                                .attr("x2", function(d) { return nodes[d.target].x; })
-                                .attr("y2", function(d) { return nodes[d.target].y; })
-                                .style("stroke-width", function(d) { return Math.sqrt(d.value); })
-                                .style("stroke", function(d) { return '#dddddd'; });
-                        
-                            // draw group
-                            let group = svg.selectAll(".group")
-                                            .data(groups,function(d){
-                                                return _.groupBy(d,'layer');
-                                            })
-                                            .enter().append("g")
-                                            .attr('id', function(d){
-                                                return 'layer'+d.layer;
-                                            })
-                                            .attr("transform", function(d) {
-                                                return "translate(" + d.x + "," + d.y + ")"; }
-                                            );
-
-                            // draw nodes
-                            /* let node = svg.selectAll(".node")
-                                .data(nodes)
-                                .enter().append("g")
-                                .attr("transform", function(d) {
-                                    let x = d.x - 20;
-                                    let y = d.y - 20;
-                                    return "translate(" + x + "," + y + ")"; }
-                                ); */
-
-                            let node = group.selectAll(".node")
-                                            .data(nodes)                
-                                            .enter().append("g");
-                                    
-                            let image = node.append("svg:image")
-                                            .attr('width', 48)
-                                            .attr('height', 48)
-                                            .attr("xlink:href", function(d){
-                                                if(d.type==='h'){
-                                                    return "/fs/assets/images/files/png/neural.png?type=download&issys=true";
-                                                } else {
-                                                    return "/fs/assets/images/files/png/cpu.png?type=download&issys=true";
-                                                }
-                                            })
-                                            .attr("class",function(d){
-                                                if(d.type === 'h'){
-                                                    return 'animated fadeIn';
-                                                }
-                                            });
-                            
-                            let fo = node.append("foreignObject")
-                                        .attr("dx", "1.5em")
-                                        .attr("dy", "5em")
-                                        .attr("width", "100px")
-                                        .attr("x", "-2.5em")
-                                        .attr("height", "4em")
-                                        .attr("y", "4.5em");
-                    
-                            let div = fo.append('xhtml:div');
-                            
-                            div.append('p')
-                                .style("text-align","center")
-                                .html(function(d){ 
-                                    if(d.type==='h'){
-                                        return d.label; 
-                                    } else {
-                                        return d.id; 
-                                    }
-                            });
-                            
-                            div.append('button')
-                                .style("text-align","center")
-                                .attr("class","fas fa-plus");
-
-                        
-                        },
                         statusUpdate(evt){
                             const self = this;
         
@@ -1761,14 +1511,14 @@ class AI {
                             let attr = {ctime: _.now()};
                             let rtn = fsHandler.fsNew('json', self.model.parent, self.model.name, JSON.stringify(self.content,null,2), attr);
                         },
-                        save(){
+                        onSave(){
                             const self = this;
 
                             let attr = {ctime: _.now()};
                             let rtn = fsHandler.fsNew('json', self.model.parent, self.model.name, JSON.stringify(self.content,null,2), attr);
                         },
                         // 删除规则
-                        remove: function() {
+                        onDelete() {
                             
                             alertify.confirm(`确认要删除该规则? <br><br> ${this.model.name}`,  (e)=> {
                                 if (e) {
@@ -1794,54 +1544,6 @@ class AI {
                                     
                                 }
                             });
-                        },
-                        toggle(){
-                            $(this.$el).find('svg').toggle("slide", { direction: "up" }, 500);
-                        },
-                        inputRemove(tag) {
-                            const self = this;
-        
-                            let index = _.findIndex(self.rules, {id: self.model.id});
-        
-                            self.model.nodes.input.splice($.inArray(tag,self.model.nodes.input), 1)
-        
-                            // 更新规则，没有关键字时status=0
-                            self.rules[index] = _.extend(self.model, {nodes: self.model.nodes, status: self.model.nodes.length==0?'0':'1'});
-                            
-                            // 更新到文件系统
-                            let attr = {ctime: _.now()};
-                            let rtn = fsHandler.fsNew('json', self.dataFile.rules[0], self.dataFile.rules[1], JSON.stringify(self.rules,null,2), attr);
-        
-                        },
-                        inputInputShow() {
-                            const self = this;
-        
-                            self.input.inputVisible = true;
-                            self.$nextTick(_ => {
-                                self.$refs.saveInputInput.$refs.input.focus();
-                            });
-                        },
-                        inputAdd() {
-                            const self = this;
-        
-                            let inputValue = self.input.inputValue;
-                            if (inputValue) {
-                                self.model.nodes.input.push({label:inputValue,layer:1,type:'i'});
-                            }
-                            
-                            let index = _.findIndex(self.rules, {id: self.model.id});
-                            
-                             // 更新规则，没有关键字时status=0
-                             self.rules[index] = self.model;//_.extend(self.model, {nodes: self.model.nodes});
-                            
-                            // 更新到文件系统
-                            let attr = {ctime: _.now()};
-                            let rtn = fsHandler.fsNew('json', self.dataFile.rules[0], self.dataFile.rules[1], JSON.stringify(self.rules,null,2), attr);
-        
-                            if(rtn == 1){
-                                self.input.inputVisible = false;
-                                self.input.inputValue = '';
-                            }
                         },
                         job(term){
                             // 默认Job名称
