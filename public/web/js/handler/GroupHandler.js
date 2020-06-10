@@ -44,7 +44,7 @@ class GroupHandler {
 
             },
             error: function (xhr, textStatus, errorThrown) {
-                console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseJSON.error);
+                return xhr.responseJSON;
             }
         });
         return rtn;
@@ -70,12 +70,13 @@ class GroupHandler {
     *
     */
     serverGroupNew(event) {
-        let rtn = 1;
+        let rtn = null;
 
         jQuery.ajax({
             url: '/group',
             dataType: 'json',
             type: 'POST',
+            contentType: 'application/json',
             async: false,
             data: event,
             beforeSend:function(xhr){
@@ -86,16 +87,11 @@ class GroupHandler {
 
                 userHandler.ifSignIn(data);
 
-                if( _.lowerCase(data.status) == "ok"){
-                    rtn = 1;
-                    alertify.success("成功" + " " + moment().format("LLL"));
-                }
+                rtn = data;
 
             },
             error: function(xhr, textStatus, errorThrown) {
-                rtn = 0;
-                alertify.error("失败" + " " + xhr.responseText);
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+                return xhr.responseJSON;
             }
         });
         return rtn;
@@ -107,13 +103,12 @@ class GroupHandler {
     *
     * */
     serverGroupDelete(event) {
-        let rtn = 1;
+        let rtn = null;
 
         jQuery.ajax({
-            url: '/group/group/test',
+            url: `/group/${event.gtype}/${event.name}`,
             dataType: 'json',
             type: 'DELETE',
-            data: event,
             beforeSend:function(xhr){
             },
             complete: function(xhr, textStatus) {
@@ -122,15 +117,10 @@ class GroupHandler {
 
                 userHandler.ifSignIn(data);
 
-                if( _.lowerCase(data.status) === "ok"){
-                    rtn = 1;
-                    alertify.success("成功" + " " + data.message);
-                }
+                rtn = data;
             },
             error: function(xhr, textStatus, errorThrown){
-                rtn = 0;
-                alertify.error("失败" + " " + xhr.responseText);
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+                return xhr.responseJSON;
             }
         });
         return rtn;

@@ -970,12 +970,9 @@
                         }
                     },
                     mounted() {
-                        const self = this;
                         setInterval(()=>{
-                            console.log(88, typeof self.output)
-                            self.setData(self.output);
-                            console.log(88,self.output)
-                        },1500)
+                            this.setData(this.output);
+                        },3000)
 
                         this.$nextTick(function () {
                             this.init();
@@ -992,19 +989,22 @@
                         setData(event) {
                             
                             try{
+                                
+                                if(!event.output) return false;
+
                                 if(event.output.message) {
                                     
                                     if (typeof event.output.message === 'object') {
-                                        _.extend( this.model, {newInput: JSON.stringify(event.output.message, null, 2)} );
+                                        this.$set( this.model, 'newInput', JSON.stringify(event.output.message, null, 2) );
                                     } else {
-                                        _.extend( this.model, {newInput: JSON.stringify(event.output.message, null, 4)} );
+                                        this.$set(this.model, 'newInput', JSON.stringify(event.output.message, null, 4) );
                                     }
         
                                 } else {
-                                    _.extend( this.model, {newInput: event.output} );
+                                    this.$set(this.model, 'newInput', event.output );
                                 }
                             } catch(err){
-                                console.log(err)
+                                
                             }
                         }
                     }
@@ -1142,9 +1142,8 @@
                     watch: {
                         item: {
                             handler:function(val,oldVal){
-                                console.log(33,_.now(),val)
-                                _.extend(this.model,{fs: val, mode: this.getMode()});
-                                console.log(33,_.now(),val,this.model)
+                                this.$set(this.model, 'fs', val);
+                                this.$set(this.model,'mode', this.getMode());
                             },
                             deep: true,
                             immediate:true

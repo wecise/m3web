@@ -523,30 +523,34 @@ class Event {
                             doLayout();
                         },
                         initData(){
-                            const self = this;
                             
-                            let init = function(){
-                                
-                                _.extend(self.dt, {columns: _.map(self.model.columns, function(v){
-                                    
-                                    if(_.isUndefined(v.visible)){
-                                        _.extend(v, { visible: true });
+                            try{
+                                _.delay(()=>{
+
+                                    if(_.isEmpty(this.model)){ 
+                                        return false; 
                                     }
 
-                                    if(!v.render){
-                                        return v;
-                                    } else {
-                                        return _.extend(v, { render: eval(v.render) });
-                                    }
+                                    this.$set(this.dt, 'columns', _.map(this.model.columns, (v)=>{
                                     
-                                })});
+                                        if(_.isUndefined(v.visible)){
+                                            _.extend(v, { visible: true });
+                                        }
+    
+                                        if(!v.render){
+                                            return v;
+                                        } else {
+                                            return _.extend(v, { render: eval(v.render) });
+                                        }
+                                        
+                                    }));
+                                    
+                                    this.$set(this.dt, 'rows', this.model.rows);
+                                },1000)
 
-                                _.extend(self.dt, {rows: self.model.rows});
-                            };
+                            } catch(err){
 
-                            _.delay(()=>{
-                                init();
-                            },1000)
+                            }
                             
                         },
                         rowClassName({row, rowIndex}){
@@ -1196,16 +1200,22 @@ class Event {
 
                             try {
                                 
+                                // 所有实体
+                                //let actions = _.map(this.model.rows,'entity').join('","');
+                                let actions = _.map(this.model.rows,(v)=>{ 
+                                                return v['refer']['_all'];
+                                            }).join('","');
+                                let matchObj = {value: `match () - [*1] -> ("${actions}") union ("${actions}") - [*1] -> ()`};
+
                                 if(!this.topological){
                                     this.topological = new Topological();
                                     this.topological.init();
-                                    this.topological.graphScript = [
-                                        {value: `match () - [*1] -> ("${_.map(this.model.rows,'entity').join('","')}") - [*1] -> ()`}
-                                    ];
+                                    
+                                    this.topological.graphScript = [matchObj];
                                     this.topological.mount(`#topological-app-${this.id}-${this.rId}`);
 
                                 } else {
-                                    this.topological.graphScript = [ {value: `match () - [*1] -> ("${_.map(this.model.rows,'entity').join('","')}") - [*1] -> ()`} ];
+                                    this.topological.graphScript = [matchObj];
                                     this.topological.search(this.topological.graphScript[0].value);
                                 }
 
@@ -1774,15 +1784,10 @@ class Event {
                         init(){    
                             let mxTopo= new Topological();
                             mxTopo.init();
-                            mxTopo.graphScript = _.map(this.model.rows,function(v){
-                                return {value: `match () - [*1] -> ("${v.entity}") - [*1] -> ()`};
+                            mxTopo.graphScript = _.map(this.model.rows,(v)=>{
+                                return {value: `match () - [*1] -> ("${v.entity}") union ("${v.entity}") - [*1] -> ()`};
                             });
                             mxTopo.mount(`#topological-app-${this.id}`);
-                            
-                            _.delay(()=>{
-                                // mxTopo.app.contextMenu();
-                            },500)
-
                         }
                     }
                 })

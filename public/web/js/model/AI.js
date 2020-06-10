@@ -18,7 +18,7 @@ class AI {
 
     init() {
 
-        VueLoader.onloaded(["ai-robot-component"],function() {
+        VueLoader.onloaded(["ai-robot-component","ai-neural-graph"],function() {
 
             $(function() {
                 Vue.component("matrix-ai-robot", {
@@ -248,7 +248,7 @@ class AI {
                                             <el-button type="text" @click="onSave" icon="el-icon-position"></el-button>
                                         </el-tooltip>
                                         <el-tooltip content="删除规则">
-                                            <el-button type="text" @click="onRemove" icon="el-icon-delete"></el-button>
+                                            <el-button type="text" @click="onDelete" icon="el-icon-delete"></el-button>
                                         </el-tooltip>
                                         <el-tooltip content="查看作业">
                                             <el-button type="text" @click="job(content.name)" icon="el-icon-date"></el-button>
@@ -268,37 +268,104 @@ class AI {
                                             <el-tab-pane label="基本设置">
                                                 <el-form :model="content" label-position="top" label-width="160px" style="width:95%;height:100%;overflow:auto;padding: 0 20px; border-left: 1px solid #dddddd;">
                                                     <el-form-item label="指定计算类" style="width:80%;">
+                                                        <el-popover
+                                                            placement="top-start"
+                                                            trigger="hover"
+                                                            content="指定计算类(class)"
+                                                            style="position:absolute;top:-40px;right:0px;">
+                                                            <span slot="reference" class="el-icon-question"></span>
+                                                        </el-popover>    
                                                         <mx-class-cascader root="/matrix/entity" :value="content.model.class" ref="class"></mx-class-cascader>
                                                     </el-form-item>
                                                     <el-form-item label="指定计算属性和值" style="width:80%;">
-                                                        <mx-classkeys-cascader :root="content.class" :value="content.model.bucketkeys" multiplenable="true"  ref="bucketkeys"></mx-classkeys-cascader>
+                                                        <el-popover
+                                                            placement="top-start"
+                                                            trigger="hover"
+                                                            content="指定计算属性和值(bucketkeys)"
+                                                            style="position:absolute;top:-40px;right:0px;">
+                                                            <span slot="reference" class="el-icon-question"></span>
+                                                        </el-popover>    
+                                                        <mx-classkeys-number-cascader :root="content.class" :value="content.model.bucketkeys" multiplenable="true"  ref="bucketkeys"></mx-classkeys-number-cascader>
                                                     </el-form-item>
                                                     <el-form-item label="计算属性" style="width:80%;display:none;">
+                                                        <el-popover
+                                                            placement="top-start"
+                                                            trigger="hover"
+                                                            content="计算属性(ctype)"
+                                                            style="position:absolute;top:-40px;right:0px;">
+                                                            <span slot="reference" class="el-icon-question"></span>
+                                                        </el-popover> 
                                                         <el-checkbox-group v-model="content.ctypelist">
                                                             <el-checkbox label="max" class="el-checkbox">Max</el-checkbox>
                                                             <el-checkbox label="avg" class="el-checkbox">Avg</el-checkbox>
                                                             <el-checkbox label="min" class="el-checkbox">Min</el-checkbox>
                                                         </el-checkbox-group>
                                                     </el-form-item>
-                                                    <el-form-item label="指定基线计算属性和值" style="width:80%;">
-                                                        <mx-classkeys-cascader :root="content.class" :value="content.model.baselinebucketkeys" multiplenable="true"  ref="baselinebucketkeys"></mx-classkeys-cascader>
-                                                    </el-form-item>
+                                                    <!--el-form-item label="指定基线计算属性和值" style="width:80%;display:none;">
+                                                        <el-popover
+                                                            placement="top-start"
+                                                            trigger="hover"
+                                                            content="指定基线计算属性和值(baselinebucketkeys)"
+                                                            style="position:absolute;top:-40px;right:0px;">
+                                                            <span slot="reference" class="el-icon-question"></span>
+                                                        </el-popover> 
+                                                        <mx-classkeys-string-cascader :root="content.class" :value="content.model.baselinebucketkeys" multiplenable="true"  ref="baselinebucketkeys"></mx-classkeys-cascader>
+                                                    </el-form-item-->
                                                     <el-form-item label="指定不参与计算属性" style="width:80%;">
-                                                        <mx-classkeys-cascader :root="content.class" :value="content.model.copykeys" multiplenable="true"  ref="copykeys"></mx-classkeys-cascader>
+                                                        <el-popover
+                                                            placement="top-start"
+                                                            trigger="hover"
+                                                            content="指定不参与计算属性(copykeys)"
+                                                            style="position:absolute;top:-40px;right:0px;">
+                                                            <span slot="reference" class="el-icon-question"></span>
+                                                        </el-popover> 
+                                                        <mx-classkeys-string-cascader :root="content.class" :value="content.model.copykeys" multiplenable="true"  ref="copykeys"></mx-classkeys-string-cascader>
                                                     </el-form-item>
-                                                    <el-form-item label="指定不参与计算对象黑名单" style="width:80%;">
-                                                        <mx-class-cascader root="/" :value="content.model.blacklist" multiplenable="true" ref="blacklist"></mx-class-cascader>
+                                                    <el-form-item label="指定子属性(diffkeys)" style="width:80%;">
+                                                        <el-popover
+                                                            placement="top-start"
+                                                            trigger="hover"
+                                                            content="指定子属性(diffkeys)"
+                                                            style="position:absolute;top:-40px;right:0px;">
+                                                            <span slot="reference" class="el-icon-question"></span>
+                                                        </el-popover>
+                                                        <mx-classkeys-string-cascader :root="content.class" :value="content.model.diffkeys" multiplenable="true"  ref="diffkeys"></mx-classkeys-string-cascader>
                                                     </el-form-item>
                                                     
                                                     <el-form-item label="基线类型" style="width:80%;">
+                                                        <el-popover
+                                                            placement="top-start"
+                                                            trigger="hover"
+                                                            content="基线类型(周基线：7天 | 月基线：30天）"
+                                                            style="position:absolute;top:-40px;right:0px;">
+                                                            <span slot="reference" class="el-icon-question"></span>
+                                                        </el-popover>
                                                         <el-radio v-model="content.limitday" :label="7">周基线</el-radio>
                                                         <el-radio v-model="content.limitday" :label="30">月基线</el-radio>
                                                     </el-form-item>
                                                     <el-form-item label="计算平均值的算法类型" style="width:80%;">
+                                                        <el-popover
+                                                            placement="top-start"
+                                                            trigger="hover"
+                                                            content="计算平均值的算法类型"
+                                                            style="position:absolute;top:-40px;right:0px;">
+                                                            <span slot="reference" class="el-icon-question"></span>
+                                                        </el-popover>
                                                         <el-radio-group v-model="content.avgtype">
                                                             <el-radio label="avg" class="el-radio">Avg</el-radio>
                                                             <el-radio label="median" class="el-radio">Median</el-radio>
                                                         </el-radio-group>    
+                                                    </el-form-item>
+
+                                                    <el-form-item label="采集间隔" prop="interval" style="width:80%;">
+                                                        <el-popover
+                                                            placement="top-start"
+                                                            trigger="hover"
+                                                            content="采集间隔"
+                                                            style="position:absolute;top:-40px;right:0px;">
+                                                            <span slot="reference" class="el-icon-question"></span>
+                                                        </el-popover>
+                                                        <el-input-number v-model="content.interval" controls-position="right" :min="1"></el-input-number> 秒
                                                     </el-form-item>
                                                     
                                                 </el-form>
@@ -330,10 +397,17 @@ class AI {
                                                         <el-input type="text" v-model="content.name" disabled></el-input>
                                                     </el-form-item>
 
-                                                    <el-form-item label="采集间隔" prop="interval">
-                                                        <el-input-number v-model="content.interval" controls-position="right" :min="1"></el-input-number> 秒
+                                                    <el-form-item label="指定不参与计算对象黑名单">
+                                                        <el-popover
+                                                            placement="top-start"
+                                                            trigger="hover"
+                                                            content="指定不参与计算对象黑名单"
+                                                            style="position:absolute;top:-40px;right:0px;">
+                                                            <span slot="reference" class="el-icon-question"></span>
+                                                        </el-popover>
+                                                        <mx-class-entity-select :root="content.class" :value="content.model.blacklist" multiplenable="true" ref="blacklist"></mx-class-entity-select>
                                                     </el-form-item>
-                                                    
+
                                                     <el-form-item label="时间" prop="time">
                                                         <small>#{moment(content.time).format(mx.global.register.format)}#</small>
                                                     </el-form-item>
@@ -367,6 +441,7 @@ class AI {
                         );
 
                         // bucket && bucketkeys
+                        // auto baselinebucketkeys
                         this.$watch(
                             "$refs.bucketkeys.selected",{
                                 handler:(val, oldVal) => {
@@ -374,13 +449,30 @@ class AI {
                                     this.$set(this.content,'bucketkeys', _.map(val,(v)=>{ return _.last(v);}));
 
                                     this.$set(this.content.model,'bucketkeys', val);
+
+
+                                    // baselinebucketkeys
+                                    this.$set(this.content,'baselinebucket',  _.head(_.head(val))+"_baseline");
+                                    
+                                    // baselinebucketkeys
+                                    let baselineBucketKeys = {};
+                                    
+                                    let ctypelist = this.content.ctypelist;
+                                    _.forEach(this.content.bucketkeys,(v)=>{ 
+                                        let tmp = {};
+                                        _.forEach(ctypelist,(w)=>{ _.extend(tmp, { [w]: `${v}_${w}` }); });
+                                        _.extend(baselineBucketKeys, { [v]: tmp } );
+                                    });
+                                    this.$set(this.content,'baselinebucketkeys', baselineBucketKeys);
+
+                                    this.$set(this.content.model,'baselinebucketkeys', val);
                                 },
                                 deep:true
                             }
                         );
 
                         // baselinebucket && baselinebucketkeys
-                        this.$watch(
+                        /* this.$watch(
                             "$refs.baselinebucketkeys.selected",{
                                 handler:(val, oldVal) => {
 
@@ -393,7 +485,7 @@ class AI {
                                     let ctypelist = this.content.ctypelist;
                                     _.forEach(keys,(v)=>{ 
                                         let tmp = {};
-                                        _.forEach(ctypelist,(w)=>{ _.extend(tmp, { [w]: `${w}_${v}` }); });
+                                        _.forEach(ctypelist,(w)=>{ _.extend(tmp, { [w.split("_")[0]]: `${v}` }); });
                                         _.extend(baselineBucketKeys, { [v]: tmp } );
                                     });
                                     this.$set(this.content,'baselinebucketkeys', baselineBucketKeys);
@@ -402,10 +494,11 @@ class AI {
                                 },
                                 deep:true
                             }
-                        );
+                        ); */
+
                         // copykeys
                         this.$watch(
-                            "$refs.copykeys.selected",{
+                            "$refs.diffkeys.selected",{
                                 handler:(val, oldVal) => {
 
                                     // copykeys
@@ -415,12 +508,27 @@ class AI {
                                 deep:true
                             }
                         );
+                        
+                        // diffkeys
+                        this.$watch(
+                            "$refs.diffkeys.selected",{
+                                handler:(val, oldVal) => {
+
+                                    // diffkeys
+                                    this.$set(this.content,'diffkeys',  _.map(val,(v)=>{ return _.last(v);}));
+                                    this.$set(this.content.model,'diffkeys',  val);
+                                },
+                                deep:true
+                            }
+                        );
+
                         // blacklist
                         this.$watch(
-                            "$refs.blacklist.selected",{
+                            "$refs.blacklist.entity.selected",{
                                 handler:(val, oldVal) => {
-                                    this.$set(this.content, 'blacklist',  _.map(val,(v)=>{ return _.last(v);}))
-                                    this.$set(this.content.model,'blacklist', val);
+                                    console.log(val)
+                                    this.$set(this.content, 'blacklist',  _.map(val,(v)=>{ return v;}))
+                                    this.$set(this.content.model,'blacklist', _.map(val,(v)=>{ return v;}));
                                 },
                                 deep:true
                             }
@@ -451,8 +559,6 @@ class AI {
                         onSave(){
                             let attr = {ctime: _.now()};
                             
-                            console.log(JSON.stringify(this.content,null,2))
-                            
                             let rt = fsHandler.fsNew('json', this.model.parent, this.model.name, JSON.stringify(this.content,null,2), attr);
                             if(rt == 1){
 
@@ -465,6 +571,7 @@ class AI {
                                 }
                                 
                                 let name = this.model.name.split(".")[0];
+                                
                                 let jobObj = { 
                                     name: name, 
                                     dir: this.content.job.dir, 
@@ -503,7 +610,7 @@ class AI {
                             }
                         },
                         // 删除规则
-                        onRemove() {
+                        onDelete() {
                             
                             this.$confirm(`确认要删除该规则：${this.model.name}？`, '提示', {
                                 confirmButtonText: '确定',
@@ -1393,16 +1500,10 @@ class AI {
                     },
                     data(){
                         return {
-                            draw:{
-                                width:0,
-                                height:0,
-                                inputLayerHeight: 0,
-                                hiddenLayersCount: 1,
-                                hiddenLayersDepths: [2,2,2,2,2],
-                                outputLayerHeight: 0,
-                                networkGraph: {
-                                    "nodes": []
-                                }
+                            graph:{
+                                input: [],
+                                hidden: 300,
+                                output: []
                             },
                             nodes: [],
                             content: null
@@ -1426,31 +1527,33 @@ class AI {
                                                 inactive-color="#dddddd"
                                                 active-value=1
                                                 inactive-value=0
-                                                @change="statusUpdate">
+                                                @change="onStatusUpdate">
                                         </el-switch>
                                     </el-header>
                                     <el-main>
                                         <el-tabs tab-position="left" style="height: 100%;">
                                             <el-tab-pane label="计算模型">
+                                                
                                                 <el-form :model="model" label-width="140px" label-position="top" style="width:95%;height:100%;overflow:auto;padding: 0 20px; border-left: 1px solid #dddddd;">
-                                            
-                                                    <el-form-item label="输入层设置">
-                                                        <mx-class-keys-cascader root="/matrix/entity" :value="content.model.bucketkeys" multiplenable="true"  ref="bucketkeys"></mx-classkeys-cascader>
+                                                    
+                                                    <ai-neural-graph :model="graph"></ai-neural-graph>
+                                                    
+                                                    <!--el-form-item label="输入层设置">
+                                                        <mx-entity-class-keys-cascader root="/matrix/entity" :value="content.model.bucketkeys" multiplenable="true"  ref="input"></mx-entity-class-keys-cascader>
                                                     </el-form-item>
 
                                                     <el-form-item label="计算层">
-                                                        <el-input-number v-model="content.nodes.hiddencount" :min="0"></el-input-number>
+                                                        <el-input-number v-model="graph.hidden" :min="0"></el-input-number>
                                                     </el-form-item>
 
                                                     <el-form-item label="输出层设置">
-                                                        <mx-class-cascader root="/matrix/entity" :value="content.model.class" ref="output"></mx-class-cascader>
-                                                        <br><br>
-                                                        <mx-classkeys-cascader :root="content.nodes.output[0].class" :value="content.model.bucketkeys" multiplenable="true"  ref="bucketkeys"></mx-classkeys-cascader>
+                                                        <mx-entity-class-keys-cascader root="/matrix/entity" :value="content.model.bucketkeys" multiplenable="true"  ref="output"></mx-entity-class-keys-cascader>
                                                     </el-form-item>
 
-                                                    <el-form-item label="模型">
-                                                        <div :id="id"></div>
-                                                    </el-form-item>
+                                                    <el-form-item label="">
+                                                        
+                                                    </el-form-item-->
+
                                                 </el-form>
                                             </el-tab-pane>
                                             
@@ -1498,18 +1601,34 @@ class AI {
                         this.content = this.model.content;
                     },
                     mounted(){
-                        
+                        // watch数据更新
+                        this.$watch(
+                            "$refs.input.selected",{
+                                handler:(val, oldVal) => {
+                                    console.log(1,val)
+                                },
+                                deep:true
+                            }
+                        );
+
+                        this.$watch(
+                            "$refs.output.selected",{
+                                handler:(val, oldVal) => {
+                                    console.log(2,val)
+                                },
+                                deep:true
+                            }
+                        );
                     },
                     methods:{
                         
-                        statusUpdate(evt){
-                            const self = this;
-        
-                            _.extend(self.content,{status:evt+'', ospace:window.COMPANY_OSPACE, user: window.SignedUser_UserName,time: _.now()});
+                        onStatusUpdate(evt){
+                            
+                            _.extend(this.content,{status:evt+'', ospace:window.COMPANY_OSPACE, user: window.SignedUser_UserName,time: _.now()});
                             
                             // 更新到文件系统
                             let attr = {ctime: _.now()};
-                            let rtn = fsHandler.fsNew('json', self.model.parent, self.model.name, JSON.stringify(self.content,null,2), attr);
+                            let rtn = fsHandler.fsNew('json', this.model.parent, this.model.name, JSON.stringify(this.content,null,2), attr);
                         },
                         onSave(){
                             const self = this;
@@ -1520,12 +1639,19 @@ class AI {
                         // 删除规则
                         onDelete() {
                             
-                            alertify.confirm(`确认要删除该规则? <br><br> ${this.model.name}`,  (e)=> {
-                                if (e) {
+                            this.$confirm(`确认要删除该规则：${this.model.name}？`, '提示', {
+                                confirmButtonText: '确定',
+                                cancelButtonText: '取消',
+                                type: 'warning'
+                            }).then(() => {
+								
+                                let rt = jobHandler.jobDelete(this.content);
+                                if(rt.status == 'ok'){
+                                    
                                     // 删除文件系统
                                     let rtn = fsHandler.fsDelete(this.model.parent, this.model.name);
-                                    
                                     if (rtn == 1){
+                                    
                                         // 刷新rules
                                         this.$root.$refs.aiSetup.load();
                                         this.$root.$refs.aiSetup.close(this.model.id);
@@ -1539,11 +1665,18 @@ class AI {
                                             type: "error",
                                             message: "删除失败 " + rtn.message
                                         })
-                                    }   
+                                    }
                                 } else {
-                                    
+                                    this.$message({
+                                        type: "error",
+                                        message: "删除失败：" + rt.message
+                                    })
                                 }
+
+                            }).catch(() => {
+                                
                             });
+
                         },
                         job(term){
                             // 默认Job名称
@@ -1715,10 +1848,11 @@ class AI {
                                         let attr = { ctime: _.now(),remark:this.remark, author: window.SignedUser_UserName };
                                         let content = _.find(mx.global.register.rule, {name: this.model.name}).content;
                                         _.extend(content,{
-                                                            id:_.now()+'',
+                                                            id: _.now()+'',
                                                             ospace: window.COMPANY_NAME,
                                                             user: window.SignedUser_UserName,
-                                                            time: _.now()
+                                                            time:  _.now(),
+                                                            name: name
                                                         });
                                         let rtn = fsHandler.fsNew('json', this.model.fullname, this.name+'.json', JSON.stringify(content,null,2), attr);
                                         if(rtn == 1){

@@ -1199,7 +1199,7 @@ class Omdb{
                                                         <el-button type="text" icon="el-icon-copy-document" class="el-button-copy" @click="onCopy(item['field'],scope.$index)"></el-button>
                                                     </el-header>
                                                     <el-main style="padding:0px;">
-                                                        <textarea rows="10" style="width:98%;" :id="'textarea_'+scope.$index">#{arrayToCsv(scope.row[item['field']])}#</textarea>
+                                                        <textarea rows="10" style="width:98%;white-space:nowrap;" :id="'textarea_'+scope.$index">#{arrayToCsv(scope.row[item['field']])}#</textarea>
                                                     </el-main>
                                                 </el-container>
                                                 <el-button type="text" icon="el-icon-date" slot="reference">#{scope.row[item['field']].length}#</el-button>

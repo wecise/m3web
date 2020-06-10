@@ -900,14 +900,29 @@ Vue.component("mx-fs-tree",{
                                 :filter-node-method="onFilterNode"
                                 style="background:transparent;"
                                 ref="tree">
-                            <span slot-scope="{ node, data }" style="width:100%;">
-                                <span v-if="data.ftype!=='dir'">
-                                    <i class="el-icon-c-scale-to-original" style="color:#0088cc;"></i> #{ node.label }#
+                            <span slot-scope="{ node, data }" style="width:100%;height:30px;line-height: 30px;"  @mouseenter="onMouseEnter(data)" @mouseleave="onMouseLeave(data)">
+                                <span v-if="data.ftype=='dir'">
+                                    <i class="el-icon-folder" style="color:#FFC107;"></i>
+                                    <span>#{node.label}#</span>
+                                    <el-dropdown v-show="data.show" style="float:right;width:14px;margin:0 5px;">
+                                        <span class="el-dropdown-link">
+                                            <i class="el-icon-more el-icon--right"></i>
+                                        </span>
+                                        <el-dropdown-menu slot="dropdown">
+                                            <el-dropdown-item @click.native="onDelete(data,$event)" icon="el-icon-delete">删除</el-dropdown-item>
+                                            <el-dropdown-item @click.native="onNodeClick(data)"icon="el-icon-refresh">刷新</el-dropdown-item>
+                                            <el-dropdown-item @click.native="onNewFile(data,$event)"icon="el-icon-plus">新建文件</el-dropdown-item>
+                                            <el-dropdown-item @click.native="onNewDir(data,$event)"icon="el-icon-folder-add">新建目录</el-dropdown-item>
+                                            <el-dropdown-item @click.native="onUpload(data,$event)"icon="el-icon-upload">上传</el-dropdown-item>
+                                        </el-dropdown-menu>
+                                    </el-dropdown>
                                 </span>
                                 <span v-else>
-                                    <i class="el-icon-folder" style="color:#ffa500;"></i> #{ node.label }#
+                                    <i class="el-icon-c-scale-to-original" style="color:#0088cc;"></i>
+                                    <span>#{node.label}#</span>
+                                    <el-button v-show="data.show" type="text" @click.stop="onDelete(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-delete"></el-button>
                                 </span>
-                            </span>
+                            </span>  
                         </el-tree>
                     </el-main>
                 </el-container>`,
@@ -924,6 +939,188 @@ Vue.component("mx-fs-tree",{
         this.onInit();
     },
     methods: {
+        onMouseEnter(item){
+            this.$set(item, 'show', true)
+        },
+        onMouseLeave(item){
+            this.$set(item, 'show', false)
+        },
+        onRefresh(item,index){
+            let childrenData = fsHandler.fsList(item.fullname);
+
+            this.$set(data, 'children', childrenData);
+        },
+        onNewDir(item,index){
+            this.$prompt('请输入目录名称', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消'
+              }).then(({ value }) => {
+                if(_.isEmpty(value)){
+                    this.$message({
+                        type: 'warning',
+                        message: '请输入目录名称！'
+                    });
+                    return false;
+                }
+
+                let _attr = {remark: '', ctime: _.now(), author: this.signedUserName, rate: 0};
+
+                let rtn = fsHandler.fsNew('dir', item.fullname, value, null, _attr);
+                
+                if(rtn == 1){
+                    this.$message({
+                        type: "success",
+                        message: "新建目录成功！"
+                    })
+                    _.delay(()=>{
+                        this.initData();
+                    },500)
+                } else {
+                    this.$message({
+                        type: "error",
+                        message: "新建目录失败，" + rtn.message
+                    })
+                }
+                
+              }).catch(() => {
+                this.$message({
+                  type: 'info',
+                  message: '取消输入'
+                });       
+              });
+            
+        },
+        onNewFile(item,index){
+            this.$prompt('请输入文件名称', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消'
+              }).then(({ value }) => {
+                if(_.isEmpty(value)){
+                    this.$message({
+                        type: 'warning',
+                        message: '请输入名称！'
+                    });
+                    return false;
+                }
+
+                let _attr = {remark: '', ctime: _.now(), author: this.signedUserName, rate: 0};
+
+                let rtn = fsHandler.fsNew('md', item.fullname, [value,'md'].join("."), null, _attr);
+                
+                if(rtn == 1){
+                    this.$message({
+                        type: "success",
+                        message: "新建成功！"
+                    })
+                    _.delay(()=>{
+                        this.initData();
+                    },500)
+                } else {
+                    this.$message({
+                        type: "error",
+                        message: "新建失败，" + rtn.message
+                    })
+                }
+                
+              }).catch(() => {
+                this.$message({
+                  type: 'info',
+                  message: '取消输入'
+                });       
+              });
+        },
+        onDelete(item,index){
+
+            this.$confirm(`确认要删除该目录或文件：${item.name}？`, '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                
+                let rtn = fsHandler.fsDelete(item.parent,item.name);
+                
+                if(rtn == 1){
+                    this.$messsage({
+                        type: "success",
+                        message: "删除成功！"
+                    })
+                    
+                    _.delay(()=>{
+                        this.initData();
+                    },1000)
+                    
+                } else {
+                    this.$messsage({
+                        type: "error",
+                        message: "删除失败！"
+                    })
+                }
+
+            }).catch(() => {
+                
+            });
+        },
+        onUpload(item,index){
+
+            let wnd = null;
+            let wndID = `jsPanel-upload-${objectHash.sha1(item.id)}`;
+
+            try{
+                if(jsPanel.activePanels.getPanel(wndID)){
+                    jsPanel.activePanels.getPanel(wndID).close();
+                }
+            } catch(error){
+
+            }
+            finally{
+                wnd = maxWindow.winUpload('文件上传', `<div id="${wndID}"></div>`, null, null);
+            }
+            
+            new Vue({
+                delimiters: ['#{', '}#'],
+                template:   `<el-container>
+                                <el-main>
+                                    <el-upload drag
+                                        multiple
+                                        show-file-list="false"
+                                        :action="upload.url"
+                                        :on-success="onSuccess"
+                                        :on-remove="onRemove"
+                                        list-type="text"
+                                        name="uploadfile">
+                                        <i class="el-icon-upload"></i>
+                                    </el-upload>
+                                </el-main>
+                                <el-footer>
+                                    <i class="fas fa-clock"></i> 上传文件：#{upload.fileList.length}# 
+                                </el-footer>
+                            </el-container>`,
+                data: {
+                    upload: {
+                        url: `/fs/${item.fullname}?issys=true`,
+                        fileList: []
+                    }
+                },
+                created(){
+                    
+                },
+                methods: {
+                    beforeUpload(file){
+                        
+                    },
+                    onSuccess(res,file,FileList){
+                        this.upload.fileList = FileList;
+                    },
+                    onRemove(file, fileList) {
+                        let rtn = fsHandler.fsDelete(item.fullname,file.name);
+                    },
+                    onPreview(file) {
+                        console.log(file);
+                    }
+                }
+            }).$mount(`#${wndID}`);
+            
+        },  
         onFilterNode:_.debounce(function(value, data) {
             if (!value) return true;
             try{
@@ -941,7 +1138,11 @@ Vue.component("mx-fs-tree",{
 
                 } else {
 
-                    let childrenData = _.sortBy(fsHandler.fsList(data.fullname),'fullname');
+                    let rtn = _.map(fsHandler.fsList(data.fullname),(v)=>{
+                        return _.extend(v,{show:false});
+                    });
+
+                    let childrenData = _.sortBy(rtn,'fullname');
 
                     this.$set(data, 'children', childrenData);
 
@@ -1484,8 +1685,9 @@ Vue.component("mx-class-cascader",{
     }
 })
 
-/* Common Class To Keys Select Cascader */
-Vue.component("mx-class-keys-cascader",{
+
+/* Common Class Keys All Select Cascader By ClassName */
+Vue.component("mx-classkeys-all-cascader",{
     delimiters: ['#{', '}#'],
     props: {
         root: String,
@@ -1498,35 +1700,39 @@ Vue.component("mx-class-keys-cascader",{
     data(){
         return {
             options: [],
-            defaultProps: {
-                multiple: false
-            },
+            defaultProps: {multiple: false },
             selected: null
         }
     },
     template:   `<el-cascader
-                    v-model="value"
+                    :value="value"
                     :options="options"
                     :props="defaultProps"
                     @change="onChange"
+                    collapseTags
                     clearable
-                    style="width:100%;"
-                    ref="cascader">
+                    filterable
+                    style="width:100%;">
                     <template slot-scope="{ node, data }">
                         <span>#{ data.label }#</span>
                         <span v-if="!node.isLeaf"> (#{ data.children.length }#) </span>
+                        <span style="color:#999999;font-size:10px;text-align:right;" v-else>#{ data.ftype }#</span>
                     </template>
                 </el-cascader>`,
+    watch:{
+        root(val,oldVal){
+            this.initData();
+        }
+    },
     created(){
         this.defaultProps.multiple = this.multiplenable;
         this.initData();
     },
     methods: {
         initData(){
-            this.options = fsHandler.callFsJScript("/matrix/ai/getClassList.js",encodeURIComponent(this.root)).message;
+            this.options = fsHandler.callFsJScript("/matrix/ai/baseline/getClassAllKeysByClassName.js",encodeURIComponent(this.root)).message;
         },
         onChange(val){
-            console.log(11,val)
             this.selected = val;
         },
         onNodeClick(data){
@@ -1551,8 +1757,8 @@ Vue.component("mx-class-keys-cascader",{
     }
 })
 
-/* Common Class Keys Select Cascader By ClassName */
-Vue.component("mx-classkeys-cascader",{
+/* Common Class Keys Number Select Cascader By ClassName */
+Vue.component("mx-classkeys-number-cascader",{
     delimiters: ['#{', '}#'],
     props: {
         root: String,
@@ -1574,6 +1780,7 @@ Vue.component("mx-classkeys-cascader",{
                     :options="options"
                     :props="defaultProps"
                     @change="onChange"
+                    collapseTags
                     clearable
                     filterable
                     style="width:100%;">
@@ -1594,7 +1801,7 @@ Vue.component("mx-classkeys-cascader",{
     },
     methods: {
         initData(){
-            this.options = fsHandler.callFsJScript("/matrix/ai/getClassKeysByClassName.js",encodeURIComponent(this.root)).message;
+            this.options = fsHandler.callFsJScript("/matrix/ai/baseline/getClassNumberKeysByClassName.js",encodeURIComponent(this.root)).message;
         },
         onChange(val){
             this.selected = val;
@@ -1617,6 +1824,315 @@ Vue.component("mx-classkeys-cascader",{
 
             }
 
+        }
+    }
+})
+
+/* Common Class Keys String Select Cascader By ClassName */
+Vue.component("mx-classkeys-string-cascader",{
+    delimiters: ['#{', '}#'],
+    props: {
+        root: String,
+        multiplenable: {
+            default:false,
+            type:Boolean
+        },
+        value: Object
+    },
+    data(){
+        return {
+            options: [],
+            defaultProps: {multiple: false },
+            selected: null
+        }
+    },
+    template:   `<el-cascader
+                    :value="value"
+                    :options="options"
+                    :props="defaultProps"
+                    @change="onChange"
+                    collapseTags
+                    clearable
+                    filterable
+                    style="width:100%;">
+                    <template slot-scope="{ node, data }">
+                        <span>#{ data.label }#</span>
+                        <span v-if="!node.isLeaf"> (#{ data.children.length }#) </span>
+                        <span style="color:#999999;font-size:10px;text-align:right;" v-else>#{ data.ftype }#</span>
+                    </template>
+                </el-cascader>`,
+    watch:{
+        root(val,oldVal){
+            this.initData();
+        }
+    },
+    created(){
+        this.defaultProps.multiple = this.multiplenable;
+        this.initData();
+    },
+    methods: {
+        initData(){
+            this.options = fsHandler.callFsJScript("/matrix/ai/baseline/getClassStringKeysByClassName.js",encodeURIComponent(this.root)).message;
+        },
+        onChange(val){
+            this.selected = val;
+        },
+        onNodeClick(data){
+            try{
+
+                if(!data.isdir) {
+                    eventHub.$emit("FS-NODE-OPENIT-EVENT", data, data.parent);
+
+                } else {
+
+                    let childrenData = _.sortBy(fsHandler.fsList(data.fullname),'fullname');
+
+                    this.$set(data, 'children', childrenData);
+                    
+                }
+
+            } catch(err){
+
+            }
+
+        }
+    }
+})
+
+/* Common Entity -> Class -> Keys Select Cascader */
+Vue.component("mx-entity-class-keys-cascader",{
+    delimiters: ['#{', '}#'],
+    props: {
+        root: String,
+        multiplenable: {
+            default:false,
+            type:Boolean
+        },
+        value: Object
+    },
+    data(){
+        return {
+            
+            search:{
+                term: "",
+                result: null,
+                selected: null
+            },
+            entity: {
+                list: [],
+                timeout:  null
+            },
+            hidden:0
+        }
+    },
+    template:   `<el-container>
+                    <el-header style="width:100%;display:flex;height:35px;line-height:35px;padding:0px;">
+                        <el-input v-model="search.term" placeholder="搜索实体、活动关键字" style="width:100%;"
+                            @blur="onSearchEntityByClass"
+                            @clear="onClear"
+                            @keyup.enter.native="onSearchEntityByClass" 
+                            clearable
+                            autofocus>
+                            <template slot="prepend">
+                                <el-dropdown trigger="click" placement="top-end">
+                                    <el-tooltip content="选则实体类" open-delay="500">
+                                        <el-button type="text" size="mini">
+                                            <i class="el-icon-office-building" style="font-size:16px;"></i>
+                                        </el-button>
+                                    </el-tooltip>
+                                    <el-dropdown-menu slot="dropdown">
+                                        <el-dropdown-item>
+                                            <template scope="scope">
+                                                <mx-entity-tree root="/matrix/entity" ref="entityTree"></mx-entity-tree>
+                                            </template>
+                                        </el-dropdown-item>
+                                    </el-dropdown-menu>
+                                </el-dropdown>
+                            </template>
+                            <el-input-number v-model="hidden" :min="0" controls-position="right" slot="append"></el-input-number>
+                        </el-input>
+                    </el-header>
+                    
+                    <el-main style="width:60vw;height:40vh;padding:0px;margin:5px 0px;background: #f2f3f5;border-top:1px solid #dddddd;" 
+                        v-if="!_.isEmpty(search.result)"
+                        ref="mainView">
+                        <div class="div-hover-effect" style="display:flex;padding:10px;cursor:pointer;width:100%;" 
+                            :key="item.id"
+                            v-for="item in search.result"
+                            @click="onSelect(item)">
+                            <div style="height:48px;line-height:48px;width:35%;padding-left:10px;">#{ item.value }#</span></div>
+                            <div style="height:48px;line-height:48px;width:50%;">
+                                <mx-classkeys-cascader :root="item.class" :value="item" multiplenable="true" :key="item.id"></mx-classkeys-cascader> 
+                            </div>
+                            <el-tooltip content="作为输入指标加入计算模型" open-delay="500">
+                                <el-button type="text" @click="onInputAdd">
+                                    <i class="el-icon-plus"></i> 输入
+                                </el-button>
+                            </el-tooltip>
+                            <el-tooltip content="作为输出指标加入计算模型" open-delay="500">
+                                <el-button type="text" @click="onOutputAdd">
+                                    <i class="el-icon-plus"></i> 输出
+                                </el-button>
+                            </el-tooltip>
+                        </div>
+                    </el-main>
+                    
+                </el-container>`,
+    filters: {
+        pickIcon(item){
+            try{
+                let icon = _.last(item.class.split("/"));
+                return `/fs/assets/images/entity/png/${icon}.png?type=open&issys=true`;
+            } catch(err){
+                return `/fs/assets/images/entity/png/matrix.png?type=open&issys=true`;
+            }
+            
+        }
+    },
+    created(){
+        
+        eventHub.$on("MX-ENTITY-TREE-NODE", (data)=>{
+            this.search.term = data.class;
+            this.onSearchEntityByClass();
+        });
+    },
+    methods: {
+        initData(){
+            this.options = fsHandler.callFsJScript("/matrix/ai/getClassList.js",encodeURIComponent(this.root)).message;
+        },
+        onChange(val){
+            this.selected = val;
+            this.findClass(this.options,_.last(val));
+        },
+        findClass(arr,name){
+            
+            let rt = _.find(arr,{class:name});
+            
+            if(rt){
+                let keys = fsHandler.callFsJScript("/matrix/ai/baseline/getClassNumberKeysByClassName.js",encodeURIComponent(rt.class)).message;
+                if(!_.isEmpty(keys)){
+                    this.$set(rt,'children',keys);
+                }
+            } else {
+                _.forEach(arr,(v)=>{
+                    if(v.children){
+                        this.findClass(v.children,name);
+                    }
+                })
+            }
+        },
+        onNodeClick(data){
+            try{
+
+                if(!data.isdir) {
+                    eventHub.$emit("FS-NODE-OPENIT-EVENT", data, data.parent);
+
+                } else {
+
+                    let childrenData = _.sortBy(fsHandler.fsList(data.fullname),'fullname');
+
+                    this.$set(data, 'children', childrenData);
+                    
+                }
+
+            } catch(err){
+
+            }
+
+        },
+        onClear(){
+            this.search.selected = null;
+            this.search.result = null;
+        },
+        onSearchEntity() {
+            
+            try{
+                if(_.isEmpty(this.search.term)){
+                    return false;
+                }
+
+                let entitys = fsHandler.callFsJScript("/matrix/graph/entity-search-by-term.js",encodeURIComponent(this.search.term)).message;
+                
+                this.search.result = entitys;
+
+                this.search.result = _.map(this.search.result,(v)=>{
+                    return _.extend(v,{cell: {edge:false}});
+                })
+        
+            } catch(err){
+                console.log(err)
+            }
+            
+        },
+        onSearchEntityByClass() {
+            
+            try{
+                if(_.isEmpty(this.search.term)){
+                    return false;
+                }
+
+                let entitys = fsHandler.callFsJScript("/matrix/graph/entitySearchByClass.js",encodeURIComponent(this.search.term)).message;
+                
+                this.search.result = entitys;
+
+                this.search.result = _.map(this.search.result,(v)=>{
+                    return _.extend(v,{cell: {edge:false}});
+                })
+        
+            } catch(err){
+                console.log(err)
+            }
+            
+        },
+        onInputAdd(){
+
+        },
+        onOutputAdd(){
+
+        }
+    }
+})
+
+/* Common Class -> Entity */
+Vue.component("mx-class-entity-select",{
+    delimiters: ['#{', '}#'],
+    props: {
+        root: String,
+        multiplenable: {
+            default:false,
+            type:Boolean
+        },
+        value: []
+    },
+    data(){
+        return {
+            entity: {
+                list: [],
+                selected: []
+            }
+        }
+    },
+    template:   `<el-transfer
+                    filterable
+                    :filter-method="onFilter"
+                    filter-placeholder="请输入实体关键字"
+                    v-model="entity.selected"
+                    :data="entity.list"
+                    style="background:#f2f3f5;padding:20px;">
+                </el-transfer>`,
+    created(){
+        this.$set(this.entity,'selected',this.value);
+    },
+    mounted(){
+        this.initData();
+    },
+    methods: {
+        initData(){
+            let term = encodeURIComponent(JSON.stringify({class: this.root, term:''}));
+            this.entity.list = fsHandler.callFsJScript("/matrix/ai/baseline/getEntityListByClassName.js",term).message;
+        },
+        onFilter(query, item) {
+            return item.value.indexOf(query) > -1;
         }
     }
 })
@@ -1679,6 +2195,11 @@ Vue.component("mx-job-group",{
                             {field:"hosts", title: "服务器", visible:false}
                         ],
                 selected: [],
+            },
+            group: {
+                "name": "",
+                "gtype":"group",
+                "hosts": []
             }
         }
     },
@@ -1726,6 +2247,10 @@ Vue.component("mx-job-group",{
                 </el-container>`,
     created(){
         this.initData();
+        
+        this.group.hosts = _.map(fsHandler.callFsJScript("/matrix/ai/getServerList.js",null).message,(v)=>{
+            return {host:v.host};
+        });
     },
     methods: {
         rowClassName({row, rowIndex}){
@@ -1772,7 +2297,72 @@ Vue.component("mx-job-group",{
         onRefresh(){
             this.initData();
         },
-        onNew(){}
+        onNew(){
+            this.$prompt('请输入名称', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+              }).then(({ value }) => {
+
+                if(_.isEmpty(value)){
+                    this.$message({
+                        type: "info",
+                        message: "请输入名称"
+                    })
+                    return false;
+                }
+
+                this.$set(this.group,'name',value);
+                
+                let rtn = groupHandler.serverGroupNew(JSON.stringify(this.group));
+            
+                if(rtn.status == 'ok'){
+                    
+                    this.$message({
+                        type: "success",
+                        message: "新建成功！"
+                    })
+                    _.delay((v)=>{
+                        this.initData();
+                    },500)
+                    
+                } else {
+                    this.$message({
+                        type: "error",
+                        message: "新建失败，" + rtn.message
+                    })
+                }
+              }).catch(() => {
+                
+              });
+            
+        },
+        onDelete(index, row){
+            this.$confirm(`确认要该组：${row.name}？`, '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+            }).then(() => {
+                
+                let rtn = groupHandler.serverGroupDelete(row);
+
+                if (rtn.status == 'ok'){
+                    this.$message({
+                        type: "success",
+                        message: "删除成功！"
+                    });
+                    _.delay((v)=>{
+                        this.initData();
+                    },500)
+                } else {
+                    this.$message({
+                        type: "error",
+                        message: "删除失败 " + rtn.message
+                    })
+                } 
+            }).catch(() => {
+                
+            }); 
+        }
     }
 })
 

@@ -316,14 +316,16 @@ class Window {
                     "min-height": "28px"
                 });
                 $(".jsPanel-content",this).css({
-                    "border": "1px solid #dddddd",
+                    "border": "none",
                     "overflow": "hidden auto"
                 });
                 $(".jsPanel-titlebar",this).css({
                     "min-height": "28px"
                 });
                 $(".jsPanel-titlebar h3").css({
-                    "font-size": "12px"
+                    "font-size": "12px",
+                    "height": "20px",
+                    "line-height": "20px"
                 });
 
             }
