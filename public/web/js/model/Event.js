@@ -138,11 +138,19 @@ class Event {
                                             <el-table-column type="selection" align="center"></el-table-column> 
                                             <el-table-column type="expand">
                                                 <template slot-scope="props">
-                                                    <el-form label-width="120px" style="width:100%;height:300px;overflow:auto;padding:10px;background:#f7f7f7;" >
-                                                        <el-form-item v-for="v,k in props.row" :label="k">
-                                                            <el-input v-model="v"></el-input>
-                                                        </el-form-item>
-                                                    </el-form>
+                                                    <el-container style="width:50vw;">
+                                                        <el-main>
+                                                            <el-form label-position="right" label-width="120px">
+                                                                <el-form-item v-for="v,k in props.row" :label="k" :key="k">
+                                                                    <el-input :type="k,metaColumns | pickType" :value="moment(v).format(mx.global.register.format)"  v-if="pickFtype(k) == 'timestamp'"></el-input>
+                                                                    <el-input :type="k,metaColumns | pickType" :value="moment(v).format('YYYY-MM-DD')"  v-else-if="pickFtype(k) == 'date'"></el-input>
+                                                                    <el-input :type="k,metaColumns | pickType" :rows="6" :value="arrayToCsv(v)"  v-else-if="pickFtype(k) == 'bucket'"></el-input>
+                                                                    <el-input :type="k,metaColumns | pickType" :rows="6" :value="JSON.stringify(v,null,4)"  v-else-if="_.includes(['map','set','list'],pickFtype(k))"></el-input>
+                                                                    <el-input :type="k,metaColumns | pickType" :value="v"  v-else></el-input>
+                                                                </el-form-item>
+                                                            </el-form>
+                                                        </el-main>
+                                                    </el-container>
                                                 </template>
                                             </el-table-column>
                                             <el-table-column :prop="item.field" 
@@ -160,12 +168,31 @@ class Event {
                                         #{ info.join(' &nbsp; | &nbsp;') }#
                                     </el-footer>
                                 </el-container>`,
+                    computed:{
+                        metaColumns(){
+                            try{
+                                return this.model.columns[this.model.rootClass];
+                            } catch(err){
+                                return [];
+                            }
+                        }
+                    },
                     mounted(){
                         this.$nextTick(()=>{
                             this.layout();
                         })
                     },
                     methods: {
+                        pickFtype(key){
+                
+                            let rtn = 'string';
+                            try{
+                                rtn = _.find(this.metaColumns,{data:key}).type;
+                            } catch(err){
+                                return rtn;
+                            }
+                            return rtn;
+                        },
                         layout(){
                             let doLayout = ()=>{
                                 if($(".el-table-column--selection",this.$el).is(':visible')){
@@ -475,11 +502,19 @@ class Event {
                                             <!--el-table-column type="selection" align="center"></el-table-column--> 
                                             <el-table-column type="expand">
                                                 <template slot-scope="props">
-                                                    <el-form label-width="120px" style="width:100%;height:300px;overflow:auto;padding:10px;background:#f7f7f7;" >
-                                                        <el-form-item v-for="v,k in props.row" :label="k">
-                                                            <el-input v-model="v"></el-input>
-                                                        </el-form-item>
-                                                    </el-form>
+                                                    <el-container style="width:50vw;">
+                                                        <el-main>
+                                                            <el-form label-position="right" label-width="120px">
+                                                                <el-form-item v-for="v,k in props.row" :label="k" :key="k">
+                                                                    <el-input :type="k,metaColumns | pickType" :value="moment(v).format(mx.global.register.format)"  v-if="pickFtype(k) == 'timestamp'"></el-input>
+                                                                    <el-input :type="k,metaColumns | pickType" :value="moment(v).format('YYYY-MM-DD')"  v-else-if="pickFtype(k) == 'date'"></el-input>
+                                                                    <el-input :type="k,metaColumns | pickType" :rows="6" :value="arrayToCsv(v)"  v-else-if="pickFtype(k) == 'bucket'"></el-input>
+                                                                    <el-input :type="k,metaColumns | pickType" :rows="6" :value="JSON.stringify(v,null,4)"  v-else-if="_.includes(['map','set','list'],pickFtype(k))"></el-input>
+                                                                    <el-input :type="k,metaColumns | pickType" :value="v"  v-else></el-input>
+                                                                </el-form-item>
+                                                            </el-form>
+                                                        </el-main>
+                                                    </el-container>
                                                 </template>
                                             </el-table-column>
                                             <el-table-column
@@ -506,10 +541,44 @@ class Event {
                                         #{ info.join(' &nbsp; | &nbsp;') }#
                                     </el-footer>
                                 </el-container>`,
+                    filters:{
+                        pickType(key,columns){
+                            let rtn = 'text';
+                            try{
+                                let type = _.find(columns,{data:key}).type;
+                                if(_.includes(['map','list','set','bucket'],type)){
+                                    rtn = 'textarea';
+                                }
+                            } catch(err){
+                                rtn = 'input';
+                            }
+        
+                            return rtn;
+                        }
+                    },
+                    computed:{
+                        metaColumns(){
+                            try{
+                                return this.model.columns[this.model.rootClass];
+                            } catch(err){
+                                return [];
+                            }
+                        }
+                    },
                     mounted(){
 
                     },
                     methods: {
+                        pickFtype(key){
+                            
+                            let rtn = 'string';
+                            try{
+                                rtn = _.find(this.metaColumns,{data:key}).type;
+                            } catch(err){
+                                return rtn;
+                            }
+                            return rtn;
+                        },
                         layout(){
                             let doLayout = ()=>{
                                 if($(".el-table-column--selection",this.$el).is(':visible')){

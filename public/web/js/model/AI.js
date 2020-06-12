@@ -311,6 +311,18 @@ class AI {
                                                         </el-popover> 
                                                         <mx-classkeys-string-cascader :root="content.class" :value="content.model.baselinebucketkeys" multiplenable="true"  ref="baselinebucketkeys"></mx-classkeys-cascader>
                                                     </el-form-item-->
+
+                                                    <el-form-item label="指定子对象(diffkeys)" style="width:80%;">
+                                                        <el-popover
+                                                            placement="top-start"
+                                                            trigger="hover"
+                                                            content="指定子对象(diffkeys)"
+                                                            style="position:absolute;top:-40px;right:0px;">
+                                                            <span slot="reference" class="el-icon-question"></span>
+                                                        </el-popover>
+                                                        <mx-classkeys-string-cascader :root="content.class" :value="content.model.diffkeys" multiplenable="true"  ref="diffkeys"></mx-classkeys-string-cascader>
+                                                    </el-form-item>
+
                                                     <el-form-item label="指定不参与计算属性" style="width:80%;">
                                                         <el-popover
                                                             placement="top-start"
@@ -321,16 +333,7 @@ class AI {
                                                         </el-popover> 
                                                         <mx-classkeys-string-cascader :root="content.class" :value="content.model.copykeys" multiplenable="true"  ref="copykeys"></mx-classkeys-string-cascader>
                                                     </el-form-item>
-                                                    <el-form-item label="指定子属性(diffkeys)" style="width:80%;">
-                                                        <el-popover
-                                                            placement="top-start"
-                                                            trigger="hover"
-                                                            content="指定子属性(diffkeys)"
-                                                            style="position:absolute;top:-40px;right:0px;">
-                                                            <span slot="reference" class="el-icon-question"></span>
-                                                        </el-popover>
-                                                        <mx-classkeys-string-cascader :root="content.class" :value="content.model.diffkeys" multiplenable="true"  ref="diffkeys"></mx-classkeys-string-cascader>
-                                                    </el-form-item>
+                                                    
                                                     
                                                     <el-form-item label="基线类型" style="width:80%;">
                                                         <el-popover
@@ -379,13 +382,42 @@ class AI {
                                             <el-tab-pane label="阈值消息">
                                                 <el-form :model="content" label-width="80px" label-position="top" style="height:100%;overflow:auto;padding: 0 20px; border-left: 1px solid #dddddd;">
                                                             
-                                                    <el-form-item label="阈值" prop="threshold">
-                                                        <el-input-number v-model="content.threshold" controls-position="right" :min="1"></el-input-number>
-                                                        <small>超过阈值，发送消息</small>
+                                                    <el-form-item label="基线告警">
+                                                        <el-switch v-model="content.threshold.alarm" active-value="1" inactive-value="0"></el-switch>
                                                     </el-form-item>
 
-                                                    <el-form-item label="消息模板" prop="msg">
-                                                        <el-input type="textarea" rows="10" v-model="content.msg"></textarea></el-input>
+                                                    <el-form-item label="上限阈值" v-if="content.threshold.alarm == 1">
+                                                        <el-input-number v-model="content.threshold.thresholdUp" controls-position="right" :min="1"></el-input-number>
+                                                        <small>超过阈值上限，发送消息</small>
+                                                    </el-form-item>
+
+                                                    <el-form-item label="下限阈值" v-if="content.threshold.alarm == 1">
+                                                        <el-input-number v-model="content.threshold.thresholdDown" controls-position="right" :min="1"></el-input-number>
+                                                        <small>超过阈值下限，发送消息</small>
+                                                    </el-form-item>
+
+                                                    <el-form-item label="预警区间" v-if="content.threshold.alarm == 1">
+                                                        <el-time-select
+                                                            placeholder="起始时间"
+                                                            v-model="content.threshold.thresholdRange[0]"
+                                                            :picker-options="{
+                                                                start: '00:00',
+                                                                step: '00:30',
+                                                                end: '23:59'}">
+                                                        </el-time-select>
+                                                        <el-time-select
+                                                            placeholder="结束时间"
+                                                            v-model="content.threshold.thresholdRange[1]"
+                                                            :picker-options="{
+                                                                start: '00:00',
+                                                                step: '00:30',
+                                                                end: '23:59',
+                                                                minTime: content.threshold.thresholdRange[0]}">
+                                                        </el-time-select>
+                                                    </el-form-item>
+
+                                                    <el-form-item label="消息模板" v-if="content.threshold.alarm == 1">
+                                                        <el-input type="textarea" rows="10" v-model="content.threshold.msg"></textarea></el-input>
                                                     </el-form-item>
                                                     
                                                 </el-form>
@@ -393,7 +425,7 @@ class AI {
                                             <el-tab-pane label="其它设置">
                                                 <el-form :model="content" label-width="140px" label-position="top" style="width:95%;height:100%;overflow:auto;padding: 0 20px; border-left: 1px solid #dddddd;">
                                                     
-                                                    <el-form-item label="作业名称">
+                                                    <el-form-item label="作业名称" style="display:none;">
                                                         <el-input type="text" v-model="content.name" disabled></el-input>
                                                     </el-form-item>
 
@@ -452,7 +484,7 @@ class AI {
 
 
                                     // baselinebucketkeys
-                                    this.$set(this.content,'baselinebucket',  _.head(_.head(val))+"_baseline");
+                                    this.$set(this.content,'baselinebucket',  _.head(_.head(val)).replace(/_perf/,"_baseline"));
                                     
                                     // baselinebucketkeys
                                     let baselineBucketKeys = {};
@@ -498,7 +530,7 @@ class AI {
 
                         // copykeys
                         this.$watch(
-                            "$refs.diffkeys.selected",{
+                            "$refs.copykeys.selected",{
                                 handler:(val, oldVal) => {
 
                                     // copykeys
@@ -580,6 +612,7 @@ class AI {
                                     schedule: `${this.content.job.cron}`, // 'cron 0 0 * * *'
                                     timeout: 43200
                                 };
+
                                 this.$set(this.content,'name',name);
 
                                 // 检查job是否存在
@@ -618,16 +651,22 @@ class AI {
                                 type: 'warning'
                             }).then(() => {
 								
-                                let rt = jobHandler.jobDelete(this.content);
-                                if(rt.status == 'ok'){
+                                try{
+
+                                    let rt = jobHandler.jobDelete(this.content);
                                     
+                                } catch(err){
+
+                                } finally{
                                     // 删除文件系统
                                     let rtn = fsHandler.fsDelete(this.model.parent, this.model.name);
                                     if (rtn == 1){
                                     
                                         // 刷新rules
-                                        this.$root.$refs.aiSetup.load();
-                                        this.$root.$refs.aiSetup.close(this.model.id);
+                                        _.delay(()=>{
+                                            this.$root.$refs.aiSetup.load();
+                                            this.$root.$refs.aiSetup.close(this.model.id);
+                                        },1000)
 
                                         this.$message({
                                             type: "success",
@@ -639,11 +678,6 @@ class AI {
                                             message: "删除失败 " + rtn.message
                                         })
                                     }
-                                } else {
-                                    this.$message({
-                                        type: "error",
-                                        message: "删除失败：" + rt.message
-                                    })
                                 }
 
                             }).catch(() => {
@@ -1501,11 +1535,11 @@ class AI {
                     data(){
                         return {
                             graph:{
-                                input: [],
+                                input: null,
                                 hidden: 300,
-                                output: []
+                                output: null,
+                                model: ""
                             },
-                            nodes: [],
                             content: null
                         }
                     },
@@ -1536,23 +1570,7 @@ class AI {
                                                 
                                                 <el-form :model="model" label-width="140px" label-position="top" style="width:95%;height:100%;overflow:auto;padding: 0 20px; border-left: 1px solid #dddddd;">
                                                     
-                                                    <ai-neural-graph :model="graph"></ai-neural-graph>
-                                                    
-                                                    <!--el-form-item label="输入层设置">
-                                                        <mx-entity-class-keys-cascader root="/matrix/entity" :value="content.model.bucketkeys" multiplenable="true"  ref="input"></mx-entity-class-keys-cascader>
-                                                    </el-form-item>
-
-                                                    <el-form-item label="计算层">
-                                                        <el-input-number v-model="graph.hidden" :min="0"></el-input-number>
-                                                    </el-form-item>
-
-                                                    <el-form-item label="输出层设置">
-                                                        <mx-entity-class-keys-cascader root="/matrix/entity" :value="content.model.bucketkeys" multiplenable="true"  ref="output"></mx-entity-class-keys-cascader>
-                                                    </el-form-item>
-
-                                                    <el-form-item label="">
-                                                        
-                                                    </el-form-item-->
+                                                    <ai-neural-graph :model="graph" ref="neuralGraph"></ai-neural-graph>
 
                                                 </el-form>
                                             </el-tab-pane>
@@ -1599,6 +1617,8 @@ class AI {
                                 </el-container>`,
                     created(){
                         this.content = this.model.content;
+                        this.$set(this.graph,'hidden',this.content.nodes.hiddencount);
+                        this.$set(this.graph,'model',this.content.model);
                     },
                     mounted(){
                         // watch数据更新
@@ -1631,10 +1651,27 @@ class AI {
                             let rtn = fsHandler.fsNew('json', this.model.parent, this.model.name, JSON.stringify(this.content,null,2), attr);
                         },
                         onSave(){
-                            const self = this;
-
                             let attr = {ctime: _.now()};
-                            let rtn = fsHandler.fsNew('json', self.model.parent, self.model.name, JSON.stringify(self.content,null,2), attr);
+                            
+                            let graph = this.$refs.neuralGraph.graph.inst;
+                            let encoder = new mxCodec();
+                            let node = encoder.encode(graph.getModel());
+                            let xml = mxUtils.getPrettyXml(node);
+                            this.$set(this.content,'model',xml);
+
+                            let rtn = fsHandler.fsNew('json', this.model.parent, this.model.name, JSON.stringify(this.content,null,2), attr);
+
+                            if(rtn == 1){
+                                this.$message({
+                                    type: 'success',
+                                    message: '提交成功！'
+                                })
+                            } else {
+                                this.$message({
+                                    type: 'error',
+                                    message: '提交失败!'
+                                })        
+                            }
                         },
                         // 删除规则
                         onDelete() {
@@ -1644,32 +1681,23 @@ class AI {
                                 cancelButtonText: '取消',
                                 type: 'warning'
                             }).then(() => {
-								
-                                let rt = jobHandler.jobDelete(this.content);
-                                if(rt.status == 'ok'){
-                                    
-                                    // 删除文件系统
-                                    let rtn = fsHandler.fsDelete(this.model.parent, this.model.name);
-                                    if (rtn == 1){
-                                    
-                                        // 刷新rules
-                                        this.$root.$refs.aiSetup.load();
-                                        this.$root.$refs.aiSetup.close(this.model.id);
+								 
+                                // 删除文件系统
+                                let rtn = fsHandler.fsDelete(this.model.parent, this.model.name);
+                                if (rtn == 1){
+                                
+                                    // 刷新rules
+                                    this.$root.$refs.aiSetup.load();
+                                    this.$root.$refs.aiSetup.close(this.model.id);
 
-                                        this.$message({
-                                            type: "success",
-                                            message: "删除成功！"
-                                        })
-                                    } else {
-                                        this.$message({
-                                            type: "error",
-                                            message: "删除失败 " + rtn.message
-                                        })
-                                    }
+                                    this.$message({
+                                        type: "success",
+                                        message: "删除成功！"
+                                    })
                                 } else {
                                     this.$message({
                                         type: "error",
-                                        message: "删除失败：" + rt.message
+                                        message: "删除失败 " + rtn.message
                                     })
                                 }
 
@@ -1756,13 +1784,13 @@ class AI {
                                                         <el-image :src="'/fs/assets/images/robot/png/'+tab.component + '.png?type=download&issys=true'" style="width: 10px;height: 10px;"></el-image>
                                                         #{tab.name.split(".")[0]}#
                                                     </span>
-                                                    <matrix-ai-setup-words :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='words'" transition="fade" transition-mode="out-in"></matrix-ai-setup-words>
-                                                    <matrix-ai-setup-neural :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='neural'" transition="fade" transition-mode="out-in"></matrix-ai-setup-neural>
-                                                    <matrix-ai-setup-baseline :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='baseline'" transition="fade" transition-mode="out-in"></matrix-ai-setup-baseline>
-                                                    <matrix-ai-setup-elad :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='elad'" transition="fade" transition-mode="out-in"></matrix-ai-setup-elad>
-                                                    <matrix-ai-setup-e-elad :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='e-elad'" transition="fade" transition-mode="out-in"></matrix-ai-setup-e-elad>
-                                                    <matrix-ai-setup-el-elad :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='el-elad'" transition="fade" transition-mode="out-in"></matrix-ai-setup-el-elad>
-                                                    <matrix-ai-setup-cafp :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='cafp'" transition="fade" transition-mode="out-in"></matrix-ai-setup-cafp>
+                                                    <matrix-ai-setup-words :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='words'" transition="fade" transition-mode="out-in" ref="aiSetupInst"></matrix-ai-setup-words>
+                                                    <matrix-ai-setup-neural :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='neural'" transition="fade" transition-mode="out-in"  ref="aiSetupInst"></matrix-ai-setup-neural>
+                                                    <matrix-ai-setup-baseline :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='baseline'" transition="fade" transition-mode="out-in" ref="aiSetupInst"></matrix-ai-setup-baseline>
+                                                    <matrix-ai-setup-elad :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='elad'" transition="fade" transition-mode="out-in" ref="aiSetupInst"></matrix-ai-setup-elad>
+                                                    <matrix-ai-setup-e-elad :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='e-elad'" transition="fade" transition-mode="out-in" ref="aiSetupInst"></matrix-ai-setup-e-elad>
+                                                    <matrix-ai-setup-el-elad :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='el-elad'" transition="fade" transition-mode="out-in" ref="aiSetupInst"></matrix-ai-setup-el-elad>
+                                                    <matrix-ai-setup-cafp :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='cafp'" transition="fade" transition-mode="out-in" ref="aiSetupInst"></matrix-ai-setup-cafp>
                                                 </el-tab-pane>
                                             </el-tabs>
                                         </el-main>
@@ -1852,7 +1880,7 @@ class AI {
                                                             ospace: window.COMPANY_NAME,
                                                             user: window.SignedUser_UserName,
                                                             time:  _.now(),
-                                                            name: name
+                                                            name: this.name
                                                         });
                                         let rtn = fsHandler.fsNew('json', this.model.fullname, this.name+'.json', JSON.stringify(content,null,2), attr);
                                         if(rtn == 1){

@@ -1899,200 +1899,6 @@ Vue.component("mx-classkeys-string-cascader",{
     }
 })
 
-/* Common Entity -> Class -> Keys Select Cascader */
-Vue.component("mx-entity-class-keys-cascader",{
-    delimiters: ['#{', '}#'],
-    props: {
-        root: String,
-        multiplenable: {
-            default:false,
-            type:Boolean
-        },
-        value: Object
-    },
-    data(){
-        return {
-            
-            search:{
-                term: "",
-                result: null,
-                selected: null
-            },
-            entity: {
-                list: [],
-                timeout:  null
-            },
-            hidden:0
-        }
-    },
-    template:   `<el-container>
-                    <el-header style="width:100%;display:flex;height:35px;line-height:35px;padding:0px;">
-                        <el-input v-model="search.term" placeholder="搜索实体、活动关键字" style="width:100%;"
-                            @blur="onSearchEntityByClass"
-                            @clear="onClear"
-                            @keyup.enter.native="onSearchEntityByClass" 
-                            clearable
-                            autofocus>
-                            <template slot="prepend">
-                                <el-dropdown trigger="click" placement="top-end">
-                                    <el-tooltip content="选则实体类" open-delay="500">
-                                        <el-button type="text" size="mini">
-                                            <i class="el-icon-office-building" style="font-size:16px;"></i>
-                                        </el-button>
-                                    </el-tooltip>
-                                    <el-dropdown-menu slot="dropdown">
-                                        <el-dropdown-item>
-                                            <template scope="scope">
-                                                <mx-entity-tree root="/matrix/entity" ref="entityTree"></mx-entity-tree>
-                                            </template>
-                                        </el-dropdown-item>
-                                    </el-dropdown-menu>
-                                </el-dropdown>
-                            </template>
-                            <el-input-number v-model="hidden" :min="0" controls-position="right" slot="append"></el-input-number>
-                        </el-input>
-                    </el-header>
-                    
-                    <el-main style="width:60vw;height:40vh;padding:0px;margin:5px 0px;background: #f2f3f5;border-top:1px solid #dddddd;" 
-                        v-if="!_.isEmpty(search.result)"
-                        ref="mainView">
-                        <div class="div-hover-effect" style="display:flex;padding:10px;cursor:pointer;width:100%;" 
-                            :key="item.id"
-                            v-for="item in search.result"
-                            @click="onSelect(item)">
-                            <div style="height:48px;line-height:48px;width:35%;padding-left:10px;">#{ item.value }#</span></div>
-                            <div style="height:48px;line-height:48px;width:50%;">
-                                <mx-classkeys-cascader :root="item.class" :value="item" multiplenable="true" :key="item.id"></mx-classkeys-cascader> 
-                            </div>
-                            <el-tooltip content="作为输入指标加入计算模型" open-delay="500">
-                                <el-button type="text" @click="onInputAdd">
-                                    <i class="el-icon-plus"></i> 输入
-                                </el-button>
-                            </el-tooltip>
-                            <el-tooltip content="作为输出指标加入计算模型" open-delay="500">
-                                <el-button type="text" @click="onOutputAdd">
-                                    <i class="el-icon-plus"></i> 输出
-                                </el-button>
-                            </el-tooltip>
-                        </div>
-                    </el-main>
-                    
-                </el-container>`,
-    filters: {
-        pickIcon(item){
-            try{
-                let icon = _.last(item.class.split("/"));
-                return `/fs/assets/images/entity/png/${icon}.png?type=open&issys=true`;
-            } catch(err){
-                return `/fs/assets/images/entity/png/matrix.png?type=open&issys=true`;
-            }
-            
-        }
-    },
-    created(){
-        
-        eventHub.$on("MX-ENTITY-TREE-NODE", (data)=>{
-            this.search.term = data.class;
-            this.onSearchEntityByClass();
-        });
-    },
-    methods: {
-        initData(){
-            this.options = fsHandler.callFsJScript("/matrix/ai/getClassList.js",encodeURIComponent(this.root)).message;
-        },
-        onChange(val){
-            this.selected = val;
-            this.findClass(this.options,_.last(val));
-        },
-        findClass(arr,name){
-            
-            let rt = _.find(arr,{class:name});
-            
-            if(rt){
-                let keys = fsHandler.callFsJScript("/matrix/ai/baseline/getClassNumberKeysByClassName.js",encodeURIComponent(rt.class)).message;
-                if(!_.isEmpty(keys)){
-                    this.$set(rt,'children',keys);
-                }
-            } else {
-                _.forEach(arr,(v)=>{
-                    if(v.children){
-                        this.findClass(v.children,name);
-                    }
-                })
-            }
-        },
-        onNodeClick(data){
-            try{
-
-                if(!data.isdir) {
-                    eventHub.$emit("FS-NODE-OPENIT-EVENT", data, data.parent);
-
-                } else {
-
-                    let childrenData = _.sortBy(fsHandler.fsList(data.fullname),'fullname');
-
-                    this.$set(data, 'children', childrenData);
-                    
-                }
-
-            } catch(err){
-
-            }
-
-        },
-        onClear(){
-            this.search.selected = null;
-            this.search.result = null;
-        },
-        onSearchEntity() {
-            
-            try{
-                if(_.isEmpty(this.search.term)){
-                    return false;
-                }
-
-                let entitys = fsHandler.callFsJScript("/matrix/graph/entity-search-by-term.js",encodeURIComponent(this.search.term)).message;
-                
-                this.search.result = entitys;
-
-                this.search.result = _.map(this.search.result,(v)=>{
-                    return _.extend(v,{cell: {edge:false}});
-                })
-        
-            } catch(err){
-                console.log(err)
-            }
-            
-        },
-        onSearchEntityByClass() {
-            
-            try{
-                if(_.isEmpty(this.search.term)){
-                    return false;
-                }
-
-                let entitys = fsHandler.callFsJScript("/matrix/graph/entitySearchByClass.js",encodeURIComponent(this.search.term)).message;
-                
-                this.search.result = entitys;
-
-                this.search.result = _.map(this.search.result,(v)=>{
-                    return _.extend(v,{cell: {edge:false}});
-                })
-        
-            } catch(err){
-                console.log(err)
-            }
-            
-        },
-        onInputAdd(){
-
-        },
-        onOutputAdd(){
-
-        }
-    }
-})
-
 /* Common Class -> Entity */
 Vue.component("mx-class-entity-select",{
     delimiters: ['#{', '}#'],
@@ -2118,6 +1924,7 @@ Vue.component("mx-class-entity-select",{
                     filter-placeholder="请输入实体关键字"
                     v-model="entity.selected"
                     :data="entity.list"
+                    :titles="['可选', '已选']"
                     style="background:#f2f3f5;padding:20px;">
                 </el-transfer>`,
     created(){
@@ -2489,6 +2296,224 @@ Vue.component("mx-job-cron",{
         },
         onSetCron(){
             this.cron = this.defaultCron.cron;
+        }
+    }
+})
+
+/* Common Entity -> Class -> Keys Select Cascader */
+Vue.component("mx-entity-class-keys-cascader",{
+    delimiters: ['#{', '}#'],
+    props: {
+        root: String,
+        multiplenable: {
+            default:false,
+            type:Boolean
+        },
+        value: Object
+    },
+    data(){
+        return {
+            
+            search:{
+                term: "",
+                result: null,
+                selected: null
+            },
+            entity: {
+                list: [],
+                timeout:  null
+            }
+        }
+    },
+    template:   `<el-container>
+                    <el-header style="width:100%;display:flex;height:35px;line-height:35px;padding:0px;">
+                        <el-input v-model="search.term" placeholder="搜索实体、活动关键字" style="width:100%;"
+                            @blur="onSearchEntityByClass"
+                            @clear="onClear"
+                            @keyup.enter.native="onSearchEntityByClass" 
+                            clearable
+                            autofocus>
+                            <template slot="prepend">
+                                <el-dropdown trigger="click" placement="top-end">
+                                    <el-tooltip content="选则实体类" open-delay="500">
+                                        <el-button type="text" size="mini">
+                                            <i class="el-icon-office-building" style="font-size:16px;"></i>
+                                        </el-button>
+                                    </el-tooltip>
+                                    <el-dropdown-menu slot="dropdown">
+                                        <el-dropdown-item>
+                                            <template scope="scope">
+                                                <mx-entity-tree root="/matrix/entity" ref="entityTree"></mx-entity-tree>
+                                            </template>
+                                        </el-dropdown-item>
+                                    </el-dropdown-menu>
+                                </el-dropdown>
+                            </template>
+                            <el-input-number 
+                                v-model="value.hidden" :min="0" controls-position="right" 
+                                slot="append"
+                                @change="onHiddenChange"></el-input-number>
+                        </el-input>
+                    </el-header>
+                    
+                    <el-main style="width:60vw;height:40vh;padding:0px;margin:5px 0px;background: #f2f3f5;border-top:1px solid #dddddd;" 
+                        v-if="!_.isEmpty(search.result)"
+                        ref="mainView">
+                        <div class="div-hover-effect" style="display:flex;padding:10px;cursor:pointer;width:100%;" 
+                            :key="item.id"
+                            v-for="item in search.result">
+                            <div style="height:48px;line-height:48px;width:35%;padding-left:10px;">#{ item.value }#</span></div>
+                            <div style="height:48px;line-height:48px;width:50%;">
+                                <mx-classkeys-number-cascader :root="item.class" :value="item" multiplenable="true" :key="item.id" :ref="item.id"></mx-classkeys-number-cascader> 
+                            </div>
+                            <el-tooltip content="作为输入指标加入计算模型" open-delay="500">
+                                <el-button type="text" @click="onInputAdd(item)">
+                                    <i class="el-icon-plus"></i> 输入
+                                </el-button>
+                            </el-tooltip>
+                            <el-tooltip content="作为输出指标加入计算模型" open-delay="500">
+                                <el-button type="text" @click="onOutputAdd(item)">
+                                    <i class="el-icon-plus"></i> 输出
+                                </el-button>
+                            </el-tooltip>
+                        </div>
+                    </el-main>
+                    
+                </el-container>`,
+    filters: {
+        pickIcon(item){
+            try{
+                let icon = _.last(item.class.split("/"));
+                return `/fs/assets/images/entity/png/${icon}.png?type=open&issys=true`;
+            } catch(err){
+                return `/fs/assets/images/entity/png/matrix.png?type=open&issys=true`;
+            }
+            
+        }
+    },
+    created(){
+        
+        eventHub.$on("MX-ENTITY-TREE-NODE", (data)=>{
+            this.search.term = data.class;
+            this.onSearchEntityByClass();
+        });
+    },
+    methods: {
+        initData(){
+            this.options = fsHandler.callFsJScript("/matrix/ai/getClassList.js",encodeURIComponent(this.root)).message;
+        },
+        onInputAdd(item){
+            
+            this.search.result = [];
+            
+            let perfs = _.map(this.$refs[item.id][0].selected,(v)=>{
+                return _.concat(['input',item.id],v).join(":");
+            })
+            let val = { entity: item.id, perfs: perfs, type: 'input'};
+            let inst = this.$root.$refs.aiSetup.$refs.aiSetupInst[0];
+            this.$set(inst.graph,'input',val);
+            console.log(val)
+        },
+        onOutputAdd(item){
+            
+            this.search.result = [];
+
+            let perfs = _.map(this.$refs[item.id][0].selected,(v)=>{
+                return _.concat(['output',item.id],v).join(":");
+            })
+            let val = { entity: item.id, perfs: perfs, type: 'output'};
+            let inst = this.$root.$refs.aiSetup.$refs.aiSetupInst[0];
+            this.$set(inst.graph,'output',val);
+            console.log(val)
+
+        },
+        onHiddenChange(val){
+            let inst = this.$root.$refs.aiSetup.$refs.aiSetupInst[0];
+            this.$set(inst.graph,'hidden',val);
+        },
+        onChange(val){
+            this.selected = val;
+            this.findClass(this.options,_.last(val));
+        },
+        findClass(arr,name){
+            
+            let rt = _.find(arr,{class:name});
+            
+            if(rt){
+                let keys = fsHandler.callFsJScript("/matrix/ai/baseline/getClassNumberKeysByClassName.js",encodeURIComponent(rt.class)).message;
+                if(!_.isEmpty(keys)){
+                    this.$set(rt,'children',keys);
+                }
+            } else {
+                _.forEach(arr,(v)=>{
+                    if(v.children){
+                        this.findClass(v.children,name);
+                    }
+                })
+            }
+        },
+        onNodeClick(data){
+            try{
+
+                if(!data.isdir) {
+                    eventHub.$emit("FS-NODE-OPENIT-EVENT", data, data.parent);
+
+                } else {
+
+                    let childrenData = _.sortBy(fsHandler.fsList(data.fullname),'fullname');
+
+                    this.$set(data, 'children', childrenData);
+                    
+                }
+
+            } catch(err){
+
+            }
+
+        },
+        onClear(){
+            this.search.selected = null;
+            this.search.result = null;
+        },
+        onSearchEntity() {
+            
+            try{
+                if(_.isEmpty(this.search.term)){
+                    return false;
+                }
+
+                let entitys = fsHandler.callFsJScript("/matrix/graph/entity-search-by-term.js",encodeURIComponent(this.search.term)).message;
+                
+                this.search.result = entitys;
+
+                this.search.result = _.map(this.search.result,(v)=>{
+                    return _.extend(v,{cell: {edge:false}});
+                })
+        
+            } catch(err){
+                console.log(err)
+            }
+            
+        },
+        onSearchEntityByClass() {
+            
+            try{
+                if(_.isEmpty(this.search.term)){
+                    return false;
+                }
+
+                let entitys = fsHandler.callFsJScript("/matrix/graph/entitySearchByClass.js",encodeURIComponent(this.search.term)).message;
+                
+                this.search.result = entitys;
+
+                this.search.result = _.map(this.search.result,(v)=>{
+                    return _.extend(v,{cell: {edge:false}});
+                })
+        
+            } catch(err){
+                console.log(err)
+            }
+            
         }
     }
 })

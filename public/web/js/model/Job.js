@@ -62,7 +62,7 @@ class Job extends Matrix {
                                 this.info = [];
                                 this.info.push(`共 ${this.dt.rows.length} 项`);
                                 this.info.push(`已选择 ${this.dt.selected.length} 项`);
-                                this.info.push(moment().format("YYYY-MM-DD HH:MM:SS.SSS"));
+                                this.info.push(moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
                             },
                             deep:true,
                             immediate:true
@@ -107,11 +107,19 @@ class Job extends Matrix {
                                             <el-table-column type="selection" align="center"></el-table-column> 
                                             <el-table-column type="expand">
                                                 <template slot-scope="props">
-                                                    <el-form label-width="120px" style="width:100%;height:300px;overflow:auto;padding:10px;background:#f2f3f5;" >
-                                                        <el-form-item v-for="v,k in props.row" :label="k">
-                                                            <el-input v-model="v"></el-input>
-                                                        </el-form-item>
-                                                    </el-form>
+                                                    <el-container style="width:50vw;">
+                                                        <el-main>
+                                                            <el-form label-position="right" label-width="120px">
+                                                                <el-form-item v-for="v,k in props.row" :label="k" :key="k">
+                                                                    <el-input :type="k,metaColumns | pickType" :value="moment(v).format(mx.global.register.format)"  v-if="pickFtype(k) == 'timestamp'"></el-input>
+                                                                    <el-input :type="k,metaColumns | pickType" :value="moment(v).format('YYYY-MM-DD')"  v-else-if="pickFtype(k) == 'date'"></el-input>
+                                                                    <el-input :type="k,metaColumns | pickType" :rows="6" :value="arrayToCsv(v)"  v-else-if="pickFtype(k) == 'bucket'"></el-input>
+                                                                    <el-input :type="k,metaColumns | pickType" :rows="6" :value="JSON.stringify(v,null,4)"  v-else-if="_.includes(['map','set','list'],pickFtype(k))"></el-input>
+                                                                    <el-input :type="k,metaColumns | pickType" :value="v"  v-else></el-input>
+                                                                </el-form-item>
+                                                            </el-form>
+                                                        </el-main>
+                                                    </el-container>
                                                 </template>
                                             </el-table-column>
                                             <el-table-column :prop="item.field" 
@@ -129,10 +137,44 @@ class Job extends Matrix {
                                         #{ info.join(' &nbsp; | &nbsp;') }#
                                     </el-footer>
                                 </el-container>`,
+                    filters: {
+                        pickType(key,columns){
+                            let rtn = 'text';
+                            try{
+                                let type = _.find(columns,{data:key}).type;
+                                if(_.includes(['map','list','set','bucket'],type)){
+                                    rtn = 'textarea';
+                                }
+                            } catch(err){
+                                rtn = 'input';
+                            }
+        
+                            return rtn;
+                        }
+                    },
+                    computed:{
+                        metaColumns(){
+                            try{
+                                return this.model.columns[this.model.rootClass];
+                            } catch(err){
+                                return [];
+                            }
+                        }
+                    },
                     mounted(){
 
                     },
                     methods: {
+                        pickFtype(key){
+                            
+                            let rtn = 'string';
+                            try{
+                                rtn = _.find(this.metaColumns,{data:key}).type;
+                            } catch(err){
+                                return rtn;
+                            }
+                            return rtn;
+                        },
                         initData(){
                             const self = this;
                             
@@ -215,7 +257,7 @@ class Job extends Matrix {
                                                                     实体ID：${row.entity}<br><br>
                                                                     模板ID：b223c78b-3107-11e6-8487-446d577ed81c<br><br>
                                                                     告警摘要：${row.msg}<br><br>
-                                                                    告警时间：${moment(row.vtime).format("YYYY-MM-DD HH:MM:SS")}<br><br>`, function (e) {
+                                                                    告警时间：${moment(row.vtime).format("YYYY-MM-DD HH:mm:ss")}<br><br>`, function (e) {
                                                     if (e) {
                                                         try{
                                                             let rtn = fsHandler.callFsJScript("/matrix/readysoft/eventToTicket.js", encodeURIComponent(JSON.stringify(row).replace(/%/g,'%25'))).message.data;
@@ -257,7 +299,7 @@ class Job extends Matrix {
                                 csvSeparator: ', ',
                                 csvUseBOM: true,
                                 ignoreColumn: [0,1],
-                                fileName: `tableExport_${moment().format("YYYY-MM-DD HH:MM:SS")}`,
+                                fileName: `tableExport_${moment().format("YYYY-MM-DD HH:mm:ss")}`,
                                 type: type,
                             };
         
@@ -413,7 +455,7 @@ class Job extends Matrix {
                                     return {id:objectHash.sha1(name+val+_.now()), 
                                             name: name, 
                                             value: val[1],
-                                            expression:  className==='vtime'?`at ${moment(name).format("YYYY-MM-DD HH:mm:SS")} within 15minutes for ${className}`:`${className}=${name}`,
+                                            expression:  className==='vtime'?`at ${moment(name).format("YYYY-MM-DD HH:mm:ss")} within 15minutes for ${className}`:`${className}=${name}`,
                                             title: `按${title}分析 \n\n ${name}: ${val[1]}`,
                                             width: val[1]/sum * 100, 
                                             color: _.sample(_.map(mx.global.register.color.summary,'color'))
@@ -477,7 +519,7 @@ class Job extends Matrix {
                     },
                     template:   `<div class="block">
                                     <el-timeline>
-                                        <el-timeline-item :timestamp="moment(item.vtime).format('YYYY-MM-DD HH:MM:SS')" placement="top" v-for="item in model">
+                                        <el-timeline-item :timestamp="moment(item.vtime).format('YYYY-MM-DD HH:mm:ss')" placement="top" v-for="item in model">
                                             <el-card style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);">
                                                 <h4>名称：#{item.name}#</h4>
                                                 <p style="font-size:12px;"><code>命令：#{item.cmd}#</code></p>
@@ -489,7 +531,7 @@ class Job extends Matrix {
                                                 <p style="font-size:12px;">SID：#{item.sid}#</p>
                                                 <p v-if="item.stauts" style="font-size:12px;">状态：#{mx.global.register.jobs.status[item.stauts][1]}#</p>
                                                 <p v-if="item.type" style="font-size:12px;">类型：#{mx.global.register.jobs.type[item.type][1]}#</p>
-                                                <p style="font-size:12px;">开始时间：#{moment(item.stime).format("YYYY-MM-DD HH:MM:SS")}#  结束时间：#{moment(item.etime).format("YYYY-MM-DD HH:MM:SS")}#</p>
+                                                <p style="font-size:12px;">开始时间：#{moment(item.stime).format("YYYY-MM-DD HH:mm:ss")}#  结束时间：#{moment(item.etime).format("YYYY-MM-DD HH:mm:ss")}#</p>
                                                 <p style="font-size:12px;">耗时：#{moment(item.etime).from(item.etime,true)}#</p>
                                                 <p style="font-size:12px;">命令：#{item.cmds}#</p>
                                                 <p style="font-size:12px;">输出：#{item.output}#</p>
@@ -509,13 +551,13 @@ class Job extends Matrix {
                         model: Object
                     },
                     template:   `<div class="block"><el-timeline>
-                                    <el-timeline-item :timestamp="moment(item.vtime).format('YYYY-MM-DD HH:MM:SS')" placement="top" v-for="item in model">
+                                    <el-timeline-item :timestamp="moment(item.vtime).format('YYYY-MM-DD HH:mm:ss')" placement="top" v-for="item in model">
                                         <el-card style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);">
                                             <h4>#{item.name}#</h4>
                                             <p v-if="item.stauts" style="font-size:12px;">状态：#{mx.global.register.jobs.status[item.stauts][1]}#</p>
                                             <p v-if="item.type" style="font-size:12px;">类型：#{mx.global.register.jobs.type[item.type][1]}#</p>
-                                            <p style="font-size:12px;">开始时间：#{moment(item.stime).format("YYYY-MM-DD HH:MM:SS")}# </p>
-                                            <p style="font-size:12px;">结束时间：#{moment(item.etime).format("YYYY-MM-DD HH:MM:SS")}# </p>
+                                            <p style="font-size:12px;">开始时间：#{moment(item.stime).format("YYYY-MM-DD HH:mm:ss")}# </p>
+                                            <p style="font-size:12px;">结束时间：#{moment(item.etime).format("YYYY-MM-DD HH:mm:ss")}# </p>
                                             <p style="font-size:12px;">耗时：#{moment(item.etime).from(item.etime,true)}#</p>
                                             <p style="font-size:12px;">命令：#{item.cmds}#</p>
                                             <p style="font-size:12px;" v-if="item.output">输出：#{item.output}#</p>
@@ -581,7 +623,7 @@ class Job extends Matrix {
                             // 2019-03-13T21:35:31.678Z
                             // 检查是否是UTC格式
                             if(_.indexOf(evt,'T') === 10 && (_.indexOf(evt,'Z') === 23 || _.indexOf(evt,'Z') === 19) ){
-                                return moment(evt).format("YYYY-MM-DD HH:MM:SS");
+                                return moment(evt).format("YYYY-MM-DD HH:mm:ss");
                             } else {
                                 return evt;
                             }
@@ -604,7 +646,7 @@ class Job extends Matrix {
                                         <el-card class="box-card">
                                             <div slot="header" class="clearfix">
                                                 <span>作业轨迹
-                                                    <small>#{moment(_.head(model.journal.rows).vtime).format("YYYY-MM-DD HH:MM:SS")}# - #{moment(_.last(model.journal.rows).vtime).format("YYYY-MM-DD HH:MM:SS")}#</small>
+                                                    <small>#{moment(_.head(model.journal.rows).vtime).format("YYYY-MM-DD HH:mm:ss")}# - #{moment(_.last(model.journal.rows).vtime).format("YYYY-MM-DD HH:mm:ss")}#</small>
                                                 </span>
                                                 <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
                                             </div>
@@ -629,7 +671,7 @@ class Job extends Matrix {
                                         <el-card class="box-card">
                                             <div slot="header" class="clearfix">
                                                 <span id="event-diagnosis-cmds">执行命令
-                                                    <small>#{moment(_.head(model.cmds.rows).vtime).format("YYYY-MM-DD HH:MM:SS")}# - #{moment(_.last(model.cmds.rows).vtime).format("YYYY-MM-DD HH:MM:SS")}#</small>
+                                                    <small>#{moment(_.head(model.cmds.rows).vtime).format("YYYY-MM-DD HH:mm:ss")}# - #{moment(_.last(model.cmds.rows).vtime).format("YYYY-MM-DD HH:mm:ss")}#</small>
                                                 </span>
                                                 <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
                                             </div>
@@ -668,7 +710,7 @@ class Job extends Matrix {
                                                                     </el-switch>
                                                                 </div>
                                                             </el-tooltip>
-                                                            <el-tooltip :content="control.ifSmart==1?'智能分析启用中':'智能分析关闭中'" placement="top" open-delay="500">
+                                                            <el-tooltip :content="control.ifSmart==1?'智能分析启用中':'智能分析关闭中'" placement="top" open-delay="500" style="display:none;">
                                                                 <div>
                                                                     #{control.ifSmart==1?'智能分析':'智能分析'}#
                                                                     <el-switch

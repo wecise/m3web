@@ -38,19 +38,25 @@ class Knowledge {
                         }
                     },
                     template:   `<el-container style="height:100%;">
-                                    <el-main style="padding:0px 10px; height: 100%;overflow-x:hidden;">
-                                        <h5><el-link :underline="false" @click="initData">热点排名</el-link></h5>
-                                        <el-timeline>
-                                            <el-timeline-item
-                                                v-for="(item, index) in knowledge.list"
-                                                :key="item.id"
-                                                :timestamp="item.vtime | formatTime" 
-                                                v-if="!_.isEmpty(knowledge.list)">
-                                                <el-link :underline="false" @click="onOpen(item)">
-                                                    #{index+1}#. #{item.name | pickShortLabel}# <span style="font-size:8px;color:#999999;"> 阅读(#{item.rate}#)</span>
-                                                </el-link>
-                                            </el-timeline-item>
-                                        </el-timeline>
+                                    <el-header style="height:35px;line-height:35px;padding:0px 10px;">
+                                        <h5>
+                                            <el-link :underline="false" @click="initData" style="color:#000000;">热点排名</el-link>
+                                        </h5>
+                                    </el-header>
+                                    <el-main style="padding:0px 10px; height: 100%;overflow-x:hidden;display: flex;
+                                                    flex-wrap: wrap;
+                                                    overflow: auto;
+                                                    align-content: flex-start;">
+                                        <el-tooltip placement="top" open-delay="500" :content="item.name" 
+                                            v-for="(item, index) in knowledge.list"
+                                            :key="item.id"
+                                            v-if="!_.isEmpty(knowledge.list)">
+                                            <el-button type="text" 
+                                                @click="onOpen(item)" 
+                                                style="height:30px;color:#555555;width: 100%;text-align: left;margin-left: 10px;">
+                                                #{index+1}#. #{item.name | pickShortLabel}# <span style="font-size:8px;color:#999999;"> 阅读(#{item.rate}#)</span>
+                                            </el-button>
+                                        </el-tooltip>
                                     </el-main>
                                 </el-container>`,
                     filters: {
@@ -59,6 +65,7 @@ class Knowledge {
                         },
                         pickShortLabel(item){
                             return _.truncate(item, {
+                                        'length': 20,
                                         'omission': ' ...'
                                     });
                         }
@@ -100,8 +107,8 @@ class Knowledge {
                         }
                     },
                     template:   `<el-container style="height:100%;">
-                                    <el-header style="height:30px;line-height:30px;padding:0px 10px;display:flex;">
-                                        <span style="width:40%;"><h5>知识分类</h5></span>
+                                    <el-header style="height:35px;line-height:35px;padding:0px 10px;display:flex;background:#f2f3f5;">
+                                        <span style="width:40%;"><h5 style="color:#000000;">知识分类</h5></span>
                                         <span style="width:60%;text-align:right;">
                                             <el-button type="text" @click="initData" icon="el-icon-refresh"></el-button>
                                             <el-button type="text" @click="onNewDir({'fullname':root})" icon="el-icon-folder-add"></el-button>
@@ -121,7 +128,9 @@ class Knowledge {
                                             <span slot-scope="{ node, data }" style="width:100%;height:30px;line-height: 30px;"  @mouseenter="onMouseEnter(data)" @mouseleave="onMouseLeave(data)">
                                                 <span v-if="data.ftype=='dir'">
                                                     <i class="el-icon-folder" style="color:#FFC107;"></i>
-                                                    <span>#{node.label | pickShortLabel}#</span>
+                                                    <el-tooltip placement="top" open-delay="500" :content="node.label">
+                                                        <span>#{node.label | pickShortLabel}#</span>
+                                                    </el-tooltip>
                                                     <el-dropdown v-show="data.show" style="float:right;width:14px;margin:0 5px;">
                                                         <span class="el-dropdown-link">
                                                             <i class="el-icon-more el-icon--right"></i>
@@ -137,7 +146,9 @@ class Knowledge {
                                                 </span>
                                                 <span v-else>
                                                     <i class="el-icon-c-scale-to-original" style="color:#0088cc;"></i>
-                                                    <span>#{node.label | pickShortLabel}#</span>
+                                                    <el-tooltip placement="top" open-delay="500" :content="node.label">
+                                                        <span>#{node.label | pickShortLabel}#</span>
+                                                    </el-tooltip>
                                                     <el-button v-show="data.show" type="text" @click.stop="onDownload(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-download"></el-button>
                                                     <el-button v-show="data.show" type="text" @click.stop="onDelete(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-delete"></el-button>
                                                 </span>
@@ -148,6 +159,7 @@ class Knowledge {
                     filters: {
                         pickShortLabel(item){
                             return _.truncate(item, {
+                                        'length': 20,
                                         'omission': ' ...'
                                     });
                         }
@@ -425,64 +437,79 @@ class Knowledge {
                                         <div v-for="(item, index) in knowledge.list" :key="index" v-if="item.ftype!='dir'">
                                             <el-card v-if="item.ftype=='md'">
                                                 <el-button type="text" @click="$root.onOpen(item)"><h4>#{item.name}#</h4></el-button>
-                                                <p> 
-                                                    <span class="el-icon-user"></span> #{item | pickAuthor}#
-                                                    <el-divider direction="vertical"></el-divider>
-                                                    发布于#{ item | pickTime }#
-                                                    <el-divider direction="vertical"></el-divider>
-                                                    <el-select
-                                                        v-model="item.tags"
-                                                        multiple
-                                                        filterable
-                                                        allow-create
-                                                        default-first-option
-                                                        class="el-select-tags"
-                                                        placeholder="标签"
-                                                        @change="onChange"
-                                                        @remove-tag="onRemoveTag"
-                                                        @mouseover.native="currentItem = item"
-                                                        style="width:300px;">
-                                                        <el-option
-                                                            v-for="tag in item.tags"
-                                                            :key="tag"
-                                                            :label="tag"
-                                                            :value="tag">
-                                                        </el-option>
-                                                    </el-select>
-                                                    <el-divider direction="vertical"></el-divider>
-                                                    阅读 ( #{item | pickRate}# )
-                                                </p>
-                                                <!--knowledge-view :model="{item:item, content:fsHandler.fsContent(item.parent, item.name)}"></knowledge-view-->
+                                                <div style="display: flex;
+                                                            height: 40px;
+                                                            line-height: 40px;
+                                                            padding: 0px 20px 0 0;"> 
+                                                    <div style="width:90%;">
+                                                        <span class="el-icon-user"></span> #{item | pickAuthor}#
+                                                        <el-divider direction="vertical"></el-divider>
+                                                        发布于 #{ item | pickTime }#
+                                                        <el-divider direction="vertical"></el-divider>
+                                                        位置 #{ item.parent }#
+                                                        <el-divider direction="vertical"></el-divider>
+                                                        <el-select
+                                                            v-model="item.tags"
+                                                            multiple
+                                                            filterable
+                                                            allow-create
+                                                            default-first-option
+                                                            class="el-select-tags"
+                                                            placeholder="标签"
+                                                            @change="onChange"
+                                                            @remove-tag="onRemoveTag"
+                                                            @mouseover.native="currentItem = item"
+                                                            style="width:300px;">
+                                                            <el-option
+                                                                v-for="tag in item.tags"
+                                                                :key="tag"
+                                                                :label="tag"
+                                                                :value="tag">
+                                                            </el-option>
+                                                        </el-select>
+                                                    </div>
+                                                    <div style="width:10%;text-align:right;">
+                                                        阅读 ( #{item | pickRate}# )
+                                                    </div>
+                                                </div>
                                             </el-card>
                                             <el-card v-else>
                                                 <el-button type="text" @click="$root.onOpen(item)"><h4>#{item.name}#</h4></el-button>
-                                                <p>
-                                                    <span class="el-icon-user"></span> #{item | pickAuthor}#
-                                                    <el-divider direction="vertical"></el-divider>
-                                                    发布于#{ item | pickTime }#
-                                                    <el-divider direction="vertical"></el-divider>
-                                                    <el-select
-                                                        v-model="item.tags"
-                                                        multiple
-                                                        filterable
-                                                        allow-create
-                                                        default-first-option
-                                                        class="el-select-tags"
-                                                        placeholder="标签"
-                                                        @change="onChange"
-                                                        @remove-tag="onRemoveTag"
-                                                        @mouseover.native="currentItem = item"
-                                                        style="width:300px;">
-                                                        <el-option
-                                                            v-for="tag in item.tags"
-                                                            :key="tag"
-                                                            :label="tag"
-                                                            :value="tag">
-                                                        </el-option>
-                                                    </el-select>
-                                                    <el-divider direction="vertical"></el-divider>
-                                                    阅读 ( #{item | pickRate}# )
-                                                </p>
+                                                <div style="display: flex;
+                                                            height: 40px;
+                                                            line-height: 40px;
+                                                            padding: 0px 20px 0 0;"> 
+                                                    <div style="width:90%;">
+                                                        <span class="el-icon-user"></span> #{item | pickAuthor}#
+                                                        <el-divider direction="vertical"></el-divider>
+                                                        发布于#{ item | pickTime }#
+                                                        <el-divider direction="vertical"></el-divider>
+                                                        位置 #{ item.parent }#
+                                                        <el-divider direction="vertical"></el-divider>
+                                                        <el-select
+                                                            v-model="item.tags"
+                                                            multiple
+                                                            filterable
+                                                            allow-create
+                                                            default-first-option
+                                                            class="el-select-tags"
+                                                            placeholder="标签"
+                                                            @change="onChange"
+                                                            @remove-tag="onRemoveTag"
+                                                            @mouseover.native="currentItem = item"
+                                                            style="width:300px;">
+                                                            <el-option
+                                                                v-for="tag in item.tags"
+                                                                :key="tag"
+                                                                :label="tag"
+                                                                :value="tag">
+                                                            </el-option>
+                                                        </el-select>
+                                                    </div>
+                                                    <div style="width:10%;text-align:right;">
+                                                        阅读 ( #{item | pickRate}# )
+                                                    </div>
+                                                </div>
                                             </el-card>
                                             <el-divider></el-divider>
                                         </div>
@@ -821,18 +848,42 @@ class Knowledge {
 
                                     let wnd = maxWindow.winApp(data.name, contents, null,null);
                                 } else if(_.includes(['png','gif','jpg','jpeg'],data.ftype)){
-                                    let contents = `<section class="is-vertical el-container" style="width:100%;height:100%;">
-                                                        <main class="el-main" style="overflow:hidden;text-align:center;padding:100px;background:#333333;">
-                                                            <div class="el-image" style="width: 100px; height: 100px;padding:50px;">
-                                                                <img src="/fs${data.fullname}?type=open&issys=${window.SignedUser_IsAdmin}" class="el-image__inner el-image__preview">
-                                                            </div>
-                                                        </main>
-                                                    </section>`;
-                                    let wnd = maxWindow.winApp(data.name, contents, null,null);
+                                    
+                                    let wnd = maxWindow.winApp(data.name, `<div id="picView"></div>`, null,null);
+                                    new Vue({
+                                        data: {
+                                            loading: true,
+                                            url: `/fs${data.fullname}?type=open&issys=${window.SignedUser_IsAdmin}`,
+                                            srcList: [`/fs${data.fullname}?type=open&issys=${window.SignedUser_IsAdmin}`]
+                                        },
+                                        template: `<el-container style="width:100%;height:100%;">
+                                                        <el-main style="overflow:hidden;background:#333333;">
+                                                            <el-image 
+                                                                v-loading="loading"
+                                                                style="width: 100%; height: 100%"
+                                                                :src="url" 
+                                                                :preview-src-list="srcList"
+                                                                @load="loading=false"
+                                                                @error="loading=false">
+                                                            </el-image>
+                                                        </el-main>
+                                                    </el-container>`,
+                                        created(){
+                                            this.model = {item:data, content:fsHandler.fsContent(data.parent, data.name)};
+                                        }
+                                    }).$mount("#picView");
+
                                 } else if(_.includes(['mov','mp3','mp4','wav','swf'],data.ftype)){
-                                    let contents = `<section class="is-vertical el-container" style="width:100%;height:100%;">
-                                                        <main class="el-main" style="overflow:hidden;padding:0px;">
-                                                            <video src="/fs${data.fullname}?type=open&issys=${window.SignedUser_IsAdmin}" width="100%" height="100%" 
+                                    
+                                    let wnd = maxWindow.winApp(data.name, `<div id="movView"></div>`, null,null);
+
+                                    new Vue({
+                                        data: {
+                                            url: `/fs${data.fullname}?type=open&issys=${window.SignedUser_IsAdmin}`
+                                        },
+                                        template: `<el-container style="width:100%;height:100%;">
+                                                        <el-main style="overflow:hidden;background:#333333;">
+                                                            <video :src="url" width="100%" height="100%" 
                                                                 controls="controls" autoplay
                                                                 style="background-image: url(/fs/assets/images/files/png/matrix.png?type=open&issys=true);
                                                                         background-repeat: no-repeat;
@@ -840,10 +891,13 @@ class Knowledge {
                                                                         background-position-y: center;">
                                                                 Your browser does not support the video tag.
                                                             </video>
-                                                        </main>
-                                                    </section>`;
+                                                        </el-main>
+                                                    </el-container>`,
+                                        created(){
+                                            this.model = {item:data, content:fsHandler.fsContent(data.parent, data.name)};
+                                        }
+                                    }).$mount("#movView");
 
-                                    let wnd = maxWindow.winApp(data.name, contents, null,null);
                                 } else {
                                     let url = `/fs/${data.fullname}?type=download&issys=true`;
                                     window.open(url,"_blank");

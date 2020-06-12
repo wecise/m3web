@@ -24,9 +24,11 @@
             <el-header style="height:40px;line-height: 40px;">
                 <mx-entity-class-keys-cascader root="/matrix/entity" 
                     multiplenable="true" 
-                    style="position: absolute;z-index: 100;"></mx-entity-class-keys-cascader>
+                    :value="model"
+                    style="position: absolute;z-index: 100;">
+                </mx-entity-class-keys-cascader>
             </el-header>
-            <el-main ref="graphContainer" style="overflow:auto;width:100%;height:100%;padding:0px;">
+            <el-main ref="graphContainer" style="width:100vw;height:100vh;min-width:100vw;position:releative;overflow:hidden;padding:0px;">
 			</el-main>
 		</el-container>
 	</template>
@@ -39,6 +41,7 @@
             model: Object
 		},
 		data(){
+
 			return {
                 graph: {
                     inst: null,
@@ -48,7 +51,27 @@
                     show: false
                 }
 			}
-		},
+        },
+        watch:{
+            'model.hidden':{
+                handler(val,oldVal){
+                    this.onHiddenChange(val);
+                },
+                deep:true
+            },
+            'model.input':{
+                handler(val,oldVal){
+                    this.onInputChange(val);
+                },
+                deep:true
+            },
+            'model.output':{
+                handler(val,oldVal){
+                    this.onOutputChange(val);
+                },
+                deep:true
+            }
+        },
 		created(){
 			
 		},
@@ -56,6 +79,134 @@
             this.initGraph(this.$refs.graphContainer.$el);
 		},
 		methods: {
+            onHiddenChange(val){
+                let graph = this.graph.inst;
+                
+                graph.getModel().beginUpdate();
+
+                try {
+                    let cell = graph.getModel().getCell('hidden');
+
+                    if(!cell){
+                        this.initHidden(graph);
+                    } else {
+                        cell.setValue(val);  
+                        graph.refresh();
+                    }
+                    
+                } finally {
+                    // Updates the display
+                    graph.getModel().endUpdate();
+                }
+            
+            },
+            onInputChange(val){
+                var graph = this.graph.inst;
+                let parent = graph.getDefaultParent();
+                let w = 220;
+                let h = 40;
+                
+                let hiddenCell = null;
+                
+                try{
+                    hiddenCell = graph.getModel().getCell('hidden');
+                    if(!hiddenCell){
+                        hiddenCell = this.initHidden(graph);
+                    }
+                } catch(err){
+                    
+                }
+
+                graph.getModel().beginUpdate();
+                try {
+                    _.forEach(val.perfs,(v)=>{
+                        let cell = null;
+                        let inputCell = null;
+                        let edgeId = null;
+                        
+                        try{
+                             cell = graph.getModel.getCell(v);
+                            if(!cell){
+                                inputCell = graph.insertVertex(parent, v, v, 20, 20, w, h, 'fillColor=blue');
+                            }
+                        } catch(err){
+                            inputCell = graph.insertVertex(parent, v, v, 20, 20, w, h, 'fillColor=blue');
+                        } finally {
+                            edgeId = [v,'hidden'].join("-");
+                            graph.insertEdge(parent, edgeId, edgeId, inputCell, hiddenCell, 'strokeColor=#888888;verticalAlign=bottom');
+                        }
+                    })
+
+                } finally {
+                    graph.getModel().endUpdate();
+                    
+                    this.executeLayout();
+                }
+            
+            },
+            onOutputChange(val){
+                var graph = this.graph.inst;
+                let parent = graph.getDefaultParent();
+                let w = 220;
+                let h = 40;
+                let hiddenCell = null;
+                
+                try{
+                    hiddenCell = graph.getModel().getCell('hidden');
+                    if(!hiddenCell){
+                        hiddenCell = this.initHidden(graph);
+                    }
+                } catch(err){
+                    
+                }
+                
+                graph.getModel().beginUpdate();
+                try {
+                    _.forEach(val.perfs,(v)=>{
+                        let cell = null;
+                        let outputCell = null;
+                        let edgeId = null;
+                        
+                        try{
+                            cell = graph.getModel.getCell(v);
+                            if(!cell){
+                                outputCell = graph.insertVertex(parent, v, v, 20, 20, w, h, 'fillColor=red');
+                            }
+                        } catch(err){
+                            outputCell = graph.insertVertex(parent, v, v, 20, 20, w, h, 'fillColor=red');
+                        } finally {
+                            edgeId = [v,'hidden'].join("-");
+                            graph.insertEdge(parent, edgeId, edgeId, hiddenCell, outputCell, 'strokeColor=#888888;verticalAlign=bottom');
+                        }
+                    })
+                    
+
+                } finally {
+                    graph.getModel().endUpdate();
+                    
+                    this.executeLayout();
+                }
+            
+            },
+            initHidden(graph){
+                
+                let parent = graph.getDefaultParent();
+
+                graph.getModel().beginUpdate();
+
+                try {
+                    let cell = graph.getModel().getCell('hidden');
+                    if(!cell){
+                        return graph.insertVertex(parent, 'hidden', 300, 300, 120, 80, 80, 'fillColor=green');
+                    }
+                } catch(err){
+                    return null;
+                }
+                finally {
+                    // Updates the display
+                    graph.getModel().endUpdate();
+                }
+            },
 			initGraph(container){
                 // Checks if the browser is supported
                 if (!mxClient.isBrowserSupported())
@@ -71,14 +222,11 @@
                     let graph = this.graph.inst = new mxGraph(container);
 
                     // No size handles, please...
-                    graph.setCellsResizable(false);
+                    graph.setCellsResizable(true);
 
                     // Makes all cells round with a white, bold label
                     var style = graph.stylesheet.getDefaultVertexStyle();
-                    // style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_ELLIPSE;
-                    // style[mxConstants.STYLE_PERIMETER] = mxPerimeter.EllipsePerimeter;
                     style[mxConstants.STYLE_FONTCOLOR] = 'white';
-                    style[mxConstants.STYLE_GRADIENTCOLOR] = 'white';
                     style[mxConstants.STYLE_FONTSTYLE] = mxConstants.FONT_BOLD;
                     style[mxConstants.STYLE_FONTSIZE] = 12;
                     style[mxConstants.STYLE_SHADOW] = true;
@@ -92,54 +240,213 @@
                     
                     // Enables rubberband selection
                     new mxRubberband(graph);
+
+                    // 容器大小自适应 
+                    graph.setResizeContainer(false);
+                    
+                    graph.setDropEnabled(true);
+
+                    // 是否允许平移。true：表示按住Shift+左键拖动时，整个graph移动；
+                    // false：按住Shift+左键拖动时，选中的图形水平方向或者垂直方向平移。
+                    graph.setPanning(true);
+                    mxPanningHandler.prototype.isPanningTrigger = function(me) {
+                        var evt = me.getEvent();
+                        return true;
+                    };
+
+                    // 禁止改变节点大小
+                    graph.setCellsResizable(false);
+                    // 禁止节点文字编辑功能
+                    graph.setCellsEditable(false);
+                    
+                    // 禁止连线移动
+                    graph.disconnectOnMove = false;
+                    
+                    // 居中缩放
+                    graph.centerZoom = true;
+                    // Tooltips on touch devices
+                    graph.setTooltips(!mxClient.IS_TOUCH);
+                    // 支持Html
+                    graph.setHtmlLabels(true);
+
+                    // 去锯齿效果
+				    mxRectangleShape.prototype.crisp = true;
+
+                    // 鼠标框选
+                    new mxRubberband(graph);
                     
                     // Gets the default parent for inserting new cells. This
                     // is normally the first child of the root (ie. layer 0).
                     var parent = graph.getDefaultParent();
+
+                    // 初始化滚轮图缩放事件监听
+                    this.addScrollListener(graph.container, this.wheelHandle);
                                     
-                    // Adds cells to the target model in a single step
-                    // using custom ids for the vertices and edges
-                    var w = 120;
-                    var h = 40;
+                    try{
+                        let doc = mxUtils.parseXml(this.model.model);
+                        let codec = new mxCodec(doc);
+                        codec.decode(doc.documentElement, graph.getModel());
+                    } catch(err){
+                        
+                    } finally{
+                        this.initHidden(graph);
+                    }
                     
-                    graph.getModel().beginUpdate();
-                    try
-                    {
-                        var input1 = graph.insertVertex(parent, 'it_linux:192.168.190.174:disk:free', 'it_linux:192.168.190.174:disk:free', 20, 20, w, h, 'fillColor=blue');
-                        var input2 = graph.insertVertex(parent, 'it_linux:192.168.190.174:disk:pfree', 'it_linux:192.168.190.174:disk:pfree', 20, 100, w, h, 'fillColor=blue');
-                        var input3 = graph.insertVertex(parent, 'it_linux:192.168.190.175:disk:free', 'it_linux:192.168.190.175:disk:free', 20, 200, w, h, 'fillColor=blue');
-                        var input4 = graph.insertVertex(parent, 'it_linux:192.168.190.175:disk:pfree', 'it_linux:192.168.190.175:disk:pfree', 20, 300, w, h, 'fillColor=blue');
+                    // Installs a popupmenu handler using local function (see below).
+                    const self = this;
+                    // 首先禁用浏览器右键菜单
+                    mxEvent.disableContextMenu(this.$el);
+                    // 右键菜单
+                    //this.model.editor.graph.popupMenuHandler.autoExpand = true;
+                    graph.popupMenuHandler.factoryMethod = function(menu, cell, evt){
+                        self.createPopupMenu(graph, menu, cell, evt);
+                    };
+                }
+            },
+            // 删除选择的节点
+            deleteSelectedCells(graph,includeEdges){
+                // Cancels interactive operations
+                graph.escape();
+                var cells = graph.getDeletableCells(graph.getSelectionCells());
+                
+                if (cells != null && cells.length > 0){
+                    var parents = graph.model.getParents(cells);
+                    graph.removeCells(cells, includeEdges);
+                    
+                    // Selects parents for easier editing of groups
+                    if (parents != null){
+                        var select = [];
                         
-                        var hidden = graph.insertVertex(parent, 'hidden', this.model.hidden, 300, 120, 60, 60, 'fillColor=green');
-                        
-                        var output1 = graph.insertVertex(parent, 'it_linux:192.168.190.174:disk:free:output', 'it_linux:192.168.190.174:disk:free:output', 600, 20, w, h, 'fillColor=red');
-                        var output2 = graph.insertVertex(parent, 'it_linux:192.168.190.175:disk:pfree:output', 'it_linux:192.168.190.175:disk:pfree:output', 600, 200, w, h, 'fillColor=red');
-                        
-                        var input1h = graph.insertEdge(parent, 'input1h', 'input1h', input1, hidden, 'strokeColor=blue;verticalAlign=bottom');
-                        var input2h = graph.insertEdge(parent, 'input2h', 'input2h', input2, hidden, 'strokeColor=blue;verticalAlign=bottom');
-                        var input3h = graph.insertEdge(parent, 'input3h', 'input3h', input3, hidden, 'strokeColor=blue;verticalAlign=bottom');
-                        var input4h = graph.insertEdge(parent, 'input4h', 'input4h', input4, hidden, 'strokeColor=blue;verticalAlign=bottom');
-                        
-                        var houtput1 = graph.insertEdge(parent, 'houtput1', 'houtput1', hidden, output1, 'strokeColor=blue;align=left;verticalAlign=bottom');
-                        var houtput2 = graph.insertEdge(parent, 'houtput2', 'houtput2', hidden, output2, 'strokeColor=blue;verticalAlign=bottom');
-
-                        
-                        
+                        for (var i = 0; i < parents.length; i++){
+                            if (graph.model.contains(parents[i]) &&
+                                (graph.model.isVertex(parents[i]) ||
+                                graph.model.isEdge(parents[i]))){
+                                select.push(parents[i]);
+                            }
+                        }
+                        graph.setSelectionCells(select);
                     }
-                    finally
-                    {
-                        // Updates the display
-                        graph.getModel().endUpdate();
-                    }
+                }
+            },
+            createPopupMenu(graph, menu, cell, evt){
+                // node/edge menu
+                if (cell != null){
+                    // node
+                    let id = cell.getId();
+                    let value = cell.getValue();
 
-                    // Adds animation to edge shape and makes "pipe" visible
-                    let edges = graph.getChildEdges(graph.getDefaultParent());
+                    // node
+                    if(!cell.edge){
+
+                        menu.addItem('删除节点', null, (evt)=>{
+                            this.deleteSelectedCells(graph,evt != null && mxEvent.isShiftDown(evt));
+                        });
+
+
+                    } 
+                    // edge
+                    else {
                         
-                    _.forEach(edges,(v)=>{
-                        let state = graph.view.getState(v);
-                        state.shape.node.getElementsByTagName('path')[0].removeAttribute('visibility');
-                        state.shape.node.getElementsByTagName('path')[1].setAttribute('class', 'flow');
-                    })
+                        menu.addItem('删除边', null, (evt)=>{
+                            this.deleteSelectedCells(graph,evt != null && mxEvent.isShiftDown(evt));
+                        });
+                    }
+                } 
+                // container menu
+                else {
+                    
+                    menu.addItem('选择节点', null, ()=>{
+                        graph.selectVertices();
+                    }, null);
+                
+                    menu.addItem('选择边', null, ()=>{
+                        graph.selectEdges();
+                    }, null);
+
+                    menu.addItem('选择所有', null, ()=>{
+                        graph.selectAll(null, true);
+                    }, null);
+                    
+                    menu.addSeparator();
+
+                    menu.addItem('清空', null, ()=>{
+                        graph.selectAll(null, true);
+                        this.deleteSelectedCells(graph,evt != null && mxEvent.isShiftDown(evt));
+                    },null);
+                    
+                }
+                
+            },
+            // 设置布局
+            executeLayout(){
+                let graph = this.graph.inst;
+                let parent = graph.getDefaultParent();
+                let layout = null;
+                
+                // Layout hierarchical
+                graph.getModel().beginUpdate();
+                try {
+                    layout = new mxHierarchicalLayout(graph, mxConstants.DIRECTION_WEST);
+                    layout.edgeStyle = layout.edgeStyle;
+                    layout.intraCellSpacing = 80;
+                    layout.interRankCellSpacing = 80;
+                    var selectionCells = graph.getSelectionCells();
+
+                    layout.execute(graph.getDefaultParent(), selectionCells.length == 0 ? null : selectionCells);
+                } catch (e) {
+                    throw e;
+                } finally {
+                    var morph = new mxMorphing(graph);  
+                    morph.addListener(mxEvent.DONE, function(){  
+                        graph.getModel().endUpdate();  
+                    });  
+                        
+                    morph.startAnimation();  
+                }
+                
+            },
+            addScrollListener(element, wheelHandle) {
+                if (typeof element != 'object') return;
+                if (typeof wheelHandle != 'function') return;
+
+                // 监测浏览器
+                if (typeof arguments.callee.browser == 'undefined') {
+                    var user = navigator.userAgent;
+                    var b = {};
+                    b.opera = user.indexOf("Opera") > -1 && typeof window.opera == "object";
+                    b.khtml = (user.indexOf("KHTML") > -1 || user.indexOf("AppleWebKit") > -1 || user.indexOf("Konqueror") > -1) && !b.opera;
+                    b.ie = user.indexOf("MSIE") > -1 && !b.opera;
+                    b.gecko = user.indexOf("Gecko") > -1 && !b.khtml;
+                    arguments.callee.browser = b;
+                }
+                if (element == window)
+                    element = document;
+                if (arguments.callee.browser.ie)
+                    element.attachEvent('onmousewheel', wheelHandle);
+                else
+                    element.addEventListener(arguments.callee.browser.gecko ? 'DOMMouseScroll' : 'mousewheel', wheelHandle, false);
+            },
+            wheelHandle(e) {
+                var upcheck;
+                let graph = this.graph.inst;
+                if (e.wheelDelta) {
+                    upcheck = e.wheelDelta > 0 ? 1 : 0;
+                } else {
+                    upcheck = e.detail < 0 ? 1 : 0;
+                }
+                if (upcheck) {
+                    graph.zoomIn();
+                }
+                else {
+                    graph.zoomOut();
+                }
+
+                if (window.event) {
+                    e.returnValue = false;
+                    window.event.cancelBubble = true;
+                } else {
+                    e.preventDefault();
+                    e.stopPropagation();
                 }
             }
 		}
