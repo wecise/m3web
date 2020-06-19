@@ -93,6 +93,151 @@ class Search {
                                     </el-timeline-item>
                                 </el-timeline>`
                 })
+
+                // knowledge View
+                Vue.component('knowledge-view',{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        model: Object
+                    },
+                    data(){
+                        return {
+                            editor: null,
+                            splitInst: null,
+                            compiledMarkdown: "",
+                            mdOption: {
+                                renderer: new marked.Renderer(),
+                                gfm: true,
+                                tables: true,
+                                breaks: false,
+                                pedantic: false,
+                                sanitize: false,
+                                smartLists: true,
+                                smartypants: false
+                            },
+                            mode:"view"
+                        }
+                    },
+                    template:   `<el-container style="height:100%;">
+                                    <el-header style="height:40px;line-height:40px;">
+                                        <span style="font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;" v-if="!_.isEmpty(model)">
+                                            #{model.item.name | pickName}#
+                                        </span>
+                                        <el-button type="text" icon="el-icon-s-platform" @click="mode='view'" style="margin-left:10px;float:right;"></el-button>
+                                        <el-button type="text" icon="el-icon-edit" @click="mode='edit'" style="float:right;"></el-button>
+                                    </el-header>
+                                    <el-main style="height:100%;padding:0px;overflow:hidden;">
+                                        <el-container style="height:100%;">
+                                            <el-aside style="width:50%;" ref="editor">
+                                            </el-aside>
+                                            <el-main style="width:50%;height:100%;" ref="content" v-html="compiledMarkdown">
+                                            </el-main>
+                                        </el-container>
+                                    </el-main>
+                                </el-container>`,
+                    filters: {
+                        pickName(name){
+                            try{
+                                return _.head(name.split(".md"));
+                            } catch(err){
+                                return name;
+                            }
+                        }
+                    },
+                    watch:{
+                        model:{
+                            handler(val,oldVal){
+                                if(this.editor){
+                                    this.editor.setValue(val.content);
+                                    this.compiledMarkdown = marked(val.content);
+                                }
+                            },
+                            deep:true
+                        },
+                        mode:{
+                            handler(val,oldVal){
+                                if(val === 'view'){
+                                    $(this.$refs.editor.$el).hide();
+                                    //this.splitInst.setSizes([0, 100]);
+                                } else {
+                                    $(this.$refs.editor.$el).show();
+                                    //this.splitInst.setSizes([50, 50]);
+                                }
+                            }
+                        }
+                    },
+                    mounted(){
+                        this.$nextTick(()=>{
+                            //this.initSplit();
+                            this.initEditor();
+                            $(this.$refs.editor.$el).hide();
+                        })
+                    },
+                    methods: {
+                        initEditor(){
+                            try{
+                                // Editor
+                                this.editor = ace.edit(this.$refs.editor.$el);
+                                this.editor.setOptions({
+                                    //maxLines: 1000,
+                                    minLines: 20,
+                                    autoScrollEditorIntoView: false,
+                                    enableBasicAutocompletion: false,
+                                    enableLiveAutocompletion: false
+                                });
+                                this.editor.on("input", ()=> {
+                                    this.compiledMarkdown = marked(this.editor.getValue());
+                                    this.onSave();
+                                });
+                                this.editor.setTheme("ace/theme/tomorrow");
+                                this.editor.getSession().setMode("ace/mode/markdown");
+                                this.editor.renderer.setShowGutter(false);
+                                
+                                if(!_.isEmpty(this.model.content)){
+                                    this.editor.setValue(this.model.content);
+                                }
+                            } catch(err){
+                                console.log(err)
+                            }
+
+                        },
+                        initSplit(){
+                            if(!this.splitInst){
+                                this.splitInst = Split([this.$refs.editor.$el, this.$refs.content.$el], {
+                                    sizes: [0, 100],
+                                    minSize: [0, 0],
+                                    gutterSize: 5,
+                                    cursor: 'col-resize',
+                                    direction: 'horizontal',
+                                    expandToMin: true
+                                });
+                            }
+                        },
+                        onSave: _.debounce(function(){
+                                    try{
+                                        let attr = null;
+                                        
+                                        if(_.isEmpty(data.attr)){
+                                            attr = {remark: '', ctime: _.now(), author: window.SignedUser_UserName, rate:1};
+                                        } else {
+                                            attr = _.attempt(JSON.parse.bind(null, data.attr));
+                                            if(attr.rate){
+                                                _.extend(attr, {rate:attr.rate + 1});    
+                                            } else {
+                                                _.extend(attr, {rate:1}); 
+                                            }
+                                        }
+                                        
+                                        fsHandler.fsNew(this.model.item.ftype, this.model.item.parent, this.model.item.name, this.editor.getValue(), attr);    
+                                        
+                                    } catch(err){
+
+                                    }
+                                    
+                                },5000)
+    
+                    }
+                });
                 
                 Vue.component('el-table-component', {
                     delimiters: ['#{', '}#'],
@@ -296,7 +441,7 @@ class Search {
                     delimiters: ['#{', '}#'],
                     template:   `<el-container id="search-syslog" class="animated fadeIn" style="background:#ffffff;margin-top:10px;">
                                     <el-header style="height:30px;line-height:30px;">
-                                        <el-button type="text" icon="fas fa-exclamation-triangle" @click="showContent=!showContent"> Syslog</el-button>
+                                        <el-button type="text" icon="el-icon-document" @click="showContent=!showContent"> Syslog</el-button>
                                     </el-header>   
                                     <el-main v-if="showContent" class="animated fadeIn">
                                         <el-tabs>
@@ -346,7 +491,7 @@ class Search {
                     delimiters: ['#{', '}#'],
                     template:   `<el-container id="search-journal" class="animated fadeIn" style="background:#ffffff;margin-top:10px;">
                                     <el-header style="height:30px;line-height:30px;">
-                                        <el-button type="text" icon="fas fa-film" @click="showContent=!showContent"> 告警轨迹</el-button>
+                                        <el-button type="text" icon="el-icon-map-location" @click="showContent=!showContent"> 告警轨迹</el-button>
                                     </el-header>   
                                     <el-main v-if="showContent" class="animated fadeIn">
                                         <el-tabs>
@@ -393,7 +538,7 @@ class Search {
                     delimiters: ['#{', '}#'],
                     template:   `<el-container id="search-log" class="animated fadeIn" style="background:#ffffff;margin-top:10px;">
                                     <el-header style="height:30px;line-height:30px;">
-                                        <el-button type="text" icon="fas fa-file-code" @click="showContent=!showContent"> 日志</el-button>
+                                        <el-button type="text" icon="el-icon-document" @click="showContent=!showContent"> 日志</el-button>
                                     </el-header>   
                                     <el-main v-if="showContent" class="animated fadeIn">
                                         <el-tabs>
@@ -443,7 +588,7 @@ class Search {
                     delimiters: ['#{', '}#'],
                     template:   `<el-container id="search-raw" class="animated fadeIn" style="background:#ffffff;margin-top:10px;">
                                     <el-header style="height:30px;line-height:30px;">
-                                        <el-button type="text" icon="fab fa-fa-file-code" @click="showContent=!showContent"> 原始报文</el-button>
+                                        <el-button type="text" icon="el-icon-document" @click="showContent=!showContent"> 原始报文</el-button>
                                     </el-header>   
                                     <el-main v-if="showContent" class="animated fadeIn">
                                         <el-tabs>
@@ -493,7 +638,7 @@ class Search {
                     delimiters: ['#{', '}#'],
                     template:   `<el-container id="search-tickets" class="animated fadeIn" style="background:#ffffff;margin-top:10px;">
                                     <el-header style="height:30px;line-height:30px;">
-                                        <el-button type="text" icon="fab fa-book" @click="showContent=!showContent"> 问题单</el-button>
+                                        <el-button type="text" icon="el-icon-notebook-1" @click="showContent=!showContent"> 问题单</el-button>
                                     </el-header> 
                                         
                                     <el-main v-if="showContent" class="animated fadeIn">
@@ -523,7 +668,7 @@ class Search {
                     delimiters: ['#{', '}#'],
                     template:   `<el-container id="search-change" class="animated fadeIn" style="background:#ffffff;margin-top:10px;">  
                                     <el-header style="height:30px;line-height:30px;">
-                                        <el-button type="text" icon="fab fa-book" @click="showContent=!showContent"> 变更单</el-button>
+                                        <el-button type="text" icon="el-icon-document-copy" @click="showContent=!showContent"> 变更单</el-button>
                                     </el-header>   
                                     <el-main v-if="showContent" class="animated fadeIn">
                                         <el-tabs>
@@ -552,7 +697,7 @@ class Search {
                     delimiters: ['#{', '}#'],
                     template:   `<el-container id="search-performance" class="animated fadeIn" style="background:#ffffff;margin-top:10px;">
                                     <el-header style="height:30px;line-height:30px;">
-                                        <el-button type="text" icon="fab fa-creative-commons-sampling" @click="showContent=!showContent"> 性能</el-button>
+                                        <el-button type="text" icon="el-icon-data-line" @click="showContent=!showContent"> 性能</el-button>
                                     </el-header>   
                                     <el-main v-if="showContent" class="animated fadeIn">
                                         <el-table-component :columns="model.columns" 
@@ -574,29 +719,18 @@ class Search {
                     delimiters: ['#{', '}#'],
                     template:   `<el-container id="search-graph" class="animated fadeIn" style="background:#ffffff;margin-top:10px;">
                                     <el-header style="height:30px;line-height:30px;">
-                                        <el-button type="text" icon="fas fa-book" @click="showContent=!showContent"> 图</el-button>
+                                        <el-button type="text" icon="el-icon-picture-outline" @click="showContent=!showContent"> 图</el-button>
                                     </el-header>        
                                     <el-main class="animated fadeIn" style="display:flex;flex-wrap:wrap;" v-if="showContent">
                                         <el-button type="default" 
                                             style="max-width: 20em;width: 20em;height:auto;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);"
                                             @click="forwardCreative('run',item)" 
                                             v-for="item in model.rows" v-if="model.rows">
-                                            <!--div style="position: relative;right: -100px;">    
-                                                <el-dropdown trigger="hover" placement="top-start">
-                                                        <span class="el-dropdown-link">
-                                                            <i class="el-icon-arrow-down el-icon--right"></i>
-                                                        </span>
-                                                        <el-dropdown-menu slot="dropdown">
-                                                            <el-dropdown-item :command="{fun:menuItem.fun,param:item,type:menuItem.type?menuItem.type:false}" v-for="menuItem in $root.$refs.viewRef.$children[0].getMenuModel(item)">#{menuItem.name}#</el-dropdown-item>
-                                                        </el-dropdown-menu>
-                                                </el-dropdown>
-                                            </div-->
                                             <el-image style="width:64px;margin:5px;" :src="item | pickIcon"></el-image>
                                             <div>
                                                 <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">名称：#{item.name}#</p>
                                                 <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">作者：#{item|pickAuthor}#</p>
                                                 <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">创建：#{moment(item.vtime).format("YYYY-MM-DD hh:mm:ss")}#</p>
-                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">标签：<input type="text" class="tags" name="tags" :value="item|pickTags"></p>
                                                 <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">描述：#{item|pickRemark}#</p>
                                             </div>
                                         </el-button>
@@ -624,34 +758,15 @@ class Search {
 
                             return _name;
                         },
-                        pickRemark: function (item) {
-                            const self = this;
-
-                            if (_.isEmpty(item.attr)) return '';
-
-                            let _remark = '';
-
-                            if(_.attempt(JSON.parse.bind(null, item.attr)).remark){
-
-                                _remark = _.attempt(JSON.parse.bind(null, item.attr)).remark;
-
-                                /*if(_.isEmpty(_remark)) return '';
-
-
-                                if($(window).width()>1280){
-                                    if(_.size(_remark) > 50){
-                                        _remark = _.split(_remark,"",49).join("") + "..."
-                                    }
-                                } else {
-
-                                    if(_.size(_remark) > 44){
-                                        _remark = _.split(_remark,"",43).join("") + "..."
-                                    }
-                                }*/
-
+                        pickAuthor: function(item){
+                            if (!_.isEmpty(item.attr) || !_.isEqual(item.attr, 'null')) {
+                                return _.attempt(JSON.parse.bind(null, item.attr)).author;
                             }
-
-                            return _remark;
+                        },
+                        pickRemark: function(item){
+                            if (!_.isEmpty(item.attr) || !_.isEqual(item.attr, 'null')) {
+                                return _.attempt(JSON.parse.bind(null, item.attr)).remark;
+                            }
                         },
                         pickIcon: function(item){
                             const self = this;
@@ -688,14 +803,14 @@ class Search {
                     delimiters: ['#{', '}#'],
                     template:   `<el-container id="search-files" class="animated fadeIn" style="background:#ffffff;margin-top:10px;">
                                     <el-header style="height:30px;line-height:30px;">
-                                        <el-button type="text" icon="fas fa-book" @click="showContent=!showContent"> 文件</el-button>
+                                        <el-button type="text" icon="el-icon-notebook-2" @click="showContent=!showContent"> 文件</el-button>
                                     </el-header>    
                                     <el-main id="list" v-if="showContent" style="flex-flow: wrap;display: flex;align-content: flex-start;">
                                         <el-button type="default" 
                                             style="max-width: 20em;width: 20em;height:auto;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);"
                                             @mouseover.native="mouseOver(item)"
                                             @mouseout.native="mouseOut(item)"
-                                            @click="openIt(item)" 
+                                            @dblclick.native="openIt(item)" 
                                             v-for="item in model.rows" v-if="model.rows">
                                             <!--div style="position: relative;right: -100px;">    
                                                 <el-dropdown trigger="hover" placement="top-start">
@@ -712,7 +827,6 @@ class Search {
                                                 <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">名称：#{item.name}#</p>
                                                 <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">作者：#{item|pickAuthor}#</p>
                                                 <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">创建：#{moment(item.vtime).format("YYYY-MM-DD hh:mm:ss")}#</p>
-                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">标签：<input type="text" class="tags" name="tags" :value="item|pickTags"></p>
                                                 <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">描述：#{item|pickRemark}#</p>
                                             </div>
                                         </el-button>
@@ -789,67 +903,92 @@ class Search {
 
                             $('#fs_node_'+item.id).find('.fs-node-highlight').removeClass('fs-node-highlight');
                         },
-                        openIt(item, path){
-                            const self = this;
+                        openIt(data, path){
+                            try{
+                                if(_.includes(['md','txt'],data.ftype)){
+                                    
+                                    let wnd = maxWindow.winApp(data.name, `<div id="mdView"></div>`, null,null);
+                                    new Vue({
+                                        data: {
+                                            model: null
+                                        },
+                                        template: `<el-container style="width:100%;height:100%;">
+                                                        <el-main style="overflow:hidden;padding:0px;">
+                                                            <knowledge-view :model="model" ref="viewRef"></knowledge-view>
+                                                        </el-main>
+                                                    </el-container>`,
+                                        created(){
+                                            this.model = {item:data, content:fsHandler.fsContent(data.parent, data.name)};
+                                        }
+                                    }).$mount("#mdView");
+                                    
+                                } else if(_.includes(['pdf'],data.ftype)){
+                                    let contents = `<section class="is-vertical el-container" style="width:100%;height:100%;">
+                                                        <main class="el-main" style="overflow:hidden;padding:0px;">
+                                                            <iframe src="/fs${data.fullname}?type=open&issys=${window.SignedUser_IsAdmin}" style="width: 100%;height: 100%;" frameborder="0"></iframe>
+                                                        </main>
+                                                    </section>`;
 
-                            if(!_.isEmpty(item)){
+                                    let wnd = maxWindow.winApp(data.name, contents, null,null);
+                                } else if(_.includes(['png','gif','jpg','jpeg'],data.ftype)){
+                                    
+                                    let wnd = maxWindow.winApp(data.name, `<div id="picView"></div>`, null,null);
+                                    new Vue({
+                                        data: {
+                                            loading: true,
+                                            url: `/fs${data.fullname}?type=open&issys=${window.SignedUser_IsAdmin}`,
+                                            srcList: [`/fs${data.fullname}?type=open&issys=${window.SignedUser_IsAdmin}`]
+                                        },
+                                        template: `<el-container style="width:100%;height:100%;">
+                                                        <el-main style="overflow:hidden;background:#333333;">
+                                                            <el-image 
+                                                                v-loading="loading"
+                                                                style="width: 100%; height: 100%"
+                                                                :src="url" 
+                                                                :preview-src-list="srcList"
+                                                                @load="loading=false"
+                                                                @error="loading=false">
+                                                            </el-image>
+                                                        </el-main>
+                                                    </el-container>`,
+                                        created(){
+                                            this.model = {item:data, content:fsHandler.fsContent(data.parent, data.name)};
+                                        }
+                                    }).$mount("#picView");
 
-                                if(_.includes(['png','jpg','jpeg','gif'], item.ftype)) {
+                                } else if(_.includes(['mov','mp3','mp4','wav','swf'],data.ftype)){
+                                    
+                                    let wnd = maxWindow.winApp(data.name, `<div id="movView"></div>`, null,null);
 
+                                    new Vue({
+                                        data: {
+                                            url: `/fs${data.fullname}?type=open&issys=${window.SignedUser_IsAdmin}`
+                                        },
+                                        template: `<el-container style="width:100%;height:100%;">
+                                                        <el-main style="overflow:hidden;background:#333333;">
+                                                            <video :src="url" width="100%" height="100%" 
+                                                                controls="controls" autoplay
+                                                                style="background-image: url(/fs/assets/images/files/png/matrix.png?type=open&issys=true);
+                                                                        background-repeat: no-repeat;
+                                                                        background-position-x: center;
+                                                                        background-position-y: center;">
+                                                                Your browser does not support the video tag.
+                                                            </video>
+                                                        </el-main>
+                                                    </el-container>`,
+                                        created(){
+                                            this.model = {item:data, content:fsHandler.fsContent(data.parent, data.name)};
+                                        }
+                                    }).$mount("#movView");
 
-                                    let contents = `<img src="/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}" class="preview-img-responsive center-block" alt="Image">`;
-                                    let _wnd = maxWindow.winApp(item.name, contents, null,null);
-
-                                } else if(_.includes(['mov','mp4','avi'], item.ftype)) {
-
-                                    let contents = `<div class="embed-responsive embed-responsive-16by9">
-                                                        <video src="/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}" controls="controls" autoplay>
-                                                            your browser does not support the video tag
-                                                        </video>
-                                                    </div>
-                                                    `;
-
-                                    let _wnd = maxWindow.winApp(item.name, contents, null,null);
-
-                                } else if(_.includes(['pdf'], item.ftype)) {
-
-                                    let contents = `<div class="embed-responsive embed-responsive-16by9">
-                                                        <iframe class="embed-responsive-item" src="/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}"></iframe>
-                                                    </div>`;
-
-                                    let _wnd = maxWindow.winApp( item.name, contents, null,null);
-
-                                } else if(_.includes(['pptx','ppt'], item.ftype)) {
-
-                                    window.open(`/fs${path}?type=download&issys=${window.SignedUser_IsAdmin}`, "_blank");
-
-                                } else if(_.includes(['js','ltsv','txt','csv','html'], item.ftype)) {
-
-                                    window.open(`/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}`, "_blank");
-
-                                } else if(_.includes(['swf'], item.ftype)) {
-                                    let contents = `<div class="embed-responsive embed-responsive-16by9">
-                                                        <video src="/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}" width="100%" height="100%" controls="controls" autoplay>
-                                                            Your browser does not support the video tag.
-                                                        </video>
-                                                    </div>`;
-
-                                    let _wnd = maxWindow.winApp(item.name, contents, null,null);
-                                } else if(_.includes(['imap','iflow', 'ishow'], item.ftype)) {
-
-                                    _.merge(item,{action:'run'});
-
-                                    let url = fsHandler.genFsUrl(item,null,null);
-
-                                    window.open(url,'_blank');
-                                } else if(_.includes(['md'], item.ftype)){
-                                    _.merge(item,{action:'run'});
-
-                                    let url = fsHandler.genFsUrl(item,{ header:true, sidebar:true, footbar:true },null);
-
-                                    window.open(url,'_blank');
+                                } else {
+                                    let url = `/fs/${data.fullname}?type=download&issys=true`;
+                                    window.open(url,"_blank");
                                 }
+                            } catch(err){
+
                             }
+                            
                         }
                     }
                 }); 
@@ -923,11 +1062,11 @@ class Search {
                                         <el-header style="height:40px;line-height:40px;padding:0px;">
                                             <search-base-component :options="options" ref="searchRef" class="grid-content"></search-base-component>
                                         </el-header>
-                                        <el-main style="overflow: hidden;height: 100%;padding:0px;">
+                                        <el-main style="overflow: hidden;height: 100%;padding:0px;" v-if="!_.isEmpty(all.list)">
                                             <el-container style="height: 100%;">
                                                 <el-header style="height:40px;line-height:40px;padding:10px 0px;">
                                                     <span style="width:95%;">
-                                                        <el-button type="text" @click="forwardInView(v.href)" v-for="(v,k) in search.result">
+                                                        <el-button type="text" @click="forwardInView(v.href)" v-for="(v,k) in search.result" v-if="v.count > 0">
                                                             #{v.name}#: #{v.count}#
                                                         </el-button>
                                                     </span>
@@ -974,11 +1113,21 @@ class Search {
                                                             <template slot="label"></template>
                                                             <el-timeline-component :model="all" v-if="all.list" id="result-timeline"></el-timeline-component>
                                                         </el-tab-pane>
-                                                    </el-tabs>
+                                                    </el-tabs> 
                                                     
                                                 </el-main>
+                                                
                                             </el-container>
                                             
+                                        </el-main>
+
+                                        <el-main style="background:#ffffff;margin-top:10px;" v-else>
+                                                <h2>很抱歉，没有找到与  相关的记录。</h2>
+                                                <p>
+                                                    温馨提示：  
+                                                    请检查您的输入是否正确 
+                                                    如有任何意见或建议，请及时反馈给我们。 
+                                                </p>
                                         </el-main>
                                 
                                     </el-container>
@@ -1081,6 +1230,32 @@ class Search {
                         }
 
                     },
+                    watch: {
+                        'all.list'(val,oldVal){
+                            if(!_.isEmpty(val)){
+                                _.delay(()=>{
+                                    $("#div_result_view > .el-tabs > .el-tabs__header").hide();
+                                },500)
+                            }
+                        },
+                        'options.term'(val,oldVal){
+                            if(_.isEmpty(val)){
+                                this.event.rows = [];
+                                this.syslog.rows = [];
+                                this.performance.rows = [];
+                                this.log.rows = [];
+                                this.raw.rows = [];
+                                this.journal.rows = [];
+                                this.tickets.rows = [];
+                                this.change.rows = [];
+                                this.files.rows = [];
+                                this.graph.rows = [];
+                                this.entity.rows = [];
+
+                                this.$set(this.all,'list',[]);
+                            }
+                        }
+                    },
                     mounted(){
                         
                         // 数据设置
@@ -1105,12 +1280,21 @@ class Search {
                                     }
                                 })
 
-                                $("#div_result_view > .el-tabs > .el-tabs__header").hide();
                             },500)
                         })
 
+                        this.weclome();
+
                     },
                     methods: {
+                        weclome(){
+                            this.$notify({
+                                title: '欢迎使用一键搜索',
+                                type: 'success',
+                                dangerouslyUseHTMLString: true,
+                                message: fsHandler.callFsJScript("/matrix/search/weclome.js",null).message
+                              });
+                        },
                         setData(){
                             _.extend(this.model, {message:this.$refs.searchRef.result});
                             
@@ -1128,7 +1312,8 @@ class Search {
                                 _.extend(this.graph, this.model.message.data.graph);
                                 _.extend(this.entity, this.model.message.data.entity);
 
-                                this.all.list = _.orderBy(this.model.message.data.all,["vtime"],["desc"]);
+                                this.$set(this.all,'list',_.orderBy(this.model.message.data.all,["vtime"],["desc"]));
+
                             } catch(err){
                                 
                                 this.event.rows = [];
@@ -1143,7 +1328,7 @@ class Search {
                                 this.graph.rows = [];
                                 this.entity.rows = [];
 
-                                this.all.list = [];
+                                this.$set(this.all,'list',[]);
                             }
                             
                             
@@ -1174,8 +1359,8 @@ class Search {
                             this.showResultType = cmd;
                         },
                         forwardInView: function(href){
-                            this.showResultType = "view";
-                            document.location.href = href;
+                            // this.showResultType = "view";
+                            // document.location.href = href;
                         }
                     }
                 };

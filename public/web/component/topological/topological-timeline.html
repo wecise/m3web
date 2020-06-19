@@ -293,6 +293,19 @@
             add(){
                 //this.timeline.items.pLOWERh();
             },
+            pickBgStyle(item){
+                let hexToRgba = function(hex, opacity) {
+                    var RGBA = "rgba(" + parseInt("0x" + hex.slice(1, 3)) + "," + parseInt("0x" + hex.slice(3, 5)) + "," + parseInt( "0x" + hex.slice(5, 7)) + "," + opacity + ")";
+                    return {
+                        red: parseInt("0x" + hex.slice(1, 3)),
+                        green: parseInt("0x" + hex.slice(3, 5)),
+                        blue: parseInt("0x" + hex.slice(5, 7)),
+                        rgba: RGBA
+                    }
+                };
+                let rgbaColor = hexToRgba(mx.global.register.event.severity[item.severity][2],0.1).rgba;
+                return `padding:5px;background:linear-gradient(to top, ${rgbaColor}, rgb(255,255,255));border: 1px solid rgb(247, 247, 247);border-radius: 5px;box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px 0px;line-height:1.5;`;
+            },
             setTimelineRange(){
                 try{
 
@@ -363,12 +376,18 @@
                 _.forEach(this.tree.diagnosisData,(v,k)=>{
                     let items  = [];
                     _.forEach(v,(val)=>{
+                        let bg = this.pickBgStyle(val);
+                        let status = mx.global.register.event.status[val.status]?mx.global.register.event.status[val.status][1]:'未知';
                         if(val.id){
-                            let id = val.id;
+                            let id = [val.id,val.entity].join("::");
                             let item = {
                                 id: id,
                                 group: k,
-                                content: `<div id="timeline_${objectHash.sha1(id)}">${id}</div>`,
+                                content: `<div id="timeline_${objectHash.sha1(id)}" style="${bg}">
+                                            <p>告警状态：${status}</p>
+                                            <p>告警摘要：${val.msg}</p>
+                                            <p>告警时间：${moment(val.vtime).format(mx.global.register.format)}</p>
+                                        </div>`,
                                 start: val.vtime
                             };
                             
@@ -377,23 +396,23 @@
                     });
                     this.timeline.items.add(items);
                 })
-                _.delay(()=>{
-                    _.forEach(this.tree.diagnosisData,(v,k)=>{
+                // _.delay(()=>{
+                //     _.forEach(this.tree.diagnosisData,(v,k)=>{
                     
-                        _.forEach(v,(val)=>{
-                            if(val.id){
-                                let id = val.id;
-                                new Vue({
-                                    data: {
-                                        src: id,
-                                    },
-                                    template: `<form-card-component :term="src" cHeight="20" style="width:auto;height:auto;"></form-card-componetn>`
-                                }).$mount(`#timeline_${objectHash.sha1(id)}`)
-                            }
-                        });
+                //         _.forEach(v,(val)=>{
+                //             if(val.id){
+                //                 let id = val.id;
+                //                 new Vue({
+                //                     data: {
+                //                         src: id,
+                //                     },
+                //                     template: `<form-card-component :term="src" cHeight="20" style="width:auto;height:auto;"></form-card-componetn>`
+                //                 }).$mount(`#timeline_${objectHash.sha1(id)}`)
+                //             }
+                //         });
                         
-                    })
-                },2000)
+                //     })
+                // },2000)
 
                 this.timeline.inst.redraw();
 
@@ -414,7 +433,24 @@
                 });
             },
             onSelect(properties) {
-                console.log('selected items: ' + properties.items);
+                
+                try{
+                    if(!_.isEmpty(properties.items)){
+                        let entity = properties.items[0].split("::")[1];
+                        let graph = this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.model.editor.graph;
+                        let cell = graph.getModel().getCell(entity);
+                        this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.onToggleCellStyle([cell],'vertex');
+
+                        // 定位cell
+                        this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.onPosition(cell.getId());
+                    } else {
+                        this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.onToggleCellStyle([],'vertex');    
+                    }
+                    
+                } catch(err){
+                    this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.onToggleCellStyle([],'vertex');
+                }
+                
             },
             onClick(props){
                 
@@ -422,7 +458,7 @@
                     let timeline = this.timeline.inst;
                     
                     let id = this.timeline.pickDate = moment(props.time.toString()).format("YYYY-MM-DD HH:MM:SS");
-                    console.log(props,this.timeline.pickDate)    
+                    
                     let oldTerm = this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.$refs.searchToolbar.term.split(" diff ");
                     oldTerm[1] = `'${id}'`;
                     let term = oldTerm.join(" diff ")
@@ -446,6 +482,7 @@
             onClose(){
                 this.$parent.$parent.$parent.$parent.model.graph.footbar.show = false;
                 this.$parent.$parent.$parent.$parent.model.control.toolbar.show = true;
+                this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.onToggleCellStyle([],'vertex');
             }
 	    }
 	

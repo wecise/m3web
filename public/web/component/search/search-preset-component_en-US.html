@@ -61,10 +61,13 @@
 	/*----------  最外层element会自动增加组件同名 class="search-preset-component"  ----------*/
 	<template>
 		<el-dropdown placement="bottom" trigger="click" placement="top-end"> 
-			<el-button type="default" style="height:40px;">${options.window.name} <i class="el-icon-arrow-down el-icon--right"></i></el-button>
+			<el-button type="default" style="height:40px;">
+				<span ref="optionsWindowName">${options.window.name}</span>
+				<i class="el-icon-arrow-down el-icon--right"></i>
+			</el-button>
 			<el-dropdown-menu slot="dropdown" class="search-preset">
 
-				<el-collapse value="1" accordion>
+				<el-collapse v-model="defaultView" accordion>
 					<el-collapse-item title="Presets" name="1">
 						<el-row :gutter="20">
 							<el-col :span="8">
@@ -96,7 +99,7 @@
 									range-separator="to"
 									start-placeholder="Begining Date"
 									end-placeholder="End Date"
-									:default-time="['00:00:00']">
+									value-format="timestamp">
 								</el-date-picker>
 							</el-main>
 						<el-container>
@@ -133,6 +136,7 @@
 		},
 	    data(){
 	        return { 
+				defaultView: '1',
 				preset: {
 							nearest: [
 									{"name":"Nearest 30 second", value: " | nearest 30 seconds "},
@@ -170,7 +174,7 @@
 									{"name":"Year", value: " | year "},
 									{"name":"Last Year", value: " | last year "},
 							],
-							range: { from: "", to: ""},
+							range: [moment().add(-1,'day').format('YYYY-MM-DD'),moment().format('YYYY-MM-DD')],
 							others: {
 								ifHistory: false,
 								ifDebug: false,
@@ -184,7 +188,7 @@
                     handler(val,oldVal){
                         if(val[0] && val[1]){
                             let value = " window " + moment(val[0]).format(mx.global.register.format) + " to " + moment(val[1]).format(mx.global.register.format);
-                            this.options.window = {name: value, value: value};
+                            this.options.window = {name: value, value: value, range: val};
                         }
                     },
                     deep:true

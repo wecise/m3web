@@ -471,7 +471,12 @@ class OmdbHandler {
 
             },
             error: function(xhr, textStatus, errorThrown){
-                rtn = xhr.responseJSON;
+                if(xhr.status){
+                    rtn = xhr.responseJSON;
+                } else{
+                    $("body").css("opacity",'.3');
+                    alert("Internal Server Error（500)");
+                }
             }
         });
 

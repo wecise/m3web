@@ -120,7 +120,7 @@ class Knowledge {
                                                 :props="defaultProps" 
                                                 node-key="fullname"
                                                 highlight-current="true"
-                                                default-expand-all="true"
+                                                :default-expand-all="true"
                                                 @node-click="onNodeClick"
                                                 :filter-node-method="onFilterNode"
                                                 style="background:transparent;"
@@ -133,7 +133,7 @@ class Knowledge {
                                                     </el-tooltip>
                                                     <el-dropdown v-show="data.show" style="float:right;width:14px;margin:0 5px;">
                                                         <span class="el-dropdown-link">
-                                                            <i class="el-icon-more el-icon--right"></i>
+                                                            <i class="el-icon-more el-icon--right" style="color:#000000;"></i>
                                                         </span>
                                                         <el-dropdown-menu slot="dropdown">
                                                             <el-dropdown-item @click.native="onDelete(data,$event)" icon="el-icon-delete">删除</el-dropdown-item>
@@ -159,7 +159,7 @@ class Knowledge {
                     filters: {
                         pickShortLabel(item){
                             return _.truncate(item, {
-                                        'length': 20,
+                                        'length': 16,
                                         'omission': ' ...'
                                     });
                         }
@@ -185,8 +185,8 @@ class Knowledge {
                         },
                         onRefresh(item,index){
                             let childrenData = fsHandler.fsList(item.fullname);
-
-                            this.$set(data, 'children', childrenData);
+                            
+                            this.$set(item, 'children', childrenData);
                         },
                         onNewDir(item,index){
                             this.$prompt('请输入目录名称', '提示', {
@@ -210,9 +210,10 @@ class Knowledge {
                                         type: "success",
                                         message: "新建目录成功！"
                                     })
-                                    _.delay(()=>{
-                                        this.initData();
-                                    },500)
+
+                                    // 刷新
+                                    this.onRefresh(item,index);
+
                                 } else {
                                     this.$message({
                                         type: "error",
@@ -242,17 +243,20 @@ class Knowledge {
                                 }
 
                                 let _attr = {remark: '', ctime: _.now(), author: this.signedUserName, rate: 0};
+
+                                let content = fsHandler.callFsJScript("/matrix/knowledge/getDefaultContent.js",null).message;
                 
-                                let rtn = fsHandler.fsNew('md', item.fullname, [value,'md'].join("."), null, _attr);
+                                let rtn = fsHandler.fsNew('md', item.fullname, [value,'md'].join("."), content, _attr);
                                 
                                 if(rtn == 1){
                                     this.$message({
                                         type: "success",
                                         message: "新建成功！"
                                     })
-                                    _.delay(()=>{
-                                        this.initData();
-                                    },500)
+
+                                    // 刷新
+                                    this.onRefresh(item,index);
+
                                 } else {
                                     this.$message({
                                         type: "error",
@@ -268,6 +272,7 @@ class Knowledge {
                               });
                         },
                         onDelete(item,index){
+                            const self = this;
 
                             this.$confirm(`确认要删除该知识：${item.name}？`, '提示', {
                                 confirmButtonText: '确定',
@@ -278,27 +283,35 @@ class Knowledge {
                                 let rtn = fsHandler.fsDelete(item.parent,item.name);
                                 
                                 if(rtn == 1){
-                                    this.$messsage({
+                                    this.$message({
                                         type: "success",
                                         message: "删除成功！"
                                     })
                                     
-                                    _.delay(()=>{
+                                    // 刷新
+                                    try{
+                                        let childrenData = fsHandler.fsList(item.parent);
+                                        let parent = this.$refs.tree.getNode(item.parent)
+                                        this.$set(parent.data, 'children', childrenData);
+                                    } catch(err){
                                         this.initData();
-                                    },1000)
+                                    }
                                     
+                                    
+
                                 } else {
-                                    this.$messsage({
+                                    this.$message({
                                         type: "error",
                                         message: "删除失败！"
                                     })
                                 }
 
-                            }).catch(() => {
-                                
+                            }).catch((err) => {
+                                console.log(err)
                             });
                         },
                         onUpload(item,index){
+                            const self = this;
 
                             let wnd = null;
                             let wndID = `jsPanel-upload-${objectHash.sha1(item.id)}`;
@@ -348,9 +361,28 @@ class Knowledge {
                                     },
                                     onSuccess(res,file,FileList){
                                         this.upload.fileList = FileList;
+                                        
+                                        _.forEach(FileList,(v)=>{
+                                            try{
+                                                let attr = {remark: '', ctime: _.now(), author: window.SignedUser_UserName, rate:0};
+                                                
+                                                fsHandler.fsUpdateAttr(item.parent, v.name, attr);
+
+                                            } catch(err){
+                                                console.log(err)
+                                            }
+                                        })
+
+                                        // 刷新
+                                        self.onRefresh(item,index);
+
                                     },
                                     onRemove(file, fileList) {
                                         let rtn = fsHandler.fsDelete(item.fullname,file.name);
+                                        if(rtn == 1){
+                                            // 刷新
+                                            self.onRefresh(item,index);
+                                        }
                                     },
                                     onPreview(file) {
                                         console.log(file);
@@ -373,18 +405,23 @@ class Knowledge {
                             }
                         },1000),
                         onNodeClick(data){
-                            if(!data.isdir) {
-                                
-                                let childrenData = fsHandler.fsList(data.fullname);
-                                
-                                this.$set(data, 'children', childrenData);
+                            
+                            try{
+                                // 文件
+                                if(!data.isdir) {
+                                    
+                                    // 打开操作
+                                    this.$root.onOpen(data);
 
-                                // 打开操作
-                                this.$root.onOpen(data);
-                            } else {
-                                let childrenData = fsHandler.fsList(data.fullname);
+                                } 
+                                // 目录
+                                else {
+                                    let childrenData = fsHandler.fsList(data.fullname);
 
-                                this.$set(data, 'children', childrenData);
+                                    this.$set(data, 'children', childrenData);
+                                }
+                            } catch(err){
+                                console.log(err)
                             }
                         },
                         initData(){
@@ -394,17 +431,22 @@ class Knowledge {
                                 return _.extend(v,{show:false});
                             });
                             
-                            let childrenData = fsHandler.fsList(this.treeData[2].fullname);
-                            this.$set(this.treeData[2], 'children', childrenData);
+                            try{
+                                // let childrenData = fsHandler.fsList(this.treeData[2].fullname);
+                                // this.$set(this.treeData[2], 'children', childrenData);
 
-                            // 默认首页
-                            let homeNode = _.find(this.treeData,{name: '知识通介绍.md'}) || _.find(_.flattenDeep(_.map(this.treeData,'children')),{name: '知识通介绍.md'});
-                            
-                            let item = _.extend(homeNode,{
-                                size: _.find(fsHandler.fsList(homeNode.parent),{name: homeNode.name}).size || 0
-                            });
-                            
-                            this.$root.model = {item:homeNode, content:fsHandler.fsContent(homeNode.parent, homeNode.name)};
+                                // 默认首页
+                                let homeNode = _.find(this.treeData,{name: '知识通介绍.md'}) || _.find(_.flattenDeep(_.map(this.treeData,'children')),{name: '知识通介绍.md'});
+                                
+                                let item = _.extend(homeNode,{
+                                    size: _.find(fsHandler.fsList(homeNode.parent),{name: homeNode.name}).size || 0
+                                });
+                                
+                                this.$root.model = {item:homeNode, content:fsHandler.fsContent(homeNode.parent, homeNode.name)};
+
+                            } catch(err){
+                                this.$root.model = null;
+                            }
                         }
                     }
                 });
@@ -427,27 +469,27 @@ class Knowledge {
                                     <el-header style="height:auto;padding:0px;display:flex;flex-wrap: wrap;align-content: flex-start;">
                                         <el-button type="default" @click="onFilter('all')" style="margin:5px;">全部(#{model.length}#)</el-button>
                                         <el-button type="default" 
-                                            v-for="(item, index) in model" 
-                                            :key="index" 
-                                            v-if="item.ftype=='dir'" 
-                                            @click="onFilter(item)" 
-                                            style="margin:5px;">#{item.name}#(#{ model,item | pickCount}#)</el-button>
+                                            v-for="(item, key) in _.groupBy(model,'parent')" 
+                                            :key="key" 
+                                            @click="onFilter(key)" 
+                                            style="margin:5px;">#{ key | pickParentName}#(#{ _.size(item) }#)</el-button>
                                     </el-header>
                                     <el-main style="height:100%;padding:0px;">
                                         <div v-for="(item, index) in knowledge.list" :key="index" v-if="item.ftype!='dir'">
                                             <el-card v-if="item.ftype=='md'">
                                                 <el-button type="text" @click="$root.onOpen(item)"><h4>#{item.name}#</h4></el-button>
                                                 <div style="display: flex;
-                                                            height: 40px;
+                                                            height: auto;
                                                             line-height: 40px;
                                                             padding: 0px 20px 0 0;"> 
                                                     <div style="width:90%;">
-                                                        <span class="el-icon-user"></span> #{item | pickAuthor}#
+                                                        <span><i class="el-icon-user"></i> #{item | pickAuthor}#</span>
                                                         <el-divider direction="vertical"></el-divider>
                                                         发布于 #{ item | pickTime }#
                                                         <el-divider direction="vertical"></el-divider>
                                                         位置 #{ item.parent }#
                                                         <el-divider direction="vertical"></el-divider>
+                                                        <i class="el-icon-price-tag" style="color:#409eff;"></i>
                                                         <el-select
                                                             v-model="item.tags"
                                                             multiple
@@ -455,11 +497,11 @@ class Knowledge {
                                                             allow-create
                                                             default-first-option
                                                             class="el-select-tags"
-                                                            placeholder="标签"
                                                             @change="onChange"
                                                             @remove-tag="onRemoveTag"
                                                             @mouseover.native="currentItem = item"
-                                                            style="width:300px;">
+                                                            style="width:300px;"
+                                                            placeholder="知识标签">
                                                             <el-option
                                                                 v-for="tag in item.tags"
                                                                 :key="tag"
@@ -476,16 +518,17 @@ class Knowledge {
                                             <el-card v-else>
                                                 <el-button type="text" @click="$root.onOpen(item)"><h4>#{item.name}#</h4></el-button>
                                                 <div style="display: flex;
-                                                            height: 40px;
+                                                            height: auto;
                                                             line-height: 40px;
                                                             padding: 0px 20px 0 0;"> 
                                                     <div style="width:90%;">
-                                                        <span class="el-icon-user"></span> #{item | pickAuthor}#
+                                                        <span><i class="el-icon-user"></i> #{item | pickAuthor}#</span>
                                                         <el-divider direction="vertical"></el-divider>
                                                         发布于#{ item | pickTime }#
                                                         <el-divider direction="vertical"></el-divider>
                                                         位置 #{ item.parent }#
                                                         <el-divider direction="vertical"></el-divider>
+                                                        <i class="el-icon-price-tag" style="color:#409eff;"></i>
                                                         <el-select
                                                             v-model="item.tags"
                                                             multiple
@@ -493,11 +536,11 @@ class Knowledge {
                                                             allow-create
                                                             default-first-option
                                                             class="el-select-tags"
-                                                            placeholder="标签"
                                                             @change="onChange"
                                                             @remove-tag="onRemoveTag"
                                                             @mouseover.native="currentItem = item"
-                                                            style="width:300px;">
+                                                            style="width:300px;"
+                                                            placeholder="知识标签">
                                                             <el-option
                                                                 v-for="tag in item.tags"
                                                                 :key="tag"
@@ -517,13 +560,19 @@ class Knowledge {
                                 </el-container>`,
                     filters: {
                         pickTime(item){
-                            return moment(item.vtime).format("LLL");
+                            
+                            try{
+                                let ctime = _.attempt(JSON.parse.bind(null, item.attr)).ctime || item.vtime;
+                                return moment(ctime).format("LLL");
+                            } catch(err){
+                                return moment(item.vtime).format("LLL");
+                            }
                         },
                         pickAuthor(item){
                             try{
-                                return _.attempt(JSON.parse.bind(null, item.attr)).author || "";
+                                return _.attempt(JSON.parse.bind(null, item.attr)).author || window.SignedUser_UserName;
                             } catch(err){
-                                return "";
+                                return window.SignedUser_UserName;
                             }
                         },
                         pickTags(item){
@@ -542,11 +591,11 @@ class Knowledge {
                                 return 0;
                             }
                         },
-                        pickCount(data,item){
+                        pickParentName(parent){
                             try{
-                                return _.size(_.filter(data,{parent:item.fullname}));
+                                return _.last(parent.split("/"));
                             } catch(err){
-                                return 0;
+                                return parent;
                             }
                         }
                     },
@@ -560,15 +609,24 @@ class Knowledge {
                     },
                     methods: {
                         initData(){
-                            this.knowledge.list = _.map(this.model,(v)=>{
+                            let getRate = function(item){
+                                try{
+                                    return _.attempt(JSON.parse.bind(null, item.attr)).rate || 0;
+                                } catch(err){
+                                    return 0;
+                                }
+                            };
 
+                            this.knowledge.list = _.orderBy(_.map(this.model,(v)=>{
+                                
                                 if( v.ftype == 'md' ){
-                                    return _.extend(v,{content:fsHandler.fsContent(v.parent,v.name)});
+                                    //return _.extend(v,{content:fsHandler.fsContent(v.parent,v.name)});
+                                    return _.extend(v,{content:'', rate: getRate(v)});
                                 } else {
-                                    return _.extend(v,{content:''});
+                                    return _.extend(v,{content:'', rate: getRate(v)});
                                 }
 
-                            })
+                            }),['rate'],['desc'])
                         },
                         onFilter(item){
                             
@@ -577,7 +635,8 @@ class Knowledge {
                             if( item == 'all' ){
                                 filtered = this.model;
                             } else {
-                                filtered = _.filter(this.model,{parent:item.fullname});
+
+                                filtered = _.filter(this.model,{parent:item});
                             }
                             
                             this.knowledge.list = _.map(filtered,(v)=>{
@@ -630,6 +689,8 @@ class Knowledge {
                                         <span style="font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;" v-if="!_.isEmpty(model)">
                                             #{model.item.name | pickName}#
                                         </span>
+                                        
+                                        <el-button type="text" icon="el-icon-position" @click="onSaveNow" style="margin-left:10px;float:right;"></el-button>
                                         <el-button type="text" icon="el-icon-s-platform" @click="mode='view'" style="margin-left:10px;float:right;"></el-button>
                                         <el-button type="text" icon="el-icon-edit" @click="mode='edit'" style="float:right;"></el-button>
                                     </el-header>
@@ -669,6 +730,12 @@ class Knowledge {
                                 } else {
                                     $(this.$refs.editor.$el).show();
                                     //this.splitInst.setSizes([50, 50]);
+                                    let editor = ace.edit(this.$refs.editor.$el);
+                                    editor.focus(); 
+                                    let row = editor.session.getLength() - 1;
+                                    let column = editor.session.getLine(row).length;
+                                    editor.gotoLine(row + 1, column);
+
                                 }
                             }
                         }
@@ -699,6 +766,10 @@ class Knowledge {
                                 this.editor.setTheme("ace/theme/tomorrow");
                                 this.editor.getSession().setMode("ace/mode/markdown");
                                 this.editor.renderer.setShowGutter(false);
+                                this.editor.focus(); //To focus the ace editor
+                                let row = this.editor.session.getLength() - 1;
+                                let column = this.editor.session.getLine(row).length;
+                                this.editor.gotoLine(row + 1, column);
                                 
                                 if(!_.isEmpty(this.model.content)){
                                     this.editor.setValue(this.model.content);
@@ -720,14 +791,42 @@ class Knowledge {
                                 });
                             }
                         },
+                        onSaveNow(){
+                            try{
+                                let attr = null;
+                                
+                                if(_.isEmpty(this.model.item.attr)){
+                                    attr = {remark: '', ctime: _.now(), author: window.SignedUser_UserName, rate:1};
+                                } else {
+                                    attr = _.attempt(JSON.parse.bind(null, this.model.item.attr));
+                                    if(attr.rate){
+                                        _.extend(attr, {rate:attr.rate + 1});    
+                                    } else {
+                                        _.extend(attr, {rate:1}); 
+                                    }
+                                }
+                                
+                                let rtn = fsHandler.fsNew(this.model.item.ftype, this.model.item.parent, this.model.item.name, this.editor.getValue(), attr);
+                                if(rtn == 1){
+                                    this.$message({
+                                        type: "success",
+                                        message: "提交成功！"
+                                    })
+                                }
+                                
+                            } catch(err){
+
+                            }
+                            
+                        },
                         onSave: _.debounce(function(){
                                     try{
                                         let attr = null;
                                         
-                                        if(_.isEmpty(data.attr)){
+                                        if(_.isEmpty(this.model.item.attr)){
                                             attr = {remark: '', ctime: _.now(), author: window.SignedUser_UserName, rate:1};
                                         } else {
-                                            attr = _.attempt(JSON.parse.bind(null, data.attr));
+                                            attr = _.attempt(JSON.parse.bind(null, this.model.item.attr));
                                             if(attr.rate){
                                                 _.extend(attr, {rate:attr.rate + 1});    
                                             } else {
@@ -735,13 +834,13 @@ class Knowledge {
                                             }
                                         }
                                         
-                                        fsHandler.fsNew(this.model.item.ftype, this.model.item.parent, this.model.item.name, this.editor.getValue(), attr);    
+                                        let rtn = fsHandler.fsNew(this.model.item.ftype, this.model.item.parent, this.model.item.name, this.editor.getValue(), attr);    
                                         
                                     } catch(err){
 
                                     }
                                     
-                                },5000)
+                                },1000)
     
                     }
                 });
@@ -752,13 +851,15 @@ class Knowledge {
                         model:{},
                         search: {
                             term: "",
-                            result: []
+                            result: [],
+                            loading: true
                         }
                     },
                     template:   `<el-container style="height:calc(100vh - 85px);">
                                     <el-header style="height:40px;line-height:40px;padding: 0px;margin-bottom: 5px;display:flex;">
                                         <el-input placeholder="请输入搜索关键字" 
                                             v-model="search.term" 
+                                            v-loading="search.loading"
                                             @clear="onClear"
                                             @keyup.enter.native="onSearch"
                                             clearable
@@ -814,6 +915,8 @@ class Knowledge {
                                 
                             } catch(err){
                                 this.search.result = [];
+                            } finally {
+                                this.search.loading = false;
                             }
                         },
                         onClear(){
@@ -824,14 +927,26 @@ class Knowledge {
                             try{
                                 if(_.includes(['md','txt'],data.ftype)){
                                     
-                                    let wnd = maxWindow.winApp(data.name, `<div id="mdView"></div>`, null,null);
+                                    let wnd = null;
+
+                                    try{
+                                        if(jsPanel.activePanels.getPanel(`jsPanel-${data.name}`)){
+                                            jsPanel.activePanels.getPanel(`jsPanel-${data.name}`).close();
+                                        }
+                                    } catch(error){
+
+                                    }
+                                    finally{
+                                        wnd = maxWindow.winApp(data.name, `<div id="mdView"></div>`, null,null);
+                                    }
+
                                     new Vue({
                                         data: {
                                             model: null
                                         },
                                         template: `<el-container style="width:100%;height:100%;">
                                                         <el-main style="overflow:hidden;padding:0px;">
-                                                            <knowledge-view :model="model" ref="viewRef"></knowledge-view>
+                                                            <knowledge-view :model="model" ref="viewRef" v-if="!_.isEmpty(model)"></knowledge-view>
                                                         </el-main>
                                                     </el-container>`,
                                         created(){

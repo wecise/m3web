@@ -340,7 +340,7 @@
                     </el-dialog>
                     <!-- 保存窗口 -->
                     <el-dialog :title="dialogSaveAs.title" :visible.sync="dialogSaveAs.visible">
-                        <mx-fs-saveas dfsRoot="/home/admin/Documents/form" ref="dfsSaveas"></mx-fs-saveas>
+                        <mx-fs-saveas dfsRoot="/home/admin/Documents/form" ftype="xml" ref="dfsSaveas"></mx-fs-saveas>
                         <div slot="footer" class="dialog-footer">
                             <el-button @click="dialogSaveAs.visible = false">取 消</el-button>
                             <el-button type="primary" @click="onSaveAs">保存</el-button>
@@ -2082,7 +2082,7 @@
                 let attr = {};
                 
                 let parent = this.$refs.dfsSaveas.node.fullname;
-                let name = this.$refs.dfsSaveas.node.name;
+                let name = this.$refs.dfsSaveas.fileName;
                 let rtn = fsHandler.fsNew('file',parent, name, xml, attr);
                 if(rtn == 1){
                     this.$message({

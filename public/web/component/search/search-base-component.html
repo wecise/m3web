@@ -59,7 +59,7 @@
 	
 	/*----------  最外层element会自动增加组件同名 class="search-base-component"  ----------*/
 	<template>
-		<div style="display:flex;width:100%;" class="search-base">
+		<div style="display:flex;width:100%;height:42px;line-height: 42px;" class="search-base">
 			<!--搜索范围-->
 			<el-select v-model="options.view.value" placeholder="请选择视图"   popper-class="search-base--select-popper" class="search-base--select" @change="onViewChange" v-if="options.view.show">
 				<el-option :label="item.title" :key="item.name" :value="item.name" v-for="item in view.list" style="height:auto;">
@@ -92,7 +92,28 @@
 							clearable
 							autofocus></el-autocomplete>
 			<!--搜索条件预设置-->
-			<search-preset-component :options.sync='options' ref="preSetRef"></search-preset-component>
+			<!--search-preset-component :options.sync='options' ref="preSetRef"></search-preset-component-->
+			<el-popover
+				placement="bottom-start"
+				trigger="hover"
+				popper-class="info-popper"
+				:popper-options="{
+					boundariesElement:'body'
+				}">
+				<div class="block">
+					<el-date-picker
+						v-model="timePicker.range"
+						:picker-options="timePicker.options"
+						type="datetimerange"
+						value-format="yyyy-MM-dd HH:mm:ss"
+						range-separator="至"
+						start-placeholder="开始日期"
+						end-placeholder="结束日期"
+						align="right">
+					</el-date-picker>
+				</div>
+				<el-button slot="reference" icon="el-icon-timer" style="height:42px;margin-left:-1px;width:100%;"></el-button>
+			</el-popover> 
 			<!--快速过滤条件设置-->
 
 			<!--搜索按钮-->
@@ -114,10 +135,66 @@
 	            view: {
 					list: []
 				},
-				suggestions: []
+				suggestions: [],
+				timePicker:{
+					range: [],
+					options: {
+						shortcuts:[
+							{
+								text: '最近15分钟',
+								onClick(picker) {
+									const end = new Date();
+									const start = new Date();
+									start.setTime(start.getTime() - 900 * 1000);
+									picker.$emit('pick', [start, end]);
+								}
+							}, {
+								text: '最近30分钟',
+								onClick(picker) {
+									const end = new Date();
+									const start = new Date();
+									start.setTime(start.getTime() - 1800 * 1000);
+									picker.$emit('pick', [start, end]);
+								}
+							}, {
+								text: '最近一小时',
+								onClick(picker) {
+									const end = new Date();
+									const start = new Date();
+									start.setTime(start.getTime() - 3600 * 1000 * 1);
+									picker.$emit('pick', [start, end]);
+								}
+							}, {
+								text: '最近一天',
+								onClick(picker) {
+									const end = new Date();
+									const start = new Date();
+									start.setTime(start.getTime() - 3600 * 1000 * 24);
+									picker.$emit('pick', [start, end]);
+								}
+							}, {
+								text: '最近七天',
+								onClick(picker) {
+									const end = new Date();
+									const start = new Date();
+									start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+									picker.$emit('pick', [start, end]);
+								}
+							}, {
+								text: '最近30天',
+								onClick(picker) {
+									const end = new Date();
+									const start = new Date();
+									start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+									picker.$emit('pick', [start, end]);
+								}
+							}
+					]}
+				}
 	        }
 	    },
 	    created(){
+			
 			// 视图列表初始化
 			let term = JSON.stringify({class:this.options.api.parent,action:"list"});
 			this.view.list = fsHandler.callFsJScript(`/matrix/view/action.js`, encodeURIComponent(term)).message;
@@ -169,6 +246,18 @@
 			},
 			search(){
 
+				//是否启用自动搜索
+				if(!this.options.autoSearch){
+					if(_.isEmpty(this.options.term)) {
+						this.$message({
+							type: "info",
+							message: "请确定搜索关键字！"
+						})
+						return false;
+					}	
+				}
+				
+
 				// 预设值
 				let ifHistory = this.options.others.ifHistory?"":"#";
 				let ifDebug = this.options.others.ifDebug?"debug> ":"";
@@ -177,9 +266,13 @@
 				
 				// 一键搜索结构
 				let cls = ifHistory=='#'?this.options.class:this.options.class.replace(/#/g,"");
-                let term = {
+				let time = "";
+				if(!_.isEmpty(this.timePicker.range)) {
+					time = "window " + this.timePicker.range.join(" to ");
+				}
+				let term = {
 					view: this.options.view.value || "all",
-					term: (ifDebug + ifHistory + _.without([cls, this.options.term, this.options.window.value],'').join(" | ")).replace(/##/g,"#").replace(/%/g,'%25')
+					term: (ifDebug + ifHistory + _.without([cls, this.options.term, time],'').join(" | ")).replace(/##/g,"#").replace(/%/g,'%25')
 				};
 
 			    // 搜索

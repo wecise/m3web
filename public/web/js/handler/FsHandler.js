@@ -164,7 +164,7 @@ class FsHandler {
 
             },
             error: function(xhr, textStatus, errorThrown) {
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON);
+                rtn = xhr.responseText;
             }
         });
 

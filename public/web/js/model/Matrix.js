@@ -127,6 +127,21 @@ class Matrix {
         
     }
 
+    // 获取允许ospace
+    allow(){
+        
+        try{
+            if(_.includes(mx.global.register.allow.company, window.COMPANY_NAME)){
+                return true;
+            } else {
+                return false;
+            }
+        } catch(err){
+            return false;
+        }
+        
+    }
+
     // 设置当前用户template
     setCurrentUserTemplate(){
         try{

@@ -103,8 +103,8 @@
             onInputChange(val){
                 var graph = this.graph.inst;
                 let parent = graph.getDefaultParent();
-                let w = 220;
-                let h = 40;
+                let w = 160;
+                let h = 80;
                 
                 let hiddenCell = null;
                 
@@ -123,17 +123,18 @@
                         let cell = null;
                         let inputCell = null;
                         let edgeId = null;
-                        
+                        let valueArr = v.split(":");
+                        let value = [valueArr[1],valueArr[3],valueArr[4],valueArr[5]].join("\n");
                         try{
                              cell = graph.getModel.getCell(v);
                             if(!cell){
-                                inputCell = graph.insertVertex(parent, v, v, 20, 20, w, h, 'fillColor=blue');
+                                inputCell = graph.insertVertex(parent, v, value, 20, 20, w, h, 'fillColor=blue');
                             }
                         } catch(err){
-                            inputCell = graph.insertVertex(parent, v, v, 20, 20, w, h, 'fillColor=blue');
+                            inputCell = graph.insertVertex(parent, v, value, 20, 20, w, h, 'fillColor=blue');
                         } finally {
                             edgeId = [v,'hidden'].join("-");
-                            graph.insertEdge(parent, edgeId, edgeId, inputCell, hiddenCell, 'strokeColor=#888888;verticalAlign=bottom');
+                            graph.insertEdge(parent, edgeId, null, inputCell, hiddenCell, 'strokeColor=#888888;verticalAlign=bottom');
                         }
                     })
 
@@ -147,8 +148,8 @@
             onOutputChange(val){
                 var graph = this.graph.inst;
                 let parent = graph.getDefaultParent();
-                let w = 220;
-                let h = 40;
+                let w = 160;
+                let h = 80;
                 let hiddenCell = null;
                 
                 try{
@@ -166,17 +167,18 @@
                         let cell = null;
                         let outputCell = null;
                         let edgeId = null;
-                        
+                        let valueArr = v.split(":");
+                        let value = [valueArr[1],valueArr[3],valueArr[4],valueArr[5]].join("\n");
                         try{
                             cell = graph.getModel.getCell(v);
                             if(!cell){
-                                outputCell = graph.insertVertex(parent, v, v, 20, 20, w, h, 'fillColor=red');
+                                outputCell = graph.insertVertex(parent, v, value, 20, 20, w, h, 'fillColor=red');
                             }
                         } catch(err){
-                            outputCell = graph.insertVertex(parent, v, v, 20, 20, w, h, 'fillColor=red');
+                            outputCell = graph.insertVertex(parent, v, value, 20, 20, w, h, 'fillColor=red');
                         } finally {
                             edgeId = [v,'hidden'].join("-");
-                            graph.insertEdge(parent, edgeId, edgeId, hiddenCell, outputCell, 'strokeColor=#888888;verticalAlign=bottom');
+                            graph.insertEdge(parent, edgeId, null, hiddenCell, outputCell, 'strokeColor=#888888;verticalAlign=bottom');
                         }
                     })
                     

@@ -107,7 +107,7 @@ Vue.component("mx-fs-editor",{
 
                         <!-- 保存窗口 -->
                         <el-dialog :title="file.dialogSaveAs.title" :visible.sync="file.dialogSaveAs.visible">
-                            <mx-fs-saveas :dfsRoot="tree.root" ref="dfsSaveas"></mx-fs-saveas>
+                            <mx-fs-saveas :dfsRoot="tree.root" ftype="xml" ref="dfsSaveas"></mx-fs-saveas>
                             <div slot="footer" class="dialog-footer">
                                 <el-button @click="file.dialogSaveAs.visible = false">取 消</el-button>
                                 <el-button type="primary" @click="onFileSaveAs">另存为</el-button>
@@ -545,7 +545,7 @@ Vue.component("mx-fs-open",{
                     </el-main>
                 </el-container>`,
     created(){
-        this.classList = fsHandler.callFsJScript("/matrix/fs/fs_list.js",encodeURIComponent(JSON.stringify({path:this.dfsRoot,onlyDir:false, ftype:['xml']}))).message;
+        this.classList = fsHandler.callFsJScript("/matrix/fs/fs_list.js",encodeURIComponent(JSON.stringify({path:this.dfsRoot,onlyDir:false, ftype:['xml','imap']}))).message;
         // 默认创建目录
         _.extend(this.node,{fullname: this.dfsRoot});
     },
@@ -566,7 +566,8 @@ Vue.component("mx-fs-open",{
 Vue.component("mx-fs-saveas",{
     delimiters: ['#{', '}#'],
     props:{
-        dfsRoot:String
+        dfsRoot:String,
+        ftype: String
     },
     data(){
         return {
@@ -577,12 +578,17 @@ Vue.component("mx-fs-saveas",{
             },
             node: {
                 parent: "",
-                name: "新建_"+_.now()+".xml"
+                name: "新建_"+_.now()
             },
             form: {
                 name: "",
                 attr: ""
             }
+        }
+    },
+    computed: {
+        fileName(){
+            return [this.node.name,this.ftype].join(".");
         }
     },
     template: `<el-container>
@@ -616,7 +622,7 @@ Vue.component("mx-fs-saveas",{
         this.initTreeData();
 
         // 默认创建目录
-        _.extend(this.node,{fullname: this.dfsRoot});
+        this.$set(this.node,'fullname',this.dfsRoot);
     },
     methods:{
         initTreeData(){
@@ -633,6 +639,7 @@ Vue.component("mx-fs-saveas",{
         }
     }
 })
+
 
 /* Common Fs Info */
 Vue.component("mx-fs-info",{
@@ -2407,7 +2414,7 @@ Vue.component("mx-entity-class-keys-cascader",{
             this.search.result = [];
             
             let perfs = _.map(this.$refs[item.id][0].selected,(v)=>{
-                return _.concat(['input',item.id],v).join(":");
+                return _.concat(['input',item.class,item.id],v).join(":");
             })
             let val = { entity: item.id, perfs: perfs, type: 'input'};
             let inst = this.$root.$refs.aiSetup.$refs.aiSetupInst[0];
@@ -2419,7 +2426,7 @@ Vue.component("mx-entity-class-keys-cascader",{
             this.search.result = [];
 
             let perfs = _.map(this.$refs[item.id][0].selected,(v)=>{
-                return _.concat(['output',item.id],v).join(":");
+                return _.concat(['output',item.class,item.id],v).join(":");
             })
             let val = { entity: item.id, perfs: perfs, type: 'output'};
             let inst = this.$root.$refs.aiSetup.$refs.aiSetupInst[0];

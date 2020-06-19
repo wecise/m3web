@@ -26,13 +26,13 @@
                         <el-button type="text" icon="el-icon-refresh" @click="loadForm"></el-button>
                     </el-tooltip>
                     <el-tooltip content="更新">
-                        <el-button type="text" icon="el-icon-position"></el-button>
+                        <el-button type="text" icon="el-icon-position" v-if="allow"></el-button>
                     </el-tooltip>
                     <el-tooltip content="添加">
-                        <el-button type="text" icon="el-icon-plus"></el-button>
+                        <el-button type="text" icon="el-icon-plus" v-if="allow"></el-button>
                     </el-tooltip>
                     <el-tooltip content="删除">
-                        <el-button type="text" icon="el-icon-delete"></el-button>
+                        <el-button type="text" icon="el-icon-delete" v-if="allow"></el-button>
                     </el-tooltip>
                     <el-tooltip content="表单样式">
                         <el-button type="text" icon="el-icon-bank-card" @click="toggleFormStyle"></el-button>
@@ -68,7 +68,8 @@
             data(){
                 return {
                     model:null,
-                    labelPosition: 'right'
+                    labelPosition: 'right',
+                    allow: mx.allow()
                 }
             },
             watch: {

@@ -33,7 +33,11 @@ class Event {
                             "event-diagnosis-datatable-component",
                             "event-summary-component",
                             "search-preset-component",
-                            "search-base-component"],function() {
+                            "search-base-component",
+                            "search-log-component",
+                            "form-component",
+                            "form-card-component",
+                            "md-editor-component"],function() {
             $(function() {
 
                 // EventList Table组件
@@ -283,6 +287,17 @@ class Event {
                                             
                                             if(_.includes(key,'diagnosis')) {
                                                 self.$root.detailAdd(row);
+                                            } else if(_.includes(key,'window')) {
+                                                
+                                                try{
+                                                    let tmp = JSON.parse(key.split("::")[1]);
+                                                    let url = tmp.url;
+                                                    let target = tmp.target;
+                                                    window.open(url,target);
+                                                } catch(err){
+                                                    
+                                                }
+                                                
                                             } else if(_.includes(key,'action')) {
                                                 // 增加操作类型
                                                 let action = _.last(key.split("_"));
@@ -1271,11 +1286,19 @@ class Event {
                                 
                                 // 所有实体
                                 //let actions = _.map(this.model.rows,'entity').join('","');
-                                let actions = _.map(this.model.rows,(v)=>{ 
-                                                return v['refer']['_all'];
-                                            }).join('","');
+                                let actionsArr = [];
+                                let actions = "";
+                                _.forEach(this.model.rows,(v)=>{ 
+                                    if(!_.isEmpty(v['refer'])){
+                                        if(!_.isEmpty(v['refer']['_all'])){
+                                            actionsArr.push(v['refer']['_all']);
+                                        }
+                                    }
+                                });
+                                actions = actionsArr.join('","');
+                                
                                 let matchObj = {value: `match () - [*1] -> ("${actions}") union ("${actions}") - [*1] -> ()`};
-
+                                
                                 if(!this.topological){
                                     this.topological = new Topological();
                                     this.topological.init();
@@ -1289,7 +1312,7 @@ class Event {
                                 }
 
                             } catch(err){
-                                
+                                console.log(err)
                             }
                             
                         }
@@ -1350,7 +1373,7 @@ class Event {
                                             <el-tooltip content="图" placement="top" open-delay="500">
                                                 <el-button type="text" icon="el-icon-data-line" @click="control.ifGraph='1'"></el-button>
                                             </el-tooltip>
-                                            <el-button type="text" :icon="control.ifGraphFullScreen | pickScreenStyle" style="float:right;" @click="onGraphFullScreen"></el-button>
+                                            <!--el-button type="text" :icon="control.ifGraphFullScreen | pickScreenStyle" style="float:right;" @click="onGraphFullScreen"></el-button-->
                                         </el-header>
                                         <el-main style="padding:0px;height:100%;">
                                             <el-tabs v-model="control.ifGraph" style="height:100%;">
@@ -2571,6 +2594,7 @@ class Event {
                             window: { name:"所有", value: ""},
                             // 输入
                             term: "",
+                            autoSearch: true,
                             // 指定类
                             class: "#/matrix/devops/alert/:",
                             // 指定api
@@ -2880,7 +2904,7 @@ class Event {
                                                 {title:'告警详情', name:`diagnosis-detail-${id}`, type: 'detail', model:model},
                                                 {title:'告警轨迹', name:`diagnosis-journal-${id}`, type: 'journal', model:model},
                                                 {title:'维度关联性告警', name:`diagnosis-dimension-${id}`, type: 'dimension', model:model},
-                                                {title:'概率相关性告警', name:`diagnosis-probability-${id}`, type: 'probability', model:model},
+                                                //{title:'概率相关性告警', name:`diagnosis-probability-${id}`, type: 'probability', model:model},
                                                 {title:'历史相似告警', name:`diagnosis-history-${id}`, type: 'history', model:model},
                                                 {title:'资源信息', name:`diagnosis-topological-${id}`, type: 'topological', model:model},
                                                 {title:'Runbook', name:`diagnosis-script-${id}`, type: 'script', model:model}

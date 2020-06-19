@@ -309,7 +309,7 @@ class AI {
                                                             style="position:absolute;top:-40px;right:0px;">
                                                             <span slot="reference" class="el-icon-question"></span>
                                                         </el-popover> 
-                                                        <mx-classkeys-string-cascader :root="content.class" :value="content.model.baselinebucketkeys" multiplenable="true"  ref="baselinebucketkeys"></mx-classkeys-cascader>
+                                                        <mx-classkeys-string-cascader :root="content.class" :value="content.model.baselinebucketkeys" multiplenable="true"  ref="baselinebucketkeys"></mx-classkeys-string-cascader>
                                                     </el-form-item-->
 
                                                     <el-form-item label="指定子对象(diffkeys)" style="width:80%;">
@@ -417,7 +417,7 @@ class AI {
                                                     </el-form-item>
 
                                                     <el-form-item label="消息模板" v-if="content.threshold.alarm == 1">
-                                                        <el-input type="textarea" rows="10" v-model="content.threshold.msg"></textarea></el-input>
+                                                        <el-input type="textarea" rows="3" v-model="content.threshold.msg"></textarea></el-input>
                                                     </el-form-item>
                                                     
                                                 </el-form>
@@ -455,6 +455,49 @@ class AI {
                     data(){
                         return {
                             content: null
+                        }
+                    },
+                    watch:{
+                        // 预警配置变化调整相应job
+                        'content.threshold':{
+                            handler(val,oldVal){
+                                
+                                try{
+                                    
+                                    let name = this.model.name.split(".")[0] + "-alert";
+
+                                    // 生成预警job
+                                    if(val.alarm == 1){
+                                        
+                                        let jobAlert = { 
+                                                name: name, 
+                                                dir: this.content.job.dir, 
+                                                exec: [this.content.job.exec[0], this.model.fullname, 'alert'].join(" "), 
+                                                group: this.content.job.group, 
+                                                schedule: `${this.content.job.cron}`, // 'cron 0 0 * * *'
+                                                timeout: 43200
+                                        };
+                                        
+                                        let rtn = jobHandler.jobMerge(jobAlert);
+                                        console.log(rtn)
+                                    } 
+                                    // 删除预警job
+                                    else {
+                                        let jobAlert = {
+                                            name: name,
+                                            job:{
+                                                dir: this.content.job.dir
+                                            }
+                                        };
+                                        
+                                        let rtn = jobHandler.jobDelete(jobAlert); 
+                                        console.log(rtn)
+                                    }
+                                } catch(err){
+                                    console.log(err)
+                                }
+                            },
+                            deep:true
                         }
                     },
                     created(){
@@ -1593,6 +1636,12 @@ class AI {
                                                     </el-form-item>
                                                 </el-form>
                                             </el-tab-pane>
+                                            <el-tab-pane label="服务器组">
+                                                <mx-job-group :value="content.job.group" ref="jobGroup"></mx-job-group>
+                                            </el-tab-pane>
+                                            <el-tab-pane label="定时任务">
+                                                <mx-job-cron :value="content.job.cron" style="height:100%;" ref="jobCron"></mx-job-cron>
+                                            </el-tab-pane>
                                             <el-tab-pane label="其它设置">
                                                 <el-form :model="content" label-width="140px" label-position="top" style="width:95%;height:100%;overflow:auto;padding: 0 20px; border-left: 1px solid #dddddd;">
                                                     
@@ -1621,20 +1670,21 @@ class AI {
                         this.$set(this.graph,'model',this.content.model);
                     },
                     mounted(){
-                        // watch数据更新
+                        // job Group
                         this.$watch(
-                            "$refs.input.selected",{
+                            "$refs.jobGroup.dt.selected",{
                                 handler:(val, oldVal) => {
-                                    console.log(1,val)
+                                    this.$set(this.content.job, 'group',  _.map(val,'name')[0])
                                 },
                                 deep:true
                             }
                         );
 
+                        // job cron
                         this.$watch(
-                            "$refs.output.selected",{
+                            "$refs.jobCron.cron",{
                                 handler:(val, oldVal) => {
-                                    console.log(2,val)
+                                    this.$set(this.content.job, 'cron',  _.concat(['cron'],val).join(" "));
                                 },
                                 deep:true
                             }
@@ -1659,9 +1709,64 @@ class AI {
                             let xml = mxUtils.getPrettyXml(node);
                             this.$set(this.content,'model',xml);
 
-                            let rtn = fsHandler.fsNew('json', this.model.parent, this.model.name, JSON.stringify(this.content,null,2), attr);
+                            // input & output
+                            let vertices = graph.getChildVertices(graph.getDefaultParent());
+                            let input = [];
+                            let output = [];
+                            _.forEach(vertices,(v)=>{
+                                let id = v.getId();
+                                // ["input", "/matrix/entity/it/it_aix", "it_aix", "192.168.190.175", "disk_perf", "free"]
+                                if(id != 'hidden'){
+                                    let str = id.split(":");
+                                    if(str[0] == 'input'){
+                                        input.push({
+                                            class: str[1],
+                                            bucket: str[4],
+                                            valuecolumn: str[5],
+                                            id: [str[2],str[3]].join(":")
+                                        });
+                                    } else if(str[0] == 'output'){
+                                        output.push({
+                                            class: str[1],
+                                            bucket: str[4],
+                                            valuecolumn: str[5],
+                                            id: [str[2],str[3]].join(":"),
+                                            realvalue: 0
+                                        });
+                                    }
+                                }
+                            })
 
-                            if(rtn == 1){
+                            this.$set(this.content.nodes,'input',input);
+                            this.$set(this.content.nodes,'output',output);
+
+                            let rtn1 = fsHandler.fsNew('json', this.model.parent, this.model.name, JSON.stringify(this.content,null,2), attr);
+                            let rtn2 = fsHandler.fsNew('json', `${this.model.parent}/analysis`, this.model.name, JSON.stringify(this.content,null,2), attr);
+
+                            if(rtn1 == 1 && rtn2 == 1){
+
+                                let name = this.model.name.split(".")[0];
+                                let jobObj1 = { 
+                                    name: name, 
+                                    dir: this.content.job.dir, 
+                                    exec: [this.content.job.exec[0], this.model.fullname].join(" "), 
+                                    group: this.content.job.group, 
+                                    schedule: `${this.content.job.cron}`, // 'cron 0 0 * * *'
+                                    timeout: 43200
+                                };
+                                let jobObj2 = { 
+                                    name: name+'-analysis', 
+                                    dir: this.content.job.dir, 
+                                    exec: [this.content.job.exec[0], this.model.parent+'/analysis/' + this.model.name].join(" "), 
+                                    group: this.content.job.group, 
+                                    schedule: `${this.content.job.cron}`, // 'cron 0 0 * * *'
+                                    timeout: 43200
+                                };
+
+                                jobHandler.jobMerge(jobObj1);
+                                jobHandler.jobMerge(jobObj2);
+
+
                                 this.$message({
                                     type: 'success',
                                     message: '提交成功！'
@@ -1681,24 +1786,37 @@ class AI {
                                 cancelButtonText: '取消',
                                 type: 'warning'
                             }).then(() => {
-								 
-                                // 删除文件系统
-                                let rtn = fsHandler.fsDelete(this.model.parent, this.model.name);
-                                if (rtn == 1){
-                                
-                                    // 刷新rules
-                                    this.$root.$refs.aiSetup.load();
-                                    this.$root.$refs.aiSetup.close(this.model.id);
+                                 
+                                try{
 
-                                    this.$message({
-                                        type: "success",
-                                        message: "删除成功！"
-                                    })
-                                } else {
-                                    this.$message({
-                                        type: "error",
-                                        message: "删除失败 " + rtn.message
-                                    })
+                                    let rt1 = jobHandler.jobDelete(this.content);
+                                    let jobAnalysis = _.cloneDeep(this.content);
+                                    this.$set(jobAnalysis,'name',this.content.name+'-analysis');
+                                    let rt2 = jobHandler.jobDelete(jobAnalysis);
+                                    
+                                } catch(err){
+
+                                } finally{
+                                    // 删除文件系统
+                                    let rtn1 = fsHandler.fsDelete(this.model.parent, this.model.name);
+                                    let rtn2 = fsHandler.fsDelete(`${this.model.parent}/analysis`, this.model.name);
+                                    
+                                    if (rtn1 == 1 && rtn2 == 1){
+                                    
+                                        // 刷新rules
+                                        this.$root.$refs.aiSetup.load();
+                                        this.$root.$refs.aiSetup.close(this.model.id);
+
+                                        this.$message({
+                                            type: "success",
+                                            message: "删除成功！"
+                                        })
+                                    } else {
+                                        this.$message({
+                                            type: "error",
+                                            message: "删除失败 " + rtn.message
+                                        })
+                                    }
                                 }
 
                             }).catch(() => {
@@ -1766,7 +1884,7 @@ class AI {
                                                                 <e-button class="el-icon-plus" @click="add(item,$event)" style="font-size:12px;"></e-button>
                                                             </div>
                                                         </template>
-                                                        <el-menu-item :index="subItem.id" v-for="subItem in item.child" @click="select(subItem)">
+                                                        <el-menu-item :index="subItem.id" v-for="subItem in item.child" @click="select(subItem)" v-if="subItem.ftype!='dir'">
                                                             <i class="fas fa-tasks"></i> #{subItem.name.split(".")[0]}#</el-menu-item>   
                                                     </el-submenu>
                                                 </el-menu>

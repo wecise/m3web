@@ -21,7 +21,6 @@
 
 -->
 {{template "base/head" .}}
-
 <!--MXClient JS & CSS-->
 <script>
 	mxBasePath = '{{AppSubUrl}}/web/creative/src';
@@ -35,9 +34,10 @@
 </script>
 <!-- BaiduMap -->
 <!-- <script type="text/javascript" src="//api.map.baidu.com/api?v=2.0&ak=uX0P7j4ewRbV5cFPjYoOfEdcQ3VCEoSP"></script> -->
+{{ if eq .company "hdim"}}
 <script type="text/javascript" src="//api.map.baidu.com/api?type=webgl&v=1.0&ak=E4805d16520de693a3fe707cdc962045"></script>
 <script type="text/javascript" src="//api.map.baidu.com/library/TrackAnimation/src/TrackAnimation_min.js"></script>
-
+{{end}}
 <style>
 
 	/* body */
@@ -190,6 +190,11 @@
         white-space: nowrap;
     } 
 
+    /* el-table */
+    .entity-diagnosis-log .el-table .el-table__body-wrapper{
+		overflow-x: hidden!important;
+	}
+
     /* el-transfer edge-main-panel */
     .edge-main-panel.el-transfer{
         height: calc(100% - 44px);
@@ -328,6 +333,7 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/topological/topological-timeline-chart.html"></link>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/search/search-base-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/search/search-log-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/search/search-preset-component_{{.Lang}}.html"></link>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/entity/entity-tree-component.html"></link>

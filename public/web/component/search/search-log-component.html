@@ -1,0 +1,220 @@
+<code>
+
+	<style scoped>
+		/*----------  style  ----------*/
+		.search-log-component .el-input__inner[role="textbox"],
+		.search-log-component .el-input--suffix > .el-input__inner{
+			border-radius: 0px;
+			border: unset;
+		}
+
+		.search-log-component .el-dropdown,.el-input--small{
+			font-size:12px;
+		}
+
+		.search-preset .el-collapse-item__header{
+			height: 30px!important;
+			line-height: 30px!important;
+		}
+
+		.search-log-component .search-base > .el-autocomplete .el-input--small>.el-input__inner{
+			height: 40px;
+			line-height: 40px;
+			border: unset;
+		}
+
+		.search-base div.search-base--select{
+			width: 20%;
+		}
+
+		.search-base div.el-autocomplete{
+			width: 100%;
+		}
+
+		.search-log-component .el-input--small .el-input__inner{
+			height: 40px;
+			line-height: 40px;
+		}
+
+		.search-log-component .el-dropdown.search-preset-component>.el-button--small{
+			border-radius: 0px;
+			border: unset;
+		}
+
+		.search-base .el-button--mini, .el-button--small {
+			border-radius: 0px!important;
+		}
+
+		.search-log-component .search-base--select-popper{
+			padding:20px;
+			left: 0px!important;
+		}
+		.search-log-component .search-base--select-popper li{
+			margin: 10px 0px;
+    		border-radius: 5px;
+		}
+
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="search-log-component"  ----------*/
+	<template>
+		<div style="display:flex;width:100%;" class="search-base">
+			<el-popover
+				placement="bottom-end"
+				trigger="hover"
+				popper-class="info-popper"
+				:popper-options="{
+					boundariesElement:'body'
+				}">
+				<el-date-picker
+					v-model="options.window.value"
+					:picker-options="timePicker.options"
+					type="datetimerange"
+					value-format="timestamp"
+					range-separator="至"
+					start-placeholder="开始日期"
+					end-placeholder="结束日期">
+				</el-date-picker>
+				<el-button slot="reference" icon="el-icon-timer" style="height:42px;margin-left:-1px;width:100%;"></el-button>
+			</el-popover> 
+			<!--搜索框-->
+			<el-autocomplete class="inline-input" placeholder="搜索" 
+							v-model="options.term" 
+							:fetch-suggestions="onFetchSuggestions"
+							:trigger-on-focus="false"
+							@select="search"
+							@clear="search"
+							clearable
+							autofocus></el-autocomplete>
+			<!--搜索条件预设置-->
+			<!--search-preset-component :options.sync='options' ref="preSetRef"></search-preset-component--> 
+			<!--快速过滤条件设置-->
+
+			<!--搜索按钮-->
+			<el-button type="primary" @click="search" @keyup.enter.native="search" ref="searchNowRef">搜索</el-button>
+		</div>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="search-log-component">
+	{
+	   	delimiters: ['#{', '}#'],
+	    props:{
+			// 搜索设置
+			options: Object
+	    },
+	    data(){
+	        return {
+				result: {},
+				suggestions: [],
+				timePicker:{
+					range: [moment().add(-1,'hour').format('YYYY-MM-DD HH:mm'),moment().format('YYYY-MM-DD HH:mm')],
+					options: {
+						shortcuts:[
+							{
+								text: '最近15分钟',
+								onClick(picker) {
+									const end = new Date();
+									const start = new Date();
+									start.setTime(start.getTime() - 900 * 1000);
+									picker.$emit('pick', [start, end]);
+								}
+							}, {
+								text: '最近30分钟',
+								onClick(picker) {
+									const end = new Date();
+									const start = new Date();
+									start.setTime(start.getTime() - 1800 * 1000);
+									picker.$emit('pick', [start, end]);
+								}
+							}, {
+								text: '最近一小时',
+								onClick(picker) {
+									const end = new Date();
+									const start = new Date();
+									start.setTime(start.getTime() - 3600 * 1000 * 1);
+									picker.$emit('pick', [start, end]);
+								}
+							}, {
+								text: '最近一天',
+								onClick(picker) {
+									const end = new Date();
+									const start = new Date();
+									start.setTime(start.getTime() - 3600 * 1000 * 24);
+									picker.$emit('pick', [start, end]);
+								}
+							}, {
+								text: '最近七天',
+								onClick(picker) {
+									const end = new Date();
+									const start = new Date();
+									start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+									picker.$emit('pick', [start, end]);
+								}
+							}
+					]}
+				}
+	        }
+	    },
+	    created(){
+            // 搜索辅助
+			this.suggestions = fsHandler.callFsJScript("/matrix/search/suggestions.js",this.options.api.parent).message;
+	    },
+	    mounted(){
+			   
+			// 预搜索
+			this.search();
+
+			// 搜索Button Enter事件
+			$(document).keypress((event)=> {
+				var keycode = (event.keyCode ? event.keyCode : event.which);
+				if (keycode == 13) {
+					this.search();
+				}
+			})
+
+			// 设置body class
+			$("body").addClass("search-log-component");
+
+	    },
+	    methods: {
+			onFetchSuggestions(queryString, cb){
+				var suggestions = this.suggestions;
+				var results = queryString ? suggestions.filter(this.createFilter(queryString)) : suggestions;
+				// 调用 callback 返回建议列表的数据
+				cb(results);
+			},
+			createFilter(queryString) {
+				return (v) => {
+					return (v.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+				};
+			},
+			search(){
+
+				// 一键搜索结构
+                let term = {
+                    entity: this.options.entity,
+                    files: this.options.files.value,
+                    find: this.options.term,
+                    time: this.options.window.value
+				};
+
+			    // 搜索
+				let rtn = fsHandler.callFsJScript(`/matrix/${this.options.api.parent}/${this.options.api.name}`, encodeURIComponent(JSON.stringify(term))).message;
+
+				// 结果
+				this.result = rtn;
+			},
+			resetTerm(){
+				this.preset.term = "";
+				this.search();
+			}
+
+	    }
+	
+	}
+	</script>
+
+</code>
+

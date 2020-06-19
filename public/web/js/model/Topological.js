@@ -25,6 +25,8 @@ class Topological {
     init() {
         const inst = this;
 
+        moment.locale(window.MATRIX_LANG);
+
         // Table组件 单选
         Vue.component("el-table-component",{
             delimiters: ['#{', '}#'],
@@ -573,6 +575,7 @@ class Topological {
                     let cols = [];
 
                     try{
+
                         rtn = fsHandler.callFsJScript("/matrix/graph/paths-by-id.js",encodeURIComponent(JSON.stringify(term))).message.result.data[0].graph;
 
                         if(!_.isEmpty(rtn.paths)){
@@ -654,100 +657,6 @@ class Topological {
             methods:{
                 setTrace(node){
                     this.trace.nodes = [];
-                    this.trace.nodes.push(node);
-                },
-                onSearch(){
-                    if(this.trace.nodes.length < 1){
-                        this.$message("请选择节点！");
-                        return false;
-                    }
-                    let term = _.map(this.trace.nodes,(v)=>{
-                        return _.extend(_.omit(v,["cell"]),{ edgeProperty: _.omit(this.$refs[v.id][0].edge,["list","show"]) });
-                    });
-
-                    let rtn = fsHandler.callFsJScript("/matrix/graph/graph-by-id.js",encodeURIComponent(JSON.stringify(term))).message;
-                    
-                    inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.graphData = rtn.result.data[0].graph;
-                    inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.$refs.graphViewSearch.term = rtn.mql;
-                    
-                },
-                onSelectionChange(val){
-                    this.trace.selectedPaths = val;
-                    inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.addPath(val);
-                }
-            }
-        })
-        // 图搜索高级面板
-        Vue.component("topological-graphAdv",{
-            delimiters: ['#{', '}#'],
-            template:  `<el-container>
-                            <el-header style="height:100%;line-height:100%;padding:10px;display:flex;flex-direction: column;">
-                                <div ref="topologicalAnalysisInputList">    
-                                    <topological-analysis-input v-for="item in _.uniqBy(trace.nodes,'id')" :model="item" :data-id="item.id" :ref="item.id"></topological-analysis-input>
-                                </div>
-                                <topological-analysis-new-input></topological-analysis-new-input>
-                            </el-header>
-                            <el-main style="padding:0px 10px;" class="topological-analysis">
-                                <el-table :data="trace.paths.rows" 
-                                        ref="multipleTable"
-                                        tooltip-effect="dark"
-                                        @selection-change="onSelectionChange"
-                                        style="width: 100%"
-                                        v-if="trace.paths.rows.length > 0">
-                                    <el-table-column type="expand">
-                                        <template slot-scope="props">
-                                          <el-form>
-                                            <el-form-item v-for="v,k in _.omit(props.row,['num','class'])">
-                                                <template slot="label">
-                                                    <i class="el-icon-place" style="color: #67c239;"></i>
-                                                </template>
-                                                <span>#{ v }#</span>
-                                            </el-form-item>
-                                          </el-form>
-                                        </template>
-                                    </el-table-column>
-                                    <el-table-column type="selection" width="55"></el-table-column>
-                                    <el-table-column :prop="col.data" :label="col.title" v-for="col in trace.paths.columns"></el-table-column>
-                                </el-table>
-                            </el-main>
-                        </el-container>`,
-            data(){
-                return {
-                    trace: {
-                        newItem: {
-                            id: "",
-                            type: "",
-                            value: ""
-                        },
-                        nodes: [],
-                        paths: {
-                            rows: [], 
-                            columns: []
-                        },
-                        selectedPaths: []
-                    }
-                }
-            },
-            created(){
-                //eventHub.$on("TOPOLOGICAL-ANALYISS-TRACE",this.setTrace);
-            },
-            mounted(){
-                
-                _.delay(()=>{
-                    let sortable = Sortable.create(this.$refs.topologicalAnalysisInputList,{
-                        handle: ".handleSort",
-                        dataIdAttr: 'data-id',
-                        onChange(evt) {
-                            let nodes = _.cloneDeep(this.trace.nodes);
-                            this.trace.nodes = _.map(sortable.toArray(),(v)=>{
-                                return _.find(nodes,{id:v});
-                            });
-                        }
-                    });
-                },1000)
-            },
-            methods:{
-                setTrace(node){
                     this.trace.nodes.push(node);
                 },
                 onSearch(){
@@ -854,7 +763,7 @@ class Topological {
                                     clearable
                                     autofocus>
                                     <template slot="prepend">
-                                        <el-dropdown trigger="click" placement="top-end"  :hide-on-click="false">
+                                        <el-dropdown trigger="hover" placement="top-end"  :hide-on-click="true">
                                             <el-tooltip content="选则实体类" open-delay="500">
                                                 <el-button type="text" size="mini">
                                                     <i class="el-icon-office-building" style="font-size:16px;"></i>
@@ -895,8 +804,8 @@ class Topological {
                                         <el-dropdown-item @click.native="$parent.$parent.onFileSave" divided>保存</el-dropdown-item>
                                         <el-dropdown-item @click.native="$parent.$parent.file.dialogSaveAs.visible=true">另存为</el-dropdown-item>
                                         <el-dropdown-item @click.native="$parent.$parent.onSaveAsPdf">另存为PDF</el-dropdown-item>
-                                        <el-dropdown-item @click.native="$parent.$parent.classDataImport" divided>导入</el-dropdown-item>
-                                        <el-dropdown-item @click.native="$parent.$parent.classDataExport('/matrix/entity')" >导出</el-dropdown-item>
+                                        <el-dropdown-item @click.native="$parent.$parent.classDataImport" divided  v-if="$parent.$parent.allow">导入</el-dropdown-item>
+                                        <el-dropdown-item @click.native="$parent.$parent.classDataExport('/matrix/entity')" v-if="$parent.$parent.allow">导出</el-dropdown-item>
                                         <el-dropdown-item @click.native="$parent.$parent.onFileDelete" divided>删除</el-dropdown-item>
                                         <el-dropdown-item @click.native="$parent.$parent.onFilePrint" divided>打印</el-dropdown-item>
                                         <el-dropdown-item @click.native="$parent.$parent.onFileClose" divided>关闭</el-dropdown-item>
@@ -913,7 +822,7 @@ class Topological {
                                     draggable="true" 
                                     @dragstart="onDragStart(item,$event)"
                                     @dragend="onDragEnd($event)">
-                                    <el-image :src="item | pickIcon" style="width:48px;" slot="suffix"></el-image>
+                                    <el-image :src="item | pickIcon" style="width:15%;height:15%;max-width:48px;min-width:48px;" slot="suffix"></el-image>
                                     <div style="height:48px;line-height:48px;width:80%;padding-left:10px;">#{ item.value }#</span></div>
                                     <el-tooltip content="拖动到画布" open-delay="500">
                                         <el-button type="text" icon="el-icon-menu" style="padding-left:10px;cursor:pointer;">
@@ -984,6 +893,14 @@ class Topological {
     
                         let entitys = fsHandler.callFsJScript("/matrix/graph/entity-search-by-term.js",encodeURIComponent(this.search.term)).message;
                         
+                        if(_.isEmpty(entitys)){
+                            this.$message({
+                                type: "info",
+                                message: "没有匹配数据！"
+                            })
+                            return false;
+                        }
+
                         this.search.result = entitys;//this.search.term ? entitys.filter(this.createStateFilter(this.search.term)) : entitys;
 
                         this.search.result = _.map(this.search.result,(v)=>{
@@ -1042,8 +959,8 @@ class Topological {
                                         <el-dropdown-item @click.native="$parent.$parent.onFileSave" divided>保存</el-dropdown-item>
                                         <el-dropdown-item @click.native="$parent.$parent.file.dialogSaveAs.visible=true">另存为</el-dropdown-item>
                                         <el-dropdown-item @click.native="$parent.$parent.onSaveAsPdf">另存为PDF</el-dropdown-item>
-                                        <el-dropdown-item @click.native="$parent.$parent.classDataImport" divided>导入</el-dropdown-item>
-                                        <el-dropdown-item @click.native="$parent.$parent.classDataExport('/matrix/entity')" >导出</el-dropdown-item>
+                                        <el-dropdown-item @click.native="$parent.$parent.classDataImport" divided v-if="$parent.$parent.allow">导入</el-dropdown-item>
+                                        <el-dropdown-item @click.native="$parent.$parent.classDataExport('/matrix/entity')" v-if="$parent.$parent.allow">导出</el-dropdown-item>
                                         <el-dropdown-item @click.native="$parent.$parent.onFileDelete" divided>删除</el-dropdown-item>
                                         <el-dropdown-item @click.native="$parent.$parent.onFilePrint" divided>打印</el-dropdown-item>
                                         <el-dropdown-item @click.native="$parent.$parent.onFileClose" divided>关闭</el-dropdown-item>
@@ -1100,8 +1017,7 @@ class Topological {
                                         </span>
                                     </el-col>
                                 </el-row>
-                                <!--topological-graphAdv class="graphAction" :model="$parent.$parent.mainView.search.model" ref="searchRef"></topological-graphAdv-->
-
+                                
                             </el-main>
                             <el-footer style="height:30px;line-height:30px;padding:0 5px;color:#999999;">
                                 <el-button type="text" icon="el-icon-delete" @click="onDeleteAllHistory">清空历史</el-button>
@@ -1187,7 +1103,7 @@ class Topological {
                             </el-dialog>
                             <!-- 保存窗口 -->
                             <el-dialog :title="file.dialogSaveAs.title" :visible.sync="file.dialogSaveAs.visible">
-                                <mx-fs-saveas dfsRoot="/home/admin/Documents/graph" ref="dfsSaveas"></mx-fs-saveas>
+                                <mx-fs-saveas dfsRoot="/home/admin/Documents/graph" ftype="imap" ref="dfsSaveas"></mx-fs-saveas>
                                 <div slot="footer" class="dialog-footer">
                                     <el-button @click="file.dialogSaveAs.visible = false">取 消</el-button>
                                     <el-button type="primary" @click="onFileSaveAs">保存</el-button>
@@ -1238,7 +1154,8 @@ class Topological {
                             content: "",
                             visible: false
                         }
-                    }
+                    },
+                    allow: mx.allow()
                 }
             },
             created(){
@@ -1416,7 +1333,7 @@ class Topological {
                     let attr = {};
                     
                     let parent = this.$refs.dfsSaveas.node.fullname;
-                    let name = this.$refs.dfsSaveas.node.name;
+                    let name = this.$refs.dfsSaveas.fileName;
                     let rtn = fsHandler.fsNew('file',parent, name, xml, attr);
                     if(rtn == 1){
                         this.$message({
@@ -2021,12 +1938,290 @@ class Topological {
             }
         })
 
+        // 实体日志
+        Vue.component("entity-diagnosis-log",{
+            delimiters: ['#{', '}#'],
+            props: {
+                model: Object,
+                entity: Object
+            },
+            data(){
+                return {
+                    editor:null,
+                    dt:{
+                        rows: [],
+                        selected: []
+                    },
+                    options: {
+                        entity: "",
+                        // 搜索窗口
+                        window: { name:"所有", value: [moment().add(-1,'hour').format('YYYY-MM-DD HH:mm'),moment().format('YYYY-MM-DD HH:mm')]},
+                        // 输入
+                        term: "",
+                        // 指定类
+                        class: "",
+                        // 指定api
+                        api: {parent: "log",name: "searchLogByTerm.js"},
+                        files:{
+                            value: [],
+                            list: []
+                        }
+                    },
+                    fileTree:{
+                        value: [],
+                        data:[],
+                        defaultProps: {
+                            children: 'children',
+                            label: 'label'
+                        }
+                    },
+                    control: {
+                        ifFullScreen:false,
+                        ifTable: true
+                    }
+                }
+            },
+            template:   `<el-container style="height: calc(100vh - 130px);">
+                            <el-header style="height: 42px;line-height: 42px;margin: 10px;padding: 0px 1px;background: #ddd;">
+                                <search-log-component :options="options" ref="searchRef" class="grid-content"></search-log-component>
+                            </el-header>
+                            <el-main style="margin:0 10px;padding:0px;width:96%;height:100%;border:1px solid #dddddd;" ref="main">
+                                <el-container style="height:100%;width:100%;">
+                                    <el-header style="height:41px;line-height:41px;background:#ffffff;text-align:right;border-bottom: 1px solid #ddd;display:flex;padding:0 5px;">
+                                        <span style="width:25%;text-align:left;color:#999999;">#{options.window.value | pickTimeRange}#</span>
+                                        <span style="width:75%;">
+                                            <el-select 
+                                                v-model="options.files.value" 
+                                                multiple
+                                                collapse-tags
+                                                style="margin-left: 20px;"
+                                                placeholder="请选择日志文件"
+                                                @change="onFileChange">
+                                                <el-option
+                                                    v-for="item in options.files.list"
+                                                    :key="item.label"
+                                                    :label="item.label"
+                                                    :value="item.label">
+                                                </el-option>
+                                            </el-select>
+                                            <el-tooltip content="切换视图" open-delay="500" placement="top-start">
+                                                <el-button type="text" :icon="control.ifTable | pickShowStyle" 
+                                                            @click="control.ifTable = !control.ifTable" style="width:18px;height:auto;">
+                                                </el-button>
+                                            </el-tooltip>
+                                            <el-tooltip content="全屏显示" open-delay="500" placement="top-start">
+                                                <el-button type="text" :icon="control.ifFullScreen | pickScreenStyle" 
+                                                            @click="onFullScreen" style="width:18px;height:auto;">
+                                                </el-button>
+                                            </el-tooltip>
+                                        </span>
+                                    </el-header>
+                                    <el-main style="padding:0px;height:100%;">
+                                        <el-container style="height:100%;" v-show="!control.ifTable">
+                                            <el-container style="width:100%;height:100%;">
+                                                <el-main style="padding:0px;width:100%;height:100%;" ref="editor"></el-main>
+                                            </el-container>
+                                        </el-container>
+                                        <el-container style="height:100%;" v-show="control.ifTable">
+                                            <el-main style="padding:0px;width:100%;height:100%;">
+                                                <el-table
+                                                    :data="dt.rows"
+                                                    highlight-current-row
+                                                    style="width: 100%"
+                                                    class="table">
+                                                    <el-table-column
+                                                        prop="time"
+                                                        label="时间戳"
+                                                        width="92">
+                                                    </el-table-column>
+                                                    <el-table-column
+                                                        prop="msg"
+                                                        label="事件">
+                                                        <template slot-scope="scope">
+                                                            <div style="color:rgba(0,0,0,0.5)">#{scope.row.file}#</div>
+                                                            <div>#{scope.row.msg}#</div>
+                                                        </template>
+                                                    </el-table-column>
+                                                    <el-table-column
+                                                        align="left"
+                                                        width="55">
+                                                        <template slot-scope="scope">
+                                                            <el-tooltip content="查看上下文" open-delay="500" placement="top-start">
+                                                                <el-button type="text" icon="el-icon-tickets"></el-button>
+                                                            </el-tooltip>
+                                                        </template>
+                                                    </el-table-column>
+                                                </el-table>
+                                                </template>
+                                            </el-main>
+                                        </el-container>
+                                    </el-main>
+                                </el-container>
+                            </el-main>
+                        </el-container>`,
+            filters: {
+                pickScreenStyle(evt){
+                    if(evt){
+                        return `el-icon-full-screen`;
+                    } else {
+                        return `el-icon-copy-document`;
+                    }
+                },
+                pickShowStyle(evt){
+                    if(evt){
+                        return `el-icon-s-grid`;
+                    } else {
+                        return `el-icon-tickets`;
+                    }
+                },
+                pickTimeRange(evt){
+                    try{
+                        return [moment(evt[0]).format('YYYY-MM-DD HH:mm:ss'),moment(evt[1]).format('YYYY-MM-DD HH:mm:ss')].join(" - ");
+                    } catch(err){
+                        return "";
+                    }
+                }
+            },
+            created(){
+                this.$set(this.options,'entity',this.entity.id);
+            },
+            mounted(){
+                this.$nextTick(()=>{
+                    
+                    this.$refs.searchRef.search();
+
+                    this.init();
+
+                    // watch数据更新
+                    this.$watch(
+                        "$refs.searchRef.result",(val, oldVal) => {
+                            this.onSetData(val);
+                        }
+                    );
+                })
+            },
+            methods: {
+                arrayToJson(data){
+                    
+                    this.dt.rows = _.map(data, (infoArray, index)=> {
+                        
+                        let valid = (new Date(infoArray[0])).getTime() > 0;
+                        let time = "";
+
+                        if(valid){
+                            time = moment(infoArray[0]).format(mx.global.register.format);
+                        }
+                        return {index: index+1, time: time, msg: infoArray.slice(3).join(", "), file:infoArray[1], num:infoArray[2]};
+                    });
+                    
+                },
+                arrayToCsv(data){
+                    
+                    let lineArray = [];
+                    _.forEach(data, (infoArray, index)=> {
+                        let valid = (new Date(infoArray[0])).getTime() > 0;
+                        
+                        if(valid){
+                            this.$set(infoArray, 0, moment(infoArray[0]).format(mx.global.register.format));
+                        }
+
+                        let line = infoArray.join(", ");
+                        lineArray.push(line);
+                    });
+                    
+                    return lineArray.join("\n");
+                    
+                },
+                init(){
+                    this.editor = ace.edit(this.$refs.editor.$el);
+                    this.editor.setOptions({
+                        // maxLines: 1000,
+                        // minLines: 20,
+                        autoScrollEditorIntoView: true,
+                        enableBasicAutocompletion: true,
+                        enableSnippets: true,
+                        enableLiveAutocompletion: false
+                    });
+                    
+                    this.editor.getSession().setMode("ace/mode/text");
+                    this.editor.setTheme("ace/theme/chrome");
+                    this.editor.getSession().setUseSoftTabs(true);
+                    this.editor.getSession().setTabSize(2);
+                    this.editor.getSession().setUseWrapMode(false);
+                    this.editor.renderer.setShowGutter(true);
+
+                    
+                    this.onSetData(this.model);
+
+                },
+                onSetData(data){
+                    
+                    let value = this.arrayToCsv(data.rows[0].logs);
+
+                    // ediotr
+                    this.editor.setValue(value);
+
+                    // rows
+                    this.arrayToJson(data.rows[0].logs);
+
+                    // fileTree
+                    let files = _.uniqBy(_.map(data.rows[0].logs,(v)=>{return {label:v[1], children:[]};}),'label');
+                    let values = _.map(files,'label');
+                    this.$set(this.options.files,'list', files);
+                    this.$set(this.options.files,'value', values);
+
+                    // mark && highlight
+                    let options = {
+                        "element": "span",
+                        "className": "el-button--warning",
+                        "separateWordSearch": true
+                    };
+                    let $ctx = $(".el-table table tr td");
+                    $ctx.unmark({
+                        done: ()=>{
+                            $ctx.mark(this.options.term.split(","), options);
+                        }
+                    });
+                      
+                },
+                onNodeClick(){
+
+                },
+                onFullScreen(){
+                    
+                    if(this.control.ifFullScreen){
+                        this.$root.$data.splitInst.setSizes([0,55,45]);
+                        this.control.ifFullScreen = false;   
+                        this.$refs.main.$el.style.width = "96%";
+                    } else {
+                        this.$root.$data.splitInst.setSizes([0,0,100]);
+                        this.control.ifFullScreen = true;
+                        this.$refs.main.$el.style.width = "98%";
+                    }   
+                },
+                onFileChange(val){
+                    // 一键搜索结构
+                    let term = {
+                        entity: this.options.entity,
+                        files: val,
+                        find: this.options.term,
+                        time: this.options.window.value
+                    };
+
+                    // 搜索
+                    let rtn = fsHandler.callFsJScript(`/matrix/${this.options.api.parent}/searchLogByFile.js`, encodeURIComponent(JSON.stringify(term))).message;
+
+                    // 结果
+                    this.onSetData(rtn);
+                }
+            }
+        })
+
         // 实体分析-性能 历史曲线图表
         Vue.component('performance-history-chart', {
             template: `<div style="width:100%;height:200px;" ref="chartContainer"></div>`,
             props:{
-                model:Object,
-                config: Object
+                model:Object
             },
             data(){
                 return {
@@ -2045,6 +2240,13 @@ class Topological {
                                 saveAsImage: {}
                             }
                         },
+                        grid: {
+                            top: '10%',
+                            left: '3%',
+                            right: '4%',
+                            bottom: '20%',
+                            containLabel: true
+                        },
                         xAxis: {
                             type: 'category',
                             data: []
@@ -2056,89 +2258,62 @@ class Topological {
                     }                            
                 }
             },
+            watch: {
+                model:{
+                    handler(val,oldVal){
+                        this.initData();
+                    },
+                    deep:true
+                }
+            },
             created(){
+                
+                // 初始化数据
+                this.initData();
+
                 // 接收窗体RESIZE事件
                 eventHub.$on("WINDOW-RESIZE-EVENT", this.checkChart);
             },
             mounted() {
                 this.init();
             },
-            watch: {
-                model: {
-                    handler: function (val,oldVal) {
-                        
-                    },
-                    deep:true
-                }
-            },
             methods: {
                 init(){
-                    this.initData();
                     this.chart = echarts.init(this.$el);
                     this.chart.setOption(this.option);
                 },
                 initData(){
-                    const self = this;
                     
-                    // 取实时数据的time作为xAxis
-                    this.option.xAxis.data = _.map(this.model.value.reverse(),function(v){
-                        return moment(v[mx.global.register.performance.chart.time]).format(self.config.step);
+                    let term = encodeURIComponent( JSON.stringify(this.model) );
+                    let rtn = fsHandler.callFsJScript("/matrix/performance/searchPerformanceByTerm.js",term).message;
+                    
+                    //取实时数据的time作为xAxis
+                    this.option.xAxis.data = _.map(rtn.reverse(),(v)=>{
+                        return moment(v[0]).format('YY-MM-DD HH:mm');
                     });
                     
-                    this.option.series = _.map(this.config.type,function(v){
-                        
-                        if(v=='value'){
-                            return {    
-                                name: v,
-                                data: _.map(self.model.value.reverse(), v),
-                                type: 'line',
-                                color: mx.global.register.performance.chart.color[v],
-                                markLine: {
-                                    data: [{
-                                        type: 'average',
-                                        name: '平均值'
-                                    }]
-                                },
-                                areaStyle: {
-                                    normal: {
-                                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
-                                            offset: 0,
-                                            color: mx.global.register.performance.chart.color[v]
-                                        }, {
-                                            offset: 0.9,
-                                            color: mx.global.register.performance.chart.color[v]
-                                        }], false),
-                                        shadowColor: mx.global.register.performance.chart.color[v],
-                                        shadowBlur: 10
-                                    }
-                                }
-                            }
-                        } else {
-                            if(!_.isEmpty(self.model.baseline)) {
-                                return  {
-                                    name: v,
-                                    data: _.map(self.model.baseline.reverse(), v=='avg'?'value':v),
-                                    type: 'line',
-                                    smooth: true,
-                                    color: mx.global.register.performance.chart.color[v],
-                                    areaStyle: {
-                                        normal: {
-                                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
-                                                offset: 0,
-                                                color: mx.global.register.performance.chart.color[v]
-                                            }, {
-                                                offset: 0.9,
-                                                color: mx.global.register.performance.chart.color[v]
-                                            }], false),
-                                            shadowColor: mx.global.register.performance.chart.color[v],
-                                            shadowBlur: 10
-                                        }
-                                    }
-                                }
+                    this.option.series = [{
+                        name: this.model.bucket + ' ' + this.model.key,
+                        data: _.map(rtn.reverse(),(v)=>{ return v[1];}),
+                        type: 'line',
+                        smooth:true,
+                        areaStyle: {
+                            normal: {
+                                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                    offset: 0,
+                                    color: 'rgba(194, 53, 68, .5)'
+                                }, {
+                                    offset: 1,
+                                    color: 'rgba(194, 53, 68, .1)'
+                                }])
                             }
                         }
-                        
-                    });
+                    }];
+
+                    if(this.$refs.chartContainer){
+                        this.chart.setOption(this.option);
+                    }
+                    console.log(this.model, this.model.bucket + ' ' + this.model.key, this.option)
                 },
                 checkChart(){
                     if(this.$refs.chartContainer){
@@ -2153,124 +2328,167 @@ class Topological {
         Vue.component("entity-diagnosis-performance",{
             delimiters: ['#{', '}#'],
             props: {
-                model:Object
+                model:Object,
+                entity: Object
             },
             data(){
                 return {
-                    result: null,
-                    options: {
-                        // 视图定义
-                        view: {
-                            eidtEnable: false,
-                            show: false,
-                            value: "all"
-                        },
-                        // 搜索窗口
-                        window: { name:"所有", value: ""},
-                        // 输入
-                        term: "",
-                        // 指定类
-                        class: "#/matrix/devops/alert/:",
-                        // 指定api
-                        api: {parent: "event",name: "event_list.js"},
-                        // 其它设置
-                        others: {
-                            // 是否包含历史数据
-                            ifHistory: false,
-                            // 是否包含Debug信息
-                            ifDebug: false,
-                            // 指定时间戳
-                            forTime:  ' for vtime ',
-                        }
-                    },
-                    baseLine: {
-                        type: {
-                            value: [],
-                            list: [{
-                                value: 'week',
-                                label: '周基线'
-                              }, {
-                                value: 'month',
-                                label: '月基线'
-                              }]
-                        }
-                    },
-                    trends: []
+                    kpi: {
+                        list: [],
+                        time: [moment().add(-1,'hour').format('yyyy-MM-dd HH:mm'),moment().format('yyyy-MM-dd HH:mm')],
+                        options: {
+                            shortcuts:[
+                                {
+                                    text: '最近15分钟',
+                                    onClick(picker) {
+                                        const end = new Date();
+                                        const start = new Date();
+                                        start.setTime(start.getTime() - 900 * 1000);
+                                        picker.$emit('pick', [start, end]);
+                                    }
+                                }, {
+                                    text: '最近30分钟',
+                                    onClick(picker) {
+                                        const end = new Date();
+                                        const start = new Date();
+                                        start.setTime(start.getTime() - 1800 * 1000);
+                                        picker.$emit('pick', [start, end]);
+                                    }
+                                }, {
+                                    text: '最近一小时',
+                                    onClick(picker) {
+                                        const end = new Date();
+                                        const start = new Date();
+                                        start.setTime(start.getTime() - 3600 * 1000 * 1);
+                                        picker.$emit('pick', [start, end]);
+                                    }
+                                }, {
+                                    text: '最近一天',
+                                    onClick(picker) {
+                                        const end = new Date();
+                                        const start = new Date();
+                                        start.setTime(start.getTime() - 3600 * 1000 * 24);
+                                        picker.$emit('pick', [start, end]);
+                                    }
+                                }, {
+                                    text: '最近七天',
+                                    onClick(picker) {
+                                        const end = new Date();
+                                        const start = new Date();
+                                        start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+                                        picker.$emit('pick', [start, end]);
+                                    }
+                                }
+                        ]}
+                    }
                 }
             },
             template: `<el-container style="height: calc(100vh - 120px);">
-                            <el-header style="height: 42px;line-height: 42px;margin: 10px;padding: 0px 1px;background: #ddd;">
-                                <search-base-component :options="options" ref="searchRef" class="grid-content"></search-base-component>
+                            <el-header style="height: 42px;line-height: 42px;margin: 10px;padding: 0px 1px;background: #ddd;display:flex;">
+                                <div style="width:9%;">
+                                    <el-popover
+                                        placement="bottom-end"
+                                        trigger="hover"
+                                        popper-class="info-popper"
+                                        :popper-options="{
+                                            boundariesElement:'body'
+                                        }">
+                                        <el-date-picker
+                                            v-model="kpi.time"
+                                            :picker-options="kpi.options"
+                                            type="datetimerange"
+                                            value-format="timestamp"
+                                            range-separator="至"
+                                            start-placeholder="开始日期"
+                                            end-placeholder="结束日期">
+                                        </el-date-picker>
+                                        <el-button slot="reference" icon="el-icon-timer" style="height:42px;margin-left:-1px;width:100%;"></el-button>
+                                    </el-popover>         
+                                </div>    
+                                <div style="width: 91.5%;margin-left: -1px;">
+                                    <mx-classkeys-number-cascader :root="entityClass" :value="null" multiplenable="true"  ref="bucketKeys"></mx-classkeys-number-cascader>
+                                </div>           
                             </el-header>
-                            <!--el-header style="height: 30px;padding: 5px;line-height: 20px;">
-                                <el-select v-model="baseLine.type.value" placeholder="选择基线" class="el-select">
-                                    <el-option
-                                    v-for="item in baseLine.type.list"
-                                    :key="item.value"
-                                    :label="item.label"
-                                    :value="item.value">
-                                    </el-option>
-                                </el-select>
-                            </el-header-->
-                            <el-main style="padding:10px 0px;">
-                                <div class="grid-stack">
+                            
+                            <el-main style="padding:10px;">
+                                <!--div class="grid-stack">
                                     <div class="grid-stack-item"
                                         data-gs-auto-position="true"
                                         data-gs-width="12" data-gs-height="3"
-                                        v-for="item,index in model.trends">
+                                        v-for="item,index in kpi.list"
+                                        :key="index">
                                             <div class="grid-stack-item-content" style="border:1px solid #f2f3f5;border-radius:5px;box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);">
                                                 <el-card class="box-card" style="width: 100%;height:100%;overflow:hidden;" >
                                                     <div slot="header" class="clearfix" style="padding:5px;">
-                                                        <span>#{item.param.param}#  历史性能 <small>#{item.title}#</small></span>
-                                                        <el-tooltip :content="item.detail">
-                                                            <span class="fas fa-question-circle"></span>
-                                                        </el-tooltip>    
-                                                        <!--el-tooltip content="设置">
-                                                            <a href="javascript:void(0);" class="btn btn-link" style="float: right; padding: 3px 0"><i class="fas fa-cog"></i></a>
-                                                        </el-tooltip-->
+                                                        <span>#{item.bucket}# <small>#{item.key}#</small></span>
                                                     </div>
-                                                    <performance-history-chart  :model="model.rows[item.value]" 
-                                                                                :config="item.config"></performance-history-chart>
+                                                    <performance-history-chart  :model="item"></performance-history-chart>
                                                 </el-card>
                                             </div>
                                     </div>
-                                </div>
-                                
+                                </div-->
+
+                                <el-card class="box-card" 
+                                    style="width: 100%;height:200px;overflow:hidden;box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04)" 
+                                    v-for="item,index in kpi.list"
+                                    :key="index">
+                                    <div slot="header" class="clearfix" style="padding:5px;">
+                                        <span>#{item.bucket}# / <small>#{item.key}#</small></span>
+                                    </div>
+                                    <performance-history-chart  :model="item"></performance-history-chart>
+                                </el-card>
                             
                             </el-main>
                         </el-container>`,
             created(){
-                if(this.model){
-                    this.result = this.model;
+                
+            },
+            watch: {
+                'kpi.time'(val,oldVal){
+                    _.forEach(this.kpi.list,(v)=>{
+                        this.$set(v,'time',val);
+                    })
+                    console.log(this.kpi.list)
+                }
+            },
+            computed:{
+                entityClass(){
+                    return fsHandler.callFsJScript("/matrix/graph/getClassNameById.js", encodeURIComponent(this.entity.id)).message;
                 }
             },
             mounted(){
-                _.delay(()=>{
-                    let grid = GridStack.init({
-                        resizable: {
-                            handles: 'e, se, s, sw, w'
-                        },
-                    });
-                    grid.on('gsresizestop', function(event, elem) {
-                        eventHub.$emit("WINDOW-RESIZE-EVENT");
-                    });
-                },500)
-
+               
                 // watch数据更新
                 this.$watch(
-                    "$refs.searchRef.result",(val, oldVal) => {
-                        this.setData();
+                    "$refs.bucketKeys.selected",{
+                        handler:(val, oldVal) => { 
+                            
+                            this.kpi.list = _.map(val,(v)=>{
+                                return {id: this.entity.id, class:this.entityClass, bucket: v[0], key: v[1], time: this.kpi.time};
+                            })
+
+                            // _.delay(()=>{
+                            //     let grid = GridStack.initAll({
+                            //         resizable: {
+                            //             handles: 'e, se, s, sw, w'
+                            //         },
+                            //     });
+                            //     grid.on('gsresizestop', function(event, elem) {
+                            //         eventHub.$emit("WINDOW-RESIZE-EVENT");
+                            //     });
+                            // },1500)
+
+                            console.log(this.kpi.list)
+                        },
+                        deep:true
                     }
                 );
+
+                
+
             },
             methods: {
-                setData(){
-                    if(_.isEmpty(this.$refs.searchRef.options.term)){
-                        this.$set(this.result,'rows',[]);    
-                    } else {
-                        this.result = this.$refs.searchRef.result;
-                    }
-                }
+                
             }
         });
 
@@ -2402,7 +2620,11 @@ class Topological {
                                                         </el-dropdown-menu>
                                                 </el-dropdown>
                                             </div>
-                                            <el-image style="width:34px;height:34px;margin:5px;" :src="item | pickIcon"></el-image>
+                                            <el-image style="width:34px;height:34px;margin:5px;" :src="item | pickIcon">
+                                                <div slot="error" class="image-slot">
+                                                    <i class="el-icon-tickets" style="font-size: 36px;color: #419efe;"></i>
+                                                </div>
+                                            </el-image>
                                             <div>
                                                 <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:center;">
                                                     #{item.name}#
@@ -2608,8 +2830,12 @@ class Topological {
                     }
                 },
                 onOrderCommand(cmd){
-                    let command = JSON.parse(cmd);
-                    this.model = _.orderBy(this.model,[command.prop],[command.type]);
+                    try {
+                        let command = _.attempt(JSON.parse.bind(null, cmd));
+                        this.model.rows = _.orderBy(this.model.rows,[command.prop],[command.type]);
+                    } catch(err){
+                        
+                    }
                 },
                 fileUpload(){
                     const self = this;
@@ -2961,19 +3187,21 @@ class Topological {
                                             </el-tooltip>
                                         </span>
                                         
+                                        <entity-diagnosis-alert :model="it.model[it.data]" v-if="it.type === 'alert' "></entity-diagnosis-alert>
+
+                                        <entity-diagnosis-performance :model="it.model[it.data]" :entity="item.node" v-if="it.type === 'performance'"></entity-diagnosis-performance>
+
+                                        <entity-diagnosis-log :model="it.model[it.data]" :entity="item.node" v-if="it.type === 'log'"></entity-diagnosis-log>
+
+                                        <entity-diagnosis-notes :model="item" v-if="it.type === 'notes'"></entity-diagnosis-notes>
+
+                                        <entity-diagnosis-file :id="it.name" :model="it.model[it.data]" :node="item.node" v-if="it.type === 'file'"></entity-diagnosis-file>
+
                                         <entity-diagnosis-form :model="it.model[it.data]" v-if="it.type === 'form'"></entity-diagnosis-form>
 
                                         <entity-diagnosis-list :model="it.model[it.data]" v-if="it.type === 'list'"></entity-diagnosis-list>
                                         
                                         <entity-diagnosis-profile :id="item.name" :model="it.model[it.data]" v-if="it.type === 'profile'"></entity-diagnosis-profile>
-                                        
-                                        <entity-diagnosis-alert :model="it.model[it.data]" v-if="it.type === 'alert' "></entity-diagnosis-alert>
-
-                                        <entity-diagnosis-performance :model="it.model[it.data]" v-if="it.type === 'history'"></entity-diagnosis-performance>
-
-                                        <entity-diagnosis-notes :model="item" v-if="it.type === 'notes'"></entity-diagnosis-notes>
-
-                                        <entity-diagnosis-file :id="it.name" :model="it.model[it.data]" :node="item.node" v-if="it.type === 'file'"></entity-diagnosis-file>
 
                                         <div v-if="it.type === 'new'"></div>
                                         
@@ -3015,7 +3243,7 @@ class Topological {
             watch: {
                 'tabs.list':function(val,oldVal){
                     if(val.length > 0){
-                        this.$root.$data.splitInst.setSizes([0,70,30]);
+                        this.$root.$data.splitInst.setSizes([0,55,45]);
                         $(".gutter").show();
                     } else {
                         this.$root.$data.splitInst.setSizes([0,100,0]);
@@ -3075,7 +3303,7 @@ class Topological {
                         highlight.highlight(graph.view.getState(node.cell));
                         
                         // 隐藏工具栏
-                        this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.model.control.show = false;
+                        this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.model.control.toolbar.show = false;
                     }
                     
                 },
@@ -3102,7 +3330,7 @@ class Topological {
                         
                     } finally{
                         // 隐藏工具栏
-                        this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.model.control.show = true;
+                        this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.model.control.toolbar.show = true;
                     }
                     
                     
@@ -3229,6 +3457,7 @@ class Topological {
                             "event-summary-component",
                             "search-preset-component",
                             "search-base-component",
+                            "search-log-component",
                             "entity-tree-component",
                             "md-editor-component",
                             "form-component",
@@ -3349,6 +3578,9 @@ class Topological {
                             return {
                                 'display': 'none'
                             }
+                        },
+                        onDragEnd: function(sizes) {
+                            eventHub.$emit("WINDOW-RESIZE-EVENT");
                         }
                     });
                 },1500)

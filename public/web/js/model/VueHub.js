@@ -44,6 +44,7 @@ setInterval(()=>{
     $(".el-popover--plain").addClass("el-popover el-popper");
     $(".el-date-editor--timerange.el-range-editor--small").addClass("el-date-editor el-range-editor el-input__inner");
     $(".el-input.el-input--small.el-date-editor--time-select").addClass("el-date-editor");
+    $(".el-date-editor--datetimerange.el-range-editor--small").addClass("el-date-editor el-range-editor el-input__inner el-date-editor--datetimerange");
     $(".has-time").addClass("el-picker-panel el-date-range-picker el-popper");
     $(".el-dialog__wrapper.transition.ElDialog").removeClass("transition ElDialog");
     $(".el-message-box__wrapper").removeClass("transition");

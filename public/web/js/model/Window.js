@@ -295,6 +295,7 @@ class Window {
         this.lrwh[3] = this.height * 0.55;
 
         let win = $.jsPanel({
+            id: `jsPanel-${title}`,
             theme:        maxWindow.theme.dark,
             headerTitle:  title,
             contentSize:  {width: this.lrwh[2], height: this.lrwh[3]},
@@ -307,6 +308,10 @@ class Window {
             headerControls: { controls: '' },
             headerRemove:  false,
             content:        template,
+            draggable: {
+                handle:  "div.jsPanel-hdr, div.jsPanel-ftr,header.jsPanel-control,.el-main",
+                opacity: 0.8
+            },
             callback:       function(){
                 $(".jsPanel").css({
                     "position":"absoulate",
