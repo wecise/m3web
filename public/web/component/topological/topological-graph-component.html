@@ -1467,6 +1467,8 @@
                     
                     this.initGraph();
                     this.graphEvent(this.model.editor.graph);
+                    // 设置主题
+                    this.setTheme(this.model.graph.theme.color);
 
                 }
             },
@@ -3538,8 +3540,7 @@
                     },500)
 
                     // 选择节点突出显示
-                    let cStyle = [[mxConstants.STYLE_PERIMETER_SPACING,8]];
-                    this.setCellStyle(cell, cStyle);
+                    graph.setCellStyles(mxConstants.STYLE_PERIMETER_SPACING, 8, [cell]);
                 } catch(err){
                     
                     // 当前画布中不包含该实体
@@ -3636,6 +3637,7 @@
                 }
 
             },
+            // 图自适应并居中显示
             toCenter(immediate){
                 const self = this;
 
@@ -3746,6 +3748,7 @@
                 let preview = new mxPrintPreview(this.model.editor.graph, scale);
                 preview.open();
             },
+            // 设置主题色
             setTheme(bgColor){
 
                 $("body").css({
@@ -3756,55 +3759,48 @@
                     "backgroundColor":"transparent"
                 });
 
-                let cStyle = [
-                                [mxConstants.STYLE_FONTCOLOR,this.setThemeFont(bgColor)],                
-                                [mxConstants.STYLE_STROKECOLOR,this.setThemeFont(bgColor)]
-                            ];
+                let vertices = this.model.editor.graph.getChildVertices(this.model.editor.graph.getDefaultParent());
+                let edges = this.model.editor.graph.getChildEdges(this.model.editor.graph.getDefaultParent());
+                let bgColorReverse = this.setThemeFont(bgColor);
                 
-                _.forEach(cStyle,(v)=>{
-                    this.setCellsStyle(v);
-                })
+                this.model.editor.graph.setCellStyles(mxConstants.STYLE_FONTCOLOR, bgColorReverse, vertices);
+                this.model.editor.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, bgColorReverse, vertices);
 
+                this.model.editor.graph.setCellStyles(mxConstants.STYLE_FONTCOLOR, bgColorReverse, edges);
+                this.model.editor.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, bgColorReverse, edges);
+                
                 localStorage.setItem(`GRAPH-VIEW-THEME-${window.SignedUser_UserName}`,bgColor);
             },
-            setCellsStyle(cStyle){
-                
-                this.model.editor.graph.escape();
+            // 根据主题获取前景色
+            setThemeFont(hexcolor){
+                try{
 
-                let cells = this.model.editor.graph.getChildVertices(this.model.editor.graph.getDefaultParent());
-                let edges = this.model.editor.graph.getChildEdges(this.model.editor.graph.getDefaultParent());
-                
-                if (cells != null && cells.length > 0){
-                    _.forEach(cells,(v)=>{
-                        let style = this.model.editor.graph.getModel().getStyle(v);
-                        let newStyle = mxUtils.setStyle(style, cStyle[0], cStyle[1]);
-                        let cs = [];
-                        cs[0] = v;
-                        this.model.editor.graph.setCellStyle(newStyle,cs);
-                    })
+                    // If a leading # is provided, remove it
+                    if (hexcolor.slice(0, 1) === '#') {
+                        hexcolor = hexcolor.slice(1);
+                    }
+
+                    // If a three-character hexcode, make six-character
+                    if (hexcolor.length === 3) {
+                        hexcolor = hexcolor.split('').map(function (hex) {
+                            return hex + hex;
+                        }).join('');
+                    }
+
+                    // Convert to RGB value
+                    var r = parseInt(hexcolor.substr(0,2),16);
+                    var g = parseInt(hexcolor.substr(2,2),16);
+                    var b = parseInt(hexcolor.substr(4,2),16);
+
+                    // Get YIQ ratio
+                    var yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+
+                    // Check contrast
+                    return (yiq >= 128) ? 'inherit' : '#efefef';
+
+                } catch(err){
+                    return 'inherit';
                 }
-
-                if (edges != null && edges.length > 0){
-                    _.forEach(edges,(v)=>{
-                        let style = this.model.editor.graph.getModel().getStyle(v);
-                        let newStyle = mxUtils.setStyle(style, cStyle[0], cStyle[1]);
-                        let cs = [];
-                        cs[0] = v;
-                        this.model.editor.graph.setCellStyle(newStyle,cs);
-                    })
-                }
-            },
-            setCellStyle(cell,cStyle){
-                
-                this.model.editor.graph.escape();
-
-                let style=this.model.editor.graph.getModel().getStyle(cell);
-                _.forEach(cStyle,(v)=>{
-                    let newStyle=mxUtils.setStyle(style, v[0], v[1]);
-                    let cs= new Array();
-                    cs[0]=cell;
-                    this.model.editor.graph.setCellStyle(newStyle,cs);
-                })
 
             },
             // 节点排列
@@ -3858,37 +3854,6 @@
                     graph.getModel().endUpdate();
                 }
             
-            },
-            setThemeFont(hexcolor){
-                try{
-
-                    // If a leading # is provided, remove it
-                    if (hexcolor.slice(0, 1) === '#') {
-                        hexcolor = hexcolor.slice(1);
-                    }
-
-                    // If a three-character hexcode, make six-character
-                    if (hexcolor.length === 3) {
-                        hexcolor = hexcolor.split('').map(function (hex) {
-                            return hex + hex;
-                        }).join('');
-                    }
-
-                    // Convert to RGB value
-                    var r = parseInt(hexcolor.substr(0,2),16);
-                    var g = parseInt(hexcolor.substr(2,2),16);
-                    var b = parseInt(hexcolor.substr(4,2),16);
-
-                    // Get YIQ ratio
-                    var yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-
-                    // Check contrast
-                    return (yiq >= 128) ? 'inherit' : '#efefef';
-
-                } catch(err){
-                    return 'inherit';
-                }
-
             },
             // 图放大
             onZoomIn(){
@@ -4167,6 +4132,7 @@
                     this.model.editor.execute('undo');
                 }
             },
+            // 保存关系类型
             onSaveEdgeType(){
                 
                 let term = encodeURIComponent( JSON.stringify(_.extend(this.entity.newEdgeType.model, {action: "create"})) );
