@@ -153,6 +153,117 @@ class ProbeHandler {
         })
         return rtn;
     };
+    
+    /* 
+        Deploy depot to zabbix agent
+    */
+    deployToZabbixAgent(depot){
+        let rtn = null;
+        
+        let form = new FormData();
+        form.append('hosts', depot.hosts);
+        form.append('name',  depot.name);
+        form.append('version', depot.version);
+        form.append('key', depot.key);
+        form.append('command', depot.commmand);
+
+        jQuery.ajax({
+            url: '/monitoring/zabbix/deploy',
+            type: "POST",
+            dataType: 'json',
+            processData: false,
+            contentType: false,
+            mimeType: 'multipart/form-data',
+            data: form,
+            async:false,
+            complete: function(xhr, textStatus) {
+            },
+            success: function(data, textStatus, xhr) {
+
+                userHandler.ifSignIn(data);
+
+                if( _.lowerCase(data.status) == "ok"){
+                    rtn = 1;
+                }
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                return xhr.responseText;
+            }
+        })
+        return rtn;
+    };
+    
+    /*
+        Undeploy depot to zabbix agent
+    */
+    deployToZabbixAgent(depot){
+        let rtn = null;
+        
+        let form = new FormData();
+        form.append('hosts', depot.hosts);
+        form.append('depots', depot.depots);
+        form.append('versions', depot.version);
+
+        jQuery.ajax({
+            url: '/monitoring/zabbix/undeploy',
+            type: "POST",
+            dataType: 'json',
+            processData: false,
+            contentType: false,
+            mimeType: 'multipart/form-data',
+            data: form,
+            async:false,
+            complete: function(xhr, textStatus) {
+            },
+            success: function(data, textStatus, xhr) {
+
+                userHandler.ifSignIn(data);
+
+                if( _.lowerCase(data.status) == "ok"){
+                    rtn = 1;
+                }
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                return xhr.responseText;
+            }
+        })
+        return rtn;
+    };
+    
+    /*  
+        Start Stop Restart zabbix agent
+    */
+    zabbixAgentAction(depot){
+        let rtn = null;
+        
+        let form = new FormData();
+        form.append('hosts', depot.hosts);
+
+        jQuery.ajax({
+            url: `/monitoring/zabbix/${deopt.action}`,
+            type: "POST",
+            dataType: 'json',
+            processData: false,
+            contentType: false,
+            mimeType: 'multipart/form-data',
+            data: form,
+            async:false,
+            complete: function(xhr, textStatus) {
+            },
+            success: function(data, textStatus, xhr) {
+
+                userHandler.ifSignIn(data);
+
+                if( _.lowerCase(data.status) == "ok"){
+                    rtn = 1;
+                }
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                return xhr.responseText;
+            }
+        })
+        return rtn;
+    }; 
 
 }
 

@@ -148,7 +148,6 @@ class Event {
                                                                 <el-form-item v-for="v,k in props.row" :label="k" :key="k">
                                                                     <el-input :type="k,metaColumns | pickType" :value="moment(v).format(mx.global.register.format)"  v-if="pickFtype(k) == 'timestamp'"></el-input>
                                                                     <el-input :type="k,metaColumns | pickType" :value="moment(v).format('YYYY-MM-DD')"  v-else-if="pickFtype(k) == 'date'"></el-input>
-                                                                    <el-input :type="k,metaColumns | pickType" :rows="6" :value="arrayToCsv(v)"  v-else-if="pickFtype(k) == 'bucket'"></el-input>
                                                                     <el-input :type="k,metaColumns | pickType" :rows="6" :value="JSON.stringify(v,null,4)"  v-else-if="_.includes(['map','set','list'],pickFtype(k))"></el-input>
                                                                     <el-input :type="k,metaColumns | pickType" :value="v"  v-else></el-input>
                                                                 </el-form-item>

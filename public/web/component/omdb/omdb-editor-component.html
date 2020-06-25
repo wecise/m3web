@@ -89,6 +89,15 @@
         .gutter {
             border: 1px solid rgb(235, 235, 235);
         }
+
+        .info-popper{
+            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            background: #fff;
+            padding: 10px;
+            outline: unset;
+        }
+
 	</style>
 
 	
@@ -134,6 +143,33 @@
                         <el-button type="text" :class="'pull-right editor-select-theme-'+objectHash.sha1(id)"><i class="fas fa-tshirt"></i></el-button>
                     </el-tooltip>
                     <el-button type="text" :icon="control.ifFullScreen | pickScreenStyle" style="float:right;" @click="onFullScreen"></el-button>
+                    <el-popover
+                        placement="bottom-end"
+                        trigger="click"
+                        width="480"
+                        popper-class="info-popper"
+                        :popper-options="{ boundariesElement: 'body', gpuAcceleration: false }"
+                        style="padding-right:8px;">
+                        <el-row :gutter="20">
+                            <el-col :span="12">
+                                <el-input
+                                    type="textarea"
+                                    :autosize="{ minRows: 2, maxRows: 4}"
+                                    placeholder="请输入需要转换的时间"
+                                    v-model="control.timeTranslate.bValue">
+                                </el-input>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-input
+                                    type="textarea"
+                                    :autosize="{ minRows: 2, maxRows: 4}"
+                                    placeholder="转换结果"
+                                    v-model="control.timeTranslate.eValue">
+                                </el-input>
+                            </el-col>
+                        </el-row>
+                        <el-button slot="reference" type="text" icon="el-icon-timer"></el-button>
+                    </el-popover>
 				</el-button-group>
 			</el-header>
 			<el-main :id="id" style="padding:0px;" ref="editor"></el-main>
@@ -159,7 +195,11 @@
                 inputText: "",
                 result: null,
                 control: {
-                    ifFullScreen: false
+                    ifFullScreen: false,
+                    timeTranslate: {
+                        bValue: "",
+                        eValue: ""
+                    }
                 }
             }
         },
@@ -187,6 +227,25 @@
                     self.editor.setValue(val);
                 },
                 deep:true
+            },
+            'control.timeTranslate.bValue'(val,oldVal){
+                if(!_.isEmpty(val)){
+                    
+                    try{
+                        let arr = val.split(/\r?\n/);
+                        let tmp = _.map(arr,(v)=>{
+                            if(_.startsWith(v,15)){
+                                return moment(Number(v)).format(mx.global.register.format);
+                            } else {
+                                return moment(v).format(mx.global.register.format);
+                            }
+                            
+                        });
+                        this.control.timeTranslate.eValue = tmp.join("\n");
+                    } catch(err){
+                        console.log(err)
+                    }
+                }
             }
 
         },
@@ -414,6 +473,16 @@
                         message: _list.message,
                         showClose: true
                     })
+                    
+                    self.result = { id:self.id, bid: self.bid, type: 'table-update', data: [], columns: [], rootclass:""};
+                    // 更新当前实例
+                    self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
+                                                                        type: 'omdb-query-output-console',
+                                                                        name: self.id+'-output-table',
+                                                                        title: `结果_TABLE_${moment().format("LT")}`,
+                                                                        model: self.result
+                                                                    });
+
                     // 输出日志
                     self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].logAppend('error',_list);
 	                return false;

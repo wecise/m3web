@@ -82,24 +82,17 @@
 					</el-card>
 				</el-option>
 			</el-select>
-			<!--搜索框-->
-			<el-autocomplete class="inline-input" placeholder="搜索" 
-							v-model="options.term" 
-							:fetch-suggestions="onFetchSuggestions"
-							:trigger-on-focus="false"
-							@select="search"
-							@clear="search"
-							clearable
-							autofocus></el-autocomplete>
-			<!--搜索条件预设置-->
-			<!--search-preset-component :options.sync='options' ref="preSetRef"></search-preset-component-->
+
 			<el-popover
-				placement="bottom-start"
-				trigger="hover"
+				placement="bottom-end"
+				trigger="click"
 				popper-class="info-popper"
 				:popper-options="{
-					boundariesElement:'body'
-				}">
+					boundariesElement:'viewport',
+					boundariesPadding: 5,
+					preventOverflowOrder: ['left', 'right', 'top', 'bottom']
+				}"
+				@show="onShowDatePicker">
 				<div class="block">
 					<el-date-picker
 						v-model="timePicker.range"
@@ -109,11 +102,25 @@
 						range-separator="至"
 						start-placeholder="开始日期"
 						end-placeholder="结束日期"
-						align="right">
+						align="right"
+						ref="datePicker">
 					</el-date-picker>
 				</div>
 				<el-button slot="reference" icon="el-icon-timer" style="height:42px;margin-left:-1px;width:100%;"></el-button>
 			</el-popover> 
+			<!--搜索框-->
+			<el-autocomplete class="inline-input" placeholder="搜索关键字" 
+							v-model="options.term" 
+							:fetch-suggestions="onFetchSuggestions"
+							:trigger-on-focus="false"
+							@select="search"
+							@clear="search"
+							clearable
+							autofocus
+							style="margin-left:-2px;"></el-autocomplete>
+			<!--搜索条件预设置-->
+			<!--search-preset-component :options.sync='options' ref="preSetRef"></search-preset-component-->
+			
 			<!--快速过滤条件设置-->
 
 			<!--搜索按钮-->
@@ -249,10 +256,10 @@
 				//是否启用自动搜索
 				if(!this.options.autoSearch){
 					if(_.isEmpty(this.options.term)) {
-						this.$message({
-							type: "info",
-							message: "请确定搜索关键字！"
-						})
+						// this.$message({
+						// 	type: "info",
+						// 	message: "请确定搜索关键字！"
+						// })
 						return false;
 					}	
 				}
@@ -284,6 +291,9 @@
 			resetTerm(){
 				this.preset.term = "";
 				this.search();
+			},
+			onShowDatePicker(){
+				this.$refs.datePicker.focus();
 			}
 
 	    }

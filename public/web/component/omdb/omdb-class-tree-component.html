@@ -314,22 +314,10 @@
                 });
 
                 $("#omdb-class-tree").contextMenu({
-                    selector: 'span.edge.more',
+                    selector: 'span.edge.parent.more',
                     trigger: 'left',
                     items: {
 
-                        "edgeNew": {
-                            name: "新建关系类型", icon: "fas fa-plus", callback: function (key, opt) {
-
-                                self.$root.mainTabsAdd({ type: 'omdb-query-console',
-                                                                    name: self.selectedNode.title,
-                                                                    title: self.selectedNode.name,
-                                                                    model: { pattern: 'create-edge-type', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
-                                                                });
-                            }
-                        },
-
-                        "sep1": "---------",
                         "删除": {
                             name: "删除关系类型", icon: "fas fa-trash", callback: function (key, opt) {
 
@@ -341,15 +329,46 @@
                             }
                         },
                         "sep2": "---------",
-                        "G": {
-                            name: "查询", icon: "fas fa-database", callback: function (key, opt) {
+                        "INSERT": {
+                            name: "新建关系", icon: "fas fa-database", callback: function (key, opt) {
                                 self.$root.mainTabsAdd({ type: 'omdb-query-console',
                                                                     name: self.selectedNode.title,
                                                                     title: self.selectedNode.name,
-                                                                    model: { pattern: 'edge-g', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
+                                                                    model: { pattern: 'edge-insert', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
                                                                 });
                             }
                         },
+                        "UPDATE": {
+                            name: "更改关系", icon: "fas fa-database", callback: function (key, opt) {
+                                self.$root.mainTabsAdd({ type: 'omdb-query-console',
+                                                                    name: self.selectedNode.title,
+                                                                    title: self.selectedNode.name,
+                                                                    model: { pattern: 'edge-update', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
+                                                                });
+                            }
+                        }
+                    },
+                    events: {
+                        show: function(opt) {
+                            // this is the trigger element
+                            var $this = this;
+                            // import states from data store
+                            $.contextMenu.setInputValues(opt, $this.data());
+                        },
+                        hide: function(opt) {
+                            // this is the trigger element
+                            var $this = this;
+                            // export states to data store
+                            $.contextMenu.getInputValues(opt, $this.data());
+                        }
+                    }
+                });
+
+                $("#omdb-class-tree").contextMenu({
+                    selector: 'span.edge.leaf.more',
+                    trigger: 'left',
+                    items: {
+
                         "INSERT": {
                             name: "新建关系", icon: "fas fa-database", callback: function (key, opt) {
                                 self.$root.mainTabsAdd({ type: 'omdb-query-console',
@@ -509,6 +528,38 @@
 
                     zTree.addNodes(nodes[0], _.map(_nodes,function(v){return _.merge(v,{rtype:'A3'})}));
 
+                    // 右键菜单
+                    let sObj = $("#" + treeNode.tId + "_span");
+                    let scObj = $("#" + treeNode.tId + "_a").find(".count");
+
+                    if (treeNode.editNameFlag || $("#addBtn_"+treeNode.tId).length>0) return;
+
+                    let addStr =   `<div class="well edge-toolbars" id='toolbars_${treeNode.tId}' >
+                                        <span class='button edge add' id='addBtn_${treeNode.tId}' title='新建' ></span>
+										<span class='button edge parent more' id='moreBtn_${treeNode.tId}' title='更多'  ></span>
+								    </div>`;
+
+                    if(scObj.length > 0){
+                        scObj.after(addStr);
+                    } else {
+                        sObj.after(addStr);
+                    }
+
+                    // add
+                    let btnAdd = $("#addBtn_"+treeNode.tId);
+                    
+                    if (btnAdd) btnAdd.bind("click", function(event){
+                        event.stopPropagation();
+                        event.preventDefault();
+
+                        self.$root.mainTabsAdd({ type: 'omdb-query-console',
+                                                    name: treeNode.title,
+                                                    title: treeNode.name,
+                                                    model: { pattern: 'create-edge-type', node: treeNode, pnode: treeNode.getParentNode() }
+                                                });
+
+                    });
+
                     return;
 
                 }
@@ -612,8 +663,8 @@
                     if (treeNode.editNameFlag || $("#addBtn_"+treeNode.tId).length>0) return;
 
                     let addStr =   `<div class="well edge-toolbars" id='toolbars_${treeNode.tId}' >
-										<span class='button edge console' id='consoleBtn_${treeNode.tId}' title='查询' ></span>
-										<span class='button edge more' id='moreBtn_${treeNode.tId}' title='更多'  ></span>
+                                        <span class='button edge remove' id='delBtn_${treeNode.tId}' title='删除'></span>
+										<span class='button edge leaf more' id='moreBtn_${treeNode.tId}' title='更多'  ></span>
 								    </div>`;
 
                     if(scObj.length > 0){
@@ -622,22 +673,22 @@
                         sObj.after(addStr);
                     }
 
-                    // console
-                    let btnConsole = $("#consoleBtn_"+treeNode.tId);
-                    if (btnConsole) btnConsole.bind("click", function(event){
-
+                    // delete
+                    let delAdd = $("#delBtn_"+treeNode.tId);
+                    
+                    if (delAdd) delAdd.bind("click", function(event){
                         event.stopPropagation();
                         event.preventDefault();
 
                         self.$root.mainTabsAdd({ type: 'omdb-query-console',
-                                                name: treeNode.title,
-                                                title: treeNode.name,
-                                                model: { pattern: 'select-edge', node: treeNode, pnode: treeNode.getParentNode() }
-                                            });
+                                                    name: treeNode.title,
+                                                    title: treeNode.name,
+                                                    model: { pattern: 'drop-edge-type', node: treeNode, pnode: treeNode.getParentNode() }
+                                                });
 
                     });
 
-
+                    
                     // more
                     let btnMore = $("#moreBtn_"+treeNode.tId);
                     if (btnMore) btnMore.bind("click", function(event){

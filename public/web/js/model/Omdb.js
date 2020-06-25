@@ -1140,7 +1140,8 @@ class Omdb{
                                     @selection-change="onSelectionChange"
                                     fit="true"
                                     size="mini"
-                                    ref="table">
+                                    ref="table"
+                                    v-if="!_.isEmpty(dt.rows)">
                                     
                                     <el-table-column type="index" label="序号" sortable align="center">
                                         <template slot-scope="scope">
@@ -1209,6 +1210,13 @@ class Omdb{
                                         </template>
                                     </el-table-column>
                                 </el-table>
+                                <div style="padding:20px;" v-else>
+                                    <h4>很抱歉，没有找到相关的记录。</h4>
+                                    <p>温馨提示：  
+                                    请检查您的输入是否正确
+                                    如有任何意见或建议，请及时反馈给我们。
+                                    </p>
+                                </div>
                             </el-main>
                             <el-footer  style="height:30px;line-height:30px;">
                                 #{ info.join(' &nbsp; | &nbsp;') }#
@@ -1324,18 +1332,22 @@ class Omdb{
                 },
                 arrayToCsvByLocal(data,index){
                     
-                    _.forEach(this.dt.rows[index][data], (infoArray, index)=> {
-                        let valid = (new Date(infoArray[0])).getTime() > 0;
-                        
-                        if(valid){
-                            if(typeof infoArray[0] == 'string'){
-                                this.$set(infoArray, 0, moment(infoArray[0]).valueOf());
-                            } else {
-                                this.$set(infoArray, 0, moment(infoArray[0]).format(mx.global.register.format));
-                            }
+                    try{
+                        _.forEach(this.dt.rows[index][data], (infoArray, index)=> {
+                            let valid = (new Date(infoArray[0])).getTime() > 0;
                             
-                        }
-                    });
+                            if(valid){
+                                if(typeof infoArray[0] == 'string'){
+                                    this.$set(infoArray, 0, moment(infoArray[0]).valueOf());
+                                } else {
+                                    this.$set(infoArray, 0, moment(infoArray[0]).format(mx.global.register.format));
+                                }
+                                
+                            }
+                        });
+                    } catch(err){
+                        console.log(err)
+                    }
                     
                 },
                 pickFtype(key){
@@ -1622,9 +1634,9 @@ class Omdb{
                     } else if(self.model.pattern === 'g') {  // edge  query
                         mql = `g.V(" ").In("${self.model.node.title}").All();`;
                     } else if(self.model.pattern === 'create-edge-type') {  // edge  new edge type
-                        mql = `CREATE EDGE TYPE  type_name 'type_remedy';`;
+                        mql = `CREATE EDGE TYPE IF NOT EXISTS type_name 'type_remedy';`;
                     } else if(self.model.pattern === 'drop-edge-type') {  // edge drop edge type
-                        mql = `DROP EDGE TYPE ${self.model.node.title};`;
+                        mql = `DROP EDGE TYPE IF EXISTS ${self.model.node.title};`;
                     } else if(self.model.pattern === 'edge-insert') {  // edge  create
                         mql = `INSERT INTO class_name id="",${self.model.node.title}=[""];`;
                     } else if(self.model.pattern === 'edge-update') {  // edge  update

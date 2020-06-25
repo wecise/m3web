@@ -109,6 +109,7 @@ class GroupHandler {
             url: `/group/${event.gtype}/${event.name}`,
             dataType: 'json',
             type: 'DELETE',
+            async: false,
             beforeSend:function(xhr){
             },
             complete: function(xhr, textStatus) {

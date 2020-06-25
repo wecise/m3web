@@ -859,11 +859,10 @@ class Topological {
             },
             methods: {
                 onDragStart(item,event){
-                    //event.target.style.opacity = .5;
                     event.dataTransfer.setData("Text",JSON.stringify(item));
                 },
                 onDragEnd(event){
-                    //event.target.style.opacity = 1;
+                    
                 },
                 onSearch(){
                     this.$refs.searchRef.onSearch();
@@ -898,10 +897,13 @@ class Topological {
                                 type: "info",
                                 message: "没有匹配数据！"
                             })
+
+                            this.search.result = [];
+
                             return false;
                         }
 
-                        this.search.result = entitys;//this.search.term ? entitys.filter(this.createStateFilter(this.search.term)) : entitys;
+                        this.search.result = entitys;
 
                         this.search.result = _.map(this.search.result,(v)=>{
                             return _.extend(v,{cell: {edge:false}});
@@ -984,7 +986,7 @@ class Topological {
                                     </el-col>
                                 </el-row>
                                 <el-divider content-position="left">历史</el-divider>
-                                <el-row style="height: 100%;overflow: auto;margin-top: 10px;">
+                                <el-row style="height: calc(100% - 130px);overflow: auto;margin-top: 10px;">
                                     <el-col :span="24" v-for="item in history" style="display:flex;flex-wrap:nowrap;">
                                         <el-popover
                                             placement="top-start"
@@ -1021,6 +1023,7 @@ class Topological {
                             </el-main>
                             <el-footer style="height:30px;line-height:30px;padding:0 5px;color:#999999;">
                                 <el-button type="text" icon="el-icon-delete" @click="onDeleteAllHistory">清空历史</el-button>
+                                <el-button type="text" icon="el-icon-s-platform" @click="onSetDefault({value:''})">取消默认图例</el-button>
                             </el-footer>
                         </div>`,
             created(){
@@ -1691,93 +1694,74 @@ class Topological {
             },
             data(){
                 return {
-                    result: null,
-                    options: {
-                        // 视图定义
-                        view: {
-                            eidtEnable: false,
-                            show: false,
-                            value: "all"
-                        },
-                        // 搜索窗口
-                        window: { name:"所有", value: ""},
-                        // 输入
-                        term: "",
-                        // 指定类
-                        class: "#/matrix/devops/alert/call/:",
-                        // 指定api
-                        api: {parent: "call",name: "call_list.js"},
-                        // 其它设置
-                        others: {
-                            // 是否包含历史数据
-                            ifHistory: false,
-                            // 是否包含Debug信息
-                            ifDebug: false,
-                            // 指定时间戳
-                            forTime:  ' for vtime ',
-                        }
+                    
+                }
+            },
+            computed:{
+                metaColumns(){
+                    try{
+                        return this.model.columns;
+                    } catch(err){
+                        return [];
                     }
                 }
             },
-            template:   `<el-container style="height: calc(100vh - 120px);">
-                            <el-header style="height: 42px;line-height: 42px;margin: 10px;padding: 0px 1px;background: #ddd;">
-                                <search-base-component :options="options" ref="searchRef" class="grid-content"></search-base-component>
-                            </el-header>
+            template:   `<el-container style="height: calc(100vh - 140px);">
                             <el-main style="padding:10px;">
-                                <el-card :style="item | pickBgStyle" 
-                                    v-for="item in result.rows" :key="item.id"
-                                    v-if="result.rows">
-                                    <span class="el-icon-warning" :style="item | pickStyle"></span>
-                                    <p>名称:#{item.name}#</p>
-                                    <p>位置:#{item.location}#</p>
-                                    <p>联系:#{item.oppositenumber}#</p>
-                                    <p>告警时间：#{moment(item.vtime).format("LLL")}#</p>
-                                    <p>电话：#{item.phonenumbe}#</p>
-                                    <el-button type="text" @click="onClick(item)">详细</el-button>
+                                <el-card v-for="item in model.rows" :key="item.id"
+                                    v-if="model.rows"
+                                    style="background: linear-gradient(to top, rgba(247,247,247, 1), rgb(255, 255, 255));
+                                        border: 1px solid rgb(247, 247, 247);
+                                        border-radius: 5px;
+                                        box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px 0px;
+                                        line-height: 1.5;">
+                                    <el-form label-position="right" label-width="120px">
+                                        <el-form-item v-for="v,k in item" :label="k,metaColumns | pickTitle" :key="k">
+                                            <el-input :type="k,metaColumns | pickType" :value="moment(v).format(mx.global.register.format)"  v-if="pickFtype(k) == 'timestamp'"></el-input>
+                                            <el-input :type="k,metaColumns | pickType" :value="moment(v).format('YYYY-MM-DD')"  v-else-if="pickFtype(k) == 'date'"></el-input>
+                                            <el-input :type="k,metaColumns | pickType" :rows="6" :value="arrayToCsv(v)"  v-else-if="pickFtype(k) == 'bucket'"></el-input>
+                                            <el-input :type="k,metaColumns | pickType" :rows="6" :value="JSON.stringify(v,null,4)"  v-else-if="_.includes(['map','set','list'],pickFtype(k))"></el-input>
+                                            <el-input :type="k,metaColumns | pickType" :value="v"  v-else></el-input>
+                                        </el-form-item>
+                                    </el-form>
                                 </el-card>
+                                <el-divider><i class="el-icon-arrow-down"></i></el-divider>
                             </el-main>
                         </el-container>`,
             filters: {
-                pickBgStyle(item){
-                    let hexToRgba = function(hex, opacity) {
-                        var RGBA = "rgba(" + parseInt("0x" + hex.slice(1, 3)) + "," + parseInt("0x" + hex.slice(3, 5)) + "," + parseInt( "0x" + hex.slice(5, 7)) + "," + opacity + ")";
-                        return {
-                            red: parseInt("0x" + hex.slice(1, 3)),
-                            green: parseInt("0x" + hex.slice(3, 5)),
-                            blue: parseInt("0x" + hex.slice(5, 7)),
-                            rgba: RGBA
-                        }
-                    };
-                    let rgbaColor = hexToRgba(mx.global.register.event.severity[item.severity][2],0.1).rgba;
-                    return `background:linear-gradient(to top, ${rgbaColor}, rgb(255,255,255));border: 1px solid rgb(247, 247, 247);border-radius: 5px;box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px 0px;line-height:1.5;`;
+                pickTitle(key,columns){
+                    
+                    try{
+                        return _.find(columns,{name:key}).title;
+                    } catch(err){
+                        return key;
+                    }
+
                 },
-                pickStyle(item) {
-                    return `color:${mx.global.register.event.severity[item.severity][2]};font-size:40px;float:right;`;
+                pickType(key,columns){
+                    let rtn = 'text';
+                    try{
+                        let type = _.find(columns,{name:key}).type;
+                        if(_.includes(['map','list','set','bucket'],type)){
+                            rtn = 'textarea';
+                        }
+                    } catch(err){
+                        rtn = 'input';
+                    }
+
+                    return rtn;
                 }
             },
-            created(){
-                this.result = this.model;
-            },
-            mounted(){
-                // watch数据更新
-                this.$watch(
-                    "$refs.searchRef.result",(val, oldVal) => {
-                        this.setData();
-                    }
-                );
-            },
             methods: {
-                onClick(item){
-                    let term = item.id;
-                    let url = `/matrix/event?term=${window.btoa(encodeURIComponent(term))}`;
-                    window.open(url,'_blank');
-                },
-                setData(){
-                    if(_.isEmpty(this.$refs.searchRef.options.term)){
-                        this.$set(this.result,'rows',[]);    
-                    } else {
-                        this.result = this.$refs.searchRef.result;
+                pickFtype(key){
+                            
+                    let rtn = 'string';
+                    try{
+                        rtn = _.find(this.metaColumns,{name:key}).type;
+                    } catch(err){
+                        return rtn;
                     }
+                    return rtn;
                 }
             }
         })
@@ -1965,6 +1949,11 @@ class Topological {
                         files:{
                             value: [],
                             list: []
+                        },
+                        pagination: {
+                            offset: 1,
+                            limit: 10,
+                            total: 0
                         }
                     },
                     fileTree:{
@@ -2016,14 +2005,14 @@ class Topological {
                                             </el-tooltip>
                                         </span>
                                     </el-header>
-                                    <el-main style="padding:0px;height:100%;">
+                                    <el-main style="padding:0px;height:100%;overflow:hidden;">
                                         <el-container style="height:100%;" v-show="!control.ifTable">
                                             <el-container style="width:100%;height:100%;">
                                                 <el-main style="padding:0px;width:100%;height:100%;" ref="editor"></el-main>
                                             </el-container>
                                         </el-container>
                                         <el-container style="height:100%;" v-show="control.ifTable">
-                                            <el-main style="padding:0px;width:100%;height:100%;">
+                                            <el-main style="padding:0px;width:100%;height:100%;overflow:hidden;">
                                                 <el-table
                                                     :data="dt.rows"
                                                     highlight-current-row
@@ -2039,7 +2028,7 @@ class Topological {
                                                         label="事件">
                                                         <template slot-scope="scope">
                                                             <div style="color:rgba(0,0,0,0.5)">#{scope.row.file}#</div>
-                                                            <div>#{scope.row.msg}#</div>
+                                                            <div v-html='markByTerm(scope.row.msg)'></div>
                                                         </template>
                                                     </el-table-column>
                                                     <el-table-column
@@ -2054,6 +2043,19 @@ class Topological {
                                                 </el-table>
                                                 </template>
                                             </el-main>
+                                            <el-footer style="height:30px;line-height:30px;">
+                                                <div class="block">
+                                                    <el-pagination
+                                                        @size-change="onSizeChange"
+                                                        @current-change="onCurrentChange"
+                                                        :current-page.sync="options.pagination.offset"
+                                                        :page-sizes="[10, 20, 30, 50]"
+                                                        :page-size="options.pagination.limit"
+                                                        layout="total, prev, pager, next, sizes"
+                                                        :total="options.pagination.total">
+                                                    </el-pagination>
+                                                </div>
+                                            </el-footer>
                                         </el-container>
                                     </el-main>
                                 </el-container>
@@ -2082,15 +2084,23 @@ class Topological {
                     }
                 }
             },
+            watch:{
+                'options.pagination.total'(val,oldVal){
+                    //重新搜索后，定位到第一页
+                    this.$set(this.options.pagination, 'offset', 1);
+                    this.$refs.searchRef.search();
+                }
+            },
             created(){
                 this.$set(this.options,'entity',this.entity.id);
             },
             mounted(){
                 this.$nextTick(()=>{
                     
-                    this.$refs.searchRef.search();
-
                     this.init();
+
+                    // 首次搜索
+                    // this.$refs.searchRef.search();
 
                     // watch数据更新
                     this.$watch(
@@ -2101,17 +2111,34 @@ class Topological {
                 })
             },
             methods: {
+                markByTerm(str){
+                    let finalStr = str;
+                    let term = this.options.term.split(",");
+                    
+                    _.forEach(term,(v)=>{
+                        
+                        if(_.isEmpty(v)) return;
+
+                        let reg = new RegExp(v, 'gim');
+                        finalStr = finalStr.replace(reg, function(s){ return '<mark style="padding:3px;">'+s+'</mark>'; });
+                    })
+
+                    return finalStr;
+                },
                 arrayToJson(data){
                     
-                    this.dt.rows = _.map(data, (infoArray, index)=> {
+                    this.$set(this.dt,'rows',[]);
+
+                    _.forEach(data, (v, index)=> {
                         
-                        let valid = (new Date(infoArray[0])).getTime() > 0;
+                        let valid = (new Date(v[0])).getTime() > 0;
                         let time = "";
 
                         if(valid){
-                            time = moment(infoArray[0]).format(mx.global.register.format);
+                            time = moment(v[0]).format(mx.global.register.format);
                         }
-                        return {index: index+1, time: time, msg: infoArray.slice(3).join(", "), file:infoArray[1], num:infoArray[2]};
+                        console.log(v.slice(3), v )
+                        this.dt.rows.push( {index: index+1, time: time, msg: v.slice(3).join(", "), file:v[1], num:v[2]} );
                     });
                     
                 },
@@ -2154,12 +2181,26 @@ class Topological {
                     this.onSetData(this.model);
 
                 },
+                onSizeChange(val) {
+                    console.log(`每页 ${val} 条`);
+                    this.$set(this.options.pagination,'limit',val);
+                    this.$refs.searchRef.search();
+                },
+                onCurrentChange(val) {
+                    console.log(`当前页: ${val}`);
+                    this.$refs.searchRef.search();
+                },
                 onSetData(data){
                     
+                    // 记录总数
+                    this.$set(this.options.pagination, 'total', data.count);
+
                     let value = this.arrayToCsv(data.rows[0].logs);
 
                     // ediotr
-                    this.editor.setValue(value);
+                    if(this.editor){
+                        this.editor.setValue(value);
+                    }
 
                     // rows
                     this.arrayToJson(data.rows[0].logs);
@@ -2170,18 +2211,15 @@ class Topological {
                     this.$set(this.options.files,'list', files);
                     this.$set(this.options.files,'value', values);
 
-                    // mark && highlight
-                    let options = {
-                        "element": "span",
-                        "className": "el-button--warning",
-                        "separateWordSearch": true
-                    };
-                    let $ctx = $(".el-table table tr td");
-                    $ctx.unmark({
-                        done: ()=>{
-                            $ctx.mark(this.options.term.split(","), options);
-                        }
-                    });
+                    // // mark && highlight
+                    // _.delay(()=>{
+                    //     window.$ctx = $(".el-table table");   
+                    //     window.$ctx.unmark({
+                    //         done: ()=>{
+                    //             window.$ctx.mark(this.options.term.split(","), {});
+                    //         }
+                    //     });
+                    // },5000)
                       
                 },
                 onNodeClick(){
@@ -2205,7 +2243,8 @@ class Topological {
                         entity: this.options.entity,
                         files: val,
                         find: this.options.term,
-                        time: this.options.window.value
+                        time: this.options.window.value,
+                        pagination: [this.options.pagination[0] * this.options.pagination[1],this.options.pagination[1]]
                     };
 
                     // 搜索
@@ -2297,14 +2336,15 @@ class Topological {
                         data: _.map(rtn.reverse(),(v)=>{ return v[1];}),
                         type: 'line',
                         smooth:true,
+                        color: 'rgba(108, 212, 11, 1)',
                         areaStyle: {
                             normal: {
                                 color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
                                     offset: 0,
-                                    color: 'rgba(194, 53, 68, .5)'
+                                    color: 'rgba(108, 212, 11, .5)'
                                 }, {
                                     offset: 1,
-                                    color: 'rgba(194, 53, 68, .1)'
+                                    color: 'rgba(108, 212, 11, .1)'
                                 }])
                             }
                         }
@@ -2388,11 +2428,12 @@ class Topological {
                                 <div style="width:9%;">
                                     <el-popover
                                         placement="bottom-end"
-                                        trigger="hover"
+                                        trigger="click"
                                         popper-class="info-popper"
                                         :popper-options="{
                                             boundariesElement:'body'
-                                        }">
+                                        }"
+                                        @show="onShowDatePicker">
                                         <el-date-picker
                                             v-model="kpi.time"
                                             :picker-options="kpi.options"
@@ -2400,13 +2441,18 @@ class Topological {
                                             value-format="timestamp"
                                             range-separator="至"
                                             start-placeholder="开始日期"
-                                            end-placeholder="结束日期">
+                                            end-placeholder="结束日期"
+                                            ref="datePicker">
                                         </el-date-picker>
                                         <el-button slot="reference" icon="el-icon-timer" style="height:42px;margin-left:-1px;width:100%;"></el-button>
                                     </el-popover>         
                                 </div>    
                                 <div style="width: 91.5%;margin-left: -1px;">
-                                    <mx-classkeys-number-cascader :root="entityClass" :value="null" multiplenable="true"  ref="bucketKeys"></mx-classkeys-number-cascader>
+                                    <mx-classkeys-number-string-cascader 
+                                        :root="entityClass" 
+                                        :value="null" 
+                                        multiplenable="true" 
+                                        :entitys="[entity.id]" ref="bucketKeys"></mx-classkeys-number-string-cascader>
                                 </div>           
                             </el-header>
                             
@@ -2488,7 +2534,9 @@ class Topological {
 
             },
             methods: {
-                
+                onShowDatePicker(){
+                    this.$refs.datePicker.focus();
+                }
             }
         });
 
@@ -2556,7 +2604,7 @@ class Topological {
                     }
                 },
                 newNote(){
-                    let attr = {remark: '', ctime: _.now(), author: window.SignedUser_UserName};
+                    let attr = {remark: '', author: window.SignedUser_UserName};
                     let rtn = fsHandler.fsNew(this.note.ftype, this.note.parent, this.note.name, this.model.title, attr);
                     this.note.content = this.model.title;
                 },
@@ -2860,6 +2908,7 @@ class Topological {
                                         <el-main>
                                             <el-upload drag
                                                 multiple
+                                                :data="{index:true}"
                                                 :action="upload.url"
                                                 :on-success="onSuccess"
                                                 list-type="text"
@@ -2905,68 +2954,181 @@ class Topological {
                     let rtn = fsHandler.callFsJScript("/matrix/graph/update-files-by-id.js", encodeURIComponent(JSON.stringify(fs))).message;
                     _.delay(()=>{ this.reload() },1000);
                 },                     
-                openIt(item, path){
-                    const self = this;
-    
-                    if(typeof(item) === 'string' || item.ftype === 'dir'){
-                        self.rootPath = path.replace(/\/\//g,'/');
-                        return;
-                    }
-    
-                    if(!_.isEmpty(item)){
-    
-                        if(_.includes(['png','jpg','jpeg','gif'], item.ftype)) {
-    
-    
-                            let contents = `<img src="/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}" class="preview-img-responsive center-block" alt="Image">`;
-                            let _wnd = maxWindow.winApp(item.name, contents, null,null);
-    
-                        } else if(_.includes(['mov','mp4','avi'], item.ftype)) {
-    
-                            let contents = `<div class="embed-responsive embed-responsive-16by9">
-                                                <video src="/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}" controls="controls" autoplay>
-                                                    your browser does not support the video tag
-                                                </video>
-                                            </div>
-                                            `;
-    
-                            let _wnd = maxWindow.winApp(item.name, contents, null,null);
-    
-                        } else if(_.includes(['pdf'], item.ftype)) {
-    
-                            let contents = `<div class="embed-responsive embed-responsive-16by9">
-                                                <iframe class="embed-responsive-item" src="/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}"></iframe>
-                                            </div>`;
-    
-                            let _wnd = maxWindow.winApp(item.name, contents, null,null);
-    
-                        } else if(_.includes(['pptx','ppt'], item.ftype)) {
-    
-                            window.open(`/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}`, "_blank");
-    
-                        } else if(_.includes(['js','ltsv','txt','csv','html'], item.ftype)) {
-    
-                           self.editIt(item);
-    
-                        } else if(_.includes(['swf'], item.ftype)) {
-                            let contents = `<div class="embed-responsive embed-responsive-16by9">
-                                                <video src="/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}" width="100%" height="100%" controls="controls" autoplay>
-                                                    Your browser does not support the video tag.
-                                                </video>
-                                            </div>`;
-    
-                            let _wnd = maxWindow.winApp(item.name, contents, null,null);
-                        } else if(_.includes(['imap','iflow', 'ishow'], item.ftype)) {
-                            _.merge(item,{action:'run'});
-                            let url = fsHandler.genFsUrl(item,null,null);
-                            window.open(url,'_blank');
-                        } else if(_.includes(['md'], item.ftype)){
-                            _.merge(item,{action:'run'});
-    
-                            let url = fsHandler.genFsUrl(item,{ header:true, sidebar:true, footbar:true },null);
-    
-                            window.open(url,'_blank');
+                openIt(data, path){
+                    
+                    try{
+                        if(_.includes(['md','txt'],data.ftype)){
+                            
+                            let wnd = null;
+
+                            try{
+                                if(jsPanel.activePanels.getPanel(`jsPanel-${data.name}`)){
+                                    jsPanel.activePanels.getPanel(`jsPanel-${data.name}`).close();
+                                }
+                            } catch(error){
+
+                            }
+                            finally{
+                                wnd = maxWindow.winApp(data.name, `<div id="mdView"></div>`, null,null);
+                            }
+
+                            new Vue({
+                                delimiters: ['#{', '}#'],
+                                data: {
+                                    model: null,
+                                    item: data
+                                },
+                                template: `<el-container style="width:100%;height:100%;">
+                                                <el-main style="overflow:hidden;padding:0px;">
+                                                    <knowledge-view :model="model" ref="viewRef" v-if="!_.isEmpty(model)"></knowledge-view>
+                                                </el-main>
+                                                <el-footer style="height:30px;line-height:30px;">
+                                                    <span><i class="el-icon-user"></i> #{item | pickAuthor}#</span>
+                                                    <el-divider direction="vertical"></el-divider>
+                                                    发布于 #{ item | pickTime }#
+                                                </el-footer>
+                                            </el-container>`,
+                                filters:{
+                                    pickTime(item){
+        
+                                        try{
+                                            let ctime = item.ctime;//_.attempt(JSON.parse.bind(null, item.attr)).ctime || item.vtime;
+                                            return moment(ctime).format(mx.global.register.format);
+                                        } catch(err){
+                                            return moment(item.vtime).format(mx.global.register.format);
+                                        }
+                                    },
+                                    pickAuthor(item){
+                                        try{
+                                            return _.attempt(JSON.parse.bind(null, item.attr)).author || window.SignedUser_UserName;
+                                        } catch(err){
+                                            return window.SignedUser_UserName;
+                                        }
+                                    },
+                                },
+                                created(){
+                                    this.model = {item:data, content:fsHandler.fsContent(data.parent, data.name)};
+                                }
+                            }).$mount("#mdView");
+                            
+                        } else if(_.includes(['pdf'],data.ftype)){
+                            let contents = `<section class="is-vertical el-container" style="width:100%;height:100%;">
+                                                <main class="el-main" style="overflow:hidden;padding:0px;">
+                                                    <iframe src="/fs${data.fullname}?type=open&issys=${window.SignedUser_IsAdmin}" style="width: 100%;height: 100%;" frameborder="0"></iframe>
+                                                </main>
+                                                <footer class="el-footer" style="height:30px;line-height:30px;"></footer>
+                                            </section>`;
+
+                            let wnd = maxWindow.winApp(data.name, contents, null,null);
+                        } else if(_.includes(['png','gif','jpg','jpeg'],data.ftype)){
+                            
+                            let wnd = maxWindow.winApp(data.name, `<div id="picView"></div>`, null,null);
+                            new Vue({
+                                delimiters: ['#{', '}#'],
+                                data: {
+                                    item: data,
+                                    loading: true,
+                                    url: `/fs${data.fullname}?type=open&issys=${window.SignedUser_IsAdmin}`,
+                                    srcList: [`/fs${data.fullname}?type=open&issys=${window.SignedUser_IsAdmin}`]
+                                },
+                                template: `<el-container style="width:100%;height:100%;">
+                                                <el-main style="overflow:hidden;background:#333333;">
+                                                    <el-image 
+                                                        v-loading="loading"
+                                                        style="width: 100%; height: 100%"
+                                                        :src="url" 
+                                                        :preview-src-list="srcList"
+                                                        @load="loading=false"
+                                                        @error="loading=false">
+                                                    </el-image>
+                                                </el-main>
+                                                <el-footer style="height:30px;line-height:30px;">
+                                                    <span><i class="el-icon-user"></i> #{item | pickAuthor}#</span>
+                                                    <el-divider direction="vertical"></el-divider>
+                                                    发布于 #{ item | pickTime }#
+                                                </el-footer>
+                                            </el-container>`,
+                                filters:{
+                                    pickTime(item){
+        
+                                        try{
+                                            let ctime = item.ctime;//_.attempt(JSON.parse.bind(null, item.attr)).ctime || item.vtime;
+                                            return moment(ctime).format(mx.global.register.format);
+                                        } catch(err){
+                                            return moment(item.vtime).format(mx.global.register.format);
+                                        }
+                                    },
+                                    pickAuthor(item){
+                                        try{
+                                            return _.attempt(JSON.parse.bind(null, item.attr)).author || window.SignedUser_UserName;
+                                        } catch(err){
+                                            return window.SignedUser_UserName;
+                                        }
+                                    },
+                                },
+                                created(){
+                                    this.model = {item:data, content:fsHandler.fsContent(data.parent, data.name)};
+                                }
+                            }).$mount("#picView");
+
+                        } else if(_.includes(['mov','mp3','mp4','wav','swf'],data.ftype)){
+                            
+                            let wnd = maxWindow.winApp(data.name, `<div id="movView"></div>`, null,null);
+
+                            new Vue({
+                                delimiters: ['#{', '}#'],
+                                data: {
+                                    item: data,
+                                    url: `/fs${data.fullname}?type=open&issys=${window.SignedUser_IsAdmin}`
+                                },
+                                template: `<el-container style="width:100%;height:100%;">
+                                                <el-main style="overflow:hidden;background:#333333;">
+                                                    <video :src="url" width="100%" height="100%" 
+                                                        controls="controls" autoplay
+                                                        style="background-image: url(/fs/assets/images/files/png/matrix.png?type=open&issys=true);
+                                                                background-repeat: no-repeat;
+                                                                background-position-x: center;
+                                                                background-position-y: center;">
+                                                        Your browser does not support the video tag.
+                                                    </video>
+                                                </el-main>
+                                                <el-footer style="height:30px;line-height:30px;">
+                                                    <span><i class="el-icon-user"></i> #{item | pickAuthor}#</span>
+                                                    <el-divider direction="vertical"></el-divider>
+                                                    发布于 #{ item | pickTime }#
+                                                </el-footer>
+                                            </el-container>`,
+                                filters:{
+                                    pickTime(item){
+        
+                                        try{
+                                            let ctime = item.ctime;//_.attempt(JSON.parse.bind(null, item.attr)).ctime || item.vtime;
+                                            return moment(ctime).format(mx.global.register.format);
+                                        } catch(err){
+                                            return moment(item.vtime).format(mx.global.register.format);
+                                        }
+                                    },
+                                    pickAuthor(item){
+                                        try{
+                                            return _.attempt(JSON.parse.bind(null, item.attr)).author || window.SignedUser_UserName;
+                                        } catch(err){
+                                            return window.SignedUser_UserName;
+                                        }
+                                    },
+                                },
+                                created(){
+                                    this.model = {item:data, content:fsHandler.fsContent(data.parent, data.name)};
+                                }
+                            }).$mount("#movView");
+
+                        } else {
+                            let url = `/fs/${data.fullname}?type=download&issys=true`;
+                            window.open(url,"_blank");
                         }
+                    } catch(err){
+
+                    } finally{
+                        
                     }
     
                 },

@@ -370,7 +370,7 @@ class SideBar {
                                             menu-trigger="hover">
                                         <el-submenu index="2">
                                             <template slot="title">
-                                                #{window.SignedUser_UserName}#
+                                                <i class="el-icon-user-solid" style="color:#ffffff;"></i> #{window.SignedUser_UserName}#
                                             </template>
                                             <el-menu-item index="user">
                                                 <template slot="title">

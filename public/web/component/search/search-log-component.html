@@ -62,11 +62,12 @@
 		<div style="display:flex;width:100%;" class="search-base">
 			<el-popover
 				placement="bottom-end"
-				trigger="hover"
+				trigger="click"
 				popper-class="info-popper"
 				:popper-options="{
 					boundariesElement:'body'
-				}">
+				}"
+				@show="onShowDatePicker">
 				<el-date-picker
 					v-model="options.window.value"
 					:picker-options="timePicker.options"
@@ -74,7 +75,8 @@
 					value-format="timestamp"
 					range-separator="至"
 					start-placeholder="开始日期"
-					end-placeholder="结束日期">
+					end-placeholder="结束日期"
+					ref="datePicker">
 				</el-date-picker>
 				<el-button slot="reference" icon="el-icon-timer" style="height:42px;margin-left:-1px;width:100%;"></el-button>
 			</el-popover> 
@@ -86,7 +88,8 @@
 							@select="search"
 							@clear="search"
 							clearable
-							autofocus></el-autocomplete>
+							autofocus
+							style="margin-left: -2px;"></el-autocomplete>
 			<!--搜索条件预设置-->
 			<!--search-preset-component :options.sync='options' ref="preSetRef"></search-preset-component--> 
 			<!--快速过滤条件设置-->
@@ -152,6 +155,14 @@
 									start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
 									picker.$emit('pick', [start, end]);
 								}
+							}, {
+								text: '最近30天',
+								onClick(picker) {
+									const end = new Date();
+									const start = new Date();
+									start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+									picker.$emit('pick', [start, end]);
+								}
 							}
 					]}
 				}
@@ -193,11 +204,13 @@
 			search(){
 
 				// 一键搜索结构
+				let offset = this.options.pagination.offset == 1?0:(this.options.pagination.offset - 1) * this.options.pagination.limit;
                 let term = {
                     entity: this.options.entity,
                     files: this.options.files.value,
                     find: this.options.term,
-                    time: this.options.window.value
+					time: this.options.window.value,
+					pagination: [offset,this.options.pagination.limit]
 				};
 
 			    // 搜索
@@ -209,6 +222,9 @@
 			resetTerm(){
 				this.preset.term = "";
 				this.search();
+			},
+			onShowDatePicker(){
+				this.$refs.datePicker.focus();
 			}
 
 	    }

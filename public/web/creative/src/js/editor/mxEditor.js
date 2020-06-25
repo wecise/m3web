@@ -1579,8 +1579,7 @@ mxEditor.prototype.execute = function (actionname, cell, evt)
 		}
 		catch (e)
 		{
-			mxUtils.error('Cannot execute ' + actionname +
-				': ' + e.message, 280, true);
+			// mxUtils.error('Cannot execute ' + actionname + ': ' + e.message, 280, true);
 			
 			throw e;
 		}

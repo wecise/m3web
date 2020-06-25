@@ -309,7 +309,7 @@ class Window {
             headerRemove:  false,
             content:        template,
             draggable: {
-                handle:  "div.jsPanel-hdr, div.jsPanel-ftr,header.jsPanel-control,.el-main",
+                handle:  "div.jsPanel-hdr, div.jsPanel-ftr,header.jsPanel-control,.el-header,.el-footer",
                 opacity: 0.8
             },
             callback:       function(){

@@ -86,6 +86,7 @@ class FsHandler {
         fm.append("data", content);
         fm.append("type", ftype);
         fm.append("attr", JSON.stringify(attr));
+        fm.append("index", true);
 
         jQuery.ajax({
             url: _url,
@@ -97,7 +98,6 @@ class FsHandler {
             data: fm,
             async:false,
             beforeSend: function(xhr) {
-                // Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -451,21 +451,25 @@ class FsHandler {
     */
     fsUpdateAttr(path, name, attr) {
         let rtn = null;
-
+        
         let parent = path.replace(/\/\//g,'/');
         let _url = `/fs${parent}/${name}?type=attr`;
+        console.log(path,_url)
 
         if(window.SignedUser_IsAdmin){
             _url += '&issys=true';
         }
+        let form = new FormData();
+        form.append("attr", JSON.stringify(attr));
 
         jQuery.ajax({
             url: _url,
             dataType: 'json',
             type: 'PUT',
-            data: {
-                attr: JSON.stringify(attr)
-            },
+            processData: false,
+            contentType: false,
+            mimeType: 'multipart/form-data',
+            data: form,
             async:false,
             beforeSend: function (xhr) {
                 // Pace.restart();

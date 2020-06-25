@@ -125,11 +125,11 @@
                         <el-tooltip content="关闭" open-delay="500">
                             <el-button type="text" icon="el-icon-close" style="float:right;padding-left:10px;" @click="onClose"></el-button>
                         </el-tooltip>
-                        <el-tooltip content="全屏显示" open-delay="500" placement="left">
+                        <!--el-tooltip content="全屏显示" open-delay="500" placement="left">
                             <el-button type="text" :icon="control.ifFullScreen | pickScreenStyle" 
                                         @click="onFullScreen" style="float:right;">
                             </el-button>
-                        </el-tooltip>
+                        </el-tooltip-->
                     </div>
                 </el-header>
                 <el-main style="width:100%;height:100%;padding:0px;display: flex;overflow: hidden;">
@@ -233,16 +233,15 @@
             },
             'timeline.pickDate':function(val,oldVal){
                 this.setTimelineRange();
+                
+                // 自定义时间轴
+                this.setCustomTimeline();
             },
             'timeline.pickRange':function(val,oldVal){
                 this.setTimelineRange();
             },
             'timeline.showDiff':function(val,oldVal){
-                if(!val){
-                    this.timeline.inst.removeCustomTime(this.timeline.id);
-                } else {
-                    this.setCustomTimeline();
-                }
+                this.setCustomTimeline();
             }
         },
         created(){
@@ -267,10 +266,15 @@
                         let props = this.timeline.inst.getEventProperties(properties.event)
                         this.onClick(props);
                     });
-                    // this.timeline.inst.on("doubleClick",(properties)=> {
-                    //     let props = this.timeline.inst.getEventProperties(properties.event)
-                    //     this.onClick(props);
-                    // });
+                    this.timeline.inst.on("doubleClick",(properties)=> {
+                        let eventProps = this.timeline.inst.getEventProperties(properties.event);
+                        if (eventProps.what === 'custom-time') {
+                            this.timeline.inst.removeCustomTime(this.timeline.id);
+                        } else {
+                            this.setCustomTimeline();
+                        }
+                        
+                    });
                 },50)
                 
             })
@@ -338,7 +342,7 @@
             },
             setCustomTimeline(){
                 
-                let customDate = moment(this.timeline.pickDate).format("YYYY-MM-DD HH:MM:SS");
+                let customDate = moment(this.timeline.pickDate).format("YYYY-MM-DD HH:mm:ss");
                 let id = this.timeline.id;
                 try {                    
                     // 删除自定义时间点
@@ -396,24 +400,6 @@
                     });
                     this.timeline.items.add(items);
                 })
-                // _.delay(()=>{
-                //     _.forEach(this.tree.diagnosisData,(v,k)=>{
-                    
-                //         _.forEach(v,(val)=>{
-                //             if(val.id){
-                //                 let id = val.id;
-                //                 new Vue({
-                //                     data: {
-                //                         src: id,
-                //                     },
-                //                     template: `<form-card-component :term="src" cHeight="20" style="width:auto;height:auto;"></form-card-componetn>`
-                //                 }).$mount(`#timeline_${objectHash.sha1(id)}`)
-                //             }
-                //         });
-                        
-                //     })
-                // },2000)
-
                 this.timeline.inst.redraw();
 
             },
@@ -453,15 +439,39 @@
                 
             },
             onClick(props){
-                
+                const self = this;
                 try{
                     let timeline = this.timeline.inst;
                     
-                    let id = this.timeline.pickDate = moment(props.time.toString()).format("YYYY-MM-DD HH:MM:SS");
+                    let id = this.timeline.pickDate = moment(props.time.toString()).format("YYYY-MM-DD HH:mm:ss");
                     
-                    let oldTerm = this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.$refs.searchToolbar.term.split(" diff ");
-                    oldTerm[1] = `'${id}'`;
-                    let term = oldTerm.join(" diff ")
+                    let backOrDiff = this.timeline.showDiff ? ' diff ' : ' back '; 
+                    
+                    // 查询match语句
+                    let getMatchStr = function(){
+                        let match = self.$root.$refs.graphViewRef.$refs.graphViewContainerInst.$refs.searchToolbar.term;
+                        let matchStr = {
+                            match: [match],
+                            back: match.split(" back "),
+                            diff: match.split(" diff ")
+                        };
+                        try{
+                            if(_.size(matchStr.back) > 1){
+                                return [matchStr.back[0]];
+                            } else if(_.size(matchStr.diff) > 1){
+                                return [matchStr.diff[0]];
+                            } else {
+                                return matchStr.match;
+                            }
+                        }catch(err){
+                            return matchStr.match;
+                        }
+                    };
+
+                    let matchStr = getMatchStr();
+                    
+                    matchStr[1] = `'${id}'`;
+                    let term = matchStr.join(backOrDiff);
                     
                     this.$message({
                         type: "info",

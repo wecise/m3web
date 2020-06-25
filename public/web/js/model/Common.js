@@ -661,8 +661,12 @@ Vue.component("mx-fs-info",{
                                         <el-input type="textarea" v-model="model.attr.remark"></el-input>
                                     </el-form-item>
 
+                                    <el-form-item label="创建时间">
+                                        <el-input :value="model.ctime | toLocalTime" disabled></el-input>
+                                    </el-form-item>
+
                                     <el-form-item label="更新时间">
-                                        <el-input :value="model.attr.ctime | toLocalTime" disabled></el-input>
+                                        <el-input :value="model.mtime | toLocalTime" disabled></el-input>
                                     </el-form-item>
 
                                     <el-form-item label="目录">
@@ -782,7 +786,7 @@ Vue.component("mx-fs-info",{
             return `/fs${item.parent}/${item.name}?type=open&issys=${window.SignedUser_IsAdmin}`;
         },
         toLocalTime(value) {
-            return moment(value).format("YYYY-MM-DD HH:MM:SS");
+            return moment(value).format(mx.global.register.format);
         }
     },
     methods: {
@@ -1835,6 +1839,82 @@ Vue.component("mx-classkeys-number-cascader",{
     }
 })
 
+/* Common Class Keys Number & String Select Cascader By ClassName */
+Vue.component("mx-classkeys-number-string-cascader",{
+    delimiters: ['#{', '}#'],
+    props: {
+        root: String,
+        multiplenable: {
+            default:false,
+            type:Boolean
+        },
+        value: Object,
+        entitys:Array
+    },
+    data(){
+        return {
+            options: [],
+            defaultProps: {multiple: false },
+            selected: null
+        }
+    },
+    template:   `<el-cascader
+                    :value="value"
+                    :options="options"
+                    :props="defaultProps"
+                    @change="onChange"
+                    collapseTags
+                    clearable
+                    filterable
+                    style="width:100%;">
+                    <template slot-scope="{ node, data }">
+                        <span>#{ data.label }#</span>
+                        <span v-if="!node.isLeaf"> (#{ data.children.length }#) </span>
+                        <span style="color:#999999;font-size:10px;text-align:right;" v-else>#{ data.ftype }#</span>
+                    </template>
+                </el-cascader>`,
+    watch:{
+        root(val,oldVal){
+            this.initData();
+        }
+    },
+    created(){
+        this.defaultProps.multiple = this.multiplenable;
+        this.initData();
+    },
+    methods: {
+        initData(){
+            let term = {
+                class: this.root,
+                entitys: this.entity
+            };
+            this.options = fsHandler.callFsJScript("/matrix/ai/baseline/getClassNumberStringKeysByClassName.js",encodeURIComponent(JSON.stringify(this.root))).message;
+        },
+        onChange(val){
+            this.selected = val;
+        },
+        onNodeClick(data){
+            try{
+
+                if(!data.isdir) {
+                    eventHub.$emit("FS-NODE-OPENIT-EVENT", data, data.parent);
+
+                } else {
+
+                    let childrenData = _.sortBy(fsHandler.fsList(data.fullname),'fullname');
+
+                    this.$set(data, 'children', childrenData);
+                    
+                }
+
+            } catch(err){
+
+            }
+
+        }
+    }
+})
+
 /* Common Class Keys String Select Cascader By ClassName */
 Vue.component("mx-classkeys-string-cascader",{
     delimiters: ['#{', '}#'],
@@ -2158,7 +2238,7 @@ Vue.component("mx-job-group",{
             }).then(() => {
                 
                 let rtn = groupHandler.serverGroupDelete(row);
-
+                
                 if (rtn.status == 'ok'){
                     this.$message({
                         type: "success",

@@ -131,7 +131,7 @@ class Knowledge {
                                                     <el-tooltip placement="top" open-delay="500" :content="node.label">
                                                         <span>#{node.label | pickShortLabel}#</span>
                                                     </el-tooltip>
-                                                    <el-dropdown v-show="data.show" style="float:right;width:14px;margin:0 5px;">
+                                                    <el-dropdown v-show="data.show" style="float:right;width:14px;margin:0 5px;" trigger="click">
                                                         <span class="el-dropdown-link">
                                                             <i class="el-icon-more el-icon--right" style="color:#000000;"></i>
                                                         </span>
@@ -201,7 +201,7 @@ class Knowledge {
                                     return false;
                                 }
 
-                                let _attr = {remark: '', ctime: _.now(), author: this.signedUserName, rate: 0};
+                                let _attr = {remark: '', rate: 0};
                 
                                 let rtn = fsHandler.fsNew('dir', item.fullname, value, null, _attr);
                                 
@@ -242,7 +242,7 @@ class Knowledge {
                                     return false;
                                 }
 
-                                let _attr = {remark: '', ctime: _.now(), author: this.signedUserName, rate: 0};
+                                let _attr = {remark: '', rate: 0};
 
                                 let content = fsHandler.callFsJScript("/matrix/knowledge/getDefaultContent.js",null).message;
                 
@@ -335,7 +335,10 @@ class Knowledge {
                                                         multiple
                                                         show-file-list="false"
                                                         :action="upload.url"
+                                                        :data="upload.ifIndex"
                                                         :on-success="onSuccess"
+                                                        :on-error="onError"
+                                                        :before-upload="onBeforeUpload"
                                                         :on-remove="onRemove"
                                                         list-type="text"
                                                         name="uploadfile">
@@ -349,14 +352,15 @@ class Knowledge {
                                 data: {
                                     upload: {
                                         url: `/fs/${item.fullname}?issys=true`,
-                                        fileList: []
+                                        fileList: [],
+                                        ifIndex: {index:true}
                                     }
                                 },
                                 created(){
                                     
                                 },
                                 methods: {
-                                    beforeUpload(file){
+                                    onBeforeUpload(file){
                                         
                                     },
                                     onSuccess(res,file,FileList){
@@ -364,17 +368,22 @@ class Knowledge {
                                         
                                         _.forEach(FileList,(v)=>{
                                             try{
-                                                let attr = {remark: '', ctime: _.now(), author: window.SignedUser_UserName, rate:0};
                                                 
+                                                let attr = {remark: '', rate:0};
                                                 fsHandler.fsUpdateAttr(item.parent, v.name, attr);
 
                                             } catch(err){
-                                                console.log(err)
+                                                let attr = {remark: '', rate:0};
+                                                fsHandler.fsUpdateAttr(item.parent, v.name, attr);
                                             }
                                         })
 
                                         // 刷新
                                         self.onRefresh(item,index);
+
+                                    },
+                                    onError(res,file,FileList){
+                                        
 
                                     },
                                     onRemove(file, fileList) {
@@ -483,9 +492,9 @@ class Knowledge {
                                                             line-height: 40px;
                                                             padding: 0px 20px 0 0;"> 
                                                     <div style="width:90%;">
-                                                        <span><i class="el-icon-user"></i> #{item | pickAuthor}#</span>
+                                                        <span><i class="el-icon-user"></i> #{item.author}#</span>
                                                         <el-divider direction="vertical"></el-divider>
-                                                        发布于 #{ item | pickTime }#
+                                                        编辑于  #{ item | pickTime }#
                                                         <el-divider direction="vertical"></el-divider>
                                                         位置 #{ item.parent }#
                                                         <el-divider direction="vertical"></el-divider>
@@ -522,9 +531,9 @@ class Knowledge {
                                                             line-height: 40px;
                                                             padding: 0px 20px 0 0;"> 
                                                     <div style="width:90%;">
-                                                        <span><i class="el-icon-user"></i> #{item | pickAuthor}#</span>
+                                                        <span><i class="el-icon-user"></i> #{item.author}#</span>
                                                         <el-divider direction="vertical"></el-divider>
-                                                        发布于#{ item | pickTime }#
+                                                        编辑于 #{ item | pickTime }#
                                                         <el-divider direction="vertical"></el-divider>
                                                         位置 #{ item.parent }#
                                                         <el-divider direction="vertical"></el-divider>
@@ -562,17 +571,10 @@ class Knowledge {
                         pickTime(item){
                             
                             try{
-                                let ctime = _.attempt(JSON.parse.bind(null, item.attr)).ctime || item.vtime;
-                                return moment(ctime).format("LLL");
+                                let mtime = item.mtime;
+                                return moment(mtime).format(mx.global.register.format);
                             } catch(err){
-                                return moment(item.vtime).format("LLL");
-                            }
-                        },
-                        pickAuthor(item){
-                            try{
-                                return _.attempt(JSON.parse.bind(null, item.attr)).author || window.SignedUser_UserName;
-                            } catch(err){
-                                return window.SignedUser_UserName;
+                                return moment(item.vtime).format(mx.global.register.format);
                             }
                         },
                         pickTags(item){
@@ -761,7 +763,7 @@ class Knowledge {
                                 });
                                 this.editor.on("input", ()=> {
                                     this.compiledMarkdown = marked(this.editor.getValue());
-                                    this.onSave();
+                                    //this.onSave();
                                 });
                                 this.editor.setTheme("ace/theme/tomorrow");
                                 this.editor.getSession().setMode("ace/mode/markdown");
@@ -792,11 +794,12 @@ class Knowledge {
                             }
                         },
                         onSaveNow(){
+                            
                             try{
                                 let attr = null;
                                 
                                 if(_.isEmpty(this.model.item.attr)){
-                                    attr = {remark: '', ctime: _.now(), author: window.SignedUser_UserName, rate:1};
+                                    attr = {remark: '', rate:1};
                                 } else {
                                     attr = _.attempt(JSON.parse.bind(null, this.model.item.attr));
                                     if(attr.rate){
@@ -812,6 +815,11 @@ class Knowledge {
                                         type: "success",
                                         message: "提交成功！"
                                     })
+                                } else {
+                                    this.$message({
+                                        type: "error",
+                                        message: "提交失败 " + rtn.message
+                                    })
                                 }
                                 
                             } catch(err){
@@ -824,7 +832,7 @@ class Knowledge {
                                         let attr = null;
                                         
                                         if(_.isEmpty(this.model.item.attr)){
-                                            attr = {remark: '', ctime: _.now(), author: window.SignedUser_UserName, rate:1};
+                                            attr = {remark: '', rate:1};
                                         } else {
                                             attr = _.attempt(JSON.parse.bind(null, this.model.item.attr));
                                             if(attr.rate){
@@ -840,7 +848,7 @@ class Knowledge {
 
                                     }
                                     
-                                },1000)
+                                },3000)
     
                     }
                 });
@@ -925,7 +933,7 @@ class Knowledge {
                         },
                         onOpen(data){
                             try{
-                                if(_.includes(['md','txt'],data.ftype)){
+                                if(_.includes(['md','txt','log'],data.ftype)){
                                     
                                     let wnd = null;
 
@@ -941,14 +949,32 @@ class Knowledge {
                                     }
 
                                     new Vue({
+                                        delimiters: ['#{', '}#'],
                                         data: {
-                                            model: null
+                                            model: null,
+                                            item: data
                                         },
                                         template: `<el-container style="width:100%;height:100%;">
                                                         <el-main style="overflow:hidden;padding:0px;">
                                                             <knowledge-view :model="model" ref="viewRef" v-if="!_.isEmpty(model)"></knowledge-view>
                                                         </el-main>
+                                                        <el-footer style="height:30px;line-height:30px;">
+                                                            <span><i class="el-icon-user"></i> #{item.author}#</span>
+                                                            <el-divider direction="vertical"></el-divider>
+                                                            编辑于 #{ item | pickTime }#
+                                                        </el-footer>
                                                     </el-container>`,
+                                        filters:{
+                                            pickTime(item){
+                
+                                                try{
+                                                    let mtime = item.mtime;
+                                                    return moment(mtime).format(mx.global.register.format);
+                                                } catch(err){
+                                                    return moment(item.vtime).format(mx.global.register.format);
+                                                }
+                                            }
+                                        },
                                         created(){
                                             this.model = {item:data, content:fsHandler.fsContent(data.parent, data.name)};
                                         }
@@ -959,6 +985,7 @@ class Knowledge {
                                                         <main class="el-main" style="overflow:hidden;padding:0px;">
                                                             <iframe src="/fs${data.fullname}?type=open&issys=${window.SignedUser_IsAdmin}" style="width: 100%;height: 100%;" frameborder="0"></iframe>
                                                         </main>
+                                                        <footer class="el-footer" style="height:30px;line-height:30px;"></footer>
                                                     </section>`;
 
                                     let wnd = maxWindow.winApp(data.name, contents, null,null);
@@ -966,7 +993,9 @@ class Knowledge {
                                     
                                     let wnd = maxWindow.winApp(data.name, `<div id="picView"></div>`, null,null);
                                     new Vue({
+                                        delimiters: ['#{', '}#'],
                                         data: {
+                                            item: data,
                                             loading: true,
                                             url: `/fs${data.fullname}?type=open&issys=${window.SignedUser_IsAdmin}`,
                                             srcList: [`/fs${data.fullname}?type=open&issys=${window.SignedUser_IsAdmin}`]
@@ -982,7 +1011,23 @@ class Knowledge {
                                                                 @error="loading=false">
                                                             </el-image>
                                                         </el-main>
+                                                        <el-footer style="height:30px;line-height:30px;">
+                                                            <span><i class="el-icon-user"></i> #{item.author}#</span>
+                                                            <el-divider direction="vertical"></el-divider>
+                                                            编辑于 #{ item | pickTime }#
+                                                        </el-footer>
                                                     </el-container>`,
+                                        filters:{
+                                            pickTime(item){
+                
+                                                try{
+                                                    let mtime = item.mtime;
+                                                    return moment(mtime).format(mx.global.register.format);
+                                                } catch(err){
+                                                    return moment(item.vtime).format(mx.global.register.format);
+                                                }
+                                            }
+                                        },
                                         created(){
                                             this.model = {item:data, content:fsHandler.fsContent(data.parent, data.name)};
                                         }
@@ -993,7 +1038,9 @@ class Knowledge {
                                     let wnd = maxWindow.winApp(data.name, `<div id="movView"></div>`, null,null);
 
                                     new Vue({
+                                        delimiters: ['#{', '}#'],
                                         data: {
+                                            item: data,
                                             url: `/fs${data.fullname}?type=open&issys=${window.SignedUser_IsAdmin}`
                                         },
                                         template: `<el-container style="width:100%;height:100%;">
@@ -1007,7 +1054,23 @@ class Knowledge {
                                                                 Your browser does not support the video tag.
                                                             </video>
                                                         </el-main>
+                                                        <el-footer style="height:30px;line-height:30px;">
+                                                            <span><i class="el-icon-user"></i> #{item.author}#</span>
+                                                            <el-divider direction="vertical"></el-divider>
+                                                            编辑于 #{ item | pickTime }#
+                                                        </el-footer>
                                                     </el-container>`,
+                                        filters:{
+                                            pickTime(item){
+                
+                                                try{
+                                                    let mtime = item.mtime;
+                                                    return moment(mtime).format(mx.global.register.format);
+                                                } catch(err){
+                                                    return moment(item.vtime).format(mx.global.register.format);
+                                                }
+                                            }
+                                        },
                                         created(){
                                             this.model = {item:data, content:fsHandler.fsContent(data.parent, data.name)};
                                         }
@@ -1025,7 +1088,7 @@ class Knowledge {
                                     let attr = null;
                                     
                                     if(_.isEmpty(data.attr)){
-                                        attr = {remark: '', ctime: _.now(), author: window.SignedUser_UserName, rate:1};
+                                        attr = {remark: '', rate:1};
                                     } else {
                                         attr = _.attempt(JSON.parse.bind(null, data.attr));
                                         if(attr.rate){
