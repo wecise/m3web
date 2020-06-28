@@ -104,8 +104,8 @@
 	/*----------  最外层element会自动增加组件同名 class="omdb-editor-component"  ----------*/
 	<template>
 		<el-container>
-			<el-header id="editorToolBar" style="padding:0px 10px;height:30px;line-height: 30px;">
-				<el-button-group>
+			<el-header id="editorToolBar" style="padding:0px 10px;height:30px;line-height: 30px;display: flex;">
+				<el-button-group style="width:70%;">
                     <el-tooltip content="另存到文件系统" placement="bottom" open-delay="500">
                         <el-button type="text" class="saveas" @click="saveToFs"><i class="fas fa-save"></i></el-button>
                     </el-tooltip>
@@ -139,12 +139,14 @@
                     <el-tooltip content="执行并保存到文件" placement="bottom" open-delay="500">
                         <el-button type="text"  class="queryAndSave" @click="queryAndSave"><i class="fas fa-file-export"></i></el-button>
                     </el-tooltip>
+                </el-button-group>
+                <el-button-group style="width:30%;text-align: right;">
                     <el-tooltip content="主题" placement="bottom" open-delay="500">
                         <el-button type="text" :class="'pull-right editor-select-theme-'+objectHash.sha1(id)"><i class="fas fa-tshirt"></i></el-button>
                     </el-tooltip>
                     <el-button type="text" :icon="control.ifFullScreen | pickScreenStyle" style="float:right;" @click="onFullScreen"></el-button>
                     <el-popover
-                        placement="bottom-end"
+                        placement="bottom-start"
                         trigger="click"
                         width="480"
                         popper-class="info-popper"

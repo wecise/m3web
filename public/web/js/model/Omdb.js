@@ -704,10 +704,9 @@ class Omdb{
         Vue.component("omdb-query-output-json-console",{
             delimiters: ['#{', '}#'],
             props: {
-                id: String,
                 model: Object
             },
-            template: `<el-container style="height: 100%;">
+            template: `<el-container style="height: calc(100% - 30px);">
                             <el-header style="height:30px;line-height:30px;background: #f2f3f5;">
                                 <el-button-group>
                                     <el-tooltip content="复制" placement="bottom" open-delay="500">
@@ -715,8 +714,7 @@ class Omdb{
                                     </el-tooltip>
                                 </el-button-group>
                             </el-header>
-                            <el-main style="padding:0px;height:100%;">
-                                <pre style="background:transparent;border:none;">#{JSON.stringify(model,null,4).replace(/   /g, ' ')}#</pre>
+                            <el-main style="padding:0px;height:100%;" ref="editor">
                             </el-main>
                         </el-container>`,
             data(){
@@ -728,30 +726,35 @@ class Omdb{
                 const self = this;
 
             },
-            mounted: function() {
-                const self = this;
-
-                new Clipboard('.el-button.btn-copy',{
-                    text: function(trigger) {
-                        self.$message('已复制');
-                        return JSON.stringify(self.model,null,4).replace(/   /g, ' ');
-                    }
-                });
+            mounted() {
+               this.init();
             },
             methods: {
-                init: function(){
-                    const self = this;
+                init(){
+                    
+                    let jsonStr = JSON.stringify(this.model,null,4);//.replace(/   /g, ' ');
 
-                    if(!_.isEmpty(content)) {
-                        self.model = content;
-                    } else {
-                        self.model = '';
-                    }
+                     // Editor
+                    let editor = ace.edit(this.$refs.editor.$el);
+                    editor.setOptions({
+                        //maxLines: 1000,
+                        minLines: 20,
+                        autoScrollEditorIntoView: true,
+                        enableBasicAutocompletion: true,
+                        enableSnippets: true,
+                        enableLiveAutocompletion: true
+                    });
+                    editor.setTheme("ace/theme/tomorrow");
+                    editor.getSession().setMode("ace/mode/json");
+                    editor.setValue(jsonStr);
 
-                },
-                setData: function(event){
-                    const self = this;
-                    self.model = event.data;
+                    new Clipboard('.el-button.btn-copy',{
+                        text: (trigger)=> {
+                            this.$message('已复制');
+                            return jsonStr;
+                        }
+                    });
+
                 }
             }
         })
@@ -1464,7 +1467,7 @@ class Omdb{
                                         <omdb-log-console :id="id+'-log-'+item.name" :model="item.model" v-if="item.type=='omdb-log-console'" :ref="'omdbQueryLogRef-'+id"></omdb-log-console>
                                         <omdb-query-output-console :id="id+'-output-'+item.name" :model="item.model" v-if="item.type=='omdb-query-output-console'" :ref="'omdbQueryOutputRef-'+id"></omdb-query-output-console>
                                         <omdb-graph-console :id="id+'-graph-'+item.name" :model="item.model" v-if="item.type=='omdb-query-graph-console'"  :ref="'omdbQueryGraphRef-'+id"></omdb-graph-console>
-                                        <omdb-query-output-json-console :id="id+'-output-json-'+item.name" :model="item.model" v-if="item.type=='omdb-query-output-json-console'"  :ref="'omdbQueryOutputJsonRef-'+id"></omdb-class-console>
+                                        <omdb-query-output-json-console :model="item.model" v-if="item.type=='omdb-query-output-json-console'"  :ref="'omdbQueryOutputJsonRef-'+id"></omdb-class-console>
                                     </el-tab-pane>
                                 </el-tabs>
                             </el-main>

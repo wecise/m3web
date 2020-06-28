@@ -161,7 +161,9 @@ class ProbeHandler {
         let rtn = null;
         
         let form = new FormData();
-        form.append('hosts', depot.hosts);
+        _.forEach(depot.hosts,(v)=>{
+            form.append('hosts', v);
+        })
         form.append('name',  depot.name);
         form.append('version', depot.version);
         form.append('key', depot.key);
@@ -182,12 +184,10 @@ class ProbeHandler {
 
                 userHandler.ifSignIn(data);
 
-                if( _.lowerCase(data.status) == "ok"){
-                    rtn = 1;
-                }
+                rtn = data;
             },
             error: function(xhr, textStatus, errorThrown) {
-                return xhr.responseText;
+                return xhr.responseJSON;
             }
         })
         return rtn;
@@ -196,11 +196,14 @@ class ProbeHandler {
     /*
         Undeploy depot to zabbix agent
     */
-    deployToZabbixAgent(depot){
+    unDeployToZabbixAgent(depot){
         let rtn = null;
         
         let form = new FormData();
-        form.append('hosts', depot.hosts);
+        
+        _.forEach(depot.hosts,(v)=>{
+            form.append('hosts', v);
+        })
         form.append('depots', depot.depots);
         form.append('versions', depot.version);
 
@@ -219,12 +222,10 @@ class ProbeHandler {
 
                 userHandler.ifSignIn(data);
 
-                if( _.lowerCase(data.status) == "ok"){
-                    rtn = 1;
-                }
+                rtn = data;
             },
             error: function(xhr, textStatus, errorThrown) {
-                return xhr.responseText;
+                return xhr.responseJSON;
             }
         })
         return rtn;
@@ -234,35 +235,34 @@ class ProbeHandler {
         Start Stop Restart zabbix agent
     */
     zabbixAgentAction(depot){
-        let rtn = null;
         
         let form = new FormData();
-        form.append('hosts', depot.hosts);
-
+        _.forEach(depot.hosts,(v)=>{
+            form.append('hosts', v);
+        })
+    
         jQuery.ajax({
-            url: `/monitoring/zabbix/${deopt.action}`,
+            url: `/monitoring/zabbix/${depot.action}`,
             type: "POST",
             dataType: 'json',
             processData: false,
             contentType: false,
             mimeType: 'multipart/form-data',
             data: form,
-            async:false,
+            async:true,
             complete: function(xhr, textStatus) {
             },
             success: function(data, textStatus, xhr) {
 
                 userHandler.ifSignIn(data);
-
-                if( _.lowerCase(data.status) == "ok"){
-                    rtn = 1;
-                }
+                
+                return data;
             },
             error: function(xhr, textStatus, errorThrown) {
-                return xhr.responseText;
+                return xhr.responseJSON;
             }
         })
-        return rtn;
+        
     }; 
 
 }

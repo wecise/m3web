@@ -2218,17 +2218,31 @@
                 exportIt(path){
                     const self = this;
                     
-                    alertify.confirm(`确认要导出 ${path} 目录下的所有文件?`, function (e) {
-                        if (e) {
-                            fsHandler.fsZip(path);
-                            self.$message({
-                                type: "info",
-                                message: "导出操作将提交至后台，请稍后。。。"
-                            })
-                        } else {
+                    this.$confirm(`确认要导出 ${path} 目录下的所有文件?`, '提示', {
+                            confirmButtonText: '确定',
+                            cancelButtonText: '取消',
+                            type: 'warning'
+                    }).then(() => {
+                        fsHandler.fsZip(path);
+                        self.$message({
+                            type: "info",
+                            message: "导出操作将提交至后台，请稍后。。。"
+                        })
+                    }).catch(() => {
                             
-                        }
-                    });
+                    }); 
+
+                    // alertify.confirm(`确认要导出 ${path} 目录下的所有文件?`, function (e) {
+                    //     if (e) {
+                    //         fsHandler.fsZip(path);
+                    //         self.$message({
+                    //             type: "info",
+                    //             message: "导出操作将提交至后台，请稍后。。。"
+                    //         })
+                    //     } else {
+                            
+                    //     }
+                    // });
     
                 },
                 importIt(event) {
@@ -2236,28 +2250,54 @@
     
                     let file = event.target.files[0];
                     
-                    alertify.confirm(`确认要导入 ${file.name} 文件，导入后将覆盖原有文件，请确认！<br><br>
+                    this.$confirm(`确认要导入 ${file.name} 文件，导入后将覆盖原有文件，请确认！<br><br>
                                         文件名称：${file.name}<br><br>
                                         修改时间：${file.lastModifiedDate}<br><br>
-                                        文件大小：${mx.bytesToSize(file.size)}`, function (e) {
-                        if (e) {
-                            let rtn = fsHandler.fsUnZip(self.rootPath, file);
+                                        文件大小：${mx.bytesToSize(file.size)}`, '提示', {
+                            confirmButtonText: '确定',
+                            cancelButtonText: '取消',
+                            type: 'warning'
+                    }).then(() => {
 
-                            self.$message({
-                                type: "info",
-                                message: "导入操作将提交至后台，请稍后。。。"
-                            })
+                        let rtn = fsHandler.fsUnZip(self.rootPath, file);
 
-                            if(rtn == 1){
-                                self.load();
-                            }
-                        } else {
-                            
+                        self.$message({
+                            type: "info",
+                            message: "导入操作将提交至后台，请稍后。。。"
+                        })
+
+                        if(rtn == 1){
+                            self.load();
                         }
-    
+
                         event.target.value = null;
+
+                    }).catch(() => {
+                            
+                    }); 
+                    
+                    // alertify.confirm(`确认要导入 ${file.name} 文件，导入后将覆盖原有文件，请确认！<br><br>
+                    //                     文件名称：${file.name}<br><br>
+                    //                     修改时间：${file.lastModifiedDate}<br><br>
+                    //                     文件大小：${mx.bytesToSize(file.size)}`, function (e) {
+                    //     if (e) {
+                    //         let rtn = fsHandler.fsUnZip(self.rootPath, file);
+
+                    //         self.$message({
+                    //             type: "info",
+                    //             message: "导入操作将提交至后台，请稍后。。。"
+                    //         })
+
+                    //         if(rtn == 1){
+                    //             self.load();
+                    //         }
+                    //     } else {
+                            
+                    //     }
     
-                    });
+                    //     event.target.value = null;
+    
+                    // });
                 },
                 syncIt(){
                     const self = this

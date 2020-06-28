@@ -198,10 +198,9 @@ class Event {
                         },
                         layout(){
                             let doLayout = ()=>{
-                                if($(".el-table-column--selection",this.$el).is(':visible')){
-                                    _.delay(()=>{
-                                        this.$refs.table.doLayout();
-                                    },1000)
+                                if($(".el-table__body-wrapper",this.$el).is(':visible')){
+                                    this.$refs.table.setCurrentRow(this.dt.rows[0]);
+                                    this.$refs.table.doLayout();
                                 } else {
                                     setTimeout(doLayout,50);
                                 }

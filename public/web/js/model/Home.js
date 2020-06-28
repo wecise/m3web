@@ -162,7 +162,7 @@ class Home extends Matrix {
                             // 输入
                             term: "",
                             // 指定类
-                            class: "#/matrix/:",
+                            class: "",
                             // 指定api
                             api: {parent: "search",name: "searchByTerm.js"},
                             // 其它设置

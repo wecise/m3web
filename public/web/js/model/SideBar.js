@@ -157,7 +157,7 @@ class SideBar {
                         </el-container>`,
             filters:{
                 pickIcon(icon){
-                    return `${window.ASSETS_ICON}/apps/png/${icon}?type=download&issys=${window.SignedUser_IsAdmin}`;
+                    return `${window.ASSETS_ICON}/apps/png/${icon}?type=open&issys=${window.SignedUser_IsAdmin}`;
                 }
             },
             created(){
@@ -415,7 +415,7 @@ class SideBar {
             },
             filters:{
                 pickIcon:function(icon){
-                    return `${window.ASSETS_ICON}/apps/png/${icon}?type=download&issys=${window.SignedUser_IsAdmin}`;
+                    return `${window.ASSETS_ICON}/apps/png/${icon}?type=open&issys=${window.SignedUser_IsAdmin}`;
                 }
             },
             methods: {
@@ -652,7 +652,7 @@ class SideBar {
             },
             filters:{
                 pickIcon:function(icon){
-                    return `${window.ASSETS_ICON}/apps/png/${icon}?type=download&issys=${window.SignedUser_IsAdmin}`;
+                    return `${window.ASSETS_ICON}/apps/png/${icon}?type=open&issys=${window.SignedUser_IsAdmin}`;
                 }
             },
             methods: {
@@ -761,7 +761,7 @@ class SideBar {
         }
         
 
-        $.get(`${window.ASSETS_ICON}/robot/svg/robot.svg?type=download&issys=${window.SignedUser_IsAdmin}`,function(svg){
+        $.get(`${window.ASSETS_ICON}/robot/svg/robot.svg?type=open&issys=${window.SignedUser_IsAdmin}`,function(svg){
 
             $("#ai-robot").empty();
 

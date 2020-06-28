@@ -357,7 +357,7 @@ class FsHandler {
             url: `/fs/copy?issys=${_issys}`,
             type: 'POST',
             dataType: 'json',
-            async:false,
+            async: false,
             data: {
                 srcpath: srcpath,
                 dstpath: dstpath

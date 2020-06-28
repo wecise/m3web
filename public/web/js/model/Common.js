@@ -1849,7 +1849,7 @@ Vue.component("mx-classkeys-number-string-cascader",{
             type:Boolean
         },
         value: Object,
-        entitys:Array
+        entity: Object
     },
     data(){
         return {
@@ -1866,7 +1866,9 @@ Vue.component("mx-classkeys-number-string-cascader",{
                     collapseTags
                     clearable
                     filterable
-                    style="width:100%;">
+                    style="width:100%;"
+                    @blur="onBlur"
+                    ref="cascader">
                     <template slot-scope="{ node, data }">
                         <span>#{ data.label }#</span>
                         <span v-if="!node.isLeaf"> (#{ data.children.length }#) </span>
@@ -1884,33 +1886,18 @@ Vue.component("mx-classkeys-number-string-cascader",{
     },
     methods: {
         initData(){
+            
             let term = {
                 class: this.root,
-                entitys: this.entity
+                entity: this.entity.id
             };
-            this.options = fsHandler.callFsJScript("/matrix/ai/baseline/getClassNumberStringKeysByClassName.js",encodeURIComponent(JSON.stringify(this.root))).message;
+            this.options = fsHandler.callFsJScript("/matrix/ai/baseline/getClassNumberStringKeysByClassName.js",encodeURIComponent(JSON.stringify(term))).message;
         },
         onChange(val){
-            this.selected = val;
+            this.selected = { bucketKeys:val, options: this.options};
         },
-        onNodeClick(data){
-            try{
-
-                if(!data.isdir) {
-                    eventHub.$emit("FS-NODE-OPENIT-EVENT", data, data.parent);
-
-                } else {
-
-                    let childrenData = _.sortBy(fsHandler.fsList(data.fullname),'fullname');
-
-                    this.$set(data, 'children', childrenData);
-                    
-                }
-
-            } catch(err){
-
-            }
-
+        onBlur(){
+            $(this.$refs.cascader.$el).hide();
         }
     }
 })

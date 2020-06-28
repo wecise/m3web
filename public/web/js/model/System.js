@@ -267,13 +267,13 @@ class System {
 												<span class="el-icon-user" style="color:#67c23a;" v-else></span>
 												<span>#{node.label}#</span>
 												<span v-if="data.otype=='org'">
-													<el-button v-show="data.del" type="text" @click="delUser(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-delete"></el-button>
+													<el-button v-show="data.del" type="text" @click="onDeleteUser(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-delete" v-if="!_.includes(['/系统组','/'],data.fullname)"></el-button>
 													<el-button v-show="data.del" type="text" @click="newUser(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-plus"></el-button>
 													<el-button v-show="data.del" type="text" @click="newGroup(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-folder-add"></el-button>
-													<el-button v-show="data.del" type="text" @click="refresh(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-refresh"></el-button>
+													<el-button v-show="data.del" type="text" @click="onRefresh(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-refresh"></el-button>
 												</span>
 												<span v-else>
-													<el-button v-show="data.del" type="text" @click="delUser(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-delete"></el-button>
+													<el-button v-show="data.del" type="text" @click="onDeleteUser(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-delete" v-if="data.username != 'admin'"></el-button>
 													<el-button v-show="data.del" type="text" @click="editUser(data,$event)" style="float:right;width:14px;margin-left:5px;" icon="el-icon-edit"></el-button>
 												</span>
 											</span>                  
@@ -284,7 +284,7 @@ class System {
 						this.initNodes();
 					},
 					methods:{
-						refresh(data,event){
+						onRefresh(data,event){
 							event.stopPropagation();
 							this.initNodes();
 						},
@@ -387,7 +387,8 @@ class System {
 														</el-form-item>
 
 														<el-form-item>
-															<el-button type="primary" @click="save">创建用户</el-button>
+															<el-button type="warning" v-if="loading"><i class="el-icon-loading"></i> 创建用户、同步文件系统，请稍后。。。</el-button>
+															<el-button type="primary" @click="save" v-else>创建用户</el-button>
 														</el-form-item>
 														
 													</form>
@@ -403,7 +404,8 @@ class System {
 										otype: 'usr'                     
 									},
 									email: "",
-									checkPass: ""
+									checkPass: "",
+									loading: false
 								},
 								created(){
 									this.ldap.parent = !_.isEmpty(self.selectedNode.fullname)?self.selectedNode.fullname:'/用户组';
@@ -424,45 +426,69 @@ class System {
 										let me = this;
 
 										if (_.isEmpty(me.ldap.username)) {
-											alertify.error("名称不能为空！");
+											
+											this.$message({
+												type: "warning",
+												message: `名称不能为空！`
+											})
 											return false;
 										}
 
 										if (_.isEmpty(me.email)) {
-											alertify.error("邮件不能为空！");
+											this.$message({
+												type: "warning",
+												message: `邮件不能为空！`
+											})
 											return false;
 										}
 
 										if (_.isEmpty(me.ldap.passwd)) {
-											alertify.error("密码不能为空！");
+											this.$message({
+												type: "warning",
+												message: `密码不能为空！`
+											})
 											return false;
 										}
 
 										if (_.isEmpty(me.checkPass)) {
-											alertify.error("确认密码不能为空！");
+											this.$message({
+												type: "warning",
+												message: `确认密码不能为空！`
+											})
 											return false;
 										}
 
 										if ( me.ldap.passwd !== me.checkPass) {
-											alertify.error("确认密码不一致！");
+											this.$message({
+												type: "warning",
+												message: `确认密码不一致！`
+											})
 											return false;
 										}
 
-										let _csrf = window.CsrfToken.replace(/'/g,"");
-										let rtn = userHandler.userAdd(me.ldap, _csrf);
+										me.loading = true;
 
-										if(rtn===1){
-											this.$message({
-												type: "success",
-												message: `用户: ${me.ldap.username} ${me.email} 添加成功！`
-											})
+										_.delay(()=>{
 											
-											_.delay(()=>{
-												self.initNodes;
-												wnd.close();
-											},500);
-
-										}
+											let _csrf = window.CsrfToken.replace(/'/g,"");
+											let rtn = userHandler.userAdd(me.ldap, _csrf);
+	
+											if(rtn===1){
+												this.$message({
+													type: "success",
+													message: `用户: ${me.ldap.username} ${me.email} 添加成功！`
+												})
+												
+												me.loading = false;
+	
+												_.delay(()=>{
+													self.initNodes;
+													self.onRefresh(data,event);
+													wnd.close();
+												},500);
+	
+											}
+										},500)
 
 									}
 								}
@@ -473,7 +499,7 @@ class System {
 						editUser(data,event){
 
 						},
-						delUser(data,event){
+						onDeleteUser(data,event){
 
 							if(data.fullname === '/系统组'){
 								this.$message({
@@ -499,11 +525,14 @@ class System {
                                 let rtn = userHandler.userDelete(data.id);
                                 
                                 if(rtn==1){
-                                    this.refresh();
                                     this.$message({
                                         type: 'success',
                                         message: '删除成功!'
-                                    });
+									});
+									_.delay(()=>{
+										this.onRefresh(data,event);
+									},500)
+									
                                 }else {
 									this.$message({
                                         type: 'error',
@@ -515,7 +544,7 @@ class System {
                             });
 							
 						},
-						newGroup(data,event){
+						newGroup(node,event){
 							
 							event.stopPropagation();
 
@@ -557,7 +586,7 @@ class System {
 											</el-container>`,
 								data: {
 									ldap: {
-										parent: data.fullname, 
+										parent: node.fullname, 
 										username: "",
 										passwd: "",
 										isactive: true,
@@ -584,22 +613,32 @@ class System {
 										let me = this;
 
 										if (_.isEmpty(me.ldap.parent)) {
-											alertify.error("所属组名称不能为空！");
+											this.$message({
+												type: 'warning',
+												message: '所属组名称不能为空！!'
+											});
 											return false;
 										}
 
 										if (_.isEmpty(me.ldap.username)) {
-											alertify.error("组名称不能为空！");
+											this.$message({
+												type: 'warning',
+												message: '组名称不能为空！'
+											});
 											return false;
 										}
 
 										let _csrf = window.CsrfToken.replace(/'/g,"");
 										let rtn = userHandler.userAdd(me.ldap, _csrf);
 
-										if(rtn===1){
-											alertify.success(`组: ${me.ldap.parent} 添加成功！`);
+										if(rtn==1){
+											this.$message({
+												type: 'success',
+												message: `组: ${me.ldap.parent} 添加成功！`
+											});
 											
 											_.delay(function(){
+												self.onRefresh(node,event);
 												eventHub.$emit('user-tree-refresh-event', null);
 												wnd.close();
 											},500);

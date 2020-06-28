@@ -78,6 +78,10 @@ class UserHandler{
                 // Pace.restart();
             },
             complete: function (xhr, textStatus) {
+                // 初始化新用户文件系统
+                if(event.otype == 'usr'){
+                    userHandler.userFsInit(event.username);
+                }
             },
             success: function (data, status) {
 
@@ -204,6 +208,33 @@ class UserHandler{
             }
         });
         return rtn;
+    };
+
+    /* 用户文件系统初始化 */
+    userFsInit(newUsername) {
+        
+        try{
+
+            if(newUsername == 'admin'){
+                
+                return;
+
+            } else {
+
+                // 检查当前用户FS是否存在
+                let home = ["","home"].join("/");
+                let check = fsHandler.fsCheck(home,newUsername);
+                // 如果不存在，进行初始化
+                if(!check){
+                    fsHandler.fsCopy("/home/admin/etc", [home,newUsername].join("/"));
+                    fsHandler.fsCopy("/home/admin/Documents/template", [home,newUsername,'Documents'].join("/"));
+                    fsHandler.fsCopy("/home/admin/Documents/history", [home,newUsername,'Documents'].join("/"));
+                }
+            }
+
+        } catch(err){
+            console.log(err)
+        } 
     };
 }
 

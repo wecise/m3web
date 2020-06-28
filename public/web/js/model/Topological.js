@@ -1664,9 +1664,9 @@ class Topological {
             filters: {
                 pickIcon(evt){
                     try {
-                        return `/fs/assets/images/entity/png/${_.last(evt.rows[0].class.split("/"))}.png?issys=true&type=download`;
+                        return `/fs/assets/images/entity/png/${_.last(evt.rows[0].class.split("/"))}.png?issys=true&type=open`;
                     } catch(err){
-                        return `/fs/assets/images/entity/png/matrix.png?issys=true&type=download`;
+                        return `/fs/assets/images/entity/png/matrix.png?issys=true&type=open`;
                     }
                     
                 }
@@ -1798,9 +1798,9 @@ class Topological {
             filters: {
                 pickIcon(evt){
                     try {
-                        return `/fs/assets/images/entity/png/${_.last(evt.rows[0].class.split("/"))}.png?issys=true&type=download`;
+                        return `/fs/assets/images/entity/png/${_.last(evt.rows[0].class.split("/"))}.png?issys=true&type=open`;
                     } catch(err){
-                        return `/fs/assets/images/entity/png/matrix.png?issys=true&type=download`;
+                        return `/fs/assets/images/entity/png/matrix.png?issys=true&type=open`;
                     }
                     
                 }
@@ -2280,10 +2280,10 @@ class Topological {
                             }
                         },
                         grid: {
-                            top: '10%',
+                            top: '5%',
                             left: '3%',
                             right: '4%',
-                            bottom: '20%',
+                            bottom: '35%',
                             containLabel: true
                         },
                         xAxis: {
@@ -2315,6 +2315,14 @@ class Topological {
             },
             mounted() {
                 this.init();
+
+                // 监听窗口发生变化，resize组件
+                window.addEventListener('resize', this.checkChart)
+                
+                // 通过hook监听组件销毁钩子函数，并取消监听事件
+                this.$once('hook:beforeDestroy', () => {
+                    window.removeEventListener('resize', this.checkChart)
+                })
             },
             methods: {
                 init(){
@@ -2322,38 +2330,41 @@ class Topological {
                     this.chart.setOption(this.option);
                 },
                 initData(){
-                    
-                    let term = encodeURIComponent( JSON.stringify(this.model) );
-                    let rtn = fsHandler.callFsJScript("/matrix/performance/searchPerformanceByTerm.js",term).message;
-                    
-                    //取实时数据的time作为xAxis
-                    this.option.xAxis.data = _.map(rtn.reverse(),(v)=>{
-                        return moment(v[0]).format('YY-MM-DD HH:mm');
-                    });
-                    
-                    this.option.series = [{
-                        name: this.model.bucket + ' ' + this.model.key,
-                        data: _.map(rtn.reverse(),(v)=>{ return v[1];}),
-                        type: 'line',
-                        smooth:true,
-                        color: 'rgba(108, 212, 11, 1)',
-                        areaStyle: {
-                            normal: {
-                                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
-                                    offset: 0,
-                                    color: 'rgba(108, 212, 11, .5)'
-                                }, {
-                                    offset: 1,
-                                    color: 'rgba(108, 212, 11, .1)'
-                                }])
-                            }
-                        }
-                    }];
+                    try{
 
-                    if(this.$refs.chartContainer){
-                        this.chart.setOption(this.option);
+                        let term = encodeURIComponent( JSON.stringify(this.model) );
+                        let rtn = fsHandler.callFsJScript("/matrix/performance/searchPerformanceByTerm.js",term).message.result;
+                        
+                        //取实时数据的time作为xAxis
+                        this.option.xAxis.data = _.map(rtn.reverse(),(v)=>{
+                            return moment(v[0]).format('YY-MM-DD HH:mm');
+                        });
+                        
+                        this.option.series = [{
+                            name: this.model.bucket + ' ' + this.model.key,
+                            data: _.map(rtn.reverse(),(v)=>{ return v[1];}),
+                            type: 'line',
+                            smooth:true,
+                            color: 'rgba(108, 212, 11, 1)',
+                            areaStyle: {
+                                normal: {
+                                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                        offset: 0,
+                                        color: 'rgba(108, 212, 11, .5)'
+                                    }, {
+                                        offset: 1,
+                                        color: 'rgba(108, 212, 11, .1)'
+                                    }])
+                                }
+                            }
+                        }];
+
+                        if(this.$refs.chartContainer){
+                            this.chart.setOption(this.option);
+                        }
+                    } catch(err){
+
                     }
-                    console.log(this.model, this.model.bucket + ' ' + this.model.key, this.option)
                 },
                 checkChart(){
                     if(this.$refs.chartContainer){
@@ -2375,7 +2386,7 @@ class Topological {
                 return {
                     kpi: {
                         list: [],
-                        time: [moment().add(-1,'hour').format('yyyy-MM-dd HH:mm'),moment().format('yyyy-MM-dd HH:mm')],
+                        time: [moment().add(-1,'hour').format('YYYY-MM-DD HH:mm'),moment().format('YYYY-MM-DD HH:mm')],
                         options: {
                             shortcuts:[
                                 {
@@ -2452,34 +2463,29 @@ class Topological {
                                         :root="entityClass" 
                                         :value="null" 
                                         multiplenable="true" 
-                                        :entitys="[entity.id]" ref="bucketKeys"></mx-classkeys-number-string-cascader>
+                                        :entity="entity" ref="bucketKeys"></mx-classkeys-number-string-cascader>
                                 </div>           
                             </el-header>
                             
                             <el-main style="padding:10px;">
-                                <!--div class="grid-stack">
-                                    <div class="grid-stack-item"
-                                        data-gs-auto-position="true"
-                                        data-gs-width="12" data-gs-height="3"
-                                        v-for="item,index in kpi.list"
-                                        :key="index">
-                                            <div class="grid-stack-item-content" style="border:1px solid #f2f3f5;border-radius:5px;box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);">
-                                                <el-card class="box-card" style="width: 100%;height:100%;overflow:hidden;" >
-                                                    <div slot="header" class="clearfix" style="padding:5px;">
-                                                        <span>#{item.bucket}# <small>#{item.key}#</small></span>
-                                                    </div>
-                                                    <performance-history-chart  :model="item"></performance-history-chart>
-                                                </el-card>
-                                            </div>
-                                    </div>
-                                </div-->
-
+                                
                                 <el-card class="box-card" 
                                     style="width: 100%;height:200px;overflow:hidden;box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04)" 
                                     v-for="item,index in kpi.list"
                                     :key="index">
                                     <div slot="header" class="clearfix" style="padding:5px;">
-                                        <span>#{item.bucket}# / <small>#{item.key}#</small></span>
+                                        <span v-if="!_.isEmpty(item.subKeys)">
+                                            #{item.bucket}# / <small>#{item.key}#</small>
+                                            <el-select v-model="item.defaultSubKey" placeholder="请选择子对象" @change="onChange">
+                                                <el-option
+                                                    v-for="key in item.subKeys"
+                                                    :key="key.value"
+                                                    :label="key.name"
+                                                    :value="key.value">
+                                                </el-option>
+                                            </el-select>
+                                        </span>
+                                        <span v-else>#{item.bucket}# / <small>#{item.key}#</small></span>
                                     </div>
                                     <performance-history-chart  :model="item"></performance-history-chart>
                                 </el-card>
@@ -2494,7 +2500,6 @@ class Topological {
                     _.forEach(this.kpi.list,(v)=>{
                         this.$set(v,'time',val);
                     })
-                    console.log(this.kpi.list)
                 }
             },
             computed:{
@@ -2508,34 +2513,34 @@ class Topological {
                 this.$watch(
                     "$refs.bucketKeys.selected",{
                         handler:(val, oldVal) => { 
-                            
-                            this.kpi.list = _.map(val,(v)=>{
-                                return {id: this.entity.id, class:this.entityClass, bucket: v[0], key: v[1], time: this.kpi.time};
+                            this.kpi.list = _.map(val.bucketKeys,(v)=>{
+                                
+                                let subKeys = [];
+                                let defaultSubKey = "";
+                                
+                                let selectedBucket = _.find(val.options,{value:v[0]}).subKeys;
+                                
+                                if(!_.isEmpty(selectedBucket)){
+                                    subKeys = selectedBucket;
+                                    defaultSubKey = _.head(subKeys).value;
+                                }
+
+                                return {id: this.entity.id, class:this.entityClass, bucket: v[0], key: v[1], time: this.kpi.time, subKeys: subKeys, defaultSubKey: defaultSubKey};
                             })
 
-                            // _.delay(()=>{
-                            //     let grid = GridStack.initAll({
-                            //         resizable: {
-                            //             handles: 'e, se, s, sw, w'
-                            //         },
-                            //     });
-                            //     grid.on('gsresizestop', function(event, elem) {
-                            //         eventHub.$emit("WINDOW-RESIZE-EVENT");
-                            //     });
-                            // },1500)
-
-                            console.log(this.kpi.list)
                         },
                         deep:true
                     }
                 );
-
-                
-
             },
             methods: {
                 onShowDatePicker(){
                     this.$refs.datePicker.focus();
+                },
+                onChange(val){
+                    _.forEach(this.kpi.list,(v)=>{
+                        this.$set(v,'defaultSubKey',val);
+                    })
                 }
             }
         });
