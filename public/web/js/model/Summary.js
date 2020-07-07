@@ -198,7 +198,7 @@ class Summary {
                             this.option.legend.color = this.colors;
                             this.option.legend.data = this.kpi;
                             // xAxis
-                            this.option.xAxis.data.push(moment().format("HH:MM:SS"));
+                            this.option.xAxis.data.push(moment().format("HH:mm:ss"));
                             // series
                             this.option.series = _.map(this.kpi,(v,index)=>{
                                 
@@ -257,7 +257,7 @@ class Summary {
                         },
                         addData(val){
                             // xAxis
-                            this.option.xAxis.data.push(moment().format("HH:MM:SS"));
+                            this.option.xAxis.data.push(moment().format("HH:mm:ss"));
                             // series
                             _.forEach(this.kpi,(v,index)=>{
                                 this.option.series[index].data.push(val[v]);
@@ -380,7 +380,7 @@ class Summary {
                                 return this.model[v].title;
                             });
                             // xAxis
-                            this.option.xAxis.data.push(moment().format("HH:MM:SS"));
+                            this.option.xAxis.data.push(moment().format("HH:mm:ss"));
                             // series
                             this.option.series = _.map(this.kpi,(v,index)=>{
                                 
@@ -439,7 +439,7 @@ class Summary {
                         },
                         addData(val){
                             // xAxis
-                            this.option.xAxis.data.push(moment().format("HH:MM:SS"));
+                            this.option.xAxis.data.push(moment().format("HH:mm:ss"));
                             // series
                             _.forEach(this.kpi,(v,index)=>{
                                 this.option.series[index].data.push(val[v].value);
@@ -718,7 +718,7 @@ class Summary {
 
                         setInterval(()=>{
                             this.initData();
-                        },10000)
+                        },3000)
                     },
                     mounted() {
                         this.$nextTick().then(()=>{
@@ -727,8 +727,7 @@ class Summary {
                     },
                     methods: {
                         initData(){
-                            this.model = fsHandler.callFsJScript("/matrix/summary/summary.js",null).message;
-                            console.log(this.model)
+                            this.model = fsHandler.callFsJScript("/matrix/summary/getSummary.js",null).message;
                         },
                         init(){
                             

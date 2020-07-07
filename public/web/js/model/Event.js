@@ -72,16 +72,7 @@ class Event {
                                 this.info = [];
                                 this.info.push(`共 ${this.dt.rows.length} 项`);
                                 this.info.push(`已选择 ${this.dt.selected.length} 项`);
-                                this.info.push(moment().format("YYYY-MM-DD HH:MM:SS.SSS"));
-
-                                // 有选择情况下
-                                // 初始化drag&drop
-                                // if(!_.isEmpty(val.selected)){
-                                //     this.dragHandle(true);
-                                //     this.dropHandle();
-                                // } else{
-                                //     this.dragHandle(false);
-                                // }
+                                this.info.push(moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
                             },
                             deep:true,
                             immediate:true
@@ -138,7 +129,8 @@ class Event {
                                             @row-contextmenu="onRowContextmenu"
                                             @row-click="onRowContextmenu"
                                             @selection-change="onSelectionChange"
-                                            ref="table">
+                                            ref="table"
+                                            v-if="!_.isEmpty(dt.rows)">
                                             <el-table-column type="selection" align="center"></el-table-column> 
                                             <el-table-column type="expand">
                                                 <template slot-scope="props">
@@ -200,7 +192,7 @@ class Event {
                             let doLayout = ()=>{
                                 if($(".el-table__body-wrapper",this.$el).is(':visible')){
                                     this.$refs.table.setCurrentRow(this.dt.rows[0]);
-                                    this.$refs.table.doLayout();
+                                    //this.$refs.table.doLayout();
                                 } else {
                                     setTimeout(doLayout,50);
                                 }
@@ -348,7 +340,7 @@ class Event {
                                 csvSeparator: ', ',
                                 csvUseBOM: true,
                                 ignoreColumn: [0,1],
-                                fileName: `tableExport_${moment().format("YYYY-MM-DD HH:MM:SS")}`,
+                                fileName: `tableExport_${moment().format("YYYY-MM-DD HH:mm:ss")}`,
                                 type: type,
                             };
         
@@ -473,7 +465,7 @@ class Event {
                                 this.info = [];
                                 this.info.push(`共 ${this.dt.rows.length} 项`);
                                 this.info.push(`已选择 ${this.dt.selected.length} 项`);
-                                this.info.push(moment().format("YYYY-MM-DD HH:MM:SS.SSS"));
+                                this.info.push(moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
                             },
                             deep:true,
                             immediate:true
@@ -596,8 +588,9 @@ class Event {
                             let doLayout = ()=>{
                                 if($(".el-table-column--selection",this.$el).is(':visible')){
                                     _.delay(()=>{
+                                        this.$refs.table.setCurrentRow(this.dt.rows[0]);
                                         this.$refs.table.doLayout();
-                                    },1000)
+                                    },500)
                                 } else {
                                     setTimeout(doLayout,50);
                                 }
@@ -721,7 +714,7 @@ class Event {
                                 csvSeparator: ', ',
                                 csvUseBOM: true,
                                 ignoreColumn: [0,1],
-                                fileName: `tableExport_${moment().format("YYYY-MM-DD HH:MM:SS")}`,
+                                fileName: `tableExport_${moment().format("YYYY-MM-DD HH:mm:ss")}`,
                                 type: type,
                             };
         
@@ -777,7 +770,7 @@ class Event {
                                 this.info = [];
                                 this.info.push(`共 ${this.dt.rows.length} 项`);
                                 this.info.push(`已选择 ${this.dt.selected.length} 项`);
-                                this.info.push(moment().format("YYYY-MM-DD HH:MM:SS.SSS"));
+                                this.info.push(moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
                             },
                             deep:true,
                             immediate:true
@@ -838,7 +831,8 @@ class Event {
                             let doLayout = ()=>{
                                 if($(".el-table-column--selection",this.$el).is(':visible')){
                                     _.delay(()=>{
-                                        this.$refs.table.doLayout();
+                                        this.$refs.table.setCurrentRow(this.dt.rows[0]);
+                                        //this.$refs.table.doLayout();
                                     },1000)
                                 } else {
                                     setTimeout(doLayout,50);
@@ -959,7 +953,7 @@ class Event {
                                 csvSeparator: ', ',
                                 csvUseBOM: true,
                                 ignoreColumn: [0,1],
-                                fileName: `tableExport_${moment().format("YYYY-MM-DD HH:MM:SS")}`,
+                                fileName: `tableExport_${moment().format("YYYY-MM-DD HH:mm:ss")}`,
                                 type: type,
                             };
         
@@ -1015,7 +1009,7 @@ class Event {
                                 this.info = [];
                                 this.info.push(`共 ${this.dt.rows.length} 项`);
                                 this.info.push(`已选择 ${this.dt.selected.length} 项`);
-                                this.info.push(moment().format("YYYY-MM-DD HH:MM:SS.SSS"));
+                                this.info.push(moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
                             },
                             deep:true,
                             immediate:true
@@ -1094,7 +1088,8 @@ class Event {
                             let doLayout = ()=>{
                                 if($(".el-table-column--selection",this.$el).is(':visible')){
                                     _.delay(()=>{
-                                        this.$refs.table.doLayout();
+                                        this.$refs.table.setCurrentRow(this.dt.rows[0]);
+                                        //this.$refs.table.doLayout();
                                     },1000)
                                 } else {
                                     setTimeout(doLayout,50);
@@ -1209,7 +1204,7 @@ class Event {
                                 csvSeparator: ', ',
                                 csvUseBOM: true,
                                 ignoreColumn: [0,1],
-                                fileName: `tableExport_${moment().format("YYYY-MM-DD HH:MM:SS")}`,
+                                fileName: `tableExport_${moment().format("YYYY-MM-DD HH:mm:ss")}`,
                                 type: type,
                             };
         
@@ -1520,7 +1515,7 @@ class Event {
                                     return {id:objectHash.sha1(name+val+_.now()), 
                                             name: name, 
                                             value: val[1],
-                                            expression:  className==='vtime'?`at ${moment(name).format("YYYY-MM-DD HH:mm:SS")} within 15minutes for ${className}`:`${className}=${name}`,
+                                            expression:  className==='vtime'?`at ${moment(name).format("YYYY-MM-DD HH:mm:ss")} within 15minutes for ${className}`:`${className}=${name}`,
                                             title: `按${title}分析 \n\n ${name}: ${val[1]}`,
                                             width: val[1]/sum * 100, 
                                             color: _.sample(_.map(mx.global.register.color.summary,'color'))
@@ -1921,10 +1916,7 @@ class Event {
                                                 <el-button type="text" style="float: right;" @click="scriptRun" icon="fas fa-running"></el-button>
                                             </el-tooltip>
                                         </el-header>
-                                        <el-main style="padding:0px;background:#333333;">
-                                            <div contenteditable="true" style="height:100vh;color:rgb(23, 236, 59);outline-style: none;white-space: pre-line;">
-                                                #{dt.result.outputs.toString()}#
-                                            </div>
+                                        <el-main style="padding:0px;background:#333333;" ref="editor">
                                         </el-main>
                                         <el-footer style="height:30px;line-height:30px;background: #f7f7f7;display:;padding: 0px 10px;">
                                             <el-tooltip :content="'查看作业: ' + dt.result.runid">
@@ -1971,8 +1963,22 @@ class Event {
                     },
                     methods: {
                         init(){    
+
+                            // Editor
+                            let editor = ace.edit(this.$refs.editor.$el);
+                            editor.setOptions({
+                                //maxLines: 1000,
+                                minLines: 20
+                            });
+                            editor.setTheme("ace/theme/vibrant_ink");
+                            editor.getSession().setMode("ace/mode/text");
+                            editor.focus(); //To focus the ace editor
+                            let row = editor.session.getLength() - 1;
+                            let column = editor.session.getLine(row).length;
+                            editor.gotoLine(row + 1, column);
+                            
                             this.split.inst = Split([this.$refs.leftView.$el, this.$refs.container.$el], {
-                                sizes: [33, 67],
+                                sizes: [30, 70],
                                 minSize: [0, 0],
                                 gutterSize: 5,
                                 gutterAlign: 'end',
@@ -1990,17 +1996,24 @@ class Event {
                             
                             let cmd = this.dt.selected[0].name;
                             let server = "wecise";
-                            let user = "matrix";
+                            let user = window.COMPANY_OSPACE;
                             try {
-                                this.dt.result.outputs[0] = `${server}:~ ${user}$ ${cmd}\n`;
+                                this.dt.result.outputs = [];
+
+                                this.dt.result.outputs[0] = `${server}:~ ${user}$ ${cmd}`;
 
                                 let rtn = jobHandler.callJob(cmd,'wecise');
+                                console.log(rtn)
                                 this.dt.result.runid = rtn.message.runid;
                                 this.dt.result.sid = rtn.message.sid;
                                 this.dt.result.outputs.push(rtn.message.outputs[0]);
 
                             } catch(err){
                                 this.dt.result.outputs = [];
+                            } finally{
+                                let editor = ace.edit(this.$refs.editor.$el);
+                                editor.setValue("");
+                                editor.setValue(this.dt.result.outputs.join("\n"),1);
                             }
                         },
                         job(term){
@@ -2594,7 +2607,7 @@ class Event {
                             term: "",
                             autoSearch: true,
                             // 指定类
-                            class: "#/matrix/devops/alert/:",
+                            class: "#/matrix/devops/alert",
                             // 指定api
                             api: {parent: "event",name: "event_list.js"},
                             // 其它设置
@@ -2961,7 +2974,7 @@ class Event {
                                 list = event.list;
                                 tip = `确定要【${mx.global.register.event.status[event.action][1]}】以下事件？<br><br>
                                         告警摘要：${list[0].msg}<br><br>
-                                        告警时间：${moment(list[0].vtime).format("YYYY-MM-DD HH:mm:SS")}<br><br>
+                                        告警时间：${moment(list[0].vtime).format("YYYY-MM-DD HH:mm:ss")}<br><br>
                                         告警级别：${list[0].severity}<br><br>
                                         告警时间：${list[0].status}<br><br>
                                         告警ID：${list[0].id}`

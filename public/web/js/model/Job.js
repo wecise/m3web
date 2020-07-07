@@ -811,12 +811,15 @@ class Job extends Matrix {
                         options: {
                             // 视图定义
                             view: {
-                                show: false
+                                eidtEnable: false,
+                                show: false,
+                                value: "all"
                             },
                             // 搜索窗口
                             window: { name:"所有", value: ""},
                             // 输入
                             term: "",
+                            autoSearch: true,
                             // 指定类
                             class: "#/matrix/jobs/jobrun:",
                             // 指定api

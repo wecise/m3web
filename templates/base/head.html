@@ -39,7 +39,10 @@
 	<!-- Element -->
 	<script src="{{AppSubUrl}}/web/vendor/element/2.13.0/dist/index.js"></script>
 	<link href="{{AppSubUrl}}/web/vendor/element/2.13.0/dist/theme-chalk/index.css" type="text/css" rel="stylesheet" />
-
+	<script src="{{AppSubUrl}}/web/vendor/element/2.13.0/dist/vue-i18n.min.js"></script>
+	<script src="{{AppSubUrl}}/web/vendor/element/2.13.0/dist/locale/zh-CN.min.js"></script>
+	<script src="{{AppSubUrl}}/web/vendor/element/2.13.0/dist/locale/en.min.js"></script>
+	
 	<!--lodash JS-->
 	<script src="{{AppSubUrl}}/web/vendor/lodash/dist/lodash.min.js"></script>
 	
@@ -122,6 +125,12 @@
 			localStorage.setItem("SIGNEDUSER", JSON.stringify( { usrename:window.SignedUser_UserName, fullname:window.SignedUser_FullName, isadmin:window.SignedUser_IsAdmin, assets_icon: window.ASSETS_ICON, lang:window.MATRIX_LANG, companyLogo:window.COMPANY_LOGO}) );
 		} catch(err){
 			
+		} finally{
+			if(window.MATRIX_LANG == 'zh-CN') {
+				ELEMENT.locale(ELEMENT.lang.zhCN);
+			} else{
+				ELEMENT.locale(ELEMENT.lang.en);
+			}
 		}
 	</script>
 

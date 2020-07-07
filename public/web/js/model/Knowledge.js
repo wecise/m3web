@@ -718,7 +718,7 @@ class Knowledge {
                         model:{
                             handler(val,oldVal){
                                 if(this.editor){
-                                    this.editor.setValue(val.content);
+                                    this.editor.setValue(val.content,1);
                                     this.compiledMarkdown = marked(val.content);
                                 }
                             },
@@ -774,7 +774,7 @@ class Knowledge {
                                 this.editor.gotoLine(row + 1, column);
                                 
                                 if(!_.isEmpty(this.model.content)){
-                                    this.editor.setValue(this.model.content);
+                                    this.editor.setValue(this.model.content,1);
                                 }
                             } catch(err){
                                 console.log(err)

@@ -833,6 +833,7 @@ class Topological {
                                         </el-button>
                                     </el-tooltip>
                                 </div>
+                                <el-button type="text" icon="el-icon-down"></el-button>
                             </el-main>
                             <el-footer ref="footerView" style="width:30vw;padding:0px;border-top:1px solid #409EFF;height:auto;" v-if="!_.isEmpty(search.selected)">
                                 <topological-graph class="graphAction" :model="$parent.$parent.mainView.search.model" ref="searchRef"></topological-graph>
@@ -876,7 +877,7 @@ class Topological {
                     },50)
 
                     // 定位cell
-                    inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.onPosition(item.id);
+                    inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.onPosition(item.id, true, true);
                                         
                 },
                 onClear(){
@@ -906,7 +907,7 @@ class Topological {
                         this.search.result = entitys;
 
                         this.search.result = _.map(this.search.result,(v)=>{
-                            return _.extend(v,{cell: {edge:false}});
+                            return _.extend(v,{ cell: {edge:false} } );
                         })
                 
                     } catch(err){
@@ -1295,7 +1296,7 @@ class Topological {
 
                         // 合并到当前图
                         let editor = inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.model.editor;
-                        editor.graph.getModel().mergeChildren(graph.getModel().getRoot().getChildAt(0), editor.graph.getDefaultParent());
+                        editor.graph.getModel().mergeChildren(graph.getModel().getRoot(), editor.graph.getDefaultParent());
 
                         // Executes the layout handler
                         _.delay(()=>{
@@ -2429,6 +2430,14 @@ class Topological {
                                         start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
                                         picker.$emit('pick', [start, end]);
                                     }
+                                }, {
+                                    text: '最近30天',
+                                    onClick(picker) {
+                                        const end = new Date();
+                                        const start = new Date();
+                                        start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+                                        picker.$emit('pick', [start, end]);
+                                    }
                                 }
                         ]}
                     }
@@ -3410,11 +3419,17 @@ class Topological {
             watch: {
                 'tabs.list':function(val,oldVal){
                     if(val.length > 0){
+                        
                         this.$root.$data.splitInst.setSizes([0,55,45]);
                         $(".gutter").show();
+
+                        // 图居中
+                        inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.toCenter(true);
                     } else {
                         this.$root.$data.splitInst.setSizes([0,100,0]);
                         $(".gutter").hide();
+                        // 图居中
+                        inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.toCenter(true);
                     }
                 }
             },

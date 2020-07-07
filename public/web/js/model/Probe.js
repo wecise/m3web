@@ -61,13 +61,7 @@ class Probe extends Matrix {
         // 组件实例化
         VueLoader.onloaded(["ai-robot-component",
             "entity-tree-component",
-            "probe-tree-component",
-            "probe-dropdown-tree-component",
-            "probe-card-component",
-            "probe-list-datatables-component",
-            "policy-list-datatables-component",
-            "log-list-datatables-component",
-            "script-datatable"], function () {
+            "probe-card-component"], function () {
             
             // 探针管理
             Vue.component("probe-manage",{
@@ -92,7 +86,7 @@ class Probe extends Matrix {
                                         <el-button type="text" icon="el-icon-s-fold" @click="onToggle"></el-button>
                                     </el-tooltip>
                                     <el-tooltip content="刷新" open-delay="500" placement="top">
-                                        <el-button type="text" icon="el-icon-refresh" @click="eventHub.$emit('PROBE-REFRESH-EVENT', ['probe'])"></el-button>
+                                        <el-button type="text" icon="el-icon-refresh" @click="$root.getProbeList"></el-button>
                                     </el-tooltip>
                                     <el-tooltip content="导出" delay-time="500">
                                         <el-dropdown @command="onExport">
@@ -149,12 +143,11 @@ class Probe extends Matrix {
                                                     multiple
                                                     filterable
                                                     allow-create
-                                                    collapse-tags	
                                                     default-first-option
                                                     class="el-select-tags"
                                                     placeholder="标签"
                                                     @change="onTagChange($event,scope.row)"
-                                                    @remove-tag="onTagRemoveTag($event,scope.row)">
+                                                    @remove-tag="onTagRemove($event,scope.row)">
                                                     <el-option
                                                         v-for="tag in scope.row.tags"
                                                         :key="tag"
@@ -164,17 +157,35 @@ class Probe extends Matrix {
                                                 </el-select>
                                             </template>
                                         </el-table-column>
-                                        <el-table-column label="操作" width="100" fixed="right">
+                                        <el-table-column label="Toe探针" width="120">
+                                            <template slot-scope="scope">
+                                                <el-tooltip content="启动" open-delay="500" v-if="scope.row.agentstatus.toe == '1'">
+                                                    <el-button type="success">
+                                                        <i class="el-icon-video-play"></i> 启动中
+                                                    </el-button>
+                                                </el-tooltip>
+                                                <el-tooltip content="停止" open-delay="500" v-else>
+                                                    <el-button type="danger">
+                                                        <i class="el-icon-video-pause"></i> 停止中
+                                                    </el-button>
+                                                </el-tooltip>
+                                            </template>
+                                        </el-table-column>
+                                        <el-table-column label="Zabbix探针" width="120">
                                             <template slot-scope="scope" v-if="scope.row.iszabbix == 1">
-                                                <el-tooltip content="启动" open-delay="500">
-                                                    <el-button type="text" icon="el-icon-video-play" @click="onStart(scope.row,scope.$index)"></el-button>
+                                                <el-tooltip content="启动中，点击停止" open-delay="500" v-if="scope.row.agentstatus.zabbix == '1'">
+                                                    <el-button type="success" @click="onStop(scope.row,scope.$index)">
+                                                        <i class="el-icon-video-pause"></i> 启动中
+                                                    </el-button>
                                                 </el-tooltip>
-                                                <el-tooltip content="停止" open-delay="500">
-                                                    <el-button type="text" icon="el-icon-video-pause" @click="onStop(scope.row,scope.$index)"></el-button>
+                                                <el-tooltip content="停止中，点击启动" open-delay="500" v-else>
+                                                    <el-button type="danger" @click="onStart(scope.row,scope.$index)">
+                                                        <i class="el-icon-video-play"></i> 停止中
+                                                    </el-button>
                                                 </el-tooltip>
-                                                <el-tooltip content="重启" open-delay="500">
+                                                <!--el-tooltip content="重启" open-delay="500">
                                                     <el-button type="text" icon="el-icon-refresh" @click="onRestart(scope.row,scope.$index)"></el-button>
-                                                </el-tooltip>
+                                                </el-tooltip-->
                                             </template>
                                         </el-table-column>
                                     </el-table>
@@ -211,7 +222,8 @@ class Probe extends Matrix {
                         let doLayout = ()=>{
                             if($(".el-table-column--selection",this.$el).is(':visible')){
                                 _.delay(()=>{
-                                    this.$refs.table.doLayout();
+                                    this.$refs.table.setCurrentRow(this.dt.rows[0]);
+                                    //this.$refs.table.doLayout();
                                 },1000)
                             } else {
                                 setTimeout(doLayout,50);
@@ -258,7 +270,7 @@ class Probe extends Matrix {
                         let input = {action: "+", tags: val, ids: [row.id]};
                         let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
                     },
-                    onTagRemoveTag(val,row){
+                    onTagRemove(val,row){
                         let input = {action: "-", tags: [val], ids: [row.id]};
                         let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
                     },
@@ -309,7 +321,7 @@ class Probe extends Matrix {
                     },
                     onStart(row,index){
                         
-                        this.$confirm(`确认要启动：${row.host} 上的Agent？`, '提示', {
+                        this.$confirm(`确认要启动：${row.host} 上的Zabbix Agent？`, '提示', {
                                 confirmButtonText: '确定',
                                 cancelButtonText: '取消',
                                 type: 'warning'
@@ -318,29 +330,23 @@ class Probe extends Matrix {
                             try{
 
                                 let params = {action: 'start', hosts: [row.host]};
-                                let rtn = probeHandler.zabbixAgentAction(params);
+                                let rtn = scriptHandler.zabbixAgentAction(params);
                                 
-                                if (rtn.status == 'ok'){
-                                    this.$message({
-                                        type: "success",
-                                        message: "启动成功！"
-                                    });
-                                    
-                                } else {
-                                    this.$message({
-                                        type: "error",
-                                        message: "启动失败!"// + rtn.message
-                                    })
-                                }
+                                this.$message({
+                                    type: "info",
+                                    message: "启动中，请稍候。。。"
+                                });
+                                
+                                _.delay(()=>{
+                                    this.$root.getProbeList();
+                                },6000)
 
-                                
                             } catch(err){
                                 this.$message({
                                     type: "error",
+                                    duration: 6000,
                                     message: "启动失败 " + err
                                 })
-                            } finally {
-                                
                             }
                              
                         }).catch(() => {
@@ -348,53 +354,55 @@ class Probe extends Matrix {
                         }); 
                     },
                     onStop(row,index){
-                        this.$confirm(`确认要停止：${row.host} 上的 Agent？`, '提示', {
+                        this.$confirm(`确认要停止：${row.host} 上的Zabbix Agent？`, '提示', {
                                 confirmButtonText: '确定',
                                 cancelButtonText: '取消',
                                 type: 'warning'
                         }).then(() => {
                             
-                            let params = {action: 'stop', hosts: [row.host]};
-                            let rtn = probeHandler.zabbixAgentAction(params);
+                            try{
+                                let params = {action: 'stop', hosts: [row.host]};
+                                let rtn = scriptHandler.zabbixAgentAction(params);
 
-                            if (rtn == 1){
                                 this.$message({
-                                    type: "success",
-                                    message: "停止成功！"
+                                    type: "info",
+                                    message: "停止中，请稍候。。。"
                                 });
-                                
-                            } else {
-                                this.$message({
-                                    type: "error",
-                                    message: "停止失败 " + rtn.message
-                                })
-                            } 
+
+                                _.delay(()=>{
+                                    this.$root.getProbeList();
+                                },6000)
+                            } catch(err){
+
+                            }
+
                         }).catch(() => {
                             
                         }); 
                     },
                     onRestart(row,index){
-                        this.$confirm(`确认要重启：${row.host} 上的Agent？`, '提示', {
+                        this.$confirm(`确认要重启：${row.host} 上的Zabbix Agent？`, '提示', {
                                 confirmButtonText: '确定',
                                 cancelButtonText: '取消',
                                 type: 'warning'
                         }).then(() => {
                             
-                            let params = {action: 'restart', hosts: [row.host]};
-                            let rtn = probeHandler.zabbixAgentAction(params);
+                            try{
+                                let params = {action: 'restart', hosts: [row.host]};
+                                let rtn = scriptHandler.zabbixAgentAction(params);
 
-                            if (rtn == 1){
                                 this.$message({
-                                    type: "success",
-                                    message: "重启成功！"
+                                    type: "info",
+                                    message: "重启中，请稍候。。。"
                                 });
-                                
-                            } else {
-                                this.$message({
-                                    type: "error",
-                                    message: "重启失败 " + rtn.message
-                                })
-                            } 
+
+                                _.delay(()=>{
+                                    this.$root.getProbeList();
+                                },6000)
+                            } catch(err){
+
+                            }
+
                         }).catch(() => {
                             
                         }); 
@@ -422,21 +430,12 @@ class Probe extends Matrix {
                     }
                 },
                 template:   `<el-container style="width:100%;height:100%;">
-                                <el-header style="height:30px;line-height:30px;">
+                                <el-header style="height:35px;line-height:35px;">
                                     <el-tooltip content="切换视图" open-delay="500" placement="top">
                                         <el-button type="text" icon="el-icon-s-fold" @click="onToggle"></el-button>
                                     </el-tooltip>
-                                    <!--el-tooltip content="下发脚本" delay-time="500" placement="top">
-                                        <el-button type="text" icon="el-icon-download" @click="scriptDeploy"></el-button>
-                                    </el-tooltip-->
-                                    <!--el-tooltip content="编辑脚本" delay-time="500" placement="top">
-                                        <el-button type="text" icon="el-icon-edit-outline" @click="scriptUpdate"></el-button>
-                                    </el-tooltip-->
-                                    <!--el-tooltip content="删除未下发脚本" delay-time="500" placement="top">
-                                        <el-button type="text" icon="el-icon-delete" @click="scriptDelete"></el-button>
-                                    </el-tooltip-->
                                     <el-tooltip content="刷新" delay-time="500" placement="top">
-                                        <el-button type="text" icon="el-icon-refresh" @click="scriptRefresh"></el-button>
+                                        <el-button type="text" icon="el-icon-refresh" @click="onScriptRefresh"></el-button>
                                     </el-tooltip>
                                     <el-tooltip content="导出" delay-time="500" placement="top">
                                         <el-dropdown @command="onExport">
@@ -455,14 +454,9 @@ class Probe extends Matrix {
                                     </el-tooltip>
                                     <el-divider direction="vertical"></el-divider>
                                     <el-tooltip content="上传脚本" delay-time="500" placement="top">
-                                        <el-dropdown>
-                                            <span class="el-dropdown-link">
-                                                <i class="el-icon-upload el-icon--right" style="font-size:15px;color:#67c23a;"></i>
-                                            </span>
-                                            <el-dropdown-menu slot="dropdown">
-                                                <el-dropdown-item @click.native="onScriptUpload">脚本上传</el-dropdown-item>
-                                            </el-dropdown-menu>
-                                        </el-dropdown>
+                                        <el-button type="default" @click.native="onScriptUpload">
+                                            <i class="el-icon-plus"></i> 脚本上传
+                                        </el-button>
                                     </el-tooltip>
                                 </el-header>   
                                 <el-main style="width:100%;padding:0px;">
@@ -476,7 +470,9 @@ class Probe extends Matrix {
                                         @row-contextmenu="onRowContextmenu"
                                         @selection-change="onSelectionChange"
                                         @current-change="onCurrentChange"
-                                        ref="table">
+                                        @expand-change="onExpandChange"
+                                        ref="table"
+                                        v-if="!_.isEmpty(dt.rows)">
                                         <!--el-table-column type="selection" align="center"></el-table-column--> 
                                         <el-table-column label="下发状态" width="120" prop="status">
                                             <template slot-scope="scope">
@@ -486,31 +482,113 @@ class Probe extends Matrix {
                                         </el-table-column>
                                         <el-table-column type="expand" width="0">
                                             <template slot-scope="props">
-                                                <el-container style="width:80%;">
-                                                    <el-main>
-                                                        <el-form label-position="left" label-width="120px">
-                                                            <el-form-item label="选择服务器">
-                                                                <el-transfer
-                                                                    :titles="['服务器列表', '已下发服务器']"
-                                                                    :button-texts="['取消下发', '下发']"
-                                                                    :data="servers.list"
-                                                                    v-model="props.row.selected"
-                                                                    :props="{
-                                                                        key: 'host',
-                                                                        label: 'host'
-                                                                    }"
-                                                                    @change="((value, direction, movedKeys)=>{ onDeployOrUndeploy(value, direction, movedKeys, props.row) })">
-                                                                    <span slot-scope="{ option }">#{ option.host }# - #{ option.iszabbix | pickZabbix }#</span>
-                                                                </el-transfer>
-                                                            </el-form-item>
-                                                            <el-form-item label="Key">
-                                                                <el-input
-                                                                    placeholder="key"
-                                                                    v-model="props.row.key"
-                                                                    clearable>
-                                                                </el-input>                                                  
-                                                            </el-form-item>
-                                                        <el-form>
+                                                <el-container style="width:90%;height:100%;background: #f2f3f5;">
+                                                    <el-main style="height:100%;padding:0px;">
+                                                        <el-tabs v-model="props.row.activeTab" tab-position="left" @tab-click="((tab,event)=>{ onTabClick(tab,event,props.row)})">
+                                                            <el-tab-pane name="script">
+                                                                <span slot="label"><i class="el-icon-tickets"></i> 脚本信息</span>
+                                                                <el-form label-position="left" label-width="120px" style="background: #ffffff;padding: 10px 20px;">
+                                                                    <el-form-item style="text-align:right;" v-if="props.row.status==0">
+                                                                        <el-button icon="el-icon-position" type="success" @click="onScriptUpdate(props.row)">更新脚本</el-button>    
+                                                                    </el-form-item>
+                                                                    <el-form-item label="脚本文件" v-if="props.row.status==0">
+                                                                        <el-upload
+                                                                            :on-change="((file, fileList)=>{ onFileChange(file, fileList, props.row)})"
+                                                                            :file-list="props.row.fileList"
+                                                                            :limit="1"
+                                                                            multiple="false"
+                                                                            :auto-upload="false"
+                                                                            style="padding:10px;background:#f2f3f5;border:1px dashed #ddd;">
+                                                                            <div slot="tip" class="el-upload__tip">只能上传脚本文件</div>
+                                                                            <el-button icon="el-icon-upload2" type="default">点击上传脚本</el-button>
+                                                                        </el-upload>
+                                                                    </el-form-item>
+                                                                    <el-form-item label="脚本文件" v-else>
+                                                                        <el-button type="default" style="padding:10px;" v-for="item in props.row.fileList" style="box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);">
+                                                                            <i class="el-icon-document" style="font-size:48px;"></i>
+                                                                            <span style="text-align:left;">
+                                                                                <p>文件名称：#{item.files[0].name}#</p>
+                                                                                <p>上传时间：#{item.files[0].modtime}#</p>
+                                                                                <p>文件大小：#{item.files[0].size | pickSize}#</p>
+                                                                            </span>
+                                                                        </el-button>
+                                                                    </el-form-item>
+                                                                    <el-form-item label="脚本库名称">
+                                                                        <el-input v-model="props.row.name" required="required" disabled></el-input>
+                                                                    </el-form-item>
+                                                                    <el-form-item label="脚本版本">
+                                                                        <el-input-number v-model="props.row.version" required="required" :precision="1" :step="0.1"></el-input-number>
+                                                                    </el-form-item>
+                                                                    <el-form-item label="脚本说明">
+                                                                        <el-input type="textarea" :row="6" v-model="props.row.remark"></el-input>
+                                                                    </el-form-item>
+                                                                    <el-form-item label="添加标签">
+                                                                        <el-select
+                                                                            v-model="props.row.tags"
+                                                                            multiple
+                                                                            filterable
+                                                                            allow-create
+                                                                            default-first-option
+                                                                            class="el-select-tags"
+                                                                            placeholder="标签"
+                                                                            @change="onTagChange($event,props.row)"
+                                                                            @remove-tag="onTagRemove($event,props.row)">
+                                                                            <el-option
+                                                                                v-for="tag in props.row.tags"
+                                                                                :key="tag"
+                                                                                :label="tag"
+                                                                                :value="tag">
+                                                                            </el-option>
+                                                                        </el-select>
+                                                                    </el-form-item>
+                                                                <el-form>
+                                                            </el-tab-pane>
+                                                            
+                                                            <el-tab-pane name="setup">
+                                                                <span slot="label"><i class="el-icon-setting"></i> 下发设置</span>
+                                                                <el-form label-position="left" label-width="120px" style="background: #ffffff;padding: 10px 20px;min-height:200px;">
+                                                                    <el-form-item label="执行命令">
+                                                                        <pre :ref="'commandRef'+props.row.id" style="width:100%;height:200px;border:1px solid #dddddd;"></pre>
+                                                                        <!--el-input
+                                                                            placeholder="command"
+                                                                            v-model="props.row.command">
+                                                                        </el-input-->                                                  
+                                                                    </el-form-item>
+                                                                    <el-form-item label="Key">
+                                                                        <el-input
+                                                                            placeholder="key"
+                                                                            v-model="props.row.zabbixKey">
+                                                                        </el-input>                                                  
+                                                                    </el-form-item>
+                                                                    <!--el-form-item label="Config">
+                                                                        <el-input type="textarea" rows="6"
+                                                                            placeholder="Config"
+                                                                            :value="props.row.zabbix | pickZabbixConfig">
+                                                                        </el-input>                                                  
+                                                                    </el-form-item-->
+                                                                <el-form>
+                                                            </el-tab-pane>
+
+                                                            <el-tab-pane name="servers">
+                                                                <span slot="label"><i class="el-icon-monitor"></i> 下发对象</span>
+                                                                <el-form label-position="left" label-width="120px" style="background: #ffffff;padding: 10px 20px;">
+                                                                    <el-form-item label="选择服务器">
+                                                                        <el-transfer
+                                                                            :titles="['服务器列表', '已下发服务器']"
+                                                                            :button-texts="['取消下发', '下发']"
+                                                                            :data="servers.list"
+                                                                            v-model="props.row.selected"
+                                                                            :props="{
+                                                                                key: 'host',
+                                                                                label: 'host'
+                                                                            }"
+                                                                            @change="((value, direction, movedKeys)=>{ onScriptDeployOrUndeploy(value, direction, movedKeys, props.row) })">
+                                                                            <span slot-scope="{ option }">#{ option.host }# - #{ option.iszabbix | pickZabbix }#</span>
+                                                                        </el-transfer>
+                                                                    </el-form-item>
+                                                                <el-form>
+                                                            </el-tab-pane>
+                                                        </el-tabs>
                                                     </el-main>
                                                 </el-container>
                                             </template>
@@ -533,19 +611,18 @@ class Probe extends Matrix {
                                                     </div>
                                                 </template>
                                         </el-table-column>
-                                        <el-table-column label="标签" prop="tags">
+                                        <el-table-column label="标签" prop="tags" width="200">
                                             <template slot-scope="scope">
                                                 <el-select
                                                     v-model="scope.row.tags"
                                                     multiple
                                                     filterable
                                                     allow-create
-                                                    collapse-tags	
                                                     default-first-option
                                                     class="el-select-tags"
                                                     placeholder="标签"
                                                     @change="onTagChange($event,scope.row)"
-                                                    @remove-tag="onTagRemoveTag($event,scope.row)">
+                                                    @remove-tag="onTagRemove($event,scope.row)">
                                                     <el-option
                                                         v-for="tag in scope.row.tags"
                                                         :key="tag"
@@ -555,16 +632,13 @@ class Probe extends Matrix {
                                                 </el-select>
                                             </template>
                                         </el-table-column>
-                                        <el-table-column label="操作" width="130" fixed="right">
+                                        <el-table-column label="操作" width="130">
                                             <template slot-scope="scope">
-                                                <el-tooltip content="下发脚本到服务器" open-delay="500" placement="top">
+                                                <el-tooltip content="编辑脚本、下发脚本" open-delay="500" placement="top">
                                                     <el-button type="text" icon="el-icon-download" @click="onToogleExpand(scope.row)"></el-button>
                                                 </el-tooltip>
-                                                <el-tooltip content="编辑脚本" open-delay="500" placement="top">
-                                                    <el-button type="text" icon="el-icon-edit-outline"></el-button>
-                                                </el-tooltip>
                                                 <el-tooltip content="删除脚本" open-delay="500" placement="top">
-                                                    <el-button type="text" icon="el-icon-delete" @click="onDelete(scope.row,scope.$index)"></el-button>
+                                                    <el-button type="text" icon="el-icon-delete" @click="onScriptDelete(scope.row,scope.$index)"></el-button>
                                                 </el-tooltip>
                                             </template>
                                         </el-table-column>
@@ -577,6 +651,16 @@ class Probe extends Matrix {
                 filters: {
                     pickZabbix(val){
                         return val == 1 ? 'Zabbix' : '';
+                    },
+                    pickSize(val){
+                        return mx.bytesToSize(val);
+                    },
+                    pickZabbixConfig(val){
+                        try{
+                            return JSON.stringify(val,null,2);
+                        } catch(err){
+                            return val;
+                        }
                     }
                 },
                 watch: {
@@ -662,13 +746,55 @@ class Probe extends Matrix {
                         let rtn = fsHandler.callFsJScript("/matrix/probe/getServerList.js",null).message;
                         this.$set(this.servers,'list', rtn);
                     },
+                    // 获取脚本详细信息
+                    onExpandChange(row,expandedRows){
+                        try{
+
+                            // 获取脚本文件信息
+                            let rtn = scriptHandler.depotGet(row);
+                            _.extend(row, { activeTab: 'script', fileList: rtn.files } );
+
+                            // 初始化命令编辑器
+                            _.delay(()=>{
+                                let editor = ace.edit(this.$refs['commandRef'+row.id]);
+                                editor.setOptions({
+                                    // maxLines: 1000,
+                                    minLines: 20,
+                                    autoScrollEditorIntoView: true,
+                                    enableBasicAutocompletion: true,
+                                    enableSnippets: true,
+                                    enableLiveAutocompletion: false
+                                });
+                                
+                                editor.getSession().setMode("ace/mode/sh");
+                                editor.setTheme("ace/theme/chrome");
+                                editor.getSession().setUseSoftTabs(true);
+                                editor.getSession().setTabSize(2);
+                                editor.getSession().setUseWrapMode(false);
+                                editor.renderer.setShowGutter(true);
+                                editor.setValue(row.command);
+                            },1000)
+
+                        } catch(err){
+                            _.extend(row, { activeTab: 'script', fileList: [] } );
+                        } 
+                    },
                     onTagChange(val,row){
                         let input = {action: "+", tags: val, ids: [row.id]};
                         let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
                     },
-                    onTagRemoveTag(val,row){
+                    onTagRemove(val,row){
                         let input = {action: "-", tags: [val], ids: [row.id]};
                         let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
+                    },
+                    // 上传文件
+                    onFileChange(file, fileList,row) {
+                                    
+                        this.$set(row, 'uploadfile', file.raw);
+
+                    },
+                    onTabClick(tab, event, row){
+                        this.$set(row,'activeTab', tab.name);
                     },
                     onSelectionChange(val) {
                         this.dt.selected = val;
@@ -718,8 +844,19 @@ class Probe extends Matrix {
                     onToogleExpand(row){
                         this.$refs.table.toggleRowExpansion(row)
                     },
-                    onDelete(row,index){
+                    // 脚本删除
+                    onScriptDelete(row,index){
                         
+                        if(row.status == 1){
+                            
+                            this.$message({
+                                type: "warning",
+                                message: "脚本已下发，不能删除！如要删除，请先在【下发对象】中取消下发。"
+                            })
+
+                            return false;
+                        }
+
                         this.$confirm('确定删除选定的脚本?', '提示', {
                             confirmButtonText: '确定',
                             cancelButtonText: '取消',
@@ -728,16 +865,17 @@ class Probe extends Matrix {
 
                                 let rtn = scriptHandler.depotDelete(row.name); 
 
-                                if(rtn === 1) {
+                                if(rtn == 1) {
                                     this.$message({
                                         type: "success",
                                         message: "删除成功！"
                                     })
-                                    eventHub.$emit("PROBE-REFRESH-EVENT", ['script']);
+                                    this.onScriptRefresh();
                                 } else {
                                     this.$message({
                                         type: "error",
-                                        message: "删除失败：" + result.message
+                                        duration: 6000,
+                                        message: "删除失败：" + rtn
                                     })
                                 }
                                 
@@ -746,50 +884,140 @@ class Probe extends Matrix {
                             })      
 
                     },
-                    onDeployOrUndeploy(value, direction, movedKeys, row){
-                        console.log(row,value,movedKeys) 
+                    // 脚本下发、取消下发
+                    onScriptDeployOrUndeploy(value, direction, movedKeys, row){
+                        
+                        let rtn = null;
+
                         // 取消下发
                         if(direction == 'left'){
                             let params = {
                                 hosts: movedKeys,
-                                depots: row.name,
+                                name: row.name,
                                 version: row.version,
                             }
-                            let rtn = probeHandler.unDeployToZabbixAgent(params);
-                            console.log(1,rtn)
+
+                            if( _.indexOf(row.tags,'zabbix') != -1 || _.indexOf(row.tags,'ZABBIX') != -1 ){
+                                scriptHandler.unDeployToZabbixAgent(params);
+                            }
+
+                            this.$message({
+                                type: "info",
+                                message: "取消下发执行中，请稍候。。。"
+                            })
+
+                            _.delay(()=>{
+                                
+                                rtn = scriptHandler.depotUnDeploy(params);
+
+                                if(rtn == 1){    
+                                    
+                                    this.$message({
+                                        type: "success",
+                                        message: "取消下发成功！"
+                                    })
+
+                                    this.onTagChange(['未下发'],row);
+                                    this.onTagRemove('已下发',row);
+                                    this.onScriptRefresh();
+
+                                } else {
+                                    this.$message({
+                                        type: "error",
+                                        duration: 6000,
+                                        message: "取消下发失败 " + rtn
+                                    })
+
+                                }
+                            },2000)
+                            
                         } 
                         // 下发
                         else {
+
+                            
+                            let editor = ace.edit(this.$refs['commandRef'+row.id]);
+                            this.$set(row,'command', _.trim(editor.getValue()));
+
+                            if(_.isEmpty(row.command)){
+                            
+                                this.$message({
+                                    type: "warning",
+                                    message: "脚本执行命令不能为空！"
+                                })
+                                this.$set(row,'selected',[]);
+                                return false;
+                            }
+
+                            if(_.isEmpty(row.zabbixKey)){
+                                this.$message({
+                                    type: "warning",
+                                    message: "请输入zabbix key！"
+                                })
+                                this.$set(row,'selected',[]);
+                                return false;
+                            }
+
                             let params = {
                                 hosts: movedKeys,
                                 name: row.name,
                                 version: row.version,
-                                key: row.key ? row.key : '',
-                                command: row.command ? row.command : ''
+                                key: row.zabbixKey,
+                                command: row.command
                             }
-                            let rtn = probeHandler.deployToZabbixAgent(params);
-                            console.log(2,rtn)
+
+                            rtn = scriptHandler.depotDeploy(params);
+
+                            this.$message({
+                                type: "info",
+                                message: "下发执行中，请稍候。。。"
+                            })
+
+                            _.delay(()=>{
+                                if(rtn == 1){
+                                
+                                    this.$message({
+                                        type: "success",
+                                        message: "下发成功！"
+                                    })
+                                    
+                                    if( _.indexOf(row.tags,'zabbix') != -1 || _.indexOf(row.tags,'ZABBIX') != -1 ){
+                                        scriptHandler.deployToZabbixAgent(params);
+                                    }
+    
+                                    this.onTagChange(['已下发'],row);
+                                    this.onTagRemove('未下发',row);
+                                    this.onScriptRefresh();
+    
+                                } else {
+                                    this.$message({
+                                        type: "error",
+                                        duration: 6000,
+                                        message: "下发失败 " + rtn
+                                    })
+                                    this.$set(row,'selected',[]);
+                                }
+                            },3000)
+                            
                         }
                     },
+                    // 脚本上传
                     onScriptUpload(){
                         const self = this;
 
-                        let wnd = maxWindow.winProbe( `<i class="fas fa-plus-circle"></i> 脚本上传`, `<div id="script-zabbix-add-container"></div>`, null, 'script-container');
+                        let wnd = maxWindow.winProbe( `<i class="el-icon-document-add"></i> 脚本上传`, `<div id="script-upload-container"></div>`, null, 'body');
 
-                        let conf = fsHandler.callFsJScript("/matrix/probe/probe_summary_script_conf.js", mx.urlParams['userid']).message;
-                        
                         new Vue({
                             delimiters: ['#{', '}#'],
                             data: {
                                 model: {
                                     item: {
-                                        name: null,
-                                        version: 1.0,
-                                        remark: null,
+                                        name: "",
+                                        version: 1,
+                                        remark: "",
                                         uploadfile: null,
-                                        tags: ['SCRIPT'],
-                                        servers: conf.servers,
-                                        command: null,
+                                        tags: ['script','zabbix'],
+                                        command: "",
                                         wnd: wnd
                                     },
                                     handler: {
@@ -808,14 +1036,12 @@ class Probe extends Matrix {
                                                         </div>
                                                         <el-container style="height:calc(100% - 80px);">
                                                             <el-header style="height:40px;line-height:40px;text-align:right;">
-                                                                <el-button type="success" icon="el-icon-upload2" @click="save">上传到脚本库</el-button>    
+                                                                <el-button type="success" icon="el-icon-upload2" @click="onSave">上传到脚本库</el-button>    
                                                             </el-header>
                                                             <el-main style="height:100%;">
                                                                 <el-form label-position="left" label-width="120px">
-                                                                    <el-form-item>
+                                                                    <el-form-item label-width="0px" style="border:1px dashed #dddddd;padding:10px;">
                                                                         <el-upload
-                                                                            :on-preview="handlePreview"
-                                                                            :on-remove="handleRemove"
                                                                             :on-change="onFileChange"
                                                                             :before-remove="beforeRemove"
                                                                             :file-list="fileList"
@@ -823,28 +1049,39 @@ class Probe extends Matrix {
                                                                             multiple="false"
                                                                             :auto-upload="false">
                                                                             <el-button icon="el-icon-plus" type="default">选择脚本</el-button>
-                                                                            <div slot="tip" class="el-upload__tip">只能上传脚本文件</div>
+                                                                            <div slot="tip" class="el-upload__tip">支持上传单个脚本文件、支持zip格式脚本压缩包</div>
                                                                             </el-upload>
                                                                     </el-form-item>
-                                                                    <el-form-item label="脚本名称">
+                                                                    <el-form-item label="脚本库名称">
                                                                         <el-input v-model="model.item.name" required="required" ></el-input>
                                                                     </el-form-item>
                                                                     <el-form-item label="脚本版本">
-                                                                        <el-input type="number" v-model="model.item.version" required="required" step="0.1"></el-input>
+                                                                        <el-input-number v-model="model.item.version" required="required" :precision="1" :step="0.1"></el-input-number>
                                                                     </el-form-item>
-                                                                    <el-form-item label="执行命令">
+                                                                    <!--el-form-item label="执行命令">
                                                                         <el-input v-model="model.item.command"></el-input>
-                                                                    </el-form-item>
+                                                                    </el-form-item-->
                                                                     <el-form-item label="脚本说明">
                                                                         <el-input type="textarea" :row="6" v-model="model.item.remark"></el-input>
                                                                     </el-form-item>
                                                                     <el-form-item label="添加标签">
-                                                                        <el-tag
-                                                                            v-for="tag in model.item.tags"
-                                                                            :key="tag"
-                                                                            closable>
-                                                                            #{tag}#
-                                                                        </el-tag>
+                                                                        <el-select
+                                                                            v-model="model.item.tags"
+                                                                            multiple
+                                                                            filterable
+                                                                            allow-create
+                                                                            default-first-option
+                                                                            class="el-select-tags"
+                                                                            placeholder="标签"
+                                                                            @change="onTagChange($event,scope.row)"
+                                                                            @remove-tag="onTagRemove($event,scope.row)">
+                                                                            <el-option
+                                                                                v-for="tag in model.item.tags"
+                                                                                :key="tag"
+                                                                                :label="tag"
+                                                                                :value="tag">
+                                                                            </el-option>
+                                                                        </el-select>
                                                                     </el-form-item>
                                                                 </el-form>
                                                             </el-main>
@@ -855,51 +1092,58 @@ class Probe extends Matrix {
                                         </el-container>`,
                             mounted(){
                                 this.$nextTick(()=> {
-                                    this.tagInput();
-                                    $(this.$el).find("li").on("click",()=>{
-                                        eventHub.$emit("COMPONENT-REDRAW-EVENT");
-                                    })
+                                    
                                 })
                             },
                             methods: {
-                                tagInput: function(className,container, tags){
-                                    const me = this
-
-                                    me.model.handler.tagify = $(me.$el).find(".tags").tagify()
-                                        .on("add",function(event, tagName){
-                                            me.model.item.tags = tagName.value;
-                                        })
-                                        .on("remove",function(event,tagName){
-                                            me.model.item.tags = tagName.value;
-                                        });
-
+                                onTagChange(val,row){
+                                    let input = {action: "+", tags: val, ids: [row.id]};
+                                    let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
                                 },
-                                save(){
+                                onTagRemove(val,row){
+                                    let input = {action: "-", tags: [val], ids: [row.id]};
+                                    let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
+                                },
+                                onSave(){
                                     
-                                    let result = scriptHandler.depotAdd(this.model.item);
+                                    if(_.isEmpty(this.model.item.uploadfile)){
+                            
+                                        this.$message({
+                                            type: "warning",
+                                            message: "请选择上传脚本文件！"
+                                        })
+            
+                                        return false;
+                                    }
 
-                                    if(result == 1){
+                                    if(_.isEmpty(this.model.item.name)){
+                            
+                                        this.$message({
+                                            type: "warning",
+                                            message: "脚本库名称不能为空！"
+                                        })
+            
+                                        return false;
+                                    }
+
+                                    let rtn = scriptHandler.depotAdd(this.model.item);
+
+                                    if(rtn == 1){
                                         
                                         this.$message({
                                             type: "success",
                                             message: "上传成功！"
                                         })
 
-                                        this.$confirm('是否需要下发该脚本?', '提示', {
-                                            confirmButtonText: '需要',
-                                            cancelButtonText: '取消',
-                                            type: 'warning'
-                                            }).then(() => {
-                                                this.activeName = 'second';    
-                                            }).catch(() => {
-                                                wnd.close();
-                                            });
+                                        self.onScriptRefresh();
 
-                                        eventHub.$emit("PROBE-REFRESH-EVENT", ['script']);
+                                        wnd.close();
+
                                     } else{
                                         this.$message({
                                             type: "error",
-                                            message: "上传失败：" + result.message
+                                            duration: 6000,
+                                            message: "上传失败：" + rtn
                                         })
                                     }
                                     
@@ -911,591 +1155,48 @@ class Probe extends Matrix {
                                     this.model.item.uploadfile = file.raw;
 
                                 },
-                                onDeploy(){
-                                
-                                    this.$confirm('确定下发该脚本?', '提示', {
-                                        confirmButtonText: '需要',
-                                        cancelButtonText: '取消',
-                                        type: 'warning'
-                                        }).then(() => {
-
-                                            let depot = _.extend({},{depots: this.model.item.name, versions: this.model.item.version, hosts: _.map(this.$refs.scriptUploadServerRef.dt.selected,'host') });
-
-                                            let result = scriptHandler.depotDeploy(depot);
-
-                                            if(result == null){
-                                                this.$message({
-                                                    type: "success",
-                                                    message: "下发成功！"
-                                                })
-                                                eventHub.$emit("PROBE-REFRESH-EVENT", ['script']);
-                                            } else{
-                                                this.$message({
-                                                    type: "error",
-                                                    message: "下发失败：" + result.message
-                                                })
-                                            }
-                                            
-                                        }).catch(() => {
-                                            wnd.close();
-                                        })
-                                },
-                                handleRemove(file, fileList) {
-                                    console.log(file, fileList);
-                                },
-                                handlePreview(file) {
-                                    console.log(file);
-                                },
                                 beforeRemove(file, fileList) {
                                     return this.$confirm(`确定移除 ${ file.name }？`);
                                 }
                             }
-                        }).$mount("#script-zabbix-add-container");
+                        }).$mount("#script-upload-container");
                     },
-                    scriptDeploy(){
-                        const self = this;
-
-                        let wnd = maxWindow.winProbe( `<i class="fas fa-plus-circle"></i> 下发`, `<div id="script-deploy-container"></div>`, null, 'script-container');
-
-                        let wizard = {
-                            delimiters: ['#{', '}#'],
-                            data: {
-                                model: {
-                                    script: {},
-                                    servers: [],
-                                },
-                                activeName: 'first'
-                            },
-                            template:   `<el-container style="height:100%;">
-                                            <el-main style="height:100%;overflow:hidden;">
-                                                <el-tabs v-model="activeName" type="border-card">
-                                                    <el-tab-pane name="first" style="height:100%;">
-                                                        <div slot="label">
-                                                            <i class="header-icon el-icon-upload"></i> 选择脚本
-                                                        </div>
-                                                        <el-container style="height:calc(100% - 80px);">
-                                                            <el-main style="height:100%;padding:0px;">
-                                                                <el-form label-position="left" label-width="120px">
-                                                                    <el-form-item label="脚本名称">
-                                                                        <el-input v-model="model.script.name" required="required" ></el-input>
-                                                                    </el-form-item>
-                                                                    <el-form-item label="脚本版本">
-                                                                        <el-input type="number" v-model="model.script.version" required="required" step="0.1"></el-input>
-                                                                    </el-form-item>
-                                                                    <el-form-item label="执行命令">
-                                                                        <el-input v-model="model.script.command"></el-input>
-                                                                    </el-form-item>
-                                                                    <el-form-item label="脚本说明">
-                                                                        <el-input type="textarea" :row="6" v-model="model.script.remark"></el-input>
-                                                                    </el-form-item>
-                                                                    <el-form-item label="添加标签">
-                                                                        <el-tag
-                                                                            v-for="tag in model.script.tags"
-                                                                            :key="tag"
-                                                                            closable>
-                                                                            #{tag}#
-                                                                        </el-tag>
-                                                                    </el-form-item>
-                                                                </el-form>
-                                                            </el-main>
-                                                        </el-container>
-                                                    </el-tab-pane>
-                                                    <el-tab-pane name="second">
-                                                        <div slot="label">
-                                                            <i class="header-icon el-icon-s-platform"></i> 选择下发目标，开始下发
-                                                        </div>
-                                                        <el-container>
-                                                            <el-header style="height:40px;line-height:40px;text-align:right;">
-                                                                <el-button type="primary" @click="onDeploy">下发并退出</el-button>    
-                                                            </el-header>
-                                                            <el-main style="padding:0px;">
-                                                                <script-datatable :model="model.servers" ref="scriptServerRef"></script-datatable>
-                                                            </el-main>
-                                                        </el-container>
-                                                    </el-tab-pane>
-                                                </el-tabs>
-                                            </el-main>
-                                        </el-container>`,
-                            created(){
-                                this.model.script = _.first(self.dt.selected);
-                                this.loadServer();
-                            },
-                            mounted(){
-                                this.$nextTick(()=> {
-                                    this.tagInput();
-                                    $(this.$el).find("li").on("click",()=>{
-                                        eventHub.$emit("COMPONENT-REDRAW-EVENT");
-                                    })
-                                })
-                            },
-                            methods: {
-                                loadServer(){
-                                    let conf = fsHandler.callFsJScript("/matrix/probe/probe_summary_script_conf.js", mx.urlParams['userid']).message;
-                                    this.model.servers = conf.servers;  
-                                },
-                                tagInput: function(className,container, tags){
-                                    const me = this
-
-                                    me.model.handler.tagify = $(me.$el).find(".tags").tagify()
-                                        .on("add",function(event, tagName){
-                                            me.model.item.tags = tagName.value;
-                                        })
-                                        .on("remove",function(event,tagName){
-                                            me.model.item.tags = tagName.value;
-                                        });
-
-                                },
-                                onDeploy(){
-                                
-                                    this.$confirm('确定下发该脚本?', '提示', {
-                                        confirmButtonText: '需要',
-                                        cancelButtonText: '取消',
-                                        type: 'warning'
-                                        }).then(() => {
-
-                                            let result = null;
-                                            
-                                            _.forEach(self.dt.selected,(v)=>{
-            
-                                                let depot = _.extend({},{depots: v.name, versions: v.version, hosts: _.map(this.$refs.scriptServerRef.dt.selected,'host') });
-
-                                                let rtn = scriptHandler.depotDeploy(depot);
-
-                                                if(rtn === 1) {
-                                                    result = null;
-                                                } else {
-                                                    result = rtn;
-                                                }
-
-                                            })   
-                                            if(result == null){
-                                                this.$message({
-                                                    type: "success",
-                                                    message: "下发成功！"
-                                                })
-                                                eventHub.$emit("PROBE-REFRESH-EVENT", ['script']);
-                                            } else{
-                                                this.$message({
-                                                    type: "error",
-                                                    message: "下发失败：" + result.message
-                                                })
-                                            }
-                                            
-                                        }).catch(() => {
-                                            wnd.close();
-                                        })
-                                }
-                            }
-                        };
-
-                        new Vue(wizard).$mount("#script-deploy-container");
-                    },
-                    scriptRefresh(){
+                    // 脚本刷新
+                    onScriptRefresh(){
                         this.$root.$refs.scriptView.getScriptList();
                     },
-                    scriptUpload(){
-                        let wnd = maxWindow.winProbe( `<i class="fas fa-plus-circle"></i> 上传`, `<div id="script-add-container"></div>`, null, 'script-container');
+                    // 脚本更新
+                    onScriptUpdate(row){
 
-                        let conf = fsHandler.callFsJScript("/matrix/probe/probe_summary_script_conf.js", mx.urlParams['userid']).message;
-                        
-                        let wizard = {
-                            delimiters: ['#{', '}#'],
-                            data: {
-                                model: {
-                                    item: {
-                                        name: null,
-                                        version: 1.0,
-                                        remark: null,
-                                        uploadfile: null,
-                                        tags: ['SCRIPT'],
-                                        servers: conf.servers,
-                                        command: null,
-                                        wnd: wnd
-                                    },
-                                    handler: {
-                                        tagify: null
-                                    }
-                                },
-                                fileList: [],
-                                activeName: 'first'
-                            },
-                            template:   `<el-container style="height:100%;">
-                                            <el-main style="height:100%;overflow:hidden;">
-                                                <el-tabs v-model="activeName" type="border-card">
-                                                    <el-tab-pane name="first" style="height:100%;">
-                                                        <div slot="label">
-                                                            <i class="header-icon el-icon-upload"></i> 选择脚本，上传到脚本库
-                                                        </div>
-                                                        <el-container style="height:calc(100% - 80px);">
-                                                            <el-header style="height:40px;line-height:40px;text-align:right;">
-                                                                <el-button type="primary" @click="save">上传</el-button>    
-                                                            </el-header>
-                                                            <el-main style="height:100%;">
-                                                                <el-form label-position="left" label-width="120px">
-                                                                    <el-form-item>
-                                                                        <el-upload
-                                                                            :on-preview="handlePreview"
-                                                                            :on-remove="handleRemove"
-                                                                            :on-change="onFileChange"
-                                                                            :before-remove="beforeRemove"
-                                                                            :file-list="fileList"
-                                                                            :limit="1"
-                                                                            multiple="false"
-                                                                            :auto-upload="false">
-                                                                            <el-button size="mini" type="success">点击上传脚本</el-button>
-                                                                            <div slot="tip" class="el-upload__tip">只能上传脚本文件</div>
-                                                                            </el-upload>
-                                                                    </el-form-item>
-                                                                    <el-form-item label="脚本名称">
-                                                                        <el-input v-model="model.item.name" required="required" ></el-input>
-                                                                    </el-form-item>
-                                                                    <el-form-item label="脚本版本">
-                                                                        <el-input type="number" v-model="model.item.version" required="required" step="0.1"></el-input>
-                                                                    </el-form-item>
-                                                                    <el-form-item label="执行命令">
-                                                                        <el-input v-model="model.item.command"></el-input>
-                                                                    </el-form-item>
-                                                                    <el-form-item label="脚本说明">
-                                                                        <el-input type="textarea" :row="6" v-model="model.item.remark"></el-input>
-                                                                    </el-form-item>
-                                                                    <el-form-item label="添加标签">
-                                                                        <el-tag
-                                                                            v-for="tag in model.item.tags"
-                                                                            :key="tag"
-                                                                            closable>
-                                                                            #{tag}#
-                                                                        </el-tag>
-                                                                    </el-form-item>
-                                                                </el-form>
-                                                            </el-main>
-                                                        </el-container>
-                                                    </el-tab-pane>
-                                                    <el-tab-pane name="second">
-                                                        <div slot="label">
-                                                            <i class="header-icon el-icon-s-platform"></i> 如果需要下发，选择下发目标，开始下发
-                                                        </div>
-                                                        <el-container>
-                                                            <el-header style="height:40px;line-height:40px;text-align:right;">
-                                                                <el-button type="primary" @click="onDeploy">下发并退出</el-button>    
-                                                            </el-header>
-                                                            <el-main>
-                                                                <script-datatable :model="model.item.servers" ref="scriptUploadServerRef"></script-datatable>
-                                                            </el-main>
-                                                        </el-container>
-                                                    </el-tab-pane>
-                                                </el-tabs>
-                                            </el-main>
-                                        </el-container>`,
-                            mounted(){
-                                this.$nextTick(()=> {
-                                    this.tagInput();
-                                    $(this.$el).find("li").on("click",()=>{
-                                        eventHub.$emit("COMPONENT-REDRAW-EVENT");
-                                    })
-                                })
-                            },
-                            methods: {
-                                tagInput: function(className,container, tags){
-                                    const me = this
+                        console.log(11,row)
+                        if(_.isEmpty(row.uploadfile)){
+                            
+                            this.$message({
+                                type: "warning",
+                                message: "请选择上传脚本文件！"
+                            })
 
-                                    me.model.handler.tagify = $(me.$el).find(".tags").tagify()
-                                        .on("add",function(event, tagName){
-                                            me.model.item.tags = tagName.value;
-                                        })
-                                        .on("remove",function(event,tagName){
-                                            me.model.item.tags = tagName.value;
-                                        });
+                            return false;
+                        }
 
-                                },
-                                save(){
-                                    
-                                    let result = scriptHandler.depotAdd(this.model.item);
+                        let rtn = scriptHandler.depotUpdate(row);
 
-                                    if(result == 1){
-                                        
-                                        this.$message({
-                                            type: "success",
-                                            message: "上传成功！"
-                                        })
+                        if(rtn == 1){
+                            
+                            this.$message({
+                                type: "success",
+                                message: "更新成功！"
+                            })
 
-                                        this.$confirm('是否需要下发该脚本?', '提示', {
-                                            confirmButtonText: '需要',
-                                            cancelButtonText: '取消',
-                                            type: 'warning'
-                                            }).then(() => {
-                                                this.activeName = 'second';    
-                                            }).catch(() => {
-                                                wnd.close();
-                                            });
-
-                                        eventHub.$emit("PROBE-REFRESH-EVENT", ['script']);
-                                    } else{
-                                        this.$message({
-                                            type: "error",
-                                            message: "上传失败：" + result.message
-                                        })
-                                    }
-                                    
-                                },
-                                onFileChange(file, fileList) {
-                                    
-                                    this.model.item.name = _.head(file.raw.name.split("."));
-                                    
-                                    this.model.item.uploadfile = file.raw;
-
-                                },
-                                onDeploy(){
-                                
-                                    this.$confirm('确定下发该脚本?', '提示', {
-                                        confirmButtonText: '需要',
-                                        cancelButtonText: '取消',
-                                        type: 'warning'
-                                        }).then(() => {
-
-                                            let depot = _.extend({},{depots: this.model.item.name, versions: this.model.item.version, hosts: _.map(this.$refs.scriptUploadServerRef.dt.selected,'host') });
-
-                                            let result = scriptHandler.depotDeploy(depot);
-
-                                            if(result == null){
-                                                this.$message({
-                                                    type: "success",
-                                                    message: "下发成功！"
-                                                })
-                                                eventHub.$emit("PROBE-REFRESH-EVENT", ['script']);
-                                            } else{
-                                                this.$message({
-                                                    type: "error",
-                                                    message: "下发失败：" + result.message
-                                                })
-                                            }
-                                            
-                                        }).catch(() => {
-                                            wnd.close();
-                                        })
-                                },
-                                handleRemove(file, fileList) {
-                                    console.log(file, fileList);
-                                },
-                                handlePreview(file) {
-                                    console.log(file);
-                                },
-                                beforeRemove(file, fileList) {
-                                    return this.$confirm(`确定移除 ${ file.name }？`);
-                                }
-                            }
-                        };
-
-                        new Vue(wizard).$mount("#script-add-container");
-                    },
-                    scriptUpdate(){
-
-                        const self = this;
-
-                        let wnd = maxWindow.winProbe( `<i class="fas fa-plus-circle"></i> 编辑`, `<div id="script-update-container"></div>`, null, 'script-container');
-
-                        let conf = fsHandler.callFsJScript("/matrix/probe/probe_summary_script_conf.js", mx.urlParams['userid']).message;
-                        
-                        let wizard = {
-                            delimiters: ['#{', '}#'],
-                            data: {
-                                model: {
-                                    item: {
-                                        name: null,
-                                        version: null,
-                                        remark: null,
-                                        uploadfile: null,
-                                        tags: ['SCRIPT'],
-                                        servers: conf.servers,
-                                        command: null,
-                                        wnd: wnd
-                                    },
-                                    handler: {
-                                        tagify: null
-                                    }
-                                },
-                                fileList: [],
-                                activeName: 'first'
-                            },
-                            template:   `<el-container style="height:100%;">
-                                            <el-main style="height:100%;overflow:hidden;">
-                                                <el-tabs v-model="activeName" type="border-card">
-                                                    <el-tab-pane name="first" style="height:100%;">
-                                                        <div slot="label">
-                                                            <i class="header-icon el-icon-upload"></i> 选择脚本，上传到脚本库
-                                                        </div>
-                                                        <el-container style="height:calc(100% - 80px);">
-                                                            <el-header style="height:40px;line-height:40px;text-align:right;">
-                                                                <el-button type="primary" @click="save">上传</el-button>    
-                                                            </el-header>
-                                                            <el-main style="height:100%;">
-                                                                <el-form label-position="left" label-width="120px">
-                                                                    <el-form-item>
-                                                                        <el-upload
-                                                                            :on-preview="handlePreview"
-                                                                            :on-remove="handleRemove"
-                                                                            :on-change="onFileChange"
-                                                                            :before-remove="beforeRemove"
-                                                                            :file-list="fileList"
-                                                                            :limit="1"
-                                                                            multiple="false"
-                                                                            :auto-upload="false">
-                                                                            <el-button size="mini" type="success">点击上传脚本</el-button>
-                                                                            <div slot="tip" class="el-upload__tip">只能上传脚本文件</div>
-                                                                            </el-upload>
-                                                                    </el-form-item>
-                                                                    <el-form-item label="脚本名称">
-                                                                        <el-input v-model="model.item.name" required="required" disabled></el-input>
-                                                                    </el-form-item>
-                                                                    <el-form-item label="脚本版本">
-                                                                        <el-input type="number" v-model="model.item.version" required="required" step="0.1"></el-input>
-                                                                    </el-form-item>
-                                                                    <el-form-item label="执行命令">
-                                                                        <el-input v-model="model.item.command"></el-input>
-                                                                    </el-form-item>
-                                                                    <el-form-item label="脚本说明">
-                                                                        <el-input type="textarea" :row="6" v-model="model.item.remark"></el-input>
-                                                                    </el-form-item>
-                                                                    <el-form-item label="添加标签">
-                                                                        <el-tag
-                                                                            v-for="tag in model.item.tags"
-                                                                            :key="tag"
-                                                                            closable>
-                                                                            #{tag}#
-                                                                        </el-tag>
-                                                                    </el-form-item>
-                                                                </el-form>
-                                                            </el-main>
-                                                        </el-container>
-                                                    </el-tab-pane>
-                                                    <el-tab-pane name="second" style="display:none;">
-                                                        <div slot="label">
-                                                            <i class="header-icon el-icon-s-platform"></i> 如果需要下发，选择下发目标，开始下发
-                                                        </div>
-                                                        <el-container>
-                                                            <el-header style="height:40px;line-height:40px;text-align:right;">
-                                                                <el-button type="primary" @click="onDeploy">下发并退出</el-button>    
-                                                            </el-header>
-                                                            <el-main>
-                                                                <script-datatable :model="model.item.servers" ref="scriptUpdateServerRef"></script-datatable>
-                                                            </el-main>
-                                                        </el-container>
-                                                    </el-tab-pane>
-                                                </el-tabs>
-                                            </el-main>
-                                        </el-container>`,
-                            created(){
-                                _.extend(this.model, {item: self.dt.selected[0]});
-                                _.extend(this.model.item, {servers:conf.servers});
-                                this.fileList.push({
-                                        status: "ready",
-                                        name: this.model.item.name,
-                                        size: 0,
-                                        percentage: 0,
-                                        uid: _.now(),
-                                        raw: null
-                                    }
-                                );
-                            },
-                            mounted(){
-                                this.$nextTick(()=> {
-                                    this.tagInput();
-                                    $(this.$el).find("li").on("click",()=>{
-                                        eventHub.$emit("COMPONENT-REDRAW-EVENT");
-                                    })
-                                })
-                            },
-                            methods: {
-                                tagInput: function(className,container, tags){
-                                    const me = this
-
-                                    me.model.handler.tagify = $(me.$el).find(".tags").tagify()
-                                        .on("add",function(event, tagName){
-                                            me.model.item.tags = tagName.value;
-                                        })
-                                        .on("remove",function(event,tagName){
-                                            me.model.item.tags = tagName.value;
-                                        });
-
-                                },
-                                save(){
-                                    
-                                    let result = scriptHandler.depotUpdate(this.model.item);
-
-                                    if(result == 1){
-                                        
-                                        this.$message({
-                                            type: "success",
-                                            message: "更新成功！"
-                                        })
-
-                                        this.$confirm('是否需要下发该脚本?', '提示', {
-                                            confirmButtonText: '需要',
-                                            cancelButtonText: '取消',
-                                            type: 'warning'
-                                            }).then(() => {
-                                                this.activeName = 'second';    
-                                            }).catch(() => {
-                                                wnd.close();
-                                            });
-
-                                        eventHub.$emit("PROBE-REFRESH-EVENT", ['script']);
-                                    } else{
-                                        this.$message({
-                                            type: "error",
-                                            message: "更新失败：" + result.message
-                                        })
-                                    }
-                                    
-                                },
-                                onFileChange(file, fileList) {
-                                    
-                                    this.model.item.name = _.head(file.raw.name.split("."));
-                                    
-                                    this.model.item.uploadfile = file.raw;
-
-                                },
-                                onDeploy(){
-                                
-                                    this.$confirm('确定下发该脚本?', '提示', {
-                                        confirmButtonText: '需要',
-                                        cancelButtonText: '取消',
-                                        type: 'warning'
-                                        }).then(() => {
-
-                                            let depot = _.extend({},{depots: this.model.item.name, versions: this.model.item.version, hosts: _.map(this.$refs.scriptUpdateServerRef.dt.selected,'host') });
-
-                                            let result = scriptHandler.depotDeploy(depot);
-
-                                            if(result == null){
-                                                this.$message({
-                                                    type: "success",
-                                                    message: "下发成功！"
-                                                })
-                                                eventHub.$emit("PROBE-REFRESH-EVENT", ['script']);
-                                            } else{
-                                                this.$message({
-                                                    type: "error",
-                                                    message: "下发失败：" + result.message
-                                                })
-                                            }
-                                            
-                                        }).catch(() => {
-                                            wnd.close();
-                                        })
-                                },
-                                handleRemove(file, fileList) {
-                                    console.log(file, fileList);
-                                },
-                                handlePreview(file) {
-                                    console.log(file);
-                                },
-                                beforeRemove(file, fileList) {
-                                    return this.$confirm(`确定移除 ${ file.name }？`);
-                                }
-                            }
-                        };
-
-                        new Vue(wizard).$mount("#script-update-container");
+                            this.onScriptRefresh();
+                            
+                        } else{
+                            this.$message({
+                                type: "error",
+                                duration: 6000,
+                                message: "更新失败：" + rtn
+                            })
+                        }
                     }
                 }
             })
@@ -1550,36 +1251,6 @@ class Probe extends Matrix {
                 }
             });
 
-            Vue.component("policy-view", {
-                props: {
-                    model: Object
-                },
-                template: `<el-container style="height:calc(100vh - 140px);">
-                                <el-aside style="width:200px;margin:-15px -10px -15px -15px;">
-                                    <probe-tree-component id="policy-tree" :model="{parent:'/probe',name:'policy_tree_data.js',domain:'policy'}"></-tree-component>
-                                </el-aside>
-                                <el-main class="policy-container" style="padding:0px;">
-                                    <!--h4 class="page-header"><i class="fas fa-angle-right"></i> 策略管理</h4 class="page-header"-->
-                                    <policy-list-datatables-component :model="model" id="policy-list-table"></policy-list-datatables-component>
-                                </el-main>
-                            </el-container>`
-            });
-
-            Vue.component("log-view", {
-                props: {
-                    model: Object
-                },
-                template: `<el-container style="height:calc(100vh - 140px);">
-                                <el-aside style="width:200px;margin:-15px -10px -15px -15px;">
-                                    <probe-tree-component id="log-tree" :model="{parent:'/probe',name:'log_tree_data.js',domain:'log'}"></-tree-component>
-                                </el-aside>
-                                <el-main class="log-container" style="padding:0px;">
-                                    <!--h4 class="page-header"><i class="fas fa-angle-right"></i> 日志管理</h4 class="page-header"-->
-                                    <log-list-datatables-component :model="model" id="log-list-table"></log-list-datatables-component>
-                                </el-main>
-                            </el-container>`
-            });
-
             Vue.component("script-view", {
                 data(){
                     return {
@@ -1594,7 +1265,7 @@ class Probe extends Matrix {
                                 <el-main style="padding:0px;width:100%;" ref="mainView">
                                     <el-container style="height:100%;">
                                         <el-main style="padding:0px;width:100%;">
-                                            <script-manage :model="model.list" ref="scriptManageRef" v-if="!_.isEmpty(model.list.rows)"></script-manage>
+                                            <script-manage :model="model.list" ref="scriptManageRef"></script-manage>
                                         </el-main>
                                     </el-container>
                                 </el-main>
@@ -1651,12 +1322,6 @@ class Probe extends Matrix {
                                             <el-tab-pane label="探针列表" name="probe">
                                                 <probe-view :model="probe" ref="probeView"></probe-view>
                                             </el-tab-pane>
-                                            <!--el-tab-pane label="策略管理" name="policy">
-                                                <policy-view :model="policy"></policy-view>
-                                            </el-tab-pane-->
-                                            <!--el-tab-pane label="日志配置" name="log">
-                                                <log-view :model="log"></log-view>
-                                            </el-tab-pane-->
                                             <el-tab-pane label="脚本管理" name="script" lazy>
                                                 <script-view ref="scriptView"></script-view>
                                             </el-tab-pane>
@@ -1665,30 +1330,19 @@ class Probe extends Matrix {
                                 </el-container>`,
                     data: {
                         probe: {},
-                        policy: {},
-                        log: {},
                         tabs:{
                             activeName: 'probe',
                         }
                     },
-                    created() {
-                        eventHub.$on("PROBE-REFRESH-EVENT", this.getProbeList);
+                    created(){
+                        
                     },
                     mounted() {
                         this.$nextTick(()=> {
                             this.getProbeList();
-                            _.delay(()=> {
-                                this.initPlug();
-                            }, 1000)
                         })
                     },
                     methods: {
-                        initPlug() {
-                            /* toggle tab trigger Echart resize */
-                            $("a[data-toggle='tab']").on("shown.bs.tab", ()=> {
-                                eventHub.$emit("COMPONENT-REDRAW-EVENT", null);
-                            })
-                        },
                         getProbeList() {
                             this.probe = fsHandler.callFsJScript(`/matrix/probe/getProbeList.js`, '').message;
                         }

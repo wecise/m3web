@@ -428,7 +428,7 @@
                         this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.onToggleCellStyle([cell],'vertex');
 
                         // 定位cell
-                        this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.onPosition(cell.getId());
+                        this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.onPosition(cell.getId(), true, true);
                     } else {
                         this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.onToggleCellStyle([],'vertex');    
                     }
@@ -463,7 +463,7 @@
                             } else {
                                 return matchStr.match;
                             }
-                        }catch(err){
+                        } catch(err){
                             return matchStr.match;
                         }
                     };

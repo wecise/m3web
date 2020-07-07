@@ -236,10 +236,10 @@
                     try{
                         let arr = val.split(/\r?\n/);
                         let tmp = _.map(arr,(v)=>{
-                            if(_.startsWith(v,15)){
+                            if(_.startsWith(v,1)){
                                 return moment(Number(v)).format(mx.global.register.format);
                             } else {
-                                return moment(v).format(mx.global.register.format);
+                                return moment(v).valueOf();
                             }
                             
                         });

@@ -46,7 +46,9 @@ class Home extends Matrix {
                                                         <p style="display: flex;flex-wrap: wrap;max-height:40px;height: 40px;margin:5px 0px;">
                                                             <el-image :src="folder.icon | pickIcon" style="margin:3px;width:14px;height:14px;" v-for="(folder,index) in item.groups" v-if="index<8"></el-image>
                                                         </p>
-                                                        <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">#{item.title}#（#{item.groups.length}#） <!--i class="el-icon-menu el-icon--right"></i--></p>
+                                                        <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                                            #{item.title}#（#{item.groups.length}#） 
+                                                        </p>
                                                         <el-dropdown @command="onGroupCommand" trigger="hover" placement="top-start"  style="position: absolute;right: 5px;top: 5px;">
                                                             <span class="el-dropdown-link">
                                                                 <i class="el-icon-arrow-down el-icon--right" style="color:rgba(255,255,255,0.5)"></i>
@@ -64,13 +66,17 @@ class Home extends Matrix {
                                                                     style="max-width: 120px;width: 120px;height:90px;border-radius: 10px!important;background:rgb(36, 44, 70);border:unset;margin: 5px;">
                                                                     <el-image :src="subItem.icon | pickIcon" style="width:40px;margin:5px;"></el-image>
                                                                     <p style="white-space:nowrap;overflow:hidden;margin:5px;">
-                                                                        #{subItem.cnname}#
+                                                                        <span v-if="window.MATRIX_LANG == 'zh-CN'">#{subItem.cnname}#</span>
+                                                                        <span v-else>#{subItem.enname}#</span>
                                                                         <el-dropdown @command="onAppCommand" trigger="hover" placement="top-end" style="color:rgba(255,255,255,.5);">
                                                                             <span class="el-dropdown-link">
                                                                                 <i class="el-icon-arrow-down el-icon--right" style="color:rgba(255,255,255,0.5)"></i>
                                                                             </span>
                                                                             <el-dropdown-menu slot="dropdown">
-                                                                                <el-dropdown-item disabled>#{subItem.cnname}#</el-dropdown-item>
+                                                                                <el-dropdown-item disabled>
+                                                                                    <span v-if="window.MATRIX_LANG == 'zh-CN'">#{subItem.cnname}#</span>
+                                                                                    <span v-else>#{subItem.enname}#</span>
+                                                                                </el-dropdown-item>
                                                                                 <el-dropdown-item :command="{cmd:'walking',data:subItem}" divided>当前窗口运行</el-dropdown-item>
                                                                                 <el-dropdown-item :command="{cmd:'running',data:subItem}">打开新窗口运行</el-dropdown-item>
                                                                                 <el-dropdown-item :command="{cmd:'home',data:subItem}" divided>设为首页</el-dropdown-item>
@@ -94,14 +100,18 @@ class Home extends Matrix {
                                                     style="max-width: 120px;width: 120px;height:90px;border-radius: 10px!important;background:rgb(36, 44, 70);border:unset;margin: 5px;">
                                                     <el-image style="width:40px;margin:5px;" :src="item.icon | pickIcon"></el-image>
                                                     <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;">
-                                                        #{item.cnname}#
+                                                        <span v-if="window.MATRIX_LANG == 'zh-CN'">#{item.cnname}#</span>
+                                                        <span v-else>#{item.enname}#</span>
                                                     </p>
                                                     <el-dropdown @command="onAppCommand" trigger="hover" placement="top-start" style="position: absolute;right: 5px;top: 5px;">
                                                         <span class="el-dropdown-link">
                                                             <i class="el-icon-arrow-down el-icon--right" style="color:rgba(255,255,255,0.5)"></i>
                                                         </span>
                                                         <el-dropdown-menu slot="dropdown">
-                                                            <el-dropdown-item disabled>#{item.cnname}#</el-dropdown-item>
+                                                            <el-dropdown-item disabled>
+                                                                <span v-if="window.MATRIX_LANG == 'zh-CN'">#{item.cnname}#</span>
+                                                                <span v-else>#{item.enname}#</span>
+                                                            </el-dropdown-item>
                                                             <el-dropdown-item :command="{cmd:'walking',data:item}" divided>当前窗口运行</el-dropdown-item>
                                                             <el-dropdown-item :command="{cmd:'running',data:item}">打开新窗口运行</el-dropdown-item>
                                                             <el-dropdown-item :command="{cmd:'home',data:item}" divided>设为首页</el-dropdown-item>

@@ -86,7 +86,7 @@
                         showTitle: true,
                         dblClickExpand: this.onDblClickExpand,
                         addDiyDom: this.addCountDom,
-                        removeHoverDom: this.removeHoverDom,
+                        removeHoverDom: this.removeHoverDom
                     },
                     edit: {
                         enable: false
@@ -474,7 +474,7 @@
 
                 return _rtn;
 	        },
-            onClick: function (event, treeId, treeNode, clickFlisParentag) {
+            onClick(event, treeId, treeNode, clickFlisParentag) {
                 const self = this;
 
                 self.selectedNode = treeNode;

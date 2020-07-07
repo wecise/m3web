@@ -469,17 +469,20 @@ class AI {
                                     // 生成预警job
                                     if(val.alarm == 1){
                                         
+                                        // 根据采集间隔生成cron
+                                        let interval = parseInt(this.content.interval / 60);
+                                        let cron = `cron 0 0/${interval} * * *`; 
+
                                         let jobAlert = { 
                                                 name: name, 
                                                 dir: this.content.job.dir, 
                                                 exec: [this.content.job.exec[0], this.model.fullname, 'alert'].join(" "), 
                                                 group: this.content.job.group, 
-                                                schedule: `${this.content.job.cron}`, // 'cron 0 0 * * *'
+                                                schedule: cron, // 'cron 0 0 * * *'
                                                 timeout: 43200
                                         };
                                         
                                         let rtn = jobHandler.jobMerge(jobAlert);
-                                        console.log(rtn)
                                     } 
                                     // 删除预警job
                                     else {
@@ -491,7 +494,6 @@ class AI {
                                         };
                                         
                                         let rtn = jobHandler.jobDelete(jobAlert); 
-                                        console.log(rtn)
                                     }
                                 } catch(err){
                                     console.log(err)
