@@ -1750,22 +1750,23 @@ class Omdb{
             $(function() {
 
                 odb.app = new Vue({
+                    i18n,
                     delimiters: ['#{', '}#'],
                     template:   `<el-container style="calc(100vh - 140px);">
                                     <el-aside style="overflow:hidden;height:100%;" ref="leftView">
                                         <el-container style="height:100%;">
                                             <el-header style="height:29px;line-height:29px;padding:0 5px;border-bottom:1px solid #dddddd;display:flex;">
                                                 <span style="width:90%;margin:0px;">
-                                                    <i class="el-icon-coin"></i> 对象管理 [${window.COMPANY_OSPACE}]
+                                                    <i class="el-icon-coin"></i> #{ $t('omdb.title') }# [${window.COMPANY_OSPACE}]
                                                 </span>
                                                 <el-dropdown style="width: 10%;text-align: right;cursor:pointer;" placement="top-end">
                                                     <span class="el-dropdown-link">
                                                         <i class="fas fa-angle-down"></i>
                                                     </span>
                                                     <el-dropdown-menu slot="dropdown">
-                                                        <el-dropdown-item @click.native="classDataExport('/matrix')"><i class="fas fa-file-export"></i> 导出</el-dropdown-item>
-                                                        <el-dropdown-item @click.native="classDataImport"><i class="fas fa-file-import"></i> 导入</el-dropdown-item>
-                                                        <el-dropdown-item @click.native="classPropsDirectory"><i class="el-icon-notebook-2"></i> 字典</el-dropdown-item>
+                                                        <el-dropdown-item @click.native="classDataExport('/matrix')"><i class="fas fa-file-export"></i> #{ $t('omdb.actions.export') }#</el-dropdown-item>
+                                                        <el-dropdown-item @click.native="classDataImport"><i class="fas fa-file-import"></i> #{ $t('omdb.actions.import') }#</el-dropdown-item>
+                                                        <el-dropdown-item @click.native="classPropsDirectory"><i class="el-icon-notebook-2"></i> #{ $t('omdb.actions.directory') }#</el-dropdown-item>
                                                     </el-dropdown-menu>
                                                 </el-dropdown>
                                             </el-header>
@@ -1781,15 +1782,15 @@ class Omdb{
                                                 v-for="(item, index) in main.tabs"
                                                 :name="item.name">
                                                 <span slot="label">
-                                                    #{item.title}#
+                                                    #{ item.title }#
                                                     <el-dropdown trigger="click">
                                                         <span class="el-dropdown-link">
                                                             <i class="el-icon-arrow-down"></i>
                                                         </span>
                                                         <el-dropdown-menu slot="dropdown">
-                                                            <el-dropdown-item @click.native="mainTabsClose(0,item)">关闭</el-dropdown-item>
-                                                            <el-dropdown-item @click.native="mainTabsClose(1,item)">关闭其它标签页</el-dropdown-item>
-                                                            <el-dropdown-item @click.native="mainTabsClose(2,item)">关闭右侧标签页</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="mainTabsClose(0,item)">#{ $t('omdb.actions.close') }#</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="mainTabsClose(1,item)">#{ $t('omdb.actions.closeOthersTab') }#</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="mainTabsClose(2,item)">#{ $t('omdb.actions.closeRightTab') }#</el-dropdown-item>
                                                         </el-dropdown-menu>
                                                     </el-dropdown>
                                                 </span>
@@ -1804,11 +1805,13 @@ class Omdb{
                     data: {
                         id: 'omdb',
                         main: {
-                            tabs: [
-                                    {title: '查询', name: `query`, type: 'omdb-query-console', model: {node:null, pnode:null, pattern: 'select'}}
-                                ],
+                            tabs: [],
                             activeIndex: 'query'
                         }
+                    },
+                    created(){
+                        // 初始化Tabs
+                        this.main.tabs.push({title: this.$t('omdb.actions.query'), name: 'query', type: 'omdb-query-console', model: {node:null, pnode:null, pattern: 'select'}});
                     },
                     mounted() {
                         this.$nextTick(()=> {

@@ -159,8 +159,19 @@ class ScriptHandler {
     depotGet(event) {
         let rtn = null;
 
+        let url = "";
+
+        // 获取脚本信息
+        if(event.version){
+            url = `/monitoring/depot/${event.name}?version=${event.version}`;
+        } 
+        // 获取脚本所有版本
+        else {
+            url = `/monitoring/depot/${event.name}`;
+        }
+
         jQuery.ajax({
-            url: `/monitoring/depot/${event.name}?version=${event.version}`,
+            url: url,
             dataType: 'json',
             type: 'GET',
             async: false,
@@ -178,7 +189,7 @@ class ScriptHandler {
 
             },
             error: function(xhr, textStatus, errorThrown){
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+                rtn = xhr.responseText;
             }
         });
         return rtn;
@@ -212,7 +223,7 @@ class ScriptHandler {
 
             },
             error: function(xhr, textStatus, errorThrown){
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+                rtn = xhr.responseText;
             }
         });
 
@@ -315,6 +326,81 @@ class ScriptHandler {
         return rtn;
     };
 
+    /*
+    *  脚本内容
+    *
+    *   Get depot file content
+    *
+    *
+    * */
+    getDepotFileContent(event) {
+        let rtn = null;
+
+        let url = `/monitoring/depot/file/${event.name}?version=${event.version}&filepath=${event.path}`;
+
+        jQuery.ajax({
+            url: url,
+            dataType: 'json',
+            type: 'GET',
+            async: false,
+            beforeSend:function(xhr){
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function (data, status) {
+
+                userHandler.ifSignIn(data);
+
+                if( _.lowerCase(data.status) == "ok"){
+                    rtn = data.message;
+                }
+            },
+            error: function(xhr, textStatus, errorThrown){
+                rtn = xhr.responseText;
+            }
+        });
+
+        return rtn;
+    };
+
+    /*
+    *  多版本脚本内容对比
+    *
+    *   Compare depot file content
+    *
+    *
+    * */
+    compareDepotFiles(event) {
+        let rtn = null;
+
+        let url = `/monitoring/depot/diff/${event.name}?version=${event.versions[0]}&compareVersion=${event.versions[1]}`;
+
+        jQuery.ajax({
+            url: url,
+            dataType: 'json',
+            type: 'GET',
+            async: false,
+            beforeSend:function(xhr){
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function (data, status) {
+
+                userHandler.ifSignIn(data);
+
+                if( _.lowerCase(data.status) == "ok"){
+                    rtn = data.message;
+                }
+            },
+            error: function(xhr, textStatus, errorThrown){
+                rtn = xhr.responseText;
+            }
+        });
+
+        return rtn;
+    };
+
+    
     /* 
         Deploy depot to zabbix agent
     */

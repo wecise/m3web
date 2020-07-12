@@ -812,10 +812,10 @@ class Topological {
                                     </el-dropdown-menu>
                                 </el-dropdown>
                             </el-header>
-                            <el-main ref="fileView" style="width:30vw;height:40vh;padding:10px;border-top:1px solid #409EFF;" v-if="file.show">
+                            <!--el-main ref="fileView" style="width:30vw;height:40vh;padding:10px;border-top:1px solid #409EFF;" v-if="file.show">
                                 
-                            </el-main>
-                            <el-main ref="mainView" style="width:30vw;height:40vh;padding:0px;border-top:1px solid #409EFF;" v-show="!_.isEmpty(search.result)" v-else>
+                            </el-main-->
+                            <el-main ref="mainView" style="width:30vw;height:40vh;padding:0px;border-top:1px solid #409EFF;" v-show="!_.isEmpty(search.result)">
                                 <div class="div-hover-effect" style="display:flex;padding:10px;cursor:pointer;" 
                                     v-for="item in search.result"
                                     @click="onSelect(item)"

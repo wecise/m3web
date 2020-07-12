@@ -74,11 +74,12 @@
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
 	<script id="omdb-class-tree-component">
 	{
+        i18n,
         delimiters: ['${', '}'],
 		props: {
             id: String,
         },
-        data: function(){
+        data(){
             return {
                 zTree: Object,
                 zSetting: {
@@ -107,29 +108,27 @@
                         enable: false
                     }
                 },
-                zNodes: [
-                            {cid:'A1', parent:null, rtype:'A1', isParent:true, name: '/类管理', title: '类管理', open:true},
-	                        //{cid:'A2', parent:null, rtype:'A2', isParent:true, name: '/规则', title: '规则', children: []},
-	                        {cid:'A3', parent:null, rtype:'A3', isParent:true, name: '/关系', title: '关系', children:[]}
-                        ],
+                zNodes: [],
                 selectedNode: null,
 
 
             }
         },
-        created: function(){
-            const self = this;
+        created(){
+            
+            // 初始化节点
+            this.zNodes = [
+                            {cid:'A1', parent:null, rtype:'A1', isParent:true, name: `/${this.$t('omdb.classTree.class')}`, title: this.$t('omdb.classTree.class'), open:true},
+	                        //{cid:'A2', parent:null, rtype:'A2', isParent:true, name: '/规则', title: '规则', children: []},
+                            {cid:'A3', parent:null, rtype:'A3', isParent:true, name: `/${this.$t('omdb.classTree.edge')}`, title: this.$t('omdb.classTree.edge'), children:[]}
+                        ];
 
-            eventHub.$on("OMDB-CLASS-REFRESH-EVENT", self.refresh);
+            eventHub.$on("OMDB-CLASS-REFRESH-EVENT", this.refresh);
 
         },
-        mounted: function () {
-            let self =  this;
-
-            self.$nextTick(function () {
-
-                self.init();
-
+        mounted() {
+            this.$nextTick( ()=> {
+                this.init();
             })
         },
         methods:{

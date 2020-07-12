@@ -73,15 +73,15 @@
 					:picker-options="timePicker.options"
 					type="datetimerange"
 					value-format="timestamp"
-					range-separator="至"
-					start-placeholder="开始日期"
-					end-placeholder="结束日期"
+					:range-separator="$t('search.component.timeTo')"
+					:start-placeholder="$t('search.component.timeBegin')"
+					:end-placeholder="$t('search.component.timeEnd')"
 					ref="datePicker">
 				</el-date-picker>
 				<el-button slot="reference" icon="el-icon-timer" style="height:42px;margin-left:-1px;width:100%;"></el-button>
 			</el-popover> 
 			<!--搜索框-->
-			<el-autocomplete class="inline-input" placeholder="搜索" 
+			<el-autocomplete class="inline-input" :placeholder="$t('search.placeholder')" 
 							v-model="options.term" 
 							:fetch-suggestions="onFetchSuggestions"
 							:trigger-on-focus="false"
@@ -95,14 +95,15 @@
 			<!--快速过滤条件设置-->
 
 			<!--搜索按钮-->
-			<el-button type="primary" @click="search" @keyup.enter.native="search" ref="searchNowRef">搜索</el-button>
+			<el-button type="primary" @click="search" @keyup.enter.native="search" ref="searchNowRef">#{ $t('search.actions.search') }#</el-button>
 		</div>
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
 	<script id="search-log-component">
 	{
-	   	delimiters: ['#{', '}#'],
+		i18n,   
+		delimiters: ['#{', '}#'],
 	    props:{
 			// 搜索设置
 			options: Object
@@ -115,8 +116,8 @@
 					range: [moment().add(-1,'hour').format('YYYY-MM-DD HH:mm'),moment().format('YYYY-MM-DD HH:mm')],
 					options: {
 						shortcuts:[
-							{
-								text: '最近15分钟',
+						{
+								text: this.$t('search.component.nearest15min'),
 								onClick(picker) {
 									const end = new Date();
 									const start = new Date();
@@ -124,7 +125,7 @@
 									picker.$emit('pick', [start, end]);
 								}
 							}, {
-								text: '最近30分钟',
+								text: this.$t('search.component.nearest30min'),
 								onClick(picker) {
 									const end = new Date();
 									const start = new Date();
@@ -132,7 +133,7 @@
 									picker.$emit('pick', [start, end]);
 								}
 							}, {
-								text: '最近一小时',
+								text: this.$t('search.component.nearest1hour'),
 								onClick(picker) {
 									const end = new Date();
 									const start = new Date();
@@ -140,7 +141,7 @@
 									picker.$emit('pick', [start, end]);
 								}
 							}, {
-								text: '最近一天',
+								text: this.$t('search.component.nearest1day'),
 								onClick(picker) {
 									const end = new Date();
 									const start = new Date();
@@ -148,7 +149,7 @@
 									picker.$emit('pick', [start, end]);
 								}
 							}, {
-								text: '最近七天',
+								text: this.$t('search.component.nearest7day'),
 								onClick(picker) {
 									const end = new Date();
 									const start = new Date();
@@ -156,7 +157,7 @@
 									picker.$emit('pick', [start, end]);
 								}
 							}, {
-								text: '最近30天',
+								text: this.$t('search.component.nearest30day'),
 								onClick(picker) {
 									const end = new Date();
 									const start = new Date();

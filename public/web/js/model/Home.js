@@ -24,9 +24,8 @@ class Home extends Matrix {
 
             $(function() {
 
-                var timeoutId = 0;
-
                 let main = {
+                    i18n,
                     delimiters: ['#{', '}#'],
                     template:   `<el-container style="padding:30px 0;">
                                     <el-main style="padding:0px;">
@@ -47,14 +46,14 @@ class Home extends Matrix {
                                                             <el-image :src="folder.icon | pickIcon" style="margin:3px;width:14px;height:14px;" v-for="(folder,index) in item.groups" v-if="index<8"></el-image>
                                                         </p>
                                                         <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                                                            #{item.title}#（#{item.groups.length}#） 
+                                                            #{ $t('home.group')[item.name] }#（ #{item.groups.length}# ） 
                                                         </p>
                                                         <el-dropdown @command="onGroupCommand" trigger="hover" placement="top-start"  style="position: absolute;right: 5px;top: 5px;">
                                                             <span class="el-dropdown-link">
                                                                 <i class="el-icon-arrow-down el-icon--right" style="color:rgba(255,255,255,0.5)"></i>
                                                             </span>
                                                             <el-dropdown-menu slot="dropdown">
-                                                                <el-dropdown-item :command="{cmd:'remove',data:item}">删除组</el-dropdown-item>
+                                                                <el-dropdown-item :command="{cmd:'remove',data:item}">#{ $t('home.actions.deleteGroup') }#</el-dropdown-item>
                                                             </el-dropdown-menu>
                                                         </el-dropdown>
                                                     </el-button>
@@ -77,14 +76,14 @@ class Home extends Matrix {
                                                                                     <span v-if="window.MATRIX_LANG == 'zh-CN'">#{subItem.cnname}#</span>
                                                                                     <span v-else>#{subItem.enname}#</span>
                                                                                 </el-dropdown-item>
-                                                                                <el-dropdown-item :command="{cmd:'walking',data:subItem}" divided>当前窗口运行</el-dropdown-item>
-                                                                                <el-dropdown-item :command="{cmd:'running',data:subItem}">打开新窗口运行</el-dropdown-item>
-                                                                                <el-dropdown-item :command="{cmd:'home',data:subItem}" divided>设为首页</el-dropdown-item>
-                                                                                <el-dropdown-item divided disabled>分组</el-dropdown-item>
-                                                                                <el-dropdown-item :command="{cmd:'groupAction', targetGroup: groupItem.name, data:subItem}" v-for="groupItem in _.xor(apps.template,[item])">移到【#{groupItem.title}#】组</el-dropdown-item>
-                                                                                <el-dropdown-item :command="{cmd:'groupAction', targetGroup: '', data:subItem}">移到桌面</el-dropdown-item>
-                                                                                <el-dropdown-item :command="{cmd:'uninstall',data:subItem}" divided>卸载应用</el-dropdown-item>
-                                                                                <el-dropdown-item :command="{cmd:'share',data:subItem}" divided>分享</el-dropdown-item>
+                                                                                <el-dropdown-item :command="{cmd:'walking',data:subItem}" divided>#{ $t('home.actions.open') }#</el-dropdown-item>
+                                                                                <el-dropdown-item :command="{cmd:'running',data:subItem}">#{ $t('home.actions.openNew') }#</el-dropdown-item>
+                                                                                <el-dropdown-item :command="{cmd:'home',data:subItem}" divided>#{ $t('home.actions.setHome') }#</el-dropdown-item>
+                                                                                <el-dropdown-item divided disabled>#{ $t('home.group.groupTitle') }#</el-dropdown-item>
+                                                                                <el-dropdown-item :command="{cmd:'groupAction', targetGroup: groupItem.name, data:subItem}" v-for="groupItem in _.xor(apps.template,[item])">#{ $t('home.actions.moveTo') }#【#{groupItem.title}#】</el-dropdown-item>
+                                                                                <el-dropdown-item :command="{cmd:'groupAction', targetGroup: '', data:subItem}">#{ $t('home.actions.moveToDesktop') }#</el-dropdown-item>
+                                                                                <el-dropdown-item :command="{cmd:'uninstall',data:subItem}" divided>#{ $t('home.actions.uninstall') }#</el-dropdown-item>
+                                                                                <el-dropdown-item :command="{cmd:'share',data:subItem}" divided>#{ $t('home.actions.share') }#</el-dropdown-item>
                                                                             </el-dropdown-menu>
                                                                         </el-dropdown>
                                                                     </p>
@@ -112,13 +111,13 @@ class Home extends Matrix {
                                                                 <span v-if="window.MATRIX_LANG == 'zh-CN'">#{item.cnname}#</span>
                                                                 <span v-else>#{item.enname}#</span>
                                                             </el-dropdown-item>
-                                                            <el-dropdown-item :command="{cmd:'walking',data:item}" divided>当前窗口运行</el-dropdown-item>
-                                                            <el-dropdown-item :command="{cmd:'running',data:item}">打开新窗口运行</el-dropdown-item>
-                                                            <el-dropdown-item :command="{cmd:'home',data:item}" divided>设为首页</el-dropdown-item>
-                                                            <el-dropdown-item divided disabled>分组</el-dropdown-item>
-                                                            <el-dropdown-item :command="{cmd:'groupAction', targetGroup: groupItem.name, data:item}" v-for="groupItem in apps.template">移到【#{groupItem.title}#】组</el-dropdown-item>
-                                                            <el-dropdown-item :command="{cmd:'uninstall',data:item}" divided>卸载应用</el-dropdown-item>
-                                                            <el-dropdown-item :command="{cmd:'share',data:item}" divided>分享</el-dropdown-item>
+                                                            <el-dropdown-item :command="{cmd:'walking',data:item}" divided>#{ $t('home.actions.open') }#</el-dropdown-item>
+                                                            <el-dropdown-item :command="{cmd:'running',data:item}">#{ $t('home.actions.openNew') }#</el-dropdown-item>
+                                                            <el-dropdown-item :command="{cmd:'home',data:item}" divided>#{ $t('home.actions.setHome') }#</el-dropdown-item>
+                                                            <el-dropdown-item divided disabled>#{ $t('home.group.groupTitle') }#</el-dropdown-item>
+                                                            <el-dropdown-item :command="{cmd:'groupAction', targetGroup: groupItem.name, data:item}" v-for="groupItem in apps.template">#{ $t('home.actions.moveTo') }#【#{groupItem.title}#】组</el-dropdown-item>
+                                                            <el-dropdown-item :command="{cmd:'uninstall',data:item}" divided>#{ $t('home.actions.uninstall') }#</el-dropdown-item>
+                                                            <el-dropdown-item :command="{cmd:'share',data:item}" divided>#{ $t('home.actions.share') }#</el-dropdown-item>
                                                         </el-dropdown-menu>
                                                     </el-dropdown>
                                                 </el-button>
@@ -129,21 +128,21 @@ class Home extends Matrix {
                                                             <i class="el-icon-plus" style="font-size: 20px;"></i>
                                                         </span>
                                                         <el-dropdown-menu slot="dropdown">
-                                                            <el-dropdown-item @click.native="onPlusCommand({type:'newGroup',url:''})">新建组</el-dropdown-item>
-                                                            <el-dropdown-item @click.native="onPlusCommand({type:'newApp',url:'/matrix/system'})">发布应用</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onPlusCommand({type:'newGroup',url:''})">#{ $t('home.actions.newGroup') }#</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onPlusCommand({type:'newApp',url:'/matrix/system'})">#{ $t('home.actions.newApp') }#</el-dropdown-item>
                                                         </el-dropdown-menu>
                                                     </el-dropdown>
                                                 </el-button>
                                                 
                                                 <el-dialog :visible.sync="group.dialogVisible" width="30%" destroy-on-close="true" modal="false">
                                                     <el-form :model="group.form" style="width:100%;">
-                                                        <el-form-item label="应用组名称" label-width="80">
+                                                        <el-form-item :label="$t('home.group.groupName')" label-width="80">
                                                             <el-input v-model="group.form.title" autofocus></el-input>
                                                         </el-form-item>
                                                     </el-form>
                                                     <div slot="footer" class="dialog-footer">
-                                                        <el-button @click="group.dialogVisible = false">取 消</el-button>
-                                                        <el-button type="primary" @click="groupAdd" @keyup.enter.native.prevent="groupAdd">确 定</el-button>
+                                                        <el-button @click="group.dialogVisible = false">#{ $t('home.actions.cancel') }#</el-button>
+                                                        <el-button type="primary" @click="groupAdd" @keyup.enter.native.prevent="groupAdd">#{ $t('home.actions.apply') }#</el-button>
                                                     </div>
                                                 </el-dialog>
                                                 
@@ -244,9 +243,10 @@ class Home extends Matrix {
                             _.extend(this.model, {message:this.$refs.searchRef.result});  
                             
                             if (_.isEmpty(this.options.term)) {
+
                                 this.$message({
                                     type: "info",
-                                    message: "请输入搜索关键字"
+                                    message: this.$t('home.tip.searchTip')
                                 });
                                 
                                 return false;
@@ -356,26 +356,10 @@ class Home extends Matrix {
                             } else{
                                 this.$message({
                                     type: "error",
-                                    message: "新建失败，请确认！"
+                                    message: this.$t('home.tip.newGroupFail')
                                 });
                             }
                             this.group.dialogVisible = false;
-                        },
-                        groupUpdate(){
-                            let data = {
-                                user: window.SignedUser_UserName,
-                                action:"update",
-                                data: this.group.form   
-                            };
-                            let rtn = fsHandler.callFsJScript("/matrix/apps/group.js",encodeURIComponent(JSON.stringify(data))).message;
-                            if(rtn === 1){
-                                this.loadApps();
-                            } else{
-                                this.$message({
-                                    type: "error",
-                                    message: "新建失败，请确认！"
-                                });
-                            }
                         },
                         groupRemove(item){
                             let data = {
@@ -384,9 +368,9 @@ class Home extends Matrix {
                                 data: item.data
                             };
                             
-                            this.$confirm('确定要删除?', '提示', {
-                                confirmButtonText: '确定',
-                                cancelButtonText: '取消',
+                            this.$confirm(this.$t('home.tip.deleteGroupConfirm'), this.$t('home.tip.label'), {
+                                confirmButtonText: this.$t('home.actions.apply'),
+                                cancelButtonText: this.$t('home.actions.cancel'),
                                 type: 'warning'
                               }).then(() => {
                                 let rtn = fsHandler.callFsJScript("/matrix/apps/group.js",encodeURIComponent(JSON.stringify(data))).message;
@@ -394,12 +378,12 @@ class Home extends Matrix {
                                     this.loadApps();
                                     this.$message({
                                         type: 'success',
-                                        message: '删除成功!'
+                                        message: this.$t('home.tip.deleteGroupSuccess')
                                     });
                                 } else{
                                     this.$message({
                                         type: "error",
-                                        message: "删除失败，请确认！"
+                                        message: this.$t('home.tip.deleteGroupFail')
                                     });
                                 }
                               }).catch(() => {

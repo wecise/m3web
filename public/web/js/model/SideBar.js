@@ -76,60 +76,73 @@ class SideBar {
         
         const inst = this;
         return {
+            i18n,
             delimiters: ['#{', '}#'],
             data: {
                 model: [],
                 selectedApps: [],
                 term: null,
                 group: [
-                        {name:'IT运维',url:'', cnname:'IT运维', target:'', icon: 'fas fa-star', count: 15},
-                        {name:'供销存管理',url:'', cnname:'供销存管理', target:'', icon: '', count: 0},
-                        {name:'财务管理',url:'', cnname:'财务管理', target:'', icon: '', count: 0},
-                        {name:'OA应用',url:'', cnname:'OA应用', target:'', icon: '', count: 0},
-                        {name:'平台应用',url:'', cnname:'平台应用', target:'', icon: '', count: 0},
-                        {name:'应用管理',url:'', cnname:'应用管理', target:'', icon: '', count: 0},
-                        {name:'数据接入',url:'', cnname:'数据接入', target:'', icon: '', count: 0},
-                        {name:'数据处理',url:'', cnname:'数据处理', target:'', icon: '', count: 0},
-                        {name:'数据分析',url:'', cnname:'数据分析', target:'', icon: '', count: 0},
-                        {name:'仪表盘',url:'', cnname:'仪表盘', target:'', icon: '', count: 0},
-                        {name:'资产管理',url:'', cnname:'资产管理', target:'', icon: '', count: 0},
-                        {name:'政务应用',url:'', cnname:'政务应用', target:'', icon: '', count: 0},
-                        {name:'开发者应用',url:'', cnname:'开发者应用', target:'', icon: '', count: 0}
+                        {name:'IT运维',url:'', cnname:'IT运维', enname:'ITSM', target:'', icon: 'fas fa-star', count: 15},
+                        {name:'供销存管理',url:'', cnname:'供销存管理', enname:'ERP', target:'', icon: '', count: 0},
+                        {name:'财务管理',url:'', cnname:'财务管理', enname:'Finance', target:'', icon: '', count: 0},
+                        {name:'OA应用',url:'', cnname:'OA应用', enname:'OA', target:'', icon: '', count: 0},
+                        {name:'平台应用',url:'', cnname:'平台应用', enname:'Plat', target:'', icon: '', count: 0},
+                        {name:'应用管理',url:'', cnname:'应用管理', enname:'App', target:'', icon: '', count: 0},
+                        {name:'数据接入',url:'', cnname:'数据接入', enname:'Data INPUT', target:'', icon: '', count: 0},
+                        {name:'数据处理',url:'', cnname:'数据处理', enname:'Data KEEP', target:'', icon: '', count: 0},
+                        {name:'数据分析',url:'', cnname:'数据分析', enname:'Analysis', target:'', icon: '', count: 0},
+                        {name:'仪表盘',url:'', cnname:'仪表盘', enname:'Dashboard', target:'', icon: '', count: 0},
+                        {name:'资产管理',url:'', cnname:'资产管理', enname:'Asset', target:'', icon: '', count: 0},
+                        {name:'政务应用',url:'', cnname:'政务应用', enname:'Govemment', target:'', icon: '', count: 0},
+                        {name:'开发者应用',url:'', cnname:'开发者应用', enname:'Developer', target:'', icon: '', count: 0}
                     ],
                 checkList: [],
                 apps: {}
             },
             template: ` <el-container style="height:100%;width:100%;" class="sidebar-container">
                             <el-header style="height:40px;line-height:40px;border-bottom:1px solid #ddd;" ref="header">
-                                <el-input placeholder="请输入关键词" v-model="term" style="width:80%;"></el-input>
+                                <el-input :placeholder="$t('sideBar.menu.placeholder')" v-model="term" style="width:80%;"></el-input>
                                 <el-button type="text" @click="onClose" style="float:right;font-size:14px;" icon="el-icon-close"></el-button>
                             </el-header>
                             <el-main style="padding:0px;">
                                 <el-container style="height:100%;">
-                                    <el-main style="padding:10px;height:100%;overflow:auto;display:flex;flex-wrap:wrap;">
+                                    <el-main style="padding:10px;height:100%;overflow:auto;display:flex;flex-wrap:wrap;align-content: flex-start;">
                                         <el-button type="default" :key="item.id" v-for="item in model" style="border: unset;width:100px;height:120px;margin:5px;padding:0px;cursor:pointer;"> 
                                             <el-image :src="_.find(model,{id:item.id}).icon | pickIcon" fit="fill" style="width:48px;filter:grayscale(100%) brightness(45%) sepia(100%) hue-rotate(-180deg) saturate(700%) contrast(0.8);">
                                             </el-image> 
                                             <p style="padding: 5px 0px;">
-                                                #{_.truncate(_.find(model,{id:item.id}).cnname,{'length': 6})}#
+                                                <span v-if="window.MATRIX_LANG == 'zh-CN'">
+                                                    #{_.truncate(_.find(model,{id:item.id}).cnname,{'length': 6})}#
+                                                </span>
+                                                <span v-else>
+                                                    #{_.truncate(_.find(model,{id:item.id}).enname,{'length': 6})}#
+                                                </span>
                                                 <el-dropdown @command="onAppCommand" trigger="hover" placement="top-end" style="color:rgba(255,255,255,.5);">
                                                     <span class="el-dropdown-link">
                                                         <i class="el-icon-arrow-down el-icon--right" style="color:#333;"></i>
                                                     </span>
                                                     <el-dropdown-menu slot="dropdown">
-                                                        <el-dropdown-item disabled>#{item.cnname}#</el-dropdown-item>
-                                                        <el-dropdown-item :command="{cmd:'walking',data:item}" divided>当前窗口运行</el-dropdown-item>
-                                                        <el-dropdown-item :command="{cmd:'running',data:item}">打开新窗口运行</el-dropdown-item>
-                                                        <el-dropdown-item :command="{cmd:'home',data:item}" divided>设为首页</el-dropdown-item>
-                                                        <el-dropdown-item divided disabled>分组</el-dropdown-item>
+                                                        <el-dropdown-item disabled>
+                                                            <span v-if="window.MATRIX_LANG == 'zh-CN'">
+                                                                #{item.cnname}#
+                                                            </span>
+                                                            <span v-else>
+                                                                #{item.enname}#
+                                                            </span>
+                                                        </el-dropdown-item>
+                                                        <el-dropdown-item :command="{cmd:'walking',data:item}" divided>#{ $t('sideBar.actions.open') }#</el-dropdown-item>
+                                                        <el-dropdown-item :command="{cmd:'running',data:item}">#{ $t('sideBar.actions.openNew') }#</el-dropdown-item>
+                                                        <el-dropdown-item :command="{cmd:'home',data:item}" divided>#{ $t('sideBar.actions.setHome') }#</el-dropdown-item>
+                                                        <el-dropdown-item divided disabled>#{ $t('sideBar.menu.groupTitle') }#</el-dropdown-item>
                                                         <el-dropdown-item :command="{cmd:'groupAction', targetGroup: groupItem.name, data:item}" v-for="groupItem in _.xor(apps.template,[item])">
                                                             <template v-if="groupItem.title">
-                                                                移到【#{groupItem.title}#】组
+                                                            #{ $t('sideBar.actions.moveTo') }#【#{groupItem.title}#】
                                                             </template>
                                                         </el-dropdown-item>
-                                                        <el-dropdown-item :command="{cmd:'groupAction', targetGroup: '', data:item}">移到桌面</el-dropdown-item>
-                                                        <el-dropdown-item :command="{cmd:'uninstall',data:item}" divided>卸载应用</el-dropdown-item>
-                                                        <el-dropdown-item :command="{cmd:'share',data:item}" divided>分享</el-dropdown-item>
+                                                        <el-dropdown-item :command="{cmd:'groupAction', targetGroup: '', data:item}">#{ $t('sideBar.actions.moveToDesktop') }#</el-dropdown-item>
+                                                        <el-dropdown-item :command="{cmd:'uninstall',data:item}" divided>#{ $t('sideBar.actions.uninstall') }#</el-dropdown-item>
+                                                        <el-dropdown-item :command="{cmd:'share',data:item}" divided>#{ $t('sideBar.actions.share') }#</el-dropdown-item>
                                                     </el-dropdown-menu>
                                                 </el-dropdown>
                                             </p>
@@ -139,7 +152,12 @@ class SideBar {
                                         <ul class="animated fadeIn" style="list-style: none;">
                                             <li v-for="(item,index) in group" :class="index<group.length - 1?'slot-li-divider':''" style="margin:5px 0px;">
                                                 <el-link href="javascript:void(0);" :target="item.target" :title="item.cnname">
-                                                    #{_.truncate(item.cnname, {'length': 6})}#  
+                                                    <span v-if="window.MATRIX_LANG == 'zh-CN'">
+                                                        #{_.truncate(item.cnname, {'length': 12})}#  
+                                                    </span>
+                                                    <span v-else>
+                                                        #{_.truncate(item.enname, {'length': 12})}#  
+                                                    </span>    
                                                     <span class="badge" style="background-color:transparent;color:#999;">#{item.count}#</span>
                                                 </el-link>
                                                 <span :class="item.icon" style="color:#fba729;"></span> 
@@ -149,9 +167,9 @@ class SideBar {
                                 </el-container>
                             </el-main>
                             <el-footer style="height:40px;line-height:40px;">
-                                <el-link href="/matrix/system" target="_blank" icon="el-icon-edit">发布新应用</el-link>
+                                <el-link href="/matrix/system" target="_blank" icon="el-icon-edit">#{ $t('sideBar.actions.newApp') }#</el-link>
                                 <el-link href="http://${window.COMPANY_WEBSITE}#appstore" target="_blank" type="primary" icon="el-icon-view" style="margin-left:20px;">
-                                    #{window.COMPANY_NAME}# 应用商店
+                                    #{window.COMPANY_NAME}# #{ $t('sideBar.menu.appStore') }#
                                 </el-link>
                             </el-footer>
                         </el-container>`,
@@ -345,6 +363,7 @@ class SideBar {
     topBar(){
         
         return{
+            i18n,
             delimiters: ['#{', '}#'],
             data: {
                 activeIndex: '1',
@@ -375,31 +394,31 @@ class SideBar {
                                             <el-menu-item index="user">
                                                 <template slot="title">
                                                     <i class="el-icon-user"></i>
-                                                    <span slot="title">用户</span>
+                                                    <span slot="title">#{ $t('topBar.menu.userInfo') }#</span>
                                                 </template>
                                             </el-menu-item>
                                             <el-menu-item index="system" divided>
                                                 <template slot="title">
                                                     <i class="el-icon-setting"></i>
-                                                    <span slot="title">系统管理</span>
+                                                    <span slot="title">#{ $t('topBar.menu.systemMain') }#</span>
                                                 </template>
                                             </el-menu-item>
                                             <el-menu-item index="files">
                                                 <template slot="title">
                                                     <i class="el-icon-folder-opened"></i>
-                                                    <span slot="title">我的文件</span>
+                                                    <span slot="title">#{ $t('topBar.menu.myFiles') }#</span>
                                                 </template>
                                             </el-menu-item>
                                             <el-menu-item index="home">
                                                 <template slot="title">
                                                     <i class="el-icon-s-home"></i>
-                                                    <span slot="title">默认首页</span>
+                                                    <span slot="title">#{ $t('topBar.menu.defaultHome') }#</span>
                                                 </template>
                                             </el-menu-item>
                                             <el-menu-item index="signout" divided>
                                                 <template slot="title">
                                                     <i class="el-icon-switch-button"></i>
-                                                    <span slot="title">注销</span>
+                                                    <span slot="title">#{ $t('topBar.menu.signOut') }#</span>
                                                 </template>
                                             </el-menu-item>
                                         </el-submenu>
@@ -443,6 +462,7 @@ class SideBar {
     footBar(){
         
         return{
+            i18n,
             delimiters: ['#{', '}#'],
             data: {
                 appVersion: window.APP_VERSION,
@@ -497,8 +517,8 @@ class SideBar {
                                     <i class="el-icon-coin el-icon--right"></i> #{company.name}#
                                 </span>
                                 <el-dropdown-menu slot="dropdown">
-                                    <el-dropdown-item>名称：#{company.name}#</el-dropdown-item>
-                                    <el-dropdown-item>应用：#{company.ospace}#</el-dropdown-item>
+                                    <el-dropdown-item>#{ $t('footBar.menu.name') }#：#{company.name}#</el-dropdown-item>
+                                    <el-dropdown-item>#{ $t('footBar.menu.application') }#：#{company.ospace}#</el-dropdown-item>
                                 </el-dropdown-menu>
                             </el-dropdown>
 
@@ -540,6 +560,7 @@ class SideBar {
         const inst = this;
 
         return{
+            i18n,
             delimiters: ['#{', '}#'],
             data: {
                 model: null,
@@ -564,30 +585,31 @@ class SideBar {
                                     active-text-color="#ffd04b"
                                     style="height:100vh;width:100%;overflow-y:auto;float:left;">
                                 <el-menu-item index="toggle" style="display:">
-                                    <i :class="isCollapse?'el-icon-s-unfold':'el-icon-s-fold'" style="width:18px;color:#fff;"></i>
+                                    <i :class="isCollapse?'el-icon-s-unfold':'el-icon-s-fold'" style="width:16px;color:#fff;"></i>
                                 </el-menu-item>
-                                <el-menu-item index="apps">
-                                    <img :src="preFixIcon+'app.png'+postFixIcon" style="width:20px;"></img> 
-                                    <span slot="title">应用</span>
+                                <el-menu-item index="apps" v-if="window.COMPANY_NAME == 'wecise'">
+                                    <img :src="preFixIcon+'app.png'+postFixIcon" style="width:16px;"></img> 
+                                    <span style="padding-left:5px;" slot="title">#{ $t('sideBar.menu.application') }#</span>
                                 </el-menu-item>
                                 <el-menu-item index="/">
-                                    <img :src="preFixIcon+'home.png'+postFixIcon" style="width:18px;"></img>
-                                    <span slot="title">首页</span>
+                                    <img :src="preFixIcon+'home.png'+postFixIcon" style="width:16px;"></img>
+                                    <span style="padding-left:5px;" slot="title">#{ $t('sideBar.menu.home') }#</span>
                                 </el-menu-item>
                                 
                                 <!-- 有模板情况-->
                                 <el-submenu :index="item.name" v-for="item in model.template" v-show="sideBarStatus === 0">
                                     <template slot="title">
-                                        <img :src="item.icon | pickIcon" style="width:18px;"></img>
-                                        <span>#{item.title}#</span>
+                                        <img :src="item.icon | pickIcon" style="width:16px;"></img>
+                                        <span style="padding-left:5px;font-size:12px;">#{ $t('home.group')[item.name] }#【#{item.groups.length}#】</span>
                                     </template>
                                     
                                     <el-menu-item-group>
-                                        <span slot="title">#{item.title}#</span>
+                                        <span slot="title" style="font-size:12px;">#{ $t('home.group')[item.name] }#【#{item.groups.length}#】</span>
                                         <el-menu-item :class="subItem.status" :index="subItem.url" v-for="subItem in item.groups">
-                                            <img :src="subItem.icon | pickIcon" style="width:18px;"></img>
+                                            <img :src="subItem.icon | pickIcon" style="width:16px;"></img>
                                             <span slot="title">
-                                                #{subItem.cnname}#
+                                                <span style="padding-left:5px;" v-if="window.MATRIX_LANG == 'zh-CN'">#{subItem.cnname}#</span>
+                                                <span style="padding-left:5px;" v-else>#{subItem.enname}#</span>
                                                 <el-tooltip content="在新窗口中打开" open-delay="500"  placement="right-start">
                                                     <el-button type="text" icon="el-icon-position" @click.stop.prevent="onClick(subItem.url)" style="float:right;transform:scale(0.6);color:#ffffff;"></el-button>
                                                 </el-tooltip>
@@ -601,15 +623,16 @@ class SideBar {
                                 <el-submenu index="appList" v-show="sideBarStatus === 1">
                                     <template slot="title">
                                         <i class="fas fa-cubes" style="color:#ffffff;font-size:18px;"></i>
-                                        <span>应用</span>
+                                        <span>#{ $t('sideBar.menu.application') }#</span>
                                     </template>
 
                                     <el-menu-item-group>
-                                        <span slot="title">应用</span>
+                                        <span slot="title">#{ $t('sideBar.menu.application') }#</span>
                                         <el-menu-item :class="item.status" :index="item.url" v-for="item in model.list">
-                                            <img :src="item.icon | pickIcon" style="width:18px;"></img>
+                                            <img :src="item.icon | pickIcon" style="width:16px;"></img>
                                             <span slot="title">
-                                                #{item.cnname}#
+                                                <span style="padding-left:5px;" v-if="window.MATRIX_LANG == 'zh-CN'">#{item.cnname}#</span>
+                                                <span style="padding-left:5px;" v-else>#{item.enname}#</span>
                                                 <el-tooltip content="在新窗口中打开" open-delay="500"  placement="right-start">
                                                     <el-button type="text" icon="el-icon-position" @click.stop.prevent="onClick(item.url)" style="float:right;transform:scale(0.6);color:#ffffff;"></el-button>
                                                 </el-tooltip>
@@ -620,9 +643,10 @@ class SideBar {
 
                                 <!-- 没有模板情况，且菜单项数量没超过阈值-->
                                 <el-menu-item :class="item.status" :index="item.url" v-for="item in model.list" v-show="sideBarStatus === 2">
-                                    <img :src="item.icon | pickIcon" style="width:18px;"></img>
+                                    <img :src="item.icon | pickIcon" style="width:16px;"></img>
                                     <span slot="title">
-                                        #{item.cnname}#
+                                        <span style="padding-left:5px;" v-if="window.MATRIX_LANG == 'zh-CN'">#{item.cnname}#</span>
+                                        <span style="padding-left:5px;" v-else>#{item.enname}#</span>
                                         <el-tooltip content="在新窗口中打开" open-delay="500"  placement="right-start">
                                             <el-button type="text" icon="el-icon-position" @click.stop.prevent="onClick(item.url)" style="float:right;transform:scale(0.6);color:#ffffff;"></el-button>
                                         </el-tooltip>
@@ -631,9 +655,10 @@ class SideBar {
 
                                 <!-- 没有分组的应用-->
                                 <el-menu-item :class="item.status" :index="item.url" v-for="item in model.appListUnGrouped">
-                                    <img :src="item.icon | pickIcon" style="width:18px;"></img>
+                                    <img :src="item.icon | pickIcon" style="width:16px;"></img>
                                     <span slot="title">
-                                        #{item.cnname}#
+                                        <span style="padding-left:5px;" v-if="window.MATRIX_LANG == 'zh-CN'">#{item.cnname}#</span>
+                                        <span style="padding-left:5px;" v-else>#{item.enname}#</span>
                                         <el-tooltip content="在新窗口中打开" open-delay="500"  placement="right-start">
                                             <el-button type="text" icon="el-icon-position" @click.stop.prevent="onClick(item.url)" style="float:right;transform:scale(0.6);color:#ffffff;"></el-button>
                                         </el-tooltip>

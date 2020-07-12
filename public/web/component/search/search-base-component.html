@@ -54,6 +54,11 @@
     		border-radius: 5px;
 		}
 
+		.search-base-component .el-picker-panel [slot=sidebar], 
+		.search-base-component .el-picker-panel__sidebar{
+			width: 120px;
+		}
+
 	</style>
 
 	
@@ -61,20 +66,20 @@
 	<template>
 		<div style="display:flex;width:100%;height:42px;line-height: 42px;" class="search-base">
 			<!--搜索范围-->
-			<el-select v-model="options.view.value" placeholder="请选择视图"   popper-class="search-base--select-popper" class="search-base--select" @change="onViewChange" v-if="options.view.show">
+			<el-select v-model="options.view.value" :placeholder="$t('search.view.placeholder')"   popper-class="search-base--select-popper" class="search-base--select" @change="onViewChange" v-if="options.view.show">
 				<el-option :label="item.title" :key="item.name" :value="item.name" v-for="item in view.list" style="height:auto;">
 					<el-card :body-style="{ padding: '5px' }" style="text-align: center;">
 						<span class="el-icon-bank-card" style="font-size:65px;padding:0px 65px;"></span>
 						<div style="padding: 0px;text-align: right;">
 							<p style="margin: 0px;">#{item.title}#</p>
 							<p style="margin: 0px;">
-								<el-tooltip content="视图创建时间">
+								<el-tooltip :content="$t('search.view.createTime')">
 									<span>#{moment(item.time).format(mx.global.register.format)}#</span>
 								</el-tooltip>
-								<el-tooltip content="设置为默认视图">
+								<el-tooltip :content="$t('search.view.default')">
 									<el-button type="text"  icon="el-icon-s-platform" style="margin-left:10px;" @click="onSetDefaultView(item)"></el-button>
 								</el-tooltip>
-								<el-tooltip content="视图管理">
+								<el-tooltip :content="$t('search.view.maintain')">
 									<el-button type="text"  icon="el-icon-edit-outline" @click="onChangeView(item)"></el-button>
 								</el-tooltip>
 							</p>  
@@ -99,9 +104,9 @@
 						:picker-options="timePicker.options"
 						type="datetimerange"
 						value-format="yyyy-MM-dd HH:mm:ss"
-						range-separator="至"
-						start-placeholder="开始日期"
-						end-placeholder="结束日期"
+						:range-separator="$t('search.component.timeTo')"
+						:start-placeholder="$t('search.component.timeBegin')"
+						:end-placeholder="$t('search.component.timeEnd')"
 						align="right"
 						ref="datePicker">
 					</el-date-picker>
@@ -109,7 +114,7 @@
 				<el-button slot="reference" icon="el-icon-timer" style="height:42px;margin-left:-1px;width:100%;"></el-button>
 			</el-popover> 
 			<!--搜索框-->
-			<el-autocomplete class="inline-input" placeholder="搜索关键字" 
+			<el-autocomplete class="inline-input" :placeholder="$t('search.placeholder')" 
 							v-model="options.term" 
 							:fetch-suggestions="onFetchSuggestions"
 							:trigger-on-focus="false"
@@ -124,14 +129,15 @@
 			<!--快速过滤条件设置-->
 
 			<!--搜索按钮-->
-			<el-button type="primary" @click="search" @keyup.enter.native="search" ref="searchNowRef">搜索</el-button>
+			<el-button type="primary" @click="search" @keyup.enter.native="search" ref="searchNowRef">#{ $t('search.actions.search') }#</el-button>
 		</div>
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
 	<script id="search-base-component">
 	{
-	   	delimiters: ['#{', '}#'],
+		i18n,   
+		delimiters: ['#{', '}#'],
 	    props:{
 			// 搜索设置
 			options: Object
@@ -148,7 +154,7 @@
 					options: {
 						shortcuts:[
 							{
-								text: '最近15分钟',
+								text: this.$t('search.component.nearest15min'),
 								onClick(picker) {
 									const end = new Date();
 									const start = new Date();
@@ -156,7 +162,7 @@
 									picker.$emit('pick', [start, end]);
 								}
 							}, {
-								text: '最近30分钟',
+								text: this.$t('search.component.nearest30min'),
 								onClick(picker) {
 									const end = new Date();
 									const start = new Date();
@@ -164,7 +170,7 @@
 									picker.$emit('pick', [start, end]);
 								}
 							}, {
-								text: '最近一小时',
+								text: this.$t('search.component.nearest1hour'),
 								onClick(picker) {
 									const end = new Date();
 									const start = new Date();
@@ -172,7 +178,7 @@
 									picker.$emit('pick', [start, end]);
 								}
 							}, {
-								text: '最近一天',
+								text: this.$t('search.component.nearest1day'),
 								onClick(picker) {
 									const end = new Date();
 									const start = new Date();
@@ -180,7 +186,7 @@
 									picker.$emit('pick', [start, end]);
 								}
 							}, {
-								text: '最近七天',
+								text: this.$t('search.component.nearest7day'),
 								onClick(picker) {
 									const end = new Date();
 									const start = new Date();
@@ -188,7 +194,7 @@
 									picker.$emit('pick', [start, end]);
 								}
 							}, {
-								text: '最近30天',
+								text: this.$t('search.component.nearest30day'),
 								onClick(picker) {
 									const end = new Date();
 									const start = new Date();

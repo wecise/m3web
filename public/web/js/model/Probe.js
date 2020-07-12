@@ -118,6 +118,34 @@ class Probe extends Matrix {
                                         v-loading="loading"
                                         ref="table">
                                         <!--el-table-column type="selection" align="center"></el-table-column--> 
+                                        <el-table-column width="120">
+                                            <template slot-scope="scope" v-if="!_.isEmpty(scope.row.depot)">
+                                                <el-button type="success" @click="onToogleExpand(scope.row)">查看脚本</el-button>
+                                            </template>
+                                        </el-table-column>
+                                        <el-table-column type="expand" width="0">
+                                            <template slot-scope="scope">
+                                                <el-container style="width:90%;height:100%;min-height:40vh;background: #f2f3f5;">
+                                                    <el-main style="height:100%;padding:0px;">
+                                                        <el-tabs tab-position="left" @tab-click="((tab,event)=>{ onTabClick(tab,event,props.row)})">
+                                                            <el-tab-pane :name="key" v-for="(val,key) in scope.row.depot">
+                                                                <span slot="label"><i class="el-icon-tickets"></i> #{ key }#</span>
+                                                                <el-button type="default" style="padding:10px;" v-for="item in JSON.parse(val)" style="box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);">
+                                                                    <i class="el-icon-document" style="font-size:48px;"></i>
+                                                                    <span style="text-align:left;">
+                                                                        <p>版本：#{item.version}#</p>
+                                                                        <p>时间：#{item.modtime}#</p>
+                                                                        <p>目录：#{item.path}#</p>
+                                                                        <p>用户：#{item.user}#</p>
+                                                                        <p>命令：#{item.command}#</p>
+                                                                    </span>
+                                                                </el-button>
+                                                            </el-tab-pane>
+                                                        </el-tabs>
+                                                    </el-main>
+                                                </el-container>
+                                            </template>
+                                        </el-table-column>
                                         <el-table-column
                                             sortable 
                                             show-overflow-tooltip
@@ -194,6 +222,11 @@ class Probe extends Matrix {
                                     #{ info.join(' &nbsp; | &nbsp;') }#
                                 </el-footer>
                             </el-container>`,
+                filters:{
+                    pickDatetime(item){
+                        return moment(item).format(mx.global.register.format);      
+                    }
+                },
                 watch: {
                     model: {
                         handler(val,oldVal){
@@ -285,6 +318,25 @@ class Probe extends Matrix {
                     },
                     onRowDblclick(row, column, event){
                         
+                    },
+                    onToogleExpand(row,index){
+                        this.$refs.table.toggleRowExpansion(row);
+
+                        // 根据该服务器部署的depot名称列表
+                        let depotNames = _.keys(row.depot);
+                        // 根据depot名称列表，获取脚本信息
+                        let depots = {};
+                        _.forEach(depotNames,(v)=>{
+                            let versions = scriptHandler.depotGet({name:v,version:null}).versions;
+                            let scriptObj = _.map(versions,(val)=>{
+                                return scriptHandler.depotGet({name:v,version:val});
+                            })
+                            _.extend(depots, {[v]:scriptObj});
+                        })
+                    },
+                    onTabClick(tab,event,row){
+                        // 根据depot获取所有版本的脚本信息
+
                     },
                     onExport(type){
                 
@@ -426,6 +478,12 @@ class Probe extends Matrix {
                         servers: {
                             list: [],
                         },
+                        versionTree:{
+                            props: {
+                                label: 'version',
+                                children: ''
+                            }
+                        },
                         info: []
                     }
                 },
@@ -473,126 +531,173 @@ class Probe extends Matrix {
                                         @expand-change="onExpandChange"
                                         ref="table"
                                         v-if="!_.isEmpty(dt.rows)">
-                                        <!--el-table-column type="selection" align="center"></el-table-column--> 
-                                        <el-table-column label="下发状态" width="120" prop="status">
-                                            <template slot-scope="scope">
-                                                <el-button type="success" @click="onToogleExpand(scope.row)" v-if="scope.row.status == 1">已下发 ></el-button>
-                                                <el-button type="warning" @click="onToogleExpand(scope.row)" v-else>未下发</el-button>
-                                            </template>
-                                        </el-table-column>
-                                        <el-table-column type="expand" width="0">
+                                        <el-table-column type="selection" align="center"></el-table-column> 
+                                        <el-table-column type="expand" width="0" >
                                             <template slot-scope="props">
                                                 <el-container style="width:90%;height:100%;background: #f2f3f5;">
-                                                    <el-main style="height:100%;padding:0px;">
-                                                        <el-tabs v-model="props.row.activeTab" tab-position="left" @tab-click="((tab,event)=>{ onTabClick(tab,event,props.row)})">
-                                                            <el-tab-pane name="script">
-                                                                <span slot="label"><i class="el-icon-tickets"></i> 脚本信息</span>
-                                                                <el-form label-position="left" label-width="120px" style="background: #ffffff;padding: 10px 20px;">
-                                                                    <el-form-item style="text-align:right;" v-if="props.row.status==0">
-                                                                        <el-button icon="el-icon-position" type="success" @click="onScriptUpdate(props.row)">更新脚本</el-button>    
-                                                                    </el-form-item>
-                                                                    <el-form-item label="脚本文件" v-if="props.row.status==0">
-                                                                        <el-upload
-                                                                            :on-change="((file, fileList)=>{ onFileChange(file, fileList, props.row)})"
-                                                                            :file-list="props.row.fileList"
-                                                                            :limit="1"
-                                                                            multiple="false"
-                                                                            :auto-upload="false"
-                                                                            style="padding:10px;background:#f2f3f5;border:1px dashed #ddd;">
-                                                                            <div slot="tip" class="el-upload__tip">只能上传脚本文件</div>
-                                                                            <el-button icon="el-icon-upload2" type="default">点击上传脚本</el-button>
-                                                                        </el-upload>
-                                                                    </el-form-item>
-                                                                    <el-form-item label="脚本文件" v-else>
-                                                                        <el-button type="default" style="padding:10px;" v-for="item in props.row.fileList" style="box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);">
-                                                                            <i class="el-icon-document" style="font-size:48px;"></i>
-                                                                            <span style="text-align:left;">
-                                                                                <p>文件名称：#{item.files[0].name}#</p>
-                                                                                <p>上传时间：#{item.files[0].modtime}#</p>
-                                                                                <p>文件大小：#{item.files[0].size | pickSize}#</p>
-                                                                            </span>
-                                                                        </el-button>
-                                                                    </el-form-item>
-                                                                    <el-form-item label="脚本库名称">
-                                                                        <el-input v-model="props.row.name" required="required" disabled></el-input>
-                                                                    </el-form-item>
-                                                                    <el-form-item label="脚本版本">
-                                                                        <el-input-number v-model="props.row.version" required="required" :precision="1" :step="0.1"></el-input-number>
-                                                                    </el-form-item>
-                                                                    <el-form-item label="脚本说明">
-                                                                        <el-input type="textarea" :row="6" v-model="props.row.remark"></el-input>
-                                                                    </el-form-item>
-                                                                    <el-form-item label="添加标签">
-                                                                        <el-select
-                                                                            v-model="props.row.tags"
-                                                                            multiple
-                                                                            filterable
-                                                                            allow-create
-                                                                            default-first-option
-                                                                            class="el-select-tags"
-                                                                            placeholder="标签"
-                                                                            @change="onTagChange($event,props.row)"
-                                                                            @remove-tag="onTagRemove($event,props.row)">
-                                                                            <el-option
-                                                                                v-for="tag in props.row.tags"
-                                                                                :key="tag"
-                                                                                :label="tag"
-                                                                                :value="tag">
-                                                                            </el-option>
-                                                                        </el-select>
-                                                                    </el-form-item>
-                                                                <el-form>
-                                                            </el-tab-pane>
-                                                            
-                                                            <el-tab-pane name="setup">
-                                                                <span slot="label"><i class="el-icon-setting"></i> 下发设置</span>
-                                                                <el-form label-position="left" label-width="120px" style="background: #ffffff;padding: 10px 20px;min-height:200px;">
-                                                                    <el-form-item label="执行命令">
-                                                                        <pre :ref="'commandRef'+props.row.id" style="width:100%;height:200px;border:1px solid #dddddd;"></pre>
-                                                                        <!--el-input
-                                                                            placeholder="command"
-                                                                            v-model="props.row.command">
-                                                                        </el-input-->                                                  
-                                                                    </el-form-item>
-                                                                    <el-form-item label="Key">
-                                                                        <el-input
-                                                                            placeholder="key"
-                                                                            v-model="props.row.zabbixKey">
-                                                                        </el-input>                                                  
-                                                                    </el-form-item>
-                                                                    <!--el-form-item label="Config">
-                                                                        <el-input type="textarea" rows="6"
-                                                                            placeholder="Config"
-                                                                            :value="props.row.zabbix | pickZabbixConfig">
-                                                                        </el-input>                                                  
-                                                                    </el-form-item-->
-                                                                <el-form>
-                                                            </el-tab-pane>
+                                                    <el-aside style="width:250px;">
+                                                        <el-container>
+                                                            <el-header style="height:40px;line-height:40px;">
+                                                                <h4 style="margin:0px;">版本历史</h4>
+                                                            </el-header>
+                                                            <el-main style="padding:0px;">
+                                                                <el-tree
+                                                                    :data="props.row.fileObj"
+                                                                    :props="versionTree.props"
+                                                                    show-checkbox
+                                                                    node-key="version"
+                                                                    accordion
+                                                                    :default-checked-keys="[props.row.selectedVersion]"
+                                                                    @node-click="((node)=>{ onFileVersionClick(node,props.row)})"
+                                                                    @check-change="onFileVersionCheckChange">
+                                                                </el-tree>
+                                                            </el-main>
+                                                        <el-container>
+                                                    </el-aside>
+                                                    <el-container style="height:100%;">
+                                                        <el-header style="height:40px;line-height:40px;">
+                                                            <h4 style="margin:0px;">选择版本：#{ props.row.selectedVersion }#</h4>
+                                                        </el-header>
+                                                        <el-main style="height:100%;padding:0px;">
+                                                            <el-tabs v-model="props.row.activeTab" tab-position="top" @tab-click="((tab,event)=>{ onTabClick(tab,event,props.row)})">
+                                                                <el-tab-pane name="script">
+                                                                    <span slot="label"><i class="el-icon-tickets"></i> 脚本信息</span>
+                                                                    <el-form label-position="left" label-width="120px" style="background: #ffffff;padding: 10px 20px;">
+                                                                        <el-form-item style="text-align:right;" v-if="props.row.status==0">
+                                                                            <el-button icon="el-icon-position" type="success" @click="onScriptUpdate(props.row)">更新脚本库</el-button>    
+                                                                        </el-form-item>
+                                                                        <el-form-item label="脚本文件" v-if="props.row.status==0">
+                                                                            <div style="display:flex;">
+                                                                                <el-button type="default" v-for="item in pickFiles(props.row)" style="position: relative;padding:10px;margin:5px;box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);">
+                                                                                    <i class="el-icon-document" style="font-size:48px;color:#f8a502;"></i>
+                                                                                    <span style="text-align:left;">
+                                                                                        <p>文件名称：#{item.name}#</p>
+                                                                                        <p>上传时间：#{item.modtime}#</p>
+                                                                                        <p>文件大小：#{item.size | pickSize}#</p>
+                                                                                    </span>
+                                                                                    <el-dropdown style="position:absolute;right:5px;top:5px;">
+                                                                                        <span class="el-dropdown-link">
+                                                                                            <i class="el-icon-arrow-down el-icon--right"></i>
+                                                                                        </span>
+                                                                                        <el-dropdown-menu slot="dropdown">
+                                                                                            <el-dropdown-item @click.native="onFileEditor(item, props.row)">编辑</el-dropdown-item>
+                                                                                        </el-dropdown-menu>
+                                                                                    </el-dropdown>
+                                                                                </el-button>
+                                                                                <el-upload
+                                                                                    :on-change="((file, fileList)=>{ onFileChange(file, fileList, props.row)})"
+                                                                                    :limit="1"
+                                                                                    multiple="false"
+                                                                                    :auto-upload="false"
+                                                                                    style="padding:10px;box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);width:230px;margin:5px;border:1px solid #dddddd;">
+                                                                                    <div slot="tip" class="el-upload__tip">只能上传脚本文件</div>
+                                                                                    <el-button type="text">
+                                                                                        <i class="el-icon-plus" style="font-size:48px;"></i>
+                                                                                    </el-button>
+                                                                                </el-upload>
+                                                                            </div>
+                                                                        </el-form-item>
+                                                                        <el-form-item label="脚本文件" v-else>
+                                                                            <el-button type="default" v-for="item in pickFiles(props.row)" style="position: relative;padding:10px;box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);">
+                                                                                <i class="el-icon-document" style="font-size:48px;color:#f8a502;"></i>
+                                                                                <span style="text-align:left;">
+                                                                                    <p>文件名称：#{item.name}#</p>
+                                                                                    <p>上传时间：#{item.modtime}#</p>
+                                                                                    <p>文件大小：#{item.size | pickSize}#</p>
+                                                                                </span>
+                                                                                <el-dropdown style="position:absolute;right:5px;top:5px;">
+                                                                                    <span class="el-dropdown-link">
+                                                                                        <i class="el-icon-arrow-down el-icon--right"></i>
+                                                                                    </span>
+                                                                                    <el-dropdown-menu slot="dropdown">
+                                                                                        <el-dropdown-item @click.native="onFileEditor(item,props.row)">编辑</el-dropdown-item>
+                                                                                    </el-dropdown-menu>
+                                                                                </el-dropdown>
+                                                                            </el-button>
+                                                                        </el-form-item>
+                                                                        <!--el-form-item label="脚本库名称">
+                                                                            <el-input v-model="props.row.name" required="required" disabled></el-input>
+                                                                        </el-form-item>
+                                                                        <el-form-item label="脚本版本">
+                                                                            <el-input v-model="props.row.version" required="required"></el-input>
+                                                                        </el-form-item>
+                                                                        <el-form-item label="脚本说明">
+                                                                            <el-input type="textarea" :row="6" v-model="props.row.remark"></el-input>
+                                                                        </el-form-item>
+                                                                        <el-form-item label="添加标签">
+                                                                            <el-select
+                                                                                v-model="props.row.tags"
+                                                                                multiple
+                                                                                filterable
+                                                                                allow-create
+                                                                                default-first-option
+                                                                                class="el-select-tags"
+                                                                                placeholder="标签"
+                                                                                @change="onTagChange($event,props.row)"
+                                                                                @remove-tag="onTagRemove($event,props.row)">
+                                                                                <el-option
+                                                                                    v-for="tag in props.row.tags"
+                                                                                    :key="tag"
+                                                                                    :label="tag"
+                                                                                    :value="tag">
+                                                                                </el-option>
+                                                                            </el-select>
+                                                                        </el-form-item-->
+                                                                    <el-form>
+                                                                </el-tab-pane>
+                                                                
+                                                                <el-tab-pane name="setup">
+                                                                    <span slot="label"><i class="el-icon-setting"></i> 下发设置</span>
+                                                                    <el-form label-position="left" label-width="120px" style="background: #ffffff;padding: 10px 20px;min-height:200px;">
+                                                                        <el-form-item label="执行命令">
+                                                                            <pre :ref="'commandRef'+props.row.id" style="width:100%;height:200px;border:1px solid #dddddd;"></pre>
+                                                                            <!--el-input
+                                                                                placeholder="command"
+                                                                                v-model="props.row.command">
+                                                                            </el-input-->                                                  
+                                                                        </el-form-item>
+                                                                        <el-form-item label="Key">
+                                                                            <el-input
+                                                                                placeholder="key"
+                                                                                v-model="props.row.zabbixKey">
+                                                                            </el-input>                                                  
+                                                                        </el-form-item>
+                                                                        <!--el-form-item label="Config">
+                                                                            <el-input type="textarea" rows="6"
+                                                                                placeholder="Config"
+                                                                                :value="props.row.zabbix | pickZabbixConfig">
+                                                                            </el-input>                                                  
+                                                                        </el-form-item-->
+                                                                    <el-form>
+                                                                </el-tab-pane>
 
-                                                            <el-tab-pane name="servers">
-                                                                <span slot="label"><i class="el-icon-monitor"></i> 下发对象</span>
-                                                                <el-form label-position="left" label-width="120px" style="background: #ffffff;padding: 10px 20px;">
-                                                                    <el-form-item label="选择服务器">
-                                                                        <el-transfer
-                                                                            :titles="['服务器列表', '已下发服务器']"
-                                                                            :button-texts="['取消下发', '下发']"
-                                                                            :data="servers.list"
-                                                                            v-model="props.row.selected"
-                                                                            :props="{
-                                                                                key: 'host',
-                                                                                label: 'host'
-                                                                            }"
-                                                                            @change="((value, direction, movedKeys)=>{ onScriptDeployOrUndeploy(value, direction, movedKeys, props.row) })">
-                                                                            <span slot-scope="{ option }">#{ option.host }# - #{ option.iszabbix | pickZabbix }#</span>
-                                                                        </el-transfer>
-                                                                    </el-form-item>
-                                                                <el-form>
-                                                            </el-tab-pane>
-                                                        </el-tabs>
-                                                    </el-main>
+                                                                <el-tab-pane name="servers">
+                                                                    <span slot="label"><i class="el-icon-monitor"></i> 下发对象</span>
+                                                                    <el-form label-position="left" label-width="120px" style="background: #ffffff;padding: 10px 20px;">
+                                                                        <el-form-item label="选择服务器">
+                                                                            <el-transfer
+                                                                                :titles="['服务器列表', '已下发服务器']"
+                                                                                :button-texts="['取消下发', '下发']"
+                                                                                :data="servers.list"
+                                                                                v-model="props.row.selected"
+                                                                                :props="{
+                                                                                    key: 'host',
+                                                                                    label: 'host'
+                                                                                }"
+                                                                                @change="((value, direction, movedKeys)=>{ onScriptDeployOrUndeploy(value, direction, movedKeys, props.row) })">
+                                                                                <span slot-scope="{ option }">#{ option.host }# - #{ option.iszabbix | pickZabbix }#</span>
+                                                                            </el-transfer>
+                                                                        </el-form-item>
+                                                                    <el-form>
+                                                                </el-tab-pane>
+                                                            </el-tabs>
+                                                        </el-main>
+                                                    </el-container>
                                                 </el-container>
                                             </template>
                                         </el-table-column>
+                                        <el-table-column label="脚本库名称" prop="name" width="200" sortable></el-table-column>
+                                        <el-table-column label="下发脚本版本" prop="version" width="120" sortable></el-table-column>
                                         <el-table-column
                                             sortable 
                                             show-overflow-tooltip
@@ -610,6 +715,12 @@ class Probe extends Matrix {
                                                         #{scope.row[item.field]}#
                                                     </div>
                                                 </template>
+                                        </el-table-column>
+                                        <el-table-column label="下发状态" width="120" prop="status">
+                                            <template slot-scope="scope">
+                                                <el-button type="success" @click="onToogleExpand(scope.row)" v-if="scope.row.status == 1">已下发 ></el-button>
+                                                <el-button type="warning" @click="onToogleExpand(scope.row)" v-else>未下发</el-button>
+                                            </template>
                                         </el-table-column>
                                         <el-table-column label="标签" prop="tags" width="200">
                                             <template slot-scope="scope">
@@ -635,10 +746,10 @@ class Probe extends Matrix {
                                         <el-table-column label="操作" width="130">
                                             <template slot-scope="scope">
                                                 <el-tooltip content="编辑脚本、下发脚本" open-delay="500" placement="top">
-                                                    <el-button type="text" icon="el-icon-download" @click="onToogleExpand(scope.row)"></el-button>
+                                                    <el-button type="text" icon="el-icon-setting" @click="onToogleExpand(scope.row)"></el-button>
                                                 </el-tooltip>
                                                 <el-tooltip content="删除脚本" open-delay="500" placement="top">
-                                                    <el-button type="text" icon="el-icon-delete" @click="onScriptDelete(scope.row,scope.$index)"></el-button>
+                                                    <el-button type="text" icon="el-icon-delete" @click="onScriptDelete(scope.row,scope.$index)" v-if="scope.row.status==0"></el-button>
                                                 </el-tooltip>
                                             </template>
                                         </el-table-column>
@@ -660,6 +771,13 @@ class Probe extends Matrix {
                             return JSON.stringify(val,null,2);
                         } catch(err){
                             return val;
+                        }
+                    },
+                    pickFiles(row){
+                        try{
+                            return _.find(row.fileObj, {version: row.selectedVersion}).files;
+                        } catch(err){
+                            return [];
                         }
                     }
                 },
@@ -698,7 +816,8 @@ class Probe extends Matrix {
                         let doLayout = ()=>{
                             if($(".el-table-column--selection",this.$el).is(':visible')){
                                 _.delay(()=>{
-                                    this.$refs.table.doLayout();
+                                    this.$refs.table.setCurrentRow(this.dt.rows[0]);
+                                    //this.$refs.table.doLayout();
                                 },1000)
                             } else {
                                 setTimeout(doLayout,50);
@@ -727,6 +846,21 @@ class Probe extends Matrix {
 
                             _.extend(self.dt, {rows: self.model.rows});
 
+                            _.forEach(self.dt.rows,(v)=>{
+                                let versions = scriptHandler.depotGet({name:v.name,version:null}).versions;
+                                
+                                let versionObj = _.map(versions,(val)=>{
+                                    return scriptHandler.depotGet({name:v.name,version:val});
+                                })
+
+                                self.$set(v,'fileObj', versionObj);
+                                self.$set(v,'versions', versions);
+                                self.$set(v,'selectedVersion',v.version);
+                            })
+
+
+                            console.log(self.dt.rows)
+
                         };
 
                         _.delay(()=>{
@@ -745,6 +879,95 @@ class Probe extends Matrix {
                     getServerList(){
                         let rtn = fsHandler.callFsJScript("/matrix/probe/getServerList.js",null).message;
                         this.$set(this.servers,'list', rtn);
+                    },
+                    pickFiles(row){
+                        
+                        try{
+                            return _.find(row.fileObj, {version: row.selectedVersion}).files;
+                        } catch(err){
+                            return [];
+                        }
+                    },
+                    // 脚本版本点击
+                    onFileVersionClick(node,row){
+                        this.$set(row, 'selectedVersion', node.version);
+                    },
+                    // 脚本版本切换
+                    onFileVersionCheckChange(row){
+                        
+                    },
+                    // 脚本编辑
+                    onFileEditor(file, row){
+                        
+                        let wnd = null;
+                        let wndId = 'jsPanel-editor';
+
+                        try{
+                            if(jsPanel.activePanels.getPanel(wndId)){
+                                jsPanel.activePanels.getPanel(wndId).close();
+                            }
+                        } catch(error){
+
+                        }
+                        finally{
+                            wnd = maxWindow.winEditor('脚本编辑', `<div id="${wndId}-editor"></div>`, null, null);
+                        }
+                        
+                        new Vue({
+                            i18n,
+                            delimiters: ['#{', '}#'],
+                            template:   `<el-container style="width:100%;height:100%;">
+                                            <el-header style="height:40px;line-height:40px;">
+                                                <el-tooltip content="刷新" delay-time="500" placement="top">
+                                                    <el-button type="text" icon="el-icon-refresh" @click="getFileContent"></el-button>
+                                                </el-tooltip>
+                                            </el-header>
+                                            <el-main style="width:100%;height:100%;">
+                                                <div style="width:100%;height:100%;" ref="editor"></div>
+                                            </el-main>
+                                        </el-container>`,
+                            data: {
+                                content: ""
+                            },
+                            created(){
+                                this.getFileContent();
+                            },
+                            mounted(){
+                                this.initEdiotr();
+                            },
+                            methods: {
+                                getFileContent(){
+                                    let param = {name:row.name, version:row.selectedVersion, path: file.path };
+                                    this.content = scriptHandler.getDepotFileContent(param);
+                                },
+                                initEdiotr(){
+                                    try{
+                                        // Editor
+                                        this.editor = ace.edit(this.$refs.editor);
+                                        this.editor.setOptions({
+                                            //maxLines: 1000,
+                                            minLines: 20,
+                                            autoScrollEditorIntoView: false,
+                                            enableBasicAutocompletion: false,
+                                            enableLiveAutocompletion: false
+                                        });
+                                        this.editor.getSession().setMode("ace/mode/sh");
+                                        this.editor.setTheme("ace/theme/chrome");
+                                        this.editor.renderer.setShowGutter(false);
+                                        this.editor.focus(); //To focus the ace editor
+                                        let row = this.editor.session.getLength() - 1;
+                                        let column = this.editor.session.getLine(row).length;
+                                        this.editor.gotoLine(row + 1, column);
+                                        
+                                        if(!_.isEmpty(this.content)){
+                                            this.editor.setValue(this.content,1);
+                                        }
+                                    } catch(err){
+                                        console.log(err)
+                                    }
+                                }
+                            }
+                        }).$mount(`#${wndId}-editor`);
                     },
                     // 获取脚本详细信息
                     onExpandChange(row,expandedRows){
@@ -788,7 +1011,7 @@ class Probe extends Matrix {
                         let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
                     },
                     // 上传文件
-                    onFileChange(file, fileList,row) {
+                    onFileChange(file, fileList, row) {
                                     
                         this.$set(row, 'uploadfile', file.raw);
 
@@ -1009,11 +1232,12 @@ class Probe extends Matrix {
 
                         new Vue({
                             delimiters: ['#{', '}#'],
+                            
                             data: {
                                 model: {
                                     item: {
                                         name: "",
-                                        version: 1,
+                                        version: '1.0.0',
                                         remark: "",
                                         uploadfile: null,
                                         tags: ['script','zabbix'],
@@ -1039,8 +1263,8 @@ class Probe extends Matrix {
                                                                 <el-button type="success" icon="el-icon-upload2" @click="onSave">上传到脚本库</el-button>    
                                                             </el-header>
                                                             <el-main style="height:100%;">
-                                                                <el-form label-position="left" label-width="120px">
-                                                                    <el-form-item label-width="0px" style="border:1px dashed #dddddd;padding:10px;">
+                                                                <el-form label-position="left" label-width="120px" ref="form">
+                                                                    <el-form-item label-width="0px" style="border:1px dashed #dddddd;padding:10px;" prop="file">
                                                                         <el-upload
                                                                             :on-change="onFileChange"
                                                                             :before-remove="beforeRemove"
@@ -1052,19 +1276,19 @@ class Probe extends Matrix {
                                                                             <div slot="tip" class="el-upload__tip">支持上传单个脚本文件、支持zip格式脚本压缩包</div>
                                                                             </el-upload>
                                                                     </el-form-item>
-                                                                    <el-form-item label="脚本库名称">
+                                                                    <el-form-item label="脚本库名称" prop="name">
                                                                         <el-input v-model="model.item.name" required="required" ></el-input>
                                                                     </el-form-item>
-                                                                    <el-form-item label="脚本版本">
-                                                                        <el-input-number v-model="model.item.version" required="required" :precision="1" :step="0.1"></el-input-number>
+                                                                    <el-form-item label="脚本版本" prop="version">
+                                                                        <el-input v-model="model.item.version" required="required"></el-input>
                                                                     </el-form-item>
-                                                                    <!--el-form-item label="执行命令">
+                                                                    <!--el-form-item label="执行命令" prop="command">
                                                                         <el-input v-model="model.item.command"></el-input>
                                                                     </el-form-item-->
-                                                                    <el-form-item label="脚本说明">
+                                                                    <el-form-item label="脚本说明" prop="remark">
                                                                         <el-input type="textarea" :row="6" v-model="model.item.remark"></el-input>
                                                                     </el-form-item>
-                                                                    <el-form-item label="添加标签">
+                                                                    <el-form-item label="添加标签" prop="tags">
                                                                         <el-select
                                                                             v-model="model.item.tags"
                                                                             multiple
@@ -1126,6 +1350,25 @@ class Probe extends Matrix {
                                         return false;
                                     }
 
+                                    if(_.isEmpty(this.model.item.version)){
+                                        
+                                        this.$message({
+                                            type: "warning",
+                                            message: "脚本库版本不能为空！"
+                                        })
+            
+                                        return false;
+                                    } else {
+                                        let flag = /^\d{1,2}\.\d{1,2}\.\d{1,2}$/.test(this.model.item.version);
+                                        if( !flag ){
+                                            this.$message({
+                                                type: "warning",
+                                                message: "请确认脚本库版本号格式，示例：1.0.0"
+                                            }) 
+                                            return false;
+                                        }
+                                    }
+
                                     let rtn = scriptHandler.depotAdd(this.model.item);
 
                                     if(rtn == 1){
@@ -1168,7 +1411,8 @@ class Probe extends Matrix {
                     // 脚本更新
                     onScriptUpdate(row){
 
-                        console.log(11,row)
+                        console.log(row.uploadfile)
+
                         if(_.isEmpty(row.uploadfile)){
                             
                             this.$message({

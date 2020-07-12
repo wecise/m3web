@@ -13,18 +13,35 @@
 class VueHub {
 
     constructor() {
-
+        
     }
 
     // 全局 Event Hub For Vue
     hub() {
         return new Vue();
     }
+
+    // 通过选项创建 VueI18n 实例
+    lang() {
+        
+        try{
+            return new VueI18n({
+                        locale: window.MATRIX_LANG,
+                        messages: fsHandler.callFsJScript("/matrix/lang/getLangList.js",null).message
+                    });
+        } catch(err){
+            return null;
+        }
+
+    }
+    
 }
 
 let vue = new VueHub();
 
 let eventHub = vue.hub();
+
+let i18n = vue.lang();
 
 // Element UI Setup
 Vue.prototype.$ELEMENT = { size: 'small', zIndex: 3000};
