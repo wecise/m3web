@@ -59,6 +59,12 @@
 			width: 120px;
 		}
 
+		.has-sidebar.has-time.el-picker-panel.el-date-range-picker.el-popper{
+			position: absolute;
+			top:0px!important;
+			left:0px!important;
+		}
+
 	</style>
 
 	
@@ -89,14 +95,11 @@
 			</el-select>
 
 			<el-popover
-				placement="bottom-end"
+				placement="top-end"
 				trigger="click"
 				popper-class="info-popper"
-				:popper-options="{
-					boundariesElement:'viewport',
-					boundariesPadding: 5,
-					preventOverflowOrder: ['left', 'right', 'top', 'bottom']
-				}"
+				:popper-options="{ boundariesElement: 'body' }"
+				:inline="true"
 				@show="onShowDatePicker">
 				<div class="block">
 					<el-date-picker
@@ -114,7 +117,7 @@
 				<el-button slot="reference" icon="el-icon-timer" style="height:42px;margin-left:-1px;width:100%;"></el-button>
 			</el-popover> 
 			<!--搜索框-->
-			<el-autocomplete class="inline-input" :placeholder="$t('search.placeholder')" 
+			<el-autocomplete class="inline-input" :placeholder="placeholder" 
 							v-model="options.term" 
 							:fetch-suggestions="onFetchSuggestions"
 							:trigger-on-focus="false"
@@ -148,6 +151,7 @@
 	            view: {
 					list: []
 				},
+				placeholder: "",
 				suggestions: [],
 				timePicker:{
 					range: [],
@@ -205,7 +209,19 @@
 					]}
 				}
 	        }
-	    },
+		},
+		watch: {
+			'timePicker.range':{
+				handler(val,oldVal){
+					if(_.isEmpty(val)){
+						this.placeholder = this.$t('search.placeholder');
+					} else {
+						this.placeholder = "window " + this.timePicker.range.join(" to ");
+					}
+				},
+				immediate:true
+			}
+		},
 	    created(){
 			
 			// 视图列表初始化

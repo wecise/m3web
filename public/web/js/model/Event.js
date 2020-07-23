@@ -37,11 +37,14 @@ class Event {
                             "search-log-component",
                             "form-component",
                             "form-card-component",
-                            "md-editor-component"],function() {
+                            "md-editor-component",
+                            "mx-tag",
+                            "mx-tag-tree"],function() {
             $(function() {
 
                 // EventList Table组件
                 Vue.component("event-eventlist-component",{
+                    i18n,
                     delimiters: ['#{', '}#'],
                     props: {
                         model: Object
@@ -78,18 +81,18 @@ class Event {
                             immediate:true
                         }
                     },
-                    template:   `<el-container class="animated fadeIn" style="height:calc(100vh - 145px);">
+                    template:   `<el-container class="animated fadeInLeft" style="height:calc(100vh - 145px);">
                                     <el-header style="height:30px;line-height:30px;">
-                                        <el-tooltip content="运行模式切换" open-delay="500" placement="top">
+                                        <el-tooltip :content="$t('event.actions.runningMode')" open-delay="500" placement="top">
                                             <el-button type="text" @click="onToggle" icon="el-icon-notebook-2"></el-button>
                                         </el-tooltip>
-                                        <el-tooltip content="刷新" open-delay="500" placement="top">
+                                        <el-tooltip :content="$t('event.actions.refresh')" open-delay="500" placement="top">
                                             <el-button type="text" @click="$root.$refs.searchRef.search" icon="el-icon-refresh"></el-button>
                                         </el-tooltip>
                                         <el-tooltip :content="mx.global.register.event.status[item][1]" open-delay="500" placement="top" v-for="item in model.actions" v-if="!_.isEmpty(model.actions)">
                                             <el-button type="text" @click="onAction(item)" :icon="mx.global.register.event.status[item][2]"></el-button>
                                         </el-tooltip>
-                                        <el-tooltip content="导出" delay-time="500">
+                                        <el-tooltip :content="$t('event.actions.export')" placement="top" delay-time="500">
                                             <el-dropdown @command="onExport" style="margin-left:5px;">
                                                 <span class="el-dropdown-link">
                                                     <i class="el-icon-download el-icon--right"></i>
@@ -104,16 +107,16 @@ class Event {
                                                 </el-dropdown-menu>
                                             </el-dropdown>
                                         </el-tooltip>
-                                        <el-tooltip :content="$root.control.viewType" placement="top" open-delay="500">
+                                        <el-tooltip :content="$t('event.actions.runningMode')" placement="top" open-delay="500">
                                             <el-dropdown @command="$root.toggleView" style="margin-left:5px;">
                                                 <span class="el-dropdown-link">
                                                     <el-button type="text" icon="el-icon-s-platform"></el-button>
                                                 </span>
                                                 <el-dropdown-menu slot="dropdown">
-                                                    <el-dropdown-item command="m">监控模式</el-dropdown-item>
-                                                    <el-dropdown-item command="o">运维模式</el-dropdown-item>
-                                                    <el-dropdown-item command="f">全屏模式</el-dropdown-item>
-                                                    <el-dropdown-item command="e">退出全屏</el-dropdown-item>
+                                                    <el-dropdown-item command="m">#{ $t('event.actions.monitorModel') }#</el-dropdown-item>
+                                                    <el-dropdown-item command="o">#{ $t('event.actions.operationModel') }#</el-dropdown-item>
+                                                    <el-dropdown-item command="f" divided>#{ $t('event.actions.fullscreenModel') }#</el-dropdown-item>
+                                                    <el-dropdown-item command="e">#{ $t('event.actions.exitFullscreenModel') }#</el-dropdown-item>
                                                 </el-dropdown-menu>
                                             </el-dropdown>
                                         </el-tooltip>
@@ -156,6 +159,11 @@ class Event {
                                                 v-for="item in dt.columns"
                                                 :width="item.width"
                                                 v-if="item.visible">
+                                            </el-table-column>
+                                            <el-table-column label="标签" prop="tags" width="200">
+                                                <template slot-scope="scope">
+                                                    <mx-tag domain='event' :model.sync="scope.row.tags" :id="scope.row.id" limit="1"></mx-tag>
+                                                </template>
                                             </el-table-column>
                                         </el-table>
                                     </el-main>
@@ -327,7 +335,16 @@ class Event {
                 
                                         let $this = this;
                                         _.delay(()=>{
-                                            new Vue(mx.tagInput(`${column.id}_single_tags`, `.${column.id} input`, row, self.$root.$refs.searchRef.search));
+                                            //new Vue(mx.tagInput(`${column.id}_single_tags`, `.${column.id} input`, row, self.$root.$refs.searchRef.search));
+                                            new Vue({
+                                                computed: {
+                                                    model(){
+                                                        return row;
+                                                    }
+                                                },
+                                                template: `<mx-tag domain='event' :model.sync="model.tags" :id="model.id" limit="6"></mx-tag>`
+
+                                            }).$mount(`.${column.id} input`);
                                         },50)
                                     }
                                 }
@@ -539,6 +556,11 @@ class Event {
                                                             #{scope.row[item.field]}#
                                                         </div>
                                                     </template>
+                                            </el-table-column>
+                                            <el-table-column label="标签" prop="tags" width="200">
+                                                <template slot-scope="scope">
+                                                    <mx-tag domain='event' :model.sync="scope.row.tags" :id="scope.row.id" limit="1"></mx-tag>
+                                                </template>
                                             </el-table-column>
                                         </el-table>
                                     </el-main>
@@ -1253,15 +1275,18 @@ class Event {
                     },
                     data(){
                         return {
-                            id: objectHash.sha1(_.now()),
-                            rId: _.now(),
                             topological: null
                         }
                     },
-                    template:`<div :id="'topological-app-' + id + '-' + rId"></div>`,
+                    computed:{
+                        id:function(){
+                            return 'topological-app-' + objectHash.sha1([_.map(this.model.rows,'id'),_.now()].join(","));
+                        }
+                    },
+                    template: `<div :id="id"></div>`,
                     watch: {
                         model:{
-                            handler: function(val,oldVal){
+                            handler(val,oldVal){
                                 this.initData();
                             },
                             deep:true,
@@ -1278,7 +1303,6 @@ class Event {
                             try {
                                 
                                 // 所有实体
-                                //let actions = _.map(this.model.rows,'entity').join('","');
                                 let actionsArr = [];
                                 let actions = "";
                                 _.forEach(this.model.rows,(v)=>{ 
@@ -1297,7 +1321,9 @@ class Event {
                                     this.topological.init();
                                     
                                     this.topological.graphScript = [matchObj];
-                                    this.topological.mount(`#topological-app-${this.id}-${this.rId}`);
+                                    _.delay(()=>{
+                                        this.topological.mount(`#${this.id}`);
+                                    },50)
 
                                 } else {
                                     this.topological.graphScript = [matchObj];
@@ -1845,12 +1871,16 @@ class Event {
                 Vue.component("event-diagnosis-topological",{
                     delimiters: ['#{', '}#'],
                     props: {
-                        id: String,
                         model: Object
+                    },
+                    computed: {
+                        id: function(){
+                            return 'topological-app-' + objectHash.sha1([_.map(this.model.rows,'id'),_.now()].join(","));
+                        }
                     },
                     template:  `<el-container :style="$root.control.viewType | heightByMode">
                                     <el-main style="padding:0px;">
-                                        <div :id="'topological-app-'+id"></div>
+                                        <div :id="id"></div>
                                     </el-main>
                                 </el-container>`,
                     filters: {
@@ -1872,7 +1902,7 @@ class Event {
                             mxTopo.graphScript = _.map(this.model.rows,(v)=>{
                                 return {value: `match () - [*1] -> ("${v.entity}") union ("${v.entity}") - [*1] -> ()`};
                             });
-                            mxTopo.mount(`#topological-app-${this.id}`);
+                            mxTopo.mount(`#${this.id}`);
                         }
                     }
                 })
@@ -2435,6 +2465,7 @@ class Event {
                 })
                 
                 let main = {
+                    i18n,
                     delimiters: ['#{', '}#'],
                     template:   `<main id="content" class="content">
                                     <el-container>
@@ -2492,7 +2523,7 @@ class Event {
                                                                     <el-dropdown>
                                                                         <span class="el-dropdown-link">
                                                                             <div>
-                                                                                #{control.ifRefresh==1?'自动刷新':'自动刷新'}#
+                                                                                #{ control.ifRefresh==1 ? $t('event.actions.autoRefresh') : $t('event.actions.autoRefreshClosed') }#
                                                                                 <el-switch
                                                                                     v-model="control.ifRefresh"
                                                                                     active-color="#13ce66"
@@ -2513,7 +2544,7 @@ class Event {
                                                             </div>
                                                             <el-container id="event-view-console">
                                                                 <el-aside class="tree-view" style="background-color:#f6f6f6;" ref="leftView">
-                                                                    <entity-tree-component id="event-tree" :model="{parent:'/event',name:'event_tree_data.js',domain:'event'}" ref="tagTree"></entity-tree-component>
+                                                                    <mx-tag-tree :model="{parent:'/event',name:'event_tree_data.js',domain:'event'}" :fun="onRefreshByTag" ref="tagTree"></mx-tag-tree>
                                                                 </el-aside>
                                                                 <el-main class="table-view" style="padding:5px;" ref="mainView">
                                                                     <event-view-facet :model="model.message" v-show="control.ifSmart!=0" style="margin-top:30px;"></event-view-facet>
@@ -2542,7 +2573,7 @@ class Event {
                                                                         <event-diagnosis-probability :id="it.name + '-probability'" :model="it.model.probability"></event-diagnosis-probability>
                                                                     </div>
                                                                     <div v-else-if="it.type==='topological'">
-                                                                        <event-diagnosis-topological :id="it.name + '-topological'" :model="it.model.event"></event-diagnosis-topological>
+                                                                        <event-diagnosis-topological :model="it.model.event"></event-diagnosis-topological>
                                                                     </div>
                                                                     <div v-else-if="it.type==='script'">
                                                                         <event-diagnosis-script :model="it.model.script"></event-diagnosis-script>
@@ -2765,6 +2796,10 @@ class Event {
                             } else {
                                 setTimeout(this.hideTabEventViewConsoleUl, 50);
                             }   
+                        },
+                        onRefreshByTag(tag){
+                            this.options.term = tag;
+                            this.$refs.searchRef.search();
                         },
                         // 切换运行模式
                         toggleModel(event){

@@ -503,12 +503,7 @@
                                                 <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">创建：#{moment(item.vtime).format("YYYY-MM-DD hh:mm:ss")}#</p>
                                                 <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">
                                                     标签：
-                                                    <el-tag
-                                                        :key="tag"
-                                                        v-for="tag in ['item.tags']"
-                                                        closable>
-                                                        #{tag}#
-                                                    </el-tag>
+                                                    <mx-tag domain='files' :model.sync="item.tags" :id="item.id" limit="1"></mx-tag>
                                                 </p>
                                                 <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">描述：#{item|pickRemark}#</p>
                                             </div>
@@ -589,38 +584,6 @@
                         this.init();
                     },
                     methods: {
-                        init(){
-                            const me = this;
-    
-                            // init Tagify script on the above inputs
-                            $('input[name=tags]').tagify()
-                                      .on('add', me.onAddTag)
-                                      .on('remove', me.onRemoveTag);
-                        },
-                        onAddTag(event,tagName){
-                            const me = this;
-    
-                            let item = $(event.currentTarget).parent().parent().data("info");
-    
-                            let input = {class: item.class, action: "+", tag: tagName.value, id: item.id};
-                            let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
-    
-                            if(rtn.status == 'ok'){
-                                me.$parent.init();
-                            }
-    
-                        },
-                        onRemoveTag(event,tagName){
-                            const me = this;
-                            let item = $(event.currentTarget).parent().parent().data("info");
-                            let input = {class: item.class, action: "-", tag: tagName.value, id: item.id};
-                            let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
-    
-                            if(rtn.status == 'ok'){
-                                me.$parent.init();
-                            }
-    
-                        },
                         onTriggerClick(item){
                             this.$refs['checkBox_'+item.id][0].$el.click();
                         }
@@ -665,24 +628,7 @@
                                                     <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">创建：#{moment(item.vtime).format("YYYY-MM-DD hh:mm:ss")}#</p>
                                                     <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">描述：#{item|pickRemark}#</p>
                                                     <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">
-                                                        <el-select
-                                                            v-model="item.tags"
-                                                            multiple
-                                                            filterable
-                                                            allow-create
-                                                            default-first-option
-                                                            class="el-select-tags"
-                                                            placeholder="标签"
-                                                            @change="onChange"
-                                                            @remove-tag="onRemoveTag"
-                                                            @mouseover.native="currentItem = item">
-                                                            <el-option
-                                                                v-for="tag in item.tags"
-                                                                :key="tag"
-                                                                :label="tag"
-                                                                :value="tag">
-                                                            </el-option>
-                                                        </el-select>
+                                                        <mx-tag domain='files' :model.sync="item.tags" :id="item.id" limit="1"></mx-tag>
                                                     </p>
                                                 </div>
                                                 <el-checkbox :label="item.id" :ref="'checkBox_'+item.id"></el-checkbox>
@@ -691,7 +637,7 @@
                                 </div>`,
                     data(){
                         return {
-                            currentItem: null
+                            
                         }
                     },
                     filters: {
@@ -747,14 +693,6 @@
                         
                     },
                     methods: {
-                        onChange(val){
-                            let input = {action: "+", tags: val, ids: [this.currentItem.id]};
-                            let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
-                        },
-                        onRemoveTag(val){
-                            let input = {action: "-", tags: [val], ids: [this.currentItem.id]};
-                            let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
-                        },
                         onTriggerClick(item){
                             this.$refs['checkBox_'+item.id][0].$el.click();
                         }
@@ -2250,10 +2188,16 @@
     
                     let file = event.target.files[0];
                     
-                    this.$confirm(`确认要导入 ${file.name} 文件，导入后将覆盖原有文件，请确认！<br><br>
-                                        文件名称：${file.name}<br><br>
-                                        修改时间：${file.lastModifiedDate}<br><br>
-                                        文件大小：${mx.bytesToSize(file.size)}`, '提示', {
+                    const h = this.$createElement;
+                    this.$msgbox({
+                            title: `导入文件确认`, 
+                            message: h('span', null, [
+                                h('h4', null, `提示：导入后将覆盖原有文件，请确认！`),
+                                h('p', null, `文件名称：${file.name}`),
+                                h('p', null, `修改时间：${file.lastModifiedDate}`),
+                                h('p', null, `文件大小：${mx.bytesToSize(file.size)}`)
+                            ]),
+                            showCancelButton: true,
                             confirmButtonText: '确定',
                             cancelButtonText: '取消',
                             type: 'warning'

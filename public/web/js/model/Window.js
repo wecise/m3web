@@ -289,6 +289,67 @@ class Window {
         return win;
     }
 
+    winEditorMini(title, template, position, container){
+
+        let id = `jsPanel-editor-mini`;
+
+        this.lrwh[2] = this.width * 0.6;
+        this.lrwh[3] = this.height * 0.55;
+
+        let win = $.jsPanel({
+            id: id,
+            theme:          maxWindow.theme.dark,
+            headerTitle:   `<img src="${window.COMPANY_FAVICON}" style="width:12px;"></img> ${title}`,
+            contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
+            position: "center 0 0",
+            container: 'body',
+            headerControls: { controls: '' },
+            headerRemove:  false,
+            content:        template,
+            onresized: function(){
+                eventHub.$emit("WINDOW-STATUS-CHANGE-EVENT");
+            },
+            draggable: {
+                handle:  "div.jsPanel-hdr, div.jsPanel-ftr,header.jsPanel-control,.el-header,.el-footer",
+                opacity: 0.8
+            },
+            callback:       function(){
+                $(".jsPanel").css({
+                    "position":"absoulate!important",
+                    "z-index": "2000"
+                });
+                $(".jsPanel-headerbar",this).css({
+                    "min-height": "28px",
+                    "border-bottom": "none"
+                });
+                $(".jsPanel-content",this).css({
+                    "border-top": "none",
+                    "overflow":"hidden"
+                });
+
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3",this).css({
+                    "font-size": "12px"
+                });
+                $(".jsPanel .jsPanel-ftr",this).css({
+                    "border-top": "unset"
+                });
+                
+
+            },
+            onclosed: function(){
+                window.editorApp = null;
+            },
+            /* footerToolbar: function (footer) {
+                return `<div style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format(mx.global.register.format)}</div>`;
+            } */
+        });
+
+        return win;
+    }
+
     winApp(title, template, position, container){
 
         this.lrwh[2] = this.width * 0.55;

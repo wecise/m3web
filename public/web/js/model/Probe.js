@@ -60,8 +60,10 @@ class Probe extends Matrix {
 
         // 组件实例化
         VueLoader.onloaded(["ai-robot-component",
-            "entity-tree-component",
+            "mx-tag",
+            "mx-tag-tree",
             "probe-card-component"], function () {
+            
             
             // 探针管理
             Vue.component("probe-manage",{
@@ -126,22 +128,27 @@ class Probe extends Matrix {
                                         <el-table-column type="expand" width="0">
                                             <template slot-scope="scope">
                                                 <el-container style="width:90%;height:100%;min-height:40vh;background: #f2f3f5;">
-                                                    <el-main style="height:100%;padding:0px;">
-                                                        <el-tabs tab-position="left" @tab-click="((tab,event)=>{ onTabClick(tab,event,props.row)})">
-                                                            <el-tab-pane :name="key" v-for="(val,key) in scope.row.depot">
-                                                                <span slot="label"><i class="el-icon-tickets"></i> #{ key }#</span>
-                                                                <el-button type="default" style="padding:10px;" v-for="item in JSON.parse(val)" style="box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);">
-                                                                    <i class="el-icon-document" style="font-size:48px;"></i>
-                                                                    <span style="text-align:left;">
-                                                                        <p>版本：#{item.version}#</p>
-                                                                        <p>时间：#{item.modtime}#</p>
-                                                                        <p>目录：#{item.path}#</p>
-                                                                        <p>用户：#{item.user}#</p>
-                                                                        <p>命令：#{item.command}#</p>
-                                                                    </span>
-                                                                </el-button>
-                                                            </el-tab-pane>
-                                                        </el-tabs>
+                                                    <el-main style="height:100%;">
+                                                        <el-button type="default" v-for="(item,key) in scope.row.depots" style="position:relative;box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);max-width: 12em;width: 12em;height:110px;margin:5px;">
+                                                            <i class="el-icon-document" style="font-size:48px;color:#f8a502;"></i>
+                                                            <span style="text-align:center;">
+                                                                <p>#{item.name}#</p>
+                                                            </span>
+                                                            <el-dropdown style="position:absolute;right:5px;top:5px;">
+                                                                <span class="el-dropdown-link">
+                                                                    <i class="el-icon-arrow-down el-icon--right"></i>
+                                                                </span>
+                                                                <el-dropdown-menu slot="dropdown">
+                                                                    <el-dropdown-item>
+                                                                        <span style="text-align:left;">
+                                                                            <p>脚本库名称：#{item.name}#</p>
+                                                                            <p>下发版本：#{item.version}#</p>
+                                                                            <p>备注：#{item.remark}#</p>
+                                                                        </span>
+                                                                    </el-dropdown-item>
+                                                                </el-dropdown-menu>
+                                                            </el-dropdown>
+                                                        </el-button>
                                                     </el-main>
                                                 </el-container>
                                             </template>
@@ -164,25 +171,9 @@ class Probe extends Matrix {
                                                     </div>
                                                 </template>
                                         </el-table-column>
-                                        <el-table-column label="标签" prop="tags">
+                                        <el-table-column label="标签" prop="tags" width="200">
                                             <template slot-scope="scope">
-                                                <el-select
-                                                    v-model="scope.row.tags"
-                                                    multiple
-                                                    filterable
-                                                    allow-create
-                                                    default-first-option
-                                                    class="el-select-tags"
-                                                    placeholder="标签"
-                                                    @change="onTagChange($event,scope.row)"
-                                                    @remove-tag="onTagRemove($event,scope.row)">
-                                                    <el-option
-                                                        v-for="tag in scope.row.tags"
-                                                        :key="tag"
-                                                        :label="tag"
-                                                        :value="tag">
-                                                    </el-option>
-                                                </el-select>
+                                                <mx-tag domain='probe' :model.sync="scope.row.tags" :id="scope.row.id" limit="1"></mx-tag>
                                             </template>
                                         </el-table-column>
                                         <el-table-column label="Toe探针" width="120">
@@ -241,7 +232,7 @@ class Probe extends Matrix {
                             this.info = [];
                             this.info.push(`共 ${this.dt.rows.length} 项`);
                             this.info.push(`已选择 ${this.dt.selected.length} 项`);
-                            this.info.push(moment().format("YYYY-MM-DD HH:MM:SS.SSS"));
+                            this.info.push(moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
                         },
                         deep:true,
                         immediate:true
@@ -255,8 +246,8 @@ class Probe extends Matrix {
                         let doLayout = ()=>{
                             if($(".el-table-column--selection",this.$el).is(':visible')){
                                 _.delay(()=>{
-                                    this.$refs.table.setCurrentRow(this.dt.rows[0]);
-                                    //this.$refs.table.doLayout();
+                                    //this.$refs.table.setCurrentRow(this.dt.rows[0]);
+                                    this.$refs.table.doLayout();
                                 },1000)
                             } else {
                                 setTimeout(doLayout,50);
@@ -299,14 +290,6 @@ class Probe extends Matrix {
                             //return 'text-align:center;';
                         }
                     },
-                    onTagChange(val,row){
-                        let input = {action: "+", tags: val, ids: [row.id]};
-                        let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
-                    },
-                    onTagRemove(val,row){
-                        let input = {action: "-", tags: [val], ids: [row.id]};
-                        let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
-                    },
                     onSelectionChange(val) {
                         this.dt.selected = [val];
                     },
@@ -320,22 +303,21 @@ class Probe extends Matrix {
                         
                     },
                     onToogleExpand(row,index){
+                        
                         this.$refs.table.toggleRowExpansion(row);
 
-                        // 根据该服务器部署的depot名称列表
-                        let depotNames = _.keys(row.depot);
                         // 根据depot名称列表，获取脚本信息
                         let depots = {};
-                        _.forEach(depotNames,(v)=>{
-                            let versions = scriptHandler.depotGet({name:v,version:null}).versions;
+                        _.forEach(row.depot,(v,k)=>{
+                            let value = JSON.parse(v);
+                            let versions = _.map(value,'version');
                             let scriptObj = _.map(versions,(val)=>{
-                                return scriptHandler.depotGet({name:v,version:val});
+                                return scriptHandler.depotGet({name:k,version:val});
                             })
-                            _.extend(depots, {[v]:scriptObj});
+                            _.extend(depots, {[k]:scriptObj[0]});
                         })
-                    },
-                    onTabClick(tab,event,row){
-                        // 根据depot获取所有版本的脚本信息
+
+                        this.$set(row, 'depots', depots);
 
                     },
                     onExport(type){
@@ -482,6 +464,10 @@ class Probe extends Matrix {
                             props: {
                                 label: 'version',
                                 children: ''
+                            },
+                            compareArr:[],
+                            dialog: {
+                                fileUpdate: false
                             }
                         },
                         info: []
@@ -524,137 +510,149 @@ class Probe extends Matrix {
                                         style="width: 100%"
                                         :row-class-name="rowClassName"
                                         :header-cell-style="headerRender"
-                                        @row-dblclick="onRowDblclick"
+                                        @row-click="onRowClick"
                                         @row-contextmenu="onRowContextmenu"
                                         @selection-change="onSelectionChange"
                                         @current-change="onCurrentChange"
-                                        @expand-change="onExpandChange"
                                         ref="table"
                                         v-if="!_.isEmpty(dt.rows)">
                                         <el-table-column type="selection" align="center"></el-table-column> 
                                         <el-table-column type="expand" width="0" >
                                             <template slot-scope="props">
-                                                <el-container style="width:90%;height:100%;background: #f2f3f5;">
-                                                    <el-aside style="width:250px;">
-                                                        <el-container>
+                                                <el-container style="width:90%;height:100%;min-height:40vh;background: #ffffff;">
+                                                    <el-aside style="width:250px;background: #f2f3f5;">
+                                                        <el-container style="height:100%;">
                                                             <el-header style="height:40px;line-height:40px;">
                                                                 <h4 style="margin:0px;">版本历史</h4>
                                                             </el-header>
-                                                            <el-main style="padding:0px;">
+                                                            <el-main style="padding:0px;height:100%;overflow:hidden;">
                                                                 <el-tree
-                                                                    :data="props.row.fileObj"
+                                                                    highlight-current="true"
+                                                                    :data="props.row.versionObj"
                                                                     :props="versionTree.props"
-                                                                    show-checkbox
                                                                     node-key="version"
                                                                     accordion
-                                                                    :default-checked-keys="[props.row.selectedVersion]"
+                                                                    show-checkbox
                                                                     @node-click="((node)=>{ onFileVersionClick(node,props.row)})"
-                                                                    @check-change="onFileVersionCheckChange">
+                                                                    @check-change="onFileVersionCheckChange"
+                                                                    style="background:transparent;height:100%;"
+                                                                    ref="tree">
+                                                                    <span slot-scope="{ node, data }" style="width:100%;height:30px;line-height: 30px;"  @mouseenter="onFileTreeMouseEnter(data)" @mouseleave="onFileTreeMouseLeave(data)">
+                                                                        <span>
+                                                                            <i class="el-icon-folder" style="color:#FFC107;"></i>
+                                                                            <span>#{node.label}#</span>
+                                                                            <span v-if="data.ifDeployed" class="el-icon-download" style="float:right;padding:10px;">已下发</span>
+                                                                        </span>
+                                                                    </span>  
                                                                 </el-tree>
                                                             </el-main>
+                                                            <el-footer style="height:40px;line-height:40px;" v-if="versionTree.compareArr.length == 2">
+                                                                <el-button type="text" icon="el-icon-money" @click="onFileVersionCompare">版本比对</el-button>
+                                                            </el-footer>
                                                         <el-container>
                                                     </el-aside>
                                                     <el-container style="height:100%;">
-                                                        <el-header style="height:40px;line-height:40px;">
-                                                            <h4 style="margin:0px;">选择版本：#{ props.row.selectedVersion }#</h4>
-                                                        </el-header>
                                                         <el-main style="height:100%;padding:0px;">
                                                             <el-tabs v-model="props.row.activeTab" tab-position="top" @tab-click="((tab,event)=>{ onTabClick(tab,event,props.row)})">
+                                                                <el-tab-pane name="title" disabled>
+                                                                    <span slot="label" style="color:#333333;"><i class="el-icon-document"></i> 选择版本：#{ props.row.selectedVersion }#</span>
+                                                                </el-tab-pane>
                                                                 <el-tab-pane name="script">
-                                                                    <span slot="label"><i class="el-icon-tickets"></i> 脚本信息</span>
-                                                                    <el-form label-position="left" label-width="120px" style="background: #ffffff;padding: 10px 20px;">
-                                                                        <el-form-item style="text-align:right;" v-if="props.row.status==0">
-                                                                            <el-button icon="el-icon-position" type="success" @click="onScriptUpdate(props.row)">更新脚本库</el-button>    
-                                                                        </el-form-item>
-                                                                        <el-form-item label="脚本文件" v-if="props.row.status==0">
-                                                                            <div style="display:flex;">
-                                                                                <el-button type="default" v-for="item in pickFiles(props.row)" style="position: relative;padding:10px;margin:5px;box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);">
-                                                                                    <i class="el-icon-document" style="font-size:48px;color:#f8a502;"></i>
-                                                                                    <span style="text-align:left;">
-                                                                                        <p>文件名称：#{item.name}#</p>
-                                                                                        <p>上传时间：#{item.modtime}#</p>
-                                                                                        <p>文件大小：#{item.size | pickSize}#</p>
-                                                                                    </span>
-                                                                                    <el-dropdown style="position:absolute;right:5px;top:5px;">
-                                                                                        <span class="el-dropdown-link">
-                                                                                            <i class="el-icon-arrow-down el-icon--right"></i>
-                                                                                        </span>
-                                                                                        <el-dropdown-menu slot="dropdown">
-                                                                                            <el-dropdown-item @click.native="onFileEditor(item, props.row)">编辑</el-dropdown-item>
-                                                                                        </el-dropdown-menu>
-                                                                                    </el-dropdown>
-                                                                                </el-button>
-                                                                                <el-upload
-                                                                                    :on-change="((file, fileList)=>{ onFileChange(file, fileList, props.row)})"
-                                                                                    :limit="1"
-                                                                                    multiple="false"
-                                                                                    :auto-upload="false"
-                                                                                    style="padding:10px;box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);width:230px;margin:5px;border:1px solid #dddddd;">
-                                                                                    <div slot="tip" class="el-upload__tip">只能上传脚本文件</div>
-                                                                                    <el-button type="text">
-                                                                                        <i class="el-icon-plus" style="font-size:48px;"></i>
-                                                                                    </el-button>
-                                                                                </el-upload>
-                                                                            </div>
-                                                                        </el-form-item>
-                                                                        <el-form-item label="脚本文件" v-else>
-                                                                            <el-button type="default" v-for="item in pickFiles(props.row)" style="position: relative;padding:10px;box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);">
-                                                                                <i class="el-icon-document" style="font-size:48px;color:#f8a502;"></i>
-                                                                                <span style="text-align:left;">
-                                                                                    <p>文件名称：#{item.name}#</p>
-                                                                                    <p>上传时间：#{item.modtime}#</p>
-                                                                                    <p>文件大小：#{item.size | pickSize}#</p>
+                                                                    <span slot="label">
+                                                                        <i class="el-icon-tickets"></i> 
+                                                                        <el-dropdown>
+                                                                            <span class="el-dropdown-link">
+                                                                                脚本文件 <i class="el-icon-arrow-down el-icon--right"></i>
+                                                                            </span>
+                                                                            <el-dropdown-menu slot="dropdown">
+                                                                                <!--el-dropdown-item @click.native="versionTree.dialog.fileUpdate = true">更新脚本库</el-dropdown-item-->
+                                                                                <!--el-dropdown-item @click.native="onScriptDelete(props.row,props.$index)">删除脚本库</el-dropdown-item-->
+                                                                            </el-dropdown-menu>
+                                                                        </el-dropdown>
+                                                                    </span>
+                                                                    <el-dialog title="脚本库更新" :visible.sync="versionTree.dialog.fileUpdate">
+                                                                        <el-form>
+                                                                            <el-form-item label="脚本库版本">
+                                                                                <el-input v-model="props.row.version" autocomplete="off"></el-input>
+                                                                            </el-form-item>
+                                                                            <el-form-item label="脚本库说明" prop="remark">
+                                                                                <el-input type="textarea" :row="6" v-model="props.row.remark"></el-input>
+                                                                            </el-form-item>
+                                                                            <el-form-item label="添加标签" prop="tags">
+                                                                                <mx-tag domain='script' :model.sync="props.row.tags" :id="props.row.id" limit="1"></mx-tag>
+                                                                            </el-form-item>
+                                                                        </el-form>
+                                                                        <div slot="footer" class="dialog-footer">
+                                                                            <el-button @click="versionTree.dialog.fileUpdate = false">取 消</el-button>
+                                                                            <el-button type="primary" @click="onScriptUpdate(props.row)">更 新</el-button>
+                                                                        </div>
+                                                                    </el-dialog>
+                                                                    <div style="display:flex;" v-if="props.row.status==0">
+                                                                        <el-button type="default" v-for="item in props.row.fileObj[props.row.selectedVersion]['files']" style="position:relative;box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);max-width: 12em;width: 12em;height:110px;margin:5px;">
+                                                                            <i class="el-icon-document" style="font-size:48px;color:#f8a502;"></i>
+                                                                            <span style="text-align:center;">
+                                                                                <p>#{item.name}#</p>
+                                                                            </span>
+                                                                            <el-dropdown style="position:absolute;right:5px;top:5px;">
+                                                                                <span class="el-dropdown-link">
+                                                                                    <i class="el-icon-arrow-down el-icon--right"></i>
                                                                                 </span>
-                                                                                <el-dropdown style="position:absolute;right:5px;top:5px;">
-                                                                                    <span class="el-dropdown-link">
-                                                                                        <i class="el-icon-arrow-down el-icon--right"></i>
-                                                                                    </span>
-                                                                                    <el-dropdown-menu slot="dropdown">
-                                                                                        <el-dropdown-item @click.native="onFileEditor(item,props.row)">编辑</el-dropdown-item>
-                                                                                    </el-dropdown-menu>
-                                                                                </el-dropdown>
+                                                                                <el-dropdown-menu slot="dropdown">
+                                                                                    <el-dropdown-item @click.native="onFileEditor(item, props.row)">编辑</el-dropdown-item>
+                                                                                    <el-dropdown-item @click.native.stop="onFileDelete(item, props.row)" divided>删除</el-dropdown-item>
+                                                                                    <el-dropdown-item divided>
+                                                                                        <span style="text-align:left;">
+                                                                                            <p>文件名称：#{item.name}#</p>
+                                                                                            <p>上传时间：#{item.modtime}#</p>
+                                                                                            <p>文件大小：#{item.size | pickSize}#</p>
+                                                                                        </span>
+                                                                                    </el-dropdown-item>
+                                                                                </el-dropdown-menu>
+                                                                            </el-dropdown>
+                                                                        </el-button>
+                                                                        <el-upload
+                                                                            :on-change="((file, fileList)=>{ onFileChange(file, fileList, props.row)})"
+                                                                            :limit="1"
+                                                                            multiple="false"
+                                                                            :auto-upload="false"
+                                                                            style="position: relative;border:1px solid #dddddd;background:rgba(255,255,255,.3);max-width: 12em;width: 12em;height:110px;margin:5px;padding:10px;">
+                                                                            <div slot="tip" class="el-upload__tip">限定脚本、ZIP文件</div>
+                                                                            <el-button type="text">
+                                                                                <i class="el-icon-plus" style="font-size:48px;color:rgba(0,0,0,.2);"></i>
                                                                             </el-button>
-                                                                        </el-form-item>
-                                                                        <!--el-form-item label="脚本库名称">
-                                                                            <el-input v-model="props.row.name" required="required" disabled></el-input>
-                                                                        </el-form-item>
-                                                                        <el-form-item label="脚本版本">
-                                                                            <el-input v-model="props.row.version" required="required"></el-input>
-                                                                        </el-form-item>
-                                                                        <el-form-item label="脚本说明">
-                                                                            <el-input type="textarea" :row="6" v-model="props.row.remark"></el-input>
-                                                                        </el-form-item>
-                                                                        <el-form-item label="添加标签">
-                                                                            <el-select
-                                                                                v-model="props.row.tags"
-                                                                                multiple
-                                                                                filterable
-                                                                                allow-create
-                                                                                default-first-option
-                                                                                class="el-select-tags"
-                                                                                placeholder="标签"
-                                                                                @change="onTagChange($event,props.row)"
-                                                                                @remove-tag="onTagRemove($event,props.row)">
-                                                                                <el-option
-                                                                                    v-for="tag in props.row.tags"
-                                                                                    :key="tag"
-                                                                                    :label="tag"
-                                                                                    :value="tag">
-                                                                                </el-option>
-                                                                            </el-select>
-                                                                        </el-form-item-->
-                                                                    <el-form>
+                                                                        </el-upload>
+                                                                    </div>
+                                                                    <div v-else>
+                                                                        <el-button type="default" v-for="item in props.row.fileObj[props.row.selectedVersion]['files']" style="position:relative;box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);max-width: 12em;width: 12em;height:110px;margin:5px;"
+                                                                            @dblclick.native="onFileEditor(item,props.row)">
+                                                                            <i class="el-icon-document" style="font-size:48px;color:#f8a502;"></i>
+                                                                            <span style="text-align:center;">
+                                                                                <p>#{item.name}#</p>
+                                                                            </span>
+                                                                            <el-dropdown style="position:absolute;right:5px;top:5px;">
+                                                                                <span class="el-dropdown-link">
+                                                                                    <i class="el-icon-arrow-down el-icon--right"></i>
+                                                                                </span>
+                                                                                <el-dropdown-menu slot="dropdown">
+                                                                                    <el-dropdown-item @click.native="onFileEditor(item,props.row)">编辑</el-dropdown-item>
+                                                                                    <el-dropdown-item divided>
+                                                                                        <span style="text-align:left;">
+                                                                                            <p>文件名称：#{item.name}#</p>
+                                                                                            <p>上传时间：#{item.modtime}#</p>
+                                                                                            <p>文件大小：#{item.size | pickSize}#</p>
+                                                                                        </span>
+                                                                                    </el-dropdown-item>
+                                                                                </el-dropdown-menu>
+                                                                            </el-dropdown>
+                                                                        </el-button>
+                                                                    </div>
                                                                 </el-tab-pane>
                                                                 
                                                                 <el-tab-pane name="setup">
                                                                     <span slot="label"><i class="el-icon-setting"></i> 下发设置</span>
-                                                                    <el-form label-position="left" label-width="120px" style="background: #ffffff;padding: 10px 20px;min-height:200px;">
+                                                                    <el-form label-position="top" label-width="120px" style="background: #ffffff;padding: 10px 20px;min-height:200px;">
                                                                         <el-form-item label="执行命令">
                                                                             <pre :ref="'commandRef'+props.row.id" style="width:100%;height:200px;border:1px solid #dddddd;"></pre>
-                                                                            <!--el-input
-                                                                                placeholder="command"
-                                                                                v-model="props.row.command">
-                                                                            </el-input-->                                                  
                                                                         </el-form-item>
                                                                         <el-form-item label="Key">
                                                                             <el-input
@@ -662,30 +660,41 @@ class Probe extends Matrix {
                                                                                 v-model="props.row.zabbixKey">
                                                                             </el-input>                                                  
                                                                         </el-form-item>
-                                                                        <!--el-form-item label="Config">
-                                                                            <el-input type="textarea" rows="6"
-                                                                                placeholder="Config"
-                                                                                :value="props.row.zabbix | pickZabbixConfig">
-                                                                            </el-input>                                                  
-                                                                        </el-form-item-->
                                                                     <el-form>
                                                                 </el-tab-pane>
 
                                                                 <el-tab-pane name="servers">
                                                                     <span slot="label"><i class="el-icon-monitor"></i> 下发对象</span>
-                                                                    <el-form label-position="left" label-width="120px" style="background: #ffffff;padding: 10px 20px;">
+                                                                    <el-form label-position="top" label-width="120px" style="background: #ffffff;padding: 10px 20px;">
                                                                         <el-form-item label="选择服务器">
                                                                             <el-transfer
+                                                                                filterable
+                                                                                style="text-align: left; display: inline-block"
                                                                                 :titles="['服务器列表', '已下发服务器']"
                                                                                 :button-texts="['取消下发', '下发']"
                                                                                 :data="servers.list"
-                                                                                v-model="props.row.selected"
+                                                                                v-model="props.row.fileObj[props.row.selectedVersion]['deployedServers']"
                                                                                 :props="{
                                                                                     key: 'host',
                                                                                     label: 'host'
                                                                                 }"
                                                                                 @change="((value, direction, movedKeys)=>{ onScriptDeployOrUndeploy(value, direction, movedKeys, props.row) })">
-                                                                                <span slot-scope="{ option }">#{ option.host }# - #{ option.iszabbix | pickZabbix }#</span>
+                                                                                <div slot-scope="{ option }">
+                                                                                    #{ option.host }# 
+                                                                                    <span v-if="option.iszabbix == 1"> - #{ option.iszabbix | pickZabbix }# </span>
+                                                                                    <span v-if="option.iplist"> - #{ option.iplist.join(",") }# </span>
+                                                                                    <el-popover
+                                                                                        placement="top-start"
+                                                                                        :title="option.host"
+                                                                                        width="300"
+                                                                                        trigger="click"
+                                                                                        popper-class="dataTablePopper">
+                                                                                        <el-form>
+                                                                                            <el-form-item :label="k" v-for="v,k in option.config">#{v}#</el-form-item>
+                                                                                        </el-form>
+                                                                                        <el-button slot="reference" type="text" icon="el-icon-postcard"></el-button>
+                                                                                    </el-popover>
+                                                                                </div>
                                                                             </el-transfer>
                                                                         </el-form-item>
                                                                     <el-form>
@@ -718,37 +727,27 @@ class Probe extends Matrix {
                                         </el-table-column>
                                         <el-table-column label="下发状态" width="120" prop="status">
                                             <template slot-scope="scope">
-                                                <el-button type="success" @click="onToogleExpand(scope.row)" v-if="scope.row.status == 1">已下发 ></el-button>
-                                                <el-button type="warning" @click="onToogleExpand(scope.row)" v-else>未下发</el-button>
+                                                <el-button type="success" @click="onToogleExpand(scope.row,scope.$index)" :loading="scope.row.loading" v-if="scope.row.status == 1">已下发 
+                                                    <span class="el-icon-arrow-down" v-if="scope.row.expand"></span>
+                                                    <span class="el-icon-arrow-right" v-else></span>
+                                                </el-button>
+                                                <el-button type="warning" @click="onToogleExpand(scope.row,scope.$index)" :loading="scope.row.loading" v-else>未下发
+                                                    <span class="el-icon-arrow-down" v-if="scope.row.expand"></span>
+                                                    <span class="el-icon-arrow-right" v-else></span>
+                                                </el-button>
                                             </template>
                                         </el-table-column>
                                         <el-table-column label="标签" prop="tags" width="200">
                                             <template slot-scope="scope">
-                                                <el-select
-                                                    v-model="scope.row.tags"
-                                                    multiple
-                                                    filterable
-                                                    allow-create
-                                                    default-first-option
-                                                    class="el-select-tags"
-                                                    placeholder="标签"
-                                                    @change="onTagChange($event,scope.row)"
-                                                    @remove-tag="onTagRemove($event,scope.row)">
-                                                    <el-option
-                                                        v-for="tag in scope.row.tags"
-                                                        :key="tag"
-                                                        :label="tag"
-                                                        :value="tag">
-                                                    </el-option>
-                                                </el-select>
+                                                <mx-tag domain='script' :model.sync="scope.row.tags" :id="scope.row.id" limit="1"></mx-tag>
                                             </template>
                                         </el-table-column>
                                         <el-table-column label="操作" width="130">
                                             <template slot-scope="scope">
                                                 <el-tooltip content="编辑脚本、下发脚本" open-delay="500" placement="top">
-                                                    <el-button type="text" icon="el-icon-setting" @click="onToogleExpand(scope.row)"></el-button>
+                                                    <el-button type="text" icon="el-icon-setting" @click="onToogleExpand(scope.row,scope.$index)" :loading="scope.row.loading"></el-button>
                                                 </el-tooltip>
-                                                <el-tooltip content="删除脚本" open-delay="500" placement="top">
+                                                <el-tooltip content="删除脚本库" open-delay="500" placement="top">
                                                     <el-button type="text" icon="el-icon-delete" @click="onScriptDelete(scope.row,scope.$index)" v-if="scope.row.status==0"></el-button>
                                                 </el-tooltip>
                                             </template>
@@ -797,10 +796,15 @@ class Probe extends Matrix {
                             this.info = [];
                             this.info.push(`共 ${this.dt.rows.length} 项`);
                             this.info.push(`已选择 ${this.dt.selected.length} 项`);
-                            this.info.push(moment().format("YYYY-MM-DD HH:MM:SS.SSS"));
+                            this.info.push(moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
                         },
                         deep:true,
                         immediate:true
+                    },
+                    'versionTree.compareArr'(val,oldVal){
+                        if(_.isEmpty(val) && this.$refs.tree){
+                            this.$refs.tree.setCheckedNodes([]);
+                        }
                     }
                 },
                 created(){
@@ -816,8 +820,8 @@ class Probe extends Matrix {
                         let doLayout = ()=>{
                             if($(".el-table-column--selection",this.$el).is(':visible')){
                                 _.delay(()=>{
-                                    this.$refs.table.setCurrentRow(this.dt.rows[0]);
-                                    //this.$refs.table.doLayout();
+                                    //this.$refs.table.setCurrentRow(this.dt.rows[0]);
+                                    this.$refs.table.doLayout();
                                 },1000)
                             } else {
                                 setTimeout(doLayout,50);
@@ -847,19 +851,8 @@ class Probe extends Matrix {
                             _.extend(self.dt, {rows: self.model.rows});
 
                             _.forEach(self.dt.rows,(v)=>{
-                                let versions = scriptHandler.depotGet({name:v.name,version:null}).versions;
-                                
-                                let versionObj = _.map(versions,(val)=>{
-                                    return scriptHandler.depotGet({name:v.name,version:val});
-                                })
-
-                                self.$set(v,'fileObj', versionObj);
-                                self.$set(v,'versions', versions);
-                                self.$set(v,'selectedVersion',v.version);
+                                self.$set(v, 'expand', false);
                             })
-
-
-                            console.log(self.dt.rows)
 
                         };
 
@@ -888,21 +881,45 @@ class Probe extends Matrix {
                             return [];
                         }
                     },
+                    // 脚本过滤 根据标签名
+                    onFilterBytag(tag){
+                        this.dt.rows = _.map(this.model.rows,(v)=>{
+                            return _.includes(v.tags,tag);
+                        })
+                    },
+                    // 脚本版本树
+                    onFileTreeMouseEnter(item){
+                        this.$set(item, 'show', true)
+                    },
+                    // 脚本版本树
+                    onFileTreeMouseLeave(item){
+                        this.$set(item, 'show', false)
+                    },
                     // 脚本版本点击
                     onFileVersionClick(node,row){
                         this.$set(row, 'selectedVersion', node.version);
                     },
-                    // 脚本版本切换
-                    onFileVersionCheckChange(row){
+                    // 脚本版本队列
+                    onFileVersionCheckChange(data, checked, indeterminate){
+                        
+                        this.versionTree.compareArr = this.$refs.tree.getCheckedNodes();
+                        
+                        if(this.versionTree.compareArr.length > 2){
+                            this.versionTree.compareArr = this.versionTree.compareArr.slice(1);
+                        }
+
+                        this.$refs.tree.setCheckedNodes(this.versionTree.compareArr);
+
                         
                     },
-                    // 脚本编辑
-                    onFileEditor(file, row){
-                        
-                        let wnd = null;
-                        let wndId = 'jsPanel-editor';
+                    // 脚本版本对比
+                    onFileVersionCompare(){
+                        const self = this;
 
-                        try{
+                        let wnd = null;
+                        let wndId = 'jsPanel-editor-mini';
+
+                        try {
                             if(jsPanel.activePanels.getPanel(wndId)){
                                 jsPanel.activePanels.getPanel(wndId).close();
                             }
@@ -910,35 +927,62 @@ class Probe extends Matrix {
 
                         }
                         finally{
-                            wnd = maxWindow.winEditor('脚本编辑', `<div id="${wndId}-editor"></div>`, null, null);
+                            wnd = maxWindow.winEditorMini('版本比对', `<div id="${wndId}-compare"></div>`, null, null);
+
+                            $(document).on('jspanelstatuschange', (event, id)=> {
+                                if( id === "jsPanel-editor-mini" ) {
+                                    var status = $('#' + id).data('status') || 'closed';
+                                    if(status == 'closed'){
+                                        this.versionTree.compareArr = [];
+                                    }
+                                }
+                            });
                         }
                         
                         new Vue({
                             i18n,
                             delimiters: ['#{', '}#'],
                             template:   `<el-container style="width:100%;height:100%;">
-                                            <el-header style="height:40px;line-height:40px;">
-                                                <el-tooltip content="刷新" delay-time="500" placement="top">
-                                                    <el-button type="text" icon="el-icon-refresh" @click="getFileContent"></el-button>
-                                                </el-tooltip>
-                                            </el-header>
-                                            <el-main style="width:100%;height:100%;">
-                                                <div style="width:100%;height:100%;" ref="editor"></div>
-                                            </el-main>
+                                            <el-container>
+                                                <el-main>
+                                                    <el-header style="height:40px;line-height:40px;">
+                                                        <el-tooltip content="刷新" delay-time="500" placement="top">
+                                                            <el-button type="text" icon="el-icon-refresh" @click="depotCompareContent"></el-button>
+                                                        </el-tooltip>
+                                                    </el-header>
+                                                    <el-main style="width:100%;height:100%;">
+                                                        <div style="width:100%;height:100%;" ref="editor"></div>
+                                                    </el-main>
+                                                </el-main>
+                                            </el-container>
+                                            <el-aside v-if="control.show">
+
+                                            </el-aside>
                                         </el-container>`,
                             data: {
-                                content: ""
+                                editor: null,
+                                content: "",
+                                control: {
+                                    show: false
+                                }
                             },
                             created(){
-                                this.getFileContent();
+                                this.depotCompareContent();
                             },
                             mounted(){
                                 this.initEdiotr();
                             },
                             methods: {
-                                getFileContent(){
-                                    let param = {name:row.name, version:row.selectedVersion, path: file.path };
-                                    this.content = scriptHandler.getDepotFileContent(param);
+                                depotCompareContent(){
+                                    let name = _.map(self.versionTree.compareArr,'name')[0];
+                                    let versions = _.map(self.versionTree.compareArr, 'version');
+                                    let param = {name:name, versions:versions };
+                                    
+                                    this.content = JSON.stringify(scriptHandler.compareDepotFiles(param),null,2);
+
+                                    if(this.editor){
+                                        this.editor.setValue(this.content,1);
+                                    }
                                 },
                                 initEdiotr(){
                                     try{
@@ -967,53 +1011,278 @@ class Probe extends Matrix {
                                     }
                                 }
                             }
+                        }).$mount(`#${wndId}-compare`);
+                    },
+                    // 脚本删除
+                    onFileDelete(file,row){
+                        try{
+                            let files = _.find(row.fileObj, {version: row.selectedVersion}).files;
+                            
+                        } catch(err){
+                            console.log(err)
+                        }
+                    },
+                    // 脚本编辑
+                    onFileEditor(file, row){
+                        
+                        let wnd = null;
+                        let wndId = 'jsPanel-editor-mini';
+
+                        try{
+                            if(jsPanel.activePanels.getPanel(wndId)){
+                                jsPanel.activePanels.getPanel(wndId).close();
+                            }
+                        } catch(error){
+
+                        }
+                        finally{
+                            wnd = maxWindow.winEditorMini('脚本编辑', `<div id="${wndId}-editor"></div>`, null, null);
+                        }
+                        
+                        new Vue({
+                            i18n,
+                            delimiters: ['#{', '}#'],
+                            data: {
+                                editor: null,
+                                row: null,
+                                fileContent: "",
+                                control: {
+                                    form: {
+                                        show: false
+                                    }
+                                }
+                            },
+                            template:   `<el-container style="width:100%;height:100%;">
+                                            <el-container style="width:100%;height:100%;">
+                                                <el-main style="height:100%;padding:0px;overflow:hidden;">
+                                                    <el-header style="height:40px;line-height:40px;">
+                                                        <el-tooltip content="刷新" delay-time="500" placement="top">
+                                                            <el-button type="text" icon="el-icon-refresh" @click="getFileContent"></el-button>
+                                                        </el-tooltip>
+                                                        <el-tooltip content="提交" delay-time="500" placement="top">
+                                                            <el-button type="text" icon="el-icon-position" @click="control.form.show = true"></el-button>
+                                                        </el-tooltip>
+                                                    </el-header>
+                                                    <el-main style="width:100%;height:100%;">
+                                                        <div style="width:100%;height:100%;" ref="editor"></div>
+                                                    </el-main>
+                                                </el-main>
+                                            </el-container>
+                                            <el-asie style="width:40%;" v-if="control.form.show">
+                                                <el-container style="width:100%;height:100%;">
+                                                    <el-main style="height:100%;">
+                                                        <el-form>
+                                                            <el-form-item label="脚本库名称">
+                                                                <el-input v-model="row.name" autocomplete="off" disabled></el-input>
+                                                            </el-form-item>
+                                                            <el-form-item label="脚本库版本">
+                                                                <el-input v-model="row.newVersion" autocomplete="off"></el-input>
+                                                            </el-form-item>
+                                                            <el-form-item label="脚本库说明" prop="remark">
+                                                                <el-input type="textarea" :row="6" v-model="row.remark"></el-input>
+                                                            </el-form-item>
+                                                            <el-form-item label="添加标签" prop="tags">
+                                                                <mx-tag domain='script' :model.sync="row.tags" :id="row.id" limit="1"></mx-tag>
+                                                            </el-form-item>
+                                                            <el-form-item>
+                                                                <el-button @click="control.form.show = false">取 消</el-button>
+                                                                <el-button type="primary" @click="onUpdateFileContent">更 新</el-button>
+                                                            </el-form-item>
+                                                        </el-form>
+                                                    </el-main>
+                                                </el-container>
+                                            </el-asie>
+                                        </el-container>`,
+                            created(){
+                                // 初始化row
+                                this.row = row;
+                                this.$set(this.row, 'newVersion', row.version);
+                                
+                                // 初始化文件内容
+                                this.getFileContent();
+                            },
+                            mounted(){
+                                this.initEdiotr();
+                            },
+                            methods: {
+                                getFileContent(){
+                                    let param = {name:row.name, version:row.selectedVersion, path: file.path };
+                                    this.fileContent = scriptHandler.getDepotFileContent(param);
+                                    if(this.editor){
+                                        this.editor.setValue(this.fileContent,1);
+                                    }
+                                },
+                                initEdiotr(){
+                                    try{
+                                        // Editor
+                                        this.editor = ace.edit(this.$refs.editor);
+                                        this.editor.setOptions({
+                                            //maxLines: 1000,
+                                            minLines: 20,
+                                            autoScrollEditorIntoView: false,
+                                            enableBasicAutocompletion: false,
+                                            enableLiveAutocompletion: false
+                                        });
+                                        this.editor.getSession().setMode("ace/mode/sh");
+                                        this.editor.setTheme("ace/theme/chrome");
+                                        this.editor.renderer.setShowGutter(false);
+                                        this.editor.focus(); //To focus the ace editor
+                                        let row = this.editor.session.getLength() - 1;
+                                        let column = this.editor.session.getLine(row).length;
+                                        this.editor.gotoLine(row + 1, column);
+                                        
+                                        if(!_.isEmpty(this.fileContent)){
+                                            this.editor.setValue(this.fileContent,1);
+                                        }
+                                    } catch(err){
+                                        console.log(err)
+                                    }
+                                },
+                                onUpdateFileContent(){
+                                    
+                                    if(this.row.version == this.row.newVersion) {
+                                        this.$message({
+                                            type: "info",
+                                            message: "请输入新版本号，示例：1.0.0"
+                                        })
+                                        return false;
+                                    }
+                                    
+                                    const h = this.$createElement;
+                                    
+                                    this.$msgbox({
+                                            title: "确认要更新该脚本！",
+                                            showCancelButton: true,
+                                            confirmButtonText: '确定',
+                                            cancelButtonText: '取消'
+                                    }).then(() => {
+                                        
+                                        this.$set(this.row, 'content', this.editor.getValue());
+                                        this.$set(this.row, 'filepath', file.path);
+                                        this.$set(this.row, 'newVersion', this.row.newVersion);
+                                        this.$set(this.row, 'type', 'M');
+
+                                        console.log(this.row)
+                                        scriptHandler.updateDepotFileContent(this.row);    
+                                        
+                                    }).catch(()=>{
+
+                                    });
+                                    
+                                }
+                            }
                         }).$mount(`#${wndId}-editor`);
                     },
                     // 获取脚本详细信息
-                    onExpandChange(row,expandedRows){
-                        try{
+                    onToogleExpand(row,rowIndex){
+                        
+                        if(row.expand){
+                            this.$refs.table.toggleRowExpansion(row,false);
+                            this.$set(row, 'expand', !row.expand);
+                            return false;
+                        }
 
-                            // 获取脚本文件信息
-                            let rtn = scriptHandler.depotGet(row);
-                            _.extend(row, { activeTab: 'script', fileList: rtn.files } );
+                        this.$set(row,'loading',true);
 
-                            // 初始化命令编辑器
+                        _.forEach(this.dt.rows,(item) => {
+                            if (row.id != item.id) {
+                                this.$set(item, 'expand', false);
+                                this.$refs.table.toggleRowExpansion(item, false);
+                            }
+                        })
+
+                        const self = this;
+                        var loadData = function(){
+                            
+                            try {
+                                // 重置比对队列
+                                self.versionTree.compareArr = [];
+    
+                                // 获取脚本文件信息
+                                let rtn = scriptHandler.depotGet(row);
+                                _.extend(row, { activeTab: 'script' } );
+    
+                                // 获取所有版本号
+                                let versions = scriptHandler.depotGet({name:row.name,version:null}).versions;
+                                   
+                                // 获取每个版本的信息
+                                let versionObj = {};
+                                _.forEach(versions,(val)=>{
+                                    let ifDeployed = false;
+                                    let term = {name:row.name, version:val};
+                                    
+                                    // 查询该版本是否是下发版本
+                                    ifDeployed = fsHandler.callFsJScript("/matrix/probe/getScriptDeployVersion.js", encodeURIComponent(JSON.stringify(term))).message;
+    
+                                    // 如果是下发版本，获取下发服务器信息
+                                    let v = {};
+                                    if(ifDeployed){
+                                        v[val] = _.extend({ show:false, ifDeployed: ifDeployed, deployedServers: row.selected }, scriptHandler.depotGet({name:row.name,version:val}));
+                                    } else {
+                                        v[val] = _.extend({ show:false, ifDeployed: ifDeployed, deployedServers: [] }, scriptHandler.depotGet({name:row.name,version:val}));
+                                    }
+                                    _.extend(versionObj, v);
+                                })
+    
+                                // 脚本文件各版本的文件对象
+                                // 当前版本对应的文件列表、文件内容、下发命令、key、服务器
+                                self.$set(row, 'fileObj', versionObj);
+                                self.$set(row, 'versionObj', _.values(versionObj));
+                                self.$set(row, 'selectedVersion', row.version);
+    
+                                console.log('row  ',row)
+    
+                                // 初始化命令编辑器
+                                _.delay(()=>{
+                                    let editor = ace.edit(self.$refs['commandRef'+row.id]);
+                                    editor.setOptions({
+                                        // maxLines: 1000,
+                                        minLines: 20,
+                                        autoScrollEditorIntoView: true,
+                                        enableBasicAutocompletion: true,
+                                        enableSnippets: true,
+                                        enableLiveAutocompletion: false
+                                    });
+                                    
+                                    editor.getSession().setMode("ace/mode/sh");
+                                    editor.setTheme("ace/theme/chrome");
+                                    editor.getSession().setUseSoftTabs(true);
+                                    editor.getSession().setTabSize(2);
+                                    editor.getSession().setUseWrapMode(false);
+                                    editor.renderer.setShowGutter(true);
+                                    editor.setValue(row.command);
+                                },1000)
+    
+                            } catch(err){
+                                console.log(err)
+                                _.extend(row, { activeTab: 'script' } );
+                            } finally{
+                                console.log(_.now())
+                            } 
+                        };
+                        
+
+                        loadData();
+
+                        if( !_.isUndefined(row.fileObj) ){
                             _.delay(()=>{
-                                let editor = ace.edit(this.$refs['commandRef'+row.id]);
-                                editor.setOptions({
-                                    // maxLines: 1000,
-                                    minLines: 20,
-                                    autoScrollEditorIntoView: true,
-                                    enableBasicAutocompletion: true,
-                                    enableSnippets: true,
-                                    enableLiveAutocompletion: false
-                                });
-                                
-                                editor.getSession().setMode("ace/mode/sh");
-                                editor.setTheme("ace/theme/chrome");
-                                editor.getSession().setUseSoftTabs(true);
-                                editor.getSession().setTabSize(2);
-                                editor.getSession().setUseWrapMode(false);
-                                editor.renderer.setShowGutter(true);
-                                editor.setValue(row.command);
+                                self.$refs.table.toggleRowExpansion(row);
+                                self.$set(row,'loading',false);
+                                self.$set(row, 'expand', !row.expand);
                             },1000)
+                        } else {
+                            console.log(123,_.now())
+                            setTimeout( loadData, 50 );
+                        }
 
-                        } catch(err){
-                            _.extend(row, { activeTab: 'script', fileList: [] } );
-                        } 
-                    },
-                    onTagChange(val,row){
-                        let input = {action: "+", tags: val, ids: [row.id]};
-                        let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
-                    },
-                    onTagRemove(val,row){
-                        let input = {action: "-", tags: [val], ids: [row.id]};
-                        let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
+                        
                     },
                     // 上传文件
                     onFileChange(file, fileList, row) {
                                     
                         this.$set(row, 'uploadfile', file.raw);
+                        
+                        this.$set(row, 'fileList', [file.raw]);
 
                     },
                     onTabClick(tab, event, row){
@@ -1028,7 +1297,7 @@ class Probe extends Matrix {
                     onRowContextmenu(row, column, event){
                         
                     },
-                    onRowDblclick(row, column, event){
+                    onRowClick(row, column, event){
                         
                     },
                     onExport(type){
@@ -1038,7 +1307,7 @@ class Probe extends Matrix {
                             csvSeparator: ', ',
                             csvUseBOM: true,
                             ignoreColumn: [0,1],
-                            fileName: `tableExport_${moment().format("YYYY-MM-DD HH:MM:SS")}`,
+                            fileName: `tableExport_${moment().format("YYYY-MM-DD HH:mm:ss")}`,
                             type: type,
                         };
 
@@ -1064,8 +1333,36 @@ class Probe extends Matrix {
                     onToggle(){
                         this.$root.$refs.scriptView.onToggle();
                     },
-                    onToogleExpand(row){
-                        this.$refs.table.toggleRowExpansion(row)
+                    // Tag Action
+                    tagAdd(tag, row){
+                        try{      
+                            
+                            let term = {action: "+", domain: "script", ids:[row.id], tags: [tag]};
+                            
+                            fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(term)));
+
+							eventHub.$emit("TAG-TREE-REFRESH");
+							
+						} catch(err){
+							console.log(err);
+						}
+                    },
+                    tagDelete(tag, row){
+                        try{      
+                            
+                            let term = {action: "-", domain: "script", ids:[row.id], tags: [tag]};
+                            
+                            fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(term)));
+
+							eventHub.$emit("TAG-TREE-REFRESH");
+							
+						} catch(err){
+							console.log(err);
+						}
+                    },
+                    // 脚本刷新
+                    onScriptRefresh(){
+                        this.initData();
                     },
                     // 脚本删除
                     onScriptDelete(row,index){
@@ -1080,7 +1377,7 @@ class Probe extends Matrix {
                             return false;
                         }
 
-                        this.$confirm('确定删除选定的脚本?', '提示', {
+                        this.$confirm('确定删除选定的脚本库?', '提示', {
                             confirmButtonText: '确定',
                             cancelButtonText: '取消',
                             type: 'warning'
@@ -1093,7 +1390,9 @@ class Probe extends Matrix {
                                         type: "success",
                                         message: "删除成功！"
                                     })
+
                                     this.onScriptRefresh();
+
                                 } else {
                                     this.$message({
                                         type: "error",
@@ -1117,7 +1416,7 @@ class Probe extends Matrix {
                             let params = {
                                 hosts: movedKeys,
                                 name: row.name,
-                                version: row.version,
+                                version: row.selectedVersion,
                             }
 
                             if( _.indexOf(row.tags,'zabbix') != -1 || _.indexOf(row.tags,'ZABBIX') != -1 ){
@@ -1140,8 +1439,9 @@ class Probe extends Matrix {
                                         message: "取消下发成功！"
                                     })
 
-                                    this.onTagChange(['未下发'],row);
-                                    this.onTagRemove('已下发',row);
+                                    this.tagAdd('未下发',row);
+                                    this.tagDelete('已下发',row);
+
                                     this.onScriptRefresh();
 
                                 } else {
@@ -1158,33 +1458,32 @@ class Probe extends Matrix {
                         // 下发
                         else {
 
+                            if(row.status == 1){
+                                this.$message({
+                                    type: "warning",
+                                    message: "该脚本库已有版本下发，请确认！"
+                                })
+                                
+                                this.$set(row.fileObj[row.selectedVersion],'deployedServers',[]);
+                                return false;
+                            }
                             
                             let editor = ace.edit(this.$refs['commandRef'+row.id]);
                             this.$set(row,'command', _.trim(editor.getValue()));
-
-                            if(_.isEmpty(row.command)){
-                            
-                                this.$message({
-                                    type: "warning",
-                                    message: "脚本执行命令不能为空！"
-                                })
-                                this.$set(row,'selected',[]);
-                                return false;
-                            }
 
                             if(_.isEmpty(row.zabbixKey)){
                                 this.$message({
                                     type: "warning",
                                     message: "请输入zabbix key！"
                                 })
-                                this.$set(row,'selected',[]);
+                                this.$set(row.fileObj[row.selectedVersion],'deployedServers',[]);
                                 return false;
                             }
 
                             let params = {
                                 hosts: movedKeys,
                                 name: row.name,
-                                version: row.version,
+                                version: row.selectedVersion,
                                 key: row.zabbixKey,
                                 command: row.command
                             }
@@ -1208,8 +1507,9 @@ class Probe extends Matrix {
                                         scriptHandler.deployToZabbixAgent(params);
                                     }
     
-                                    this.onTagChange(['已下发'],row);
-                                    this.onTagRemove('未下发',row);
+                                    this.tagAdd('已下发',row);
+                                    this.tagDelete('未下发',row);
+
                                     this.onScriptRefresh();
     
                                 } else {
@@ -1218,7 +1518,7 @@ class Probe extends Matrix {
                                         duration: 6000,
                                         message: "下发失败 " + rtn
                                     })
-                                    this.$set(row,'selected',[]);
+                                    this.$set(row.fileObj[row.selectedVersion],'deployedServers',[]);
                                 }
                             },3000)
                             
@@ -1267,7 +1567,7 @@ class Probe extends Matrix {
                                                                     <el-form-item label-width="0px" style="border:1px dashed #dddddd;padding:10px;" prop="file">
                                                                         <el-upload
                                                                             :on-change="onFileChange"
-                                                                            :before-remove="beforeRemove"
+                                                                            :before-remove="onBeforeRemove"
                                                                             :file-list="fileList"
                                                                             :limit="1"
                                                                             multiple="false"
@@ -1279,33 +1579,17 @@ class Probe extends Matrix {
                                                                     <el-form-item label="脚本库名称" prop="name">
                                                                         <el-input v-model="model.item.name" required="required" ></el-input>
                                                                     </el-form-item>
-                                                                    <el-form-item label="脚本版本" prop="version">
+                                                                    <el-form-item label="脚本库版本" prop="version">
                                                                         <el-input v-model="model.item.version" required="required"></el-input>
                                                                     </el-form-item>
                                                                     <!--el-form-item label="执行命令" prop="command">
                                                                         <el-input v-model="model.item.command"></el-input>
                                                                     </el-form-item-->
-                                                                    <el-form-item label="脚本说明" prop="remark">
+                                                                    <el-form-item label="脚本库说明" prop="remark">
                                                                         <el-input type="textarea" :row="6" v-model="model.item.remark"></el-input>
                                                                     </el-form-item>
                                                                     <el-form-item label="添加标签" prop="tags">
-                                                                        <el-select
-                                                                            v-model="model.item.tags"
-                                                                            multiple
-                                                                            filterable
-                                                                            allow-create
-                                                                            default-first-option
-                                                                            class="el-select-tags"
-                                                                            placeholder="标签"
-                                                                            @change="onTagChange($event,scope.row)"
-                                                                            @remove-tag="onTagRemove($event,scope.row)">
-                                                                            <el-option
-                                                                                v-for="tag in model.item.tags"
-                                                                                :key="tag"
-                                                                                :label="tag"
-                                                                                :value="tag">
-                                                                            </el-option>
-                                                                        </el-select>
+                                                                        <mx-tag domain='script' :model.sync="model.item.tags" id="null" limit="8"></mx-tag>
                                                                     </el-form-item>
                                                                 </el-form>
                                                             </el-main>
@@ -1320,14 +1604,6 @@ class Probe extends Matrix {
                                 })
                             },
                             methods: {
-                                onTagChange(val,row){
-                                    let input = {action: "+", tags: val, ids: [row.id]};
-                                    let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
-                                },
-                                onTagRemove(val,row){
-                                    let input = {action: "-", tags: [val], ids: [row.id]};
-                                    let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
-                                },
                                 onSave(){
                                     
                                     if(_.isEmpty(this.model.item.uploadfile)){
@@ -1369,6 +1645,14 @@ class Probe extends Matrix {
                                         }
                                     }
 
+                                    if(_.isEmpty(this.model.item.remark)){
+                                        this.$message({
+                                            type: "warning",
+                                            message: "请输入脚本库说明！"
+                                        })
+                                        return false;
+                                    }
+
                                     let rtn = scriptHandler.depotAdd(this.model.item);
 
                                     if(rtn == 1){
@@ -1393,12 +1677,22 @@ class Probe extends Matrix {
                                 },
                                 onFileChange(file, fileList) {
                                     
-                                    this.model.item.name = _.head(file.raw.name.split("."));
-                                    
-                                    this.model.item.uploadfile = file.raw;
+                                    try{
+                                        if (_.includes(mx.global.register.probe.upload.blackList,file.raw.type)) {
+                                            this.$message.warning('上传文件不能是图片或者媒体文件!');
+                                            this.fileList = [];
+                                            return false;
+                                        }
+    
+                                        this.model.item.name = _.head(file.raw.name.split("."));
+                                        
+                                        this.model.item.uploadfile = file.raw;
+                                    } catch(err){
+
+                                    }
 
                                 },
-                                beforeRemove(file, fileList) {
+                                onBeforeRemove(file, fileList) {
                                     return this.$confirm(`确定移除 ${ file.name }？`);
                                 }
                             }
@@ -1410,8 +1704,6 @@ class Probe extends Matrix {
                     },
                     // 脚本更新
                     onScriptUpdate(row){
-
-                        console.log(row.uploadfile)
 
                         if(_.isEmpty(row.uploadfile)){
                             
@@ -1441,6 +1733,8 @@ class Probe extends Matrix {
                                 message: "更新失败：" + rtn
                             })
                         }
+
+                        this.versionTree.dialog.fileUpdate = false;
                     }
                 }
             })
@@ -1455,8 +1749,8 @@ class Probe extends Matrix {
                     }
                 },
                 template: `<el-container style="height:calc(100vh - 145px);">
-                                <el-aside style="background:#f7f7f7;width:20%;" ref="leftView">
-                                    <entity-tree-component id="probe-tree" :model="{parent:'/probe',name:'probe_tree_data.js',domain:'probe'}" ref="tagTree"></entity-tree-component>
+                                <el-aside style="background:#f2f3f5;width:20%;margin: -10px 0px -10px -10px;" ref="leftView">
+                                    <mx-tag-tree :model="{parent:'/probe',name:'probe_tree_data.js',domain:'probe'}" :fun="onRefreshByTag" ref="probeTagTree"></mx-tag-tree>
                                 </el-aside>
                                 <el-main style="padding:0px;width:80%;" ref="mainView">
                                     <el-container style="height:100%;">
@@ -1491,6 +1785,9 @@ class Probe extends Matrix {
                     },
                     onToggle(){
                         $(this.$refs.leftView.$el).toggle();
+                    },
+                    onRefreshByTag(tag){
+                        this.$root.getProbeListByTag(tag);
                     }
                 }
             });
@@ -1503,8 +1800,8 @@ class Probe extends Matrix {
                     }
                 },
                 template: `<el-container style="height:calc(100vh - 145px);width:100%;">
-                                <el-aside ref="leftView" style="background:#f7f7f7;">
-                                    <entity-tree-component id="script-tree" :model="{parent:'/probe',name:'script_tree_data.js',domain:'script'}" ref="tagTree"></entity-tree-component>
+                                <el-aside ref="leftView" style="background:#f2f3f5;margin: -10px 0px -10px -10px;">
+                                    <mx-tag-tree :model="{parent:'/probe',name:'script_tree_data.js',domain:'script'}" :fun="onRefreshByTag" ref="scriptTagTree"></mx-tag-tree>
                                 </el-aside>
                                 <el-main style="padding:0px;width:100%;" ref="mainView">
                                     <el-container style="height:100%;">
@@ -1548,13 +1845,27 @@ class Probe extends Matrix {
                     },
                     // 获取所有脚本列表
                     getScriptList(){
-                        this.model = fsHandler.callFsJScript("/matrix/probe/getScriptList.js",null).message;
+                        this.model = fsHandler.callFsJScript("/matrix/probe/getScriptList.js").message;
+                    },
+                    onRefreshByTag(tag){
+                        this.model = fsHandler.callFsJScript("/matrix/probe/getScriptList.js", encodeURIComponent(tag)).message;
                     },
                     onToggle(){
                         $(this.$refs.leftView.$el).toggle();
                     }
                 }
             });
+
+            Vue.component("job-view",{
+                template:   `<div ref="jobView"></div>`,
+                mounted(){
+                    _.delay(()=>{
+                        let maxJob = new Job();
+                        maxJob.init();
+                        maxJob.mount(this.$refs.jobView,210);
+                    },500)
+                }
+            })
 
             $(function () {
 
@@ -1568,6 +1879,9 @@ class Probe extends Matrix {
                                             </el-tab-pane>
                                             <el-tab-pane label="脚本管理" name="script" lazy>
                                                 <script-view ref="scriptView"></script-view>
+                                            </el-tab-pane>
+                                            <el-tab-pane label="执行控制台" name="job">
+                                                <job-view ref="jobView"></job-view>
                                             </el-tab-pane>
                                         </el-tabs>
                                     </el-main>
@@ -1589,6 +1903,9 @@ class Probe extends Matrix {
                     methods: {
                         getProbeList() {
                             this.probe = fsHandler.callFsJScript(`/matrix/probe/getProbeList.js`, '').message;
+                        },
+                        getProbeListByTag(tag){
+                            this.probe = fsHandler.callFsJScript("/matrix/probe/getProbeList.js", encodeURIComponent(tag)).message;
                         }
                     }
                 }).$mount("#app");

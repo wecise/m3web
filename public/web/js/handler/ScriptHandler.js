@@ -364,6 +364,58 @@ class ScriptHandler {
     };
 
     /*
+    *  脚本内容
+    *
+    *   Update depot file content to new Version
+    *
+    *
+    * */
+    updateDepotFileContent(event) {
+        let rtn = null;
+
+        let url = '/monitoring/depot/file/';
+        let form = new FormData();
+        form.append("name", event.name);
+        form.append("version", event.version); // Old version
+        form.append("newVersion", event.newVersion) // new version
+        form.append("remark", event.remark);
+        form.append("filepath", event.filepath); // relative path
+        form.append("content", event.content)
+        form.append("type", "M") // type: M | A | D
+        _.forEach(event.tags,(v)=>{
+            form.append("tags", v);
+        })
+
+        jQuery.ajax({
+            url: url,
+            dataType: 'json',
+            type: 'PUT',
+            processData: false,
+            contentType: false,
+            mimeType: "multipart/form-data",
+            async: false,
+            data: form,
+            beforeSend:function(xhr){
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function (data, status) {
+
+                userHandler.ifSignIn(data);
+
+                if( _.lowerCase(data.status) == "ok"){
+                    rtn = data.message;
+                }
+            },
+            error: function(xhr, textStatus, errorThrown){
+                rtn = xhr.responseText;
+            }
+        });
+
+        return rtn;
+    };
+
+    /*
     *  多版本脚本内容对比
     *
     *   Compare depot file content

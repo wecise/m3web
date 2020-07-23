@@ -3845,7 +3845,7 @@ class Topological {
         // mount
         _.delay(() => {
             this.app = new Vue(main).$mount(el);
-        },50)
+        },500)
 
     }
 

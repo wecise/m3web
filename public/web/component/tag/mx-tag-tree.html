@@ -1,0 +1,288 @@
+<code>
+
+	<style scoped>
+		/*----------  style  ----------*/
+		
+
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="mx-tag-tree"  ----------*/
+	<template>		
+		<el-container>
+			<el-header style="height:30px;line-height:30px;display: none;">
+				<el-input placeholder="搜索"></el-input>
+			</el-header>
+			<el-main style="padding: 5px;height: calc(100vh - 175px);">
+				<el-tree 
+					node-key="name"
+					highlight-current="true"
+					:default-expand-all="true"
+					:data="nodes" 
+					:props="defaultProps" 
+					draggable
+					:allow-drop="allowDrop"
+					:allow-drag="allowDrag"
+					@node-drag-start="onDragStart"
+					@node-drag-enter="onDragEnter"
+					@node-drag-leave="onDragLeave"
+					@node-drag-over="onDragOver"
+					@node-drag-end="onDragEnd"
+					@node-drop="onDrop"
+					@node-click="onNodeClick"
+					@node-expand="onNodeExpand"
+					style="background: transparent;"
+					ref="tree">
+					<span slot-scope="{ node, data }" style="width:100%;height:30px;line-height: 30px;"  @mouseenter="onMouseEnter(data)" @mouseleave="onMouseLeave(data)">
+						<span class="el-icon-price-tag" style="color: #f8a502;font-size: 14px;"></span>
+						<span v-if="_.isEmpty(data.name)">
+							<span>标签</span>
+							<el-button v-show="data.show" type="text" @click="addTagDir(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-plus"></el-button>
+							<el-button v-show="data.show" type="text" @click.stop="loadNodes" style="float:right;width:14px;margin:0 5px;" icon="el-icon-refresh"></el-button>
+						</span>
+						<span v-else>
+							<span>#{node.label}#</span>
+							<el-button v-show="data.show" type="text" @click="delTagDir(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-delete"></el-button>
+							<el-button v-show="data.show" type="text" @click="editTagDir(data,$event)" style="float:right;width:14px;margin-left:5px;" icon="el-icon-edit"></el-button>
+							<el-button v-show="data.show" type="text" @click="addTagDir(data,$event)" style="float:right;width:14px;" icon="el-icon-plus"></el-button>
+						</span>
+					</span>                  
+				</el-tree>
+			</el-main>
+		</el-container>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="mx-tag-tree">
+	{
+		delimiters: ['#{', '}#'],
+		props: {
+			model: Object,
+			fun: {
+				type: Function
+			}
+		},
+		data(){
+			return {
+				defaultProps: {
+					children: 'nodes',
+					label: 'name'
+				},
+				nodes: [],
+				nodePath: [],
+				movePath: []
+			}
+		},
+		created(){
+			this.loadNodes();
+
+			eventHub.$on("TAG-TREE-REFRESH",this.loadNodes);
+		},
+		mounted() {
+			this.$nextTick(()=> {
+				
+			})
+		},
+		methods:{
+			loadNodes(){
+				this.nodes = fsHandler.callFsJScript(`${['/matrix'+this.model.parent,this.model.name].join("/")}`).message;
+			},
+			onMouseEnter(data){
+				this.$set(data, 'show', true)
+			},
+			onMouseLeave(data){
+				this.$set(data, 'show', false)
+			},
+			recursiveTraverse(node) {
+
+				let rtn = null;
+
+				rtn = _.map(node, (v,k)=>{
+					return {cid: v.name, parent:'A2', rtype:'A2', name: v.name, title: v.name, nodes: this.recursiveTraverse(v.nodes), iconSkin: 'el-icon-price-tag',del:false};
+				});
+
+				return rtn;
+			},
+			onNodeExpand(tNode){
+				
+				if(tNode.rtype === 'A2' && tNode.parent == null){
+					let tagDir = tagHandler.getTagDir(this.model.domain);
+					// 忽略第一层
+					_.extend(_.find(this.nodes,{cid:tNode.cid}), {nodes: this.recursiveTraverse(tagDir.nodes)});
+
+					return;
+				}
+
+			},
+			onNodeClick(tNode){
+				
+				// 根据标签名过滤列表
+				// if(this.model.domain == 'probe'){
+				// 	this.$root.getProbeListByTag(tNode.name);
+				// } else {
+				// 	this.$root.$refs.scriptView.getScriptListByTag(tNode.name);
+				// }
+
+				this.fun(tNode.name);
+
+			},
+			onDragStart(node, ev) {
+				
+				try {
+					this.getParentNode(node.label);
+					this.movePath[0] = node.label;
+					this.movePath[1] = this.nodePath.slice(1);
+				} catch(err){
+
+				} finally{
+					this.nodePath = [];
+				}
+				
+			},
+			onDragEnter(draggingNode, dropNode, ev) {
+				// console.log('tree drag enter: ', dropNode.label);
+			},
+			onDragLeave(draggingNode, dropNode, ev) {
+				// console.log('tree drag leave: ', dropNode.label);
+			},
+			onDragOver(draggingNode, dropNode, ev) {
+				// console.log('tree drag over: ', dropNode.label);
+			},
+			onDragEnd(draggingNode, dropNode, dropType, ev) {
+				
+				this.getParentNode(this.movePath[0]);
+				this.movePath[2] = _.initial(this.nodePath.slice(1));
+				this.nodePath = [];
+
+			},
+			onDrop(draggingNode, dropNode, dropType, ev) {
+				console.log(this.movePath[0], this.movePath[1].join("/"), this.movePath[2].join("/"))
+				try {
+					// 提交更新
+					let name = this.movePath[1].join("/");
+					let newName = this.movePath[2].join("/");
+					let term = { domain: this.model.domain, tag: name, newTag: newName };
+					let rtn = fsHandler.callFsJScript("/matrix/tags/tagDirMove.js", encodeURIComponent(JSON.stringify(term)));
+
+					if(rtn.status == 'ok') {
+						this.loadNodes();
+					}
+				} catch(err){
+					console.log(err)
+				} finally {
+					
+				}
+			},
+			allowDrop(draggingNode, dropNode, type) {
+				if (dropNode.data.label === '') {
+					return type !== 'inner';
+				} else {
+					return true;
+				}
+			},
+			allowDrag(draggingNode) {
+				return draggingNode;
+			},
+			addTagDir(tNode,event){
+				
+				event.stopPropagation();
+
+				this.$prompt('请输入标签名称', '提示', {
+					confirmButtonText: '确定',
+					cancelButtonText: '取消'
+					}).then(({ value }) => {
+
+						this.getParentNode(tNode.name);
+						
+						let name = [this.nodePath.slice(1),value].join("/");
+						let term = {domain: this.model.domain, tag: name};
+						let rtn = fsHandler.callFsJScript("/matrix/tags/tagDirAdd.js", encodeURIComponent(JSON.stringify(term)));
+						
+						if(rtn.status == 'ok') {
+							this.loadNodes();
+						} 
+
+						this.nodePath = [];
+
+					}).catch(() => {
+						
+					});
+
+			},
+			editTagDir(tNode,event){
+
+				event.stopPropagation();
+
+				this.$prompt('请输入标签名称', '提示', {
+					confirmButtonText: '确定',
+					cancelButtonText: '取消',
+					inputValue: tNode.name
+					}).then(({ value }) => {
+
+						this.getParentNode(tNode.name);
+
+						let path = this.nodePath.slice(1);
+						let name = path.slice(1,-1).concat(tNode.name).join("/");
+						let newName = path.slice(1,-1).concat(value).join("/");
+						let term = {domain: this.model.domain, tag: name, newTag: newName};
+						let rtn = fsHandler.callFsJScript("/matrix/tags/tagDirRename.js", encodeURIComponent(JSON.stringify(term)));
+
+						if(rtn.status == 'ok') {
+							this.loadNodes();
+						}
+
+						this.nodePath = [];
+						
+					}).catch(() => {
+						
+					});
+			},
+			delTagDir(tNode,event){
+				
+				event.stopPropagation();
+
+				const h = this.$createElement;
+
+				this.$msgbox({
+						title: "确认要删除该标签?",
+						message: h('span', null, [
+							h('p', null, `标签域：${this.model.domain}`),
+							h('p', null, `标签名称：${tNode.name}`)
+						]),
+						showCancelButton: true,
+						confirmButtonText: '确定',
+						cancelButtonText: '取消'
+				}).then(() => {
+					
+					this.getParentNode(tNode.name);
+
+					let name = this.nodePath.slice(1).join("/");
+					let term = {domain: this.model.domain, tag: name};
+					let rtn = fsHandler.callFsJScript("/matrix/tags/tagDirDelete.js", encodeURIComponent(JSON.stringify(term)));
+
+					if(rtn.status == 'ok') {
+						this.loadNodes();
+					}
+
+					this.nodePath = [];
+					
+				}).catch(()=>{
+
+				});
+
+			},
+			getParentNode(name) {
+				
+				let cNode = this.$refs.tree.getNode(name);
+						
+				this.nodePath.unshift(cNode.label);
+				
+				if(cNode.parent && cNode.parent.label != undefined){
+					this.getParentNode(cNode.parent.label);
+				}
+			}
+		}
+	}
+	</script>
+
+</code>

@@ -99,7 +99,7 @@
                     style="background: transparent;"
                     ref="tree">
                     <span slot-scope="{ node, data }" style="width:100%;height:30px;line-height: 30px;"  @mouseenter="onMouseEnter(data)" @mouseleave="onMouseLeave(data)">
-                        <span :class="data.iconSkin"></span>
+                        <span :class="data.iconSkin" style="color: #f8a502;font-size: 14px;"></span>
                         <span>${node.label}</span>
                         <span v-if="data.parent == null && data.rtype=='A2'">
                             <el-button v-show="data.del" type="text" @click="addTagDir(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-plus"></el-button>
@@ -182,7 +182,7 @@
                 }
             },
             onNodeClick(tNode){
-                
+                console.log(tNode)
                 if(tNode.rtype === 'A1') {
                     this.loadSubNodeByA1([{cid: tNode.cid, tNode: tNode}]);
                 }

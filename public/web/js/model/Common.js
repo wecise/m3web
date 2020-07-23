@@ -19,6 +19,54 @@ Vue.directive('focus', {
     }
 });
 
+
+/* Common editor */
+Vue.component("mx-editor",{
+    delimiters: ['#{', '}#'],
+    props:{
+        model: String,
+        cHeight: String
+    },
+    computed:{
+        cStyle(){
+            return `width:100%;height:${this.cHeight};border:1px solid #f2f3f5;`;
+        }
+    },
+    template:  `<div :style="cStyle" ref="editor"></div>`,
+    mounted(){
+        this.$nextTick().then(()=> {
+            this.init();
+        })
+    },
+    methods: {
+        init(){
+            let editor = ace.edit(this.$refs.editor);
+            editor.setOptions({
+                maxLines: Infinity,
+                minLines: 6,
+                autoScrollEditorIntoView: true,
+                enableBasicAutocompletion: true,
+                enableSnippets: true,
+                enableLiveAutocompletion: false
+            });
+            
+            editor.getSession().setMode("ace/mode/sh");
+            editor.setTheme("ace/theme/chrome");
+            editor.getSession().setUseSoftTabs(true);
+            editor.getSession().setTabSize(2);
+            editor.getSession().setUseWrapMode(false);
+            editor.renderer.setShowGutter(true);
+            editor.setValue(this.model);
+
+            editor.focus(); 
+            let row = editor.session.getLength() - 1;
+            let column = editor.session.getLine(row).length;
+            editor.gotoLine(row + 1, column);
+        }
+    }
+})
+
+
  /* Common FS Editor */
 Vue.component("mx-fs-editor",{
     delimiters: ['#{', '}#'],
@@ -416,7 +464,8 @@ Vue.component("mx-fs-editor",{
                 } else {
 
                     try {
-                        let rtn = fsHandler.callFsJScript([this.tabs.activeNode.parent, this.tabs.activeNode.name].join("/").replace(/\/script/g, ""), '');
+                        console.log(232323,[this.tabs.activeNode.parent, this.tabs.activeNode.name].join("/").replace(/\/script\//g, "/") )
+                        let rtn = fsHandler.callFsJScript([this.tabs.activeNode.parent, this.tabs.activeNode.name].join("/").replace(/\/script\//g, "/"), '');
                         
                         _.forEach(this.tabs.list,(v)=>{
                             if(v.name == this.tabs.activeIndex){

@@ -36,7 +36,7 @@ class Summary {
                             valueTween: 0
                         }
                     },
-                    template:   `<div style="height:100%;padding:20px;text-align: center;background:#f7f7f7;margin:5px;">
+                    template:   `<div style="height:100%;padding:20px;text-align: center;background:#f2f3f5;margin:5px;">
                                     <span style="color:rgb(153, 153, 153);">#{title}#</span>
                                     <h1 style="font-size:32px;">#{valueTween}# <span style="color:rgb(153, 153, 153);font-size:x-small;">#{unit}#</span></h1>
                                 </div>`,
@@ -58,7 +58,7 @@ class Summary {
                         value: Array,
                         unit: Array
                     },
-                    template:   `<div style="height:100%;padding:20px;text-align: center;background:#f7f7f7;margin:5px;">
+                    template:   `<div style="height:100%;padding:20px;text-align: center;background:#f2f3f5;margin:5px;">
                                     <span style="color:rgb(153, 153, 153);">#{title[0]}#</span>
                                     <h1 style="font-size:32px;margin:5px;">#{value[0]}# <span style="color:rgb(153, 153, 153);font-size:x-small;">#{unit[0]}#</span></h1>
                                     <span style="color:rgb(153, 153, 153);">#{title[1]}#</span>
@@ -80,7 +80,7 @@ class Summary {
                             valueTween: 0
                         }
                     },
-                    template:   `<div style="height:100%;text-align: center;background:#f7f7f7;">
+                    template:   `<div style="height:100%;text-align: center;background:#f2f3f5;">
                                     <span style="color:rgb(153, 153, 153);">#{title}#</span>
                                     <h1 style="font-size:32px;">#{valueTween}# <span style="color:rgb(153, 153, 153);font-size:x-small;">#{unit}#</span></h1>
                                 </div>`,
@@ -102,7 +102,7 @@ class Summary {
                         title: String,
                         height: String,
                     },
-                    template: `<div style="width:100%;background:#f7f7f7;height:100%;"></div>`,
+                    template: `<div style="width:100%;background:#f2f3f5;height:100%;"></div>`,
                     data(){
                         return {
                             chart: null,
@@ -282,7 +282,7 @@ class Summary {
                         title: String,
                         height: String,
                     },
-                    template: `<div :style="'width:100%;background:#f7f7f7;height:'+height"></div>`,
+                    template: `<div :style="'width:100%;background:#f2f3f5;height:'+height"></div>`,
                     data(){
                         return {
                             chart: null,
@@ -464,7 +464,7 @@ class Summary {
                         title: String,
                         height: String
                     },
-                    template: `<div style="'width:100%;background:#f7f7f7;height:100%;"></div>`,
+                    template: `<div style="'width:100%;background:#f2f3f5;height:100%;"></div>`,
                     data(){
                         return {
                             
@@ -587,7 +587,7 @@ class Summary {
                                         
                                         <el-button type="text" icon="el-icon-plus" style="position:absolute;z-index:1000;top:55px;right:25px;" @click="control.show=!control.show"></el-button>
                                         
-                                        <div class="d-none d-md-block" style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);background:#f7f7f7;height:75vh;position:absolute;top:60px;left:70px;z-index:100;" v-show="control.show">
+                                        <div class="d-none d-md-block" style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);background:#f2f3f5;height:75vh;position:absolute;top:60px;left:70px;z-index:100;" v-show="control.show">
                                             
                                             <div class="newWidget grid-stack-item" data-gs-width="2" data-gs-height="2">
                                                 <div class="grid-stack-item-content">
@@ -598,7 +598,7 @@ class Summary {
                                             </div>
                                         </div>
                                         <div style="font-size: 18px;padding: 0px 20px;">数据概览</div>
-                                        <div class="grid-stack grid-container" data-gs-animate="yes" style="background:#f7f7f7;margin:0 20px;">
+                                        <div class="grid-stack grid-container" data-gs-animate="yes" style="background:#f2f3f5;margin:0 20px;">
                                             <div class="grid-stack-item" data-gs-width="2" data-gs-height="2">
                                                 <div class="grid-stack-item-content" style="overflow:hidden;">
                                                     <larger-number title="数据吞吐量"
@@ -674,7 +674,7 @@ class Summary {
                                         <div class="grid-stack grid-container" 
                                             data-gs-animate="yes" 
                                             v-for="(item,api) in model.byApi" 
-                                            style="background:#f7f7f7;margin:0px 20px;border-top:1px solid #fff;" >
+                                            style="background:#f2f3f5;margin:0px 20px;border-top:1px solid #fff;" >
                                             <div class="grid-stack-item" data-gs-width="12" data-gs-height="3">
                                                 <div class="grid-stack-item-content" style="overflow:hidden;">
                                                     <h5 style="margin:0px;padding:10px 20px;">#{_.upperCase(api)}#</h5>

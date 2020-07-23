@@ -714,11 +714,11 @@ class FsHandler {
 
         // 打标签
         if(_.endsWith(name,'tag_service.js')){
-            let system = window.location.pathname.replace(/\/matrix\//,'');
-            term = encodeURIComponent(JSON.stringify(_.merge(JSON.parse(decodeURIComponent(term)), {
-                system:system,
+            let domain = window.location.pathname.replace(/\/matrix\//,'');
+            term = encodeURIComponent(JSON.stringify(_.extend({
+                domain:domain,
                 user:window.SignedUser_UserName
-            })));
+            },JSON.parse(decodeURIComponent(term)))));
         }
 
         jQuery.ajax({
@@ -741,7 +741,6 @@ class FsHandler {
             },
             error: function(xhr, textStatus, errorThrown) {
                 rtn = xhr.responseText;
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
             }
         });
 

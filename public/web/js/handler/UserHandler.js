@@ -108,7 +108,7 @@ class UserHandler{
         用户删除
     */
     userDelete(event) {
-        let rtn = 0;
+        let rtn = null;
 
         jQuery.ajax({
             url: `/admin/users/${event}`,
@@ -116,7 +116,7 @@ class UserHandler{
             type: 'DELETE',
             async: false,
             beforeSend: function (xhr) {
-                // Pace.restart();
+                
             },
             complete: function (xhr, textStatus) {
             },
@@ -130,8 +130,7 @@ class UserHandler{
 
             },
             error: function (xhr, textStatus, errorThrown) {
-                return 0;
-                console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseText);
+                rtn = xhr.responseText;
             }
 
         })
@@ -236,6 +235,401 @@ class UserHandler{
             console.log(err)
         } 
     };
+
+    /* Add group permissions */
+    addGroupPermissions(event) {
+        let rtn = null;
+
+
+        jQuery.ajax({
+            url: "/admin/perms/group",
+            dataType: 'json',
+            type: 'POST',
+            async: false,
+            data: { name:  event.name, parent: "", member: event.ids },
+            beforeSend:function(xhr){
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function (data, status) {
+
+                userHandler.ifSignIn(data);
+
+                if( _.lowerCase(data.status) == "ok"){
+                    rtn = 1;
+                }
+
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                rtn = xhr.responseText;
+            }
+        });
+        return rtn;
+    };
+
+    /* Delete group permissions */
+    deleteGroupPermissions(event) {
+        let rtn = null;
+
+
+        jQuery.ajax({
+            url: `/admin/perms/group/${event.id}`,
+            dataType: 'json',
+            type: 'POST',
+            async: false,
+            beforeSend:function(xhr){
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function (data, status) {
+
+                userHandler.ifSignIn(data);
+
+                if( _.lowerCase(data.status) == "ok"){
+                    rtn = 1;
+                }
+
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                rtn = xhr.responseText;
+            }
+        });
+        return rtn;
+    };
+
+    /* Update group permissions */
+    updateGroupPermissions(event) {
+        let rtn = null;
+
+
+        jQuery.ajax({
+            url: `/admin/perms/group`,
+            dataType: 'json',
+            type: 'PUT',
+            async: false,
+            data: { name:  event.name, parent: "", member: event.ids },
+            beforeSend:function(xhr){
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function (data, status) {
+
+                userHandler.ifSignIn(data);
+
+                if( _.lowerCase(data.status) == "ok"){
+                    rtn = 1;
+                }
+
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                rtn = xhr.responseText;
+            }
+        });
+        return rtn;
+    };
+
+    /* Get group permissions list by parent */
+    getGroupPermissionsByParent(event) {
+        let rtn = null;
+
+
+        jQuery.ajax({
+            url: `/admin/perms/group?parent=${event.parent}`,
+            dataType: 'json',
+            type: 'GET',
+            async: false,
+            beforeSend:function(xhr){
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function (data, status) {
+
+                userHandler.ifSignIn(data);
+
+                if( _.lowerCase(data.status) == "ok"){
+                    rtn = data.message;
+                }
+
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                rtn = xhr.responseText;
+            }
+        });
+        return rtn;
+    };
+
+    /* Get group permissions list by parent */
+    getGroupPermissionsById(event) {
+        let rtn = null;
+
+
+        jQuery.ajax({
+            url: `/admin/perms/group?parent=${event.id}`,
+            dataType: 'json',
+            type: 'GET',
+            async: false,
+            beforeSend:function(xhr){
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function (data, status) {
+
+                userHandler.ifSignIn(data);
+
+                if( _.lowerCase(data.status) == "ok"){
+                    rtn = data.message;
+                }
+
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                rtn = xhr.responseText;
+            }
+        });
+        return rtn;
+    };
+
+    /* Add api permissions */
+    addApiPermissions(event) {
+        let rtn = null;
+
+        let form = new FormData();
+        form.append("name", event.name);
+        _.forEach(event.paths, (v)=>{
+            form.append("path", v);
+        })
+
+        jQuery.ajax({
+            url: `/admin/perms/api`,
+            dataType: 'json',
+            type: 'PUT',
+            processData: false,
+            contentType: false,
+            mimeType: "multipart/form-data",
+            async: false,
+            data: form,
+            beforeSend:function(xhr){
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function (data, status) {
+
+                userHandler.ifSignIn(data);
+
+                if( _.lowerCase(data.status) == "ok"){
+                    rtn = data.message;
+                }
+
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                rtn = xhr.responseText;
+            }
+        });
+        return rtn;
+    };
+
+    /* Delete api permissions */
+    deleteApiPermissions(event) {
+        let rtn = null;
+
+        jQuery.ajax({
+            url: `/admin/perms/api/${event.name}`,
+            dataType: 'json',
+            type: 'DELETE',
+            processData: false,
+            contentType: false,
+            mimeType: "multipart/form-data",
+            async: false,
+            data: form,
+            beforeSend:function(xhr){
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function (data, status) {
+
+                userHandler.ifSignIn(data);
+
+                if( _.lowerCase(data.status) == "ok"){
+                    rtn = 1;
+                }
+
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                rtn = xhr.responseText;
+            }
+        });
+        return rtn;
+    };
+
+    /* Update api permissions */
+    UpdateApiPermissions(event) {
+        let rtn = null;
+
+        let form = new FormData();
+        form.append("name", event.name);
+        _.forEach(event.paths, (v)=>{
+            form.append("path", v);
+        })
+
+        jQuery.ajax({
+            url: `/admin/perms/api/${event.name}`,
+            dataType: 'json',
+            type: 'PUT',
+            processData: false,
+            contentType: false,
+            mimeType: "multipart/form-data",
+            async: false,
+            data: form,
+            beforeSend:function(xhr){
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function (data, status) {
+
+                userHandler.ifSignIn(data);
+
+                if( _.lowerCase(data.status) == "ok"){
+                    rtn = data.message;
+                }
+
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                rtn = xhr.responseText;
+            }
+        });
+        return rtn;
+    };
+
+    /* Get api permissions List*/
+    getApiPermissions() {
+        let rtn = null;
+
+        jQuery.ajax({
+            url: `/admin/perms/api`,
+            dataType: 'json',
+            type: 'GET',
+            async: false,
+            beforeSend:function(xhr){
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function (data, status) {
+
+                userHandler.ifSignIn(data);
+
+                if( _.lowerCase(data.status) == "ok"){
+                    rtn = data.message;
+                }
+
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                rtn = xhr.responseText;
+            }
+        });
+        return rtn;
+    };
+
+    /* Get api permissions List By name */
+    getApiPermissionsByName(event) {
+        let rtn = null;
+
+        jQuery.ajax({
+            url: `/admin/perms/api/${event.name}`,
+            dataType: 'json',
+            type: 'GET',
+            async: false,
+            beforeSend:function(xhr){
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function (data, status) {
+
+                userHandler.ifSignIn(data);
+
+                if( _.lowerCase(data.status) == "ok"){
+                    rtn = data.message;
+                }
+
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                rtn = xhr.responseText;
+            }
+        });
+        return rtn;
+    };
+
+     /* Set api permissions groups */
+     setApiPermissionsGroups(event) {
+        let rtn = null;
+
+        let form = new FormData();
+
+        _.forEach(event.groups, (v)=>{
+            form.append("group", v);
+        })
+
+        jQuery.ajax({
+            url: `//admin/perms/api/${event.name}/group`,
+            dataType: 'json',
+            type: 'PUT',
+            processData: false,
+            contentType: false,
+            mimeType: "multipart/form-data",
+            async: false,
+            data: form,
+            beforeSend:function(xhr){
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function (data, status) {
+
+                userHandler.ifSignIn(data);
+
+                if( _.lowerCase(data.status) == "ok"){
+                    rtn = 1;
+                }
+
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                rtn = xhr.responseText;
+            }
+        });
+        return rtn;
+    };
+
+    /* Set api permissions groups */
+    deleteApiPermissionsGroups(event) {
+        let rtn = null;
+
+        let groups = _.map(event.groups, (v)=>{
+            return `group=${v}`;
+        }).join("&");
+
+        jQuery.ajax({
+            url: `/admin/perms/api/TestAPIPerm/group?${groups}`,
+            dataType: 'json',
+            type: 'DELETE',
+            async: false,
+            beforeSend:function(xhr){
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function (data, status) {
+
+                userHandler.ifSignIn(data);
+
+                if( _.lowerCase(data.status) == "ok"){
+                    rtn = 1;
+                }
+
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                rtn = xhr.responseText;
+            }
+        });
+        return rtn;
+    };
+
+    
 }
 
 var userHandler = new UserHandler();

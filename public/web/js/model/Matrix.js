@@ -28,6 +28,7 @@ class Matrix {
 
         this.companyName = window.COMPANY_NAME;
         this.companyLogo = window.COMPANY_LOGO;
+        this.companyFavicon = window.COMPANY_FAVICON;
         this.companyTitle = window.COMPANY_TITLE;
 
         this.currentUserTemplate = null;
@@ -59,7 +60,6 @@ class Matrix {
         mx.global();
         mx.setLogo();
         mx.setFavIcon();
-        mx.setTitle();
         mx.setTheme();
         
         document.addEventListener('DOMContentLoaded', function(){
@@ -69,6 +69,8 @@ class Matrix {
             mx.mxAlert();
             // 加载当前用户模板
             mx.setCurrentUserTemplate();
+            // 设置title
+            mx.setTitle();
 
             document.addEventListener('click', function (event) {
 
@@ -108,12 +110,27 @@ class Matrix {
 
     // 设置Fav
     setFavIcon(){
-        $("#favicon").attr("href", mx.companyLogo);
+        $("#favicon").attr("href", mx.companyFavicon);
     }
 
     // 设置Title
     setTitle(){
-        document.title = mx.companyTitle;
+        try{
+            document.title = mx.companyTitle;
+
+            let pathName = window.location.pathname;
+            let name = fsHandler.callFsJScript("/matrix/system/getAppNameByUrl.js", encodeURIComponent(pathName)).message;
+            
+            if(!_.isEmpty(name)){
+                if(window.MATRIX_LANG == 'zh-CN'){
+                    document.title = name['cnname'];
+                } else {
+                    document.title = name['enname'];
+                }
+            }
+        } catch(err){
+            document.title = mx.companyTitle;
+        }
     }
 
     // 设置主题

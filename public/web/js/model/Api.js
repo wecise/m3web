@@ -24,7 +24,9 @@ class Api {
                         "fs-output-component",
                         "fs-datatable-component",
                         "devops-tree-component",
-                        "ai-robot-component"
+                        "ai-robot-component",
+                        "mx-tag",
+                        "mx-tag-tree"
                         ],function() {
 
             $(function() {

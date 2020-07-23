@@ -361,6 +361,42 @@ class Omdb{
             }
         })
 
+        Vue.component("omdb-editor",{
+            delimiters: ['#{', '}#'],
+            props:{
+                model: String
+            },
+            data(){
+
+            },
+            template:  `<div style="width:100%;height:100%;" ref="editor"></div>`,
+            mounted(){
+                this.$nextTick().then(()=> {
+                    this.init();
+                })
+            },
+            methods: {
+                init(){
+                    let editor = ace.edit(this.$refs.editor);
+                    editor.setOptions({
+                        // maxLines: 1000,
+                        minLines: 20,
+                        autoScrollEditorIntoView: true,
+                        enableBasicAutocompletion: true,
+                        enableSnippets: true,
+                        enableLiveAutocompletion: false
+                    });
+                    
+                    editor.getSession().setMode("ace/mode/json");
+                    editor.setTheme("ace/theme/chrome");
+                    editor.getSession().setUseSoftTabs(true);
+                    editor.getSession().setTabSize(2);
+                    editor.getSession().setUseWrapMode(false);
+                    editor.renderer.setShowGutter(true);
+                    editor.setValue(this.model);
+                }
+            }
+        })
         // 日志控制台
         Vue.component("omdb-log-console", {
             delimiters: ['#{', '}#'],
@@ -381,15 +417,14 @@ class Omdb{
                                                 [#{item[0]}#] [<span :class="'log-severity '+item[1]">#{item[1]}#</span>]  #{item[2].short}# 
                                             </div>
                                         </template>
-                                        <div>
-                                            <el-button :class="item[2].id" 
-                                                type="text" 
-                                                icon="el-icon-copy-document" 
-                                                style="position: absolute;right: 10px;"
-                                                @click="copyMe(item)">
-                                            </el-button>
-                                            <pre style="white-space: pre-wrap;">#{item[2].content}#</pre>
-                                        </div>
+                                        <el-container style="height:200px;">
+                                            <el-header class="logToolBar" style="height: 30px;line-height: 30px;padding: 0px 10px;width: 100%;">
+                                                <el-button :class="item[2].id"  type="text"  icon="el-icon-copy-document" @click="copyMe(item)"></el-button>
+                                            </el-header>
+                                            <el-main style="padding:0px;height:100%;overflow:hidden;">
+                                                <omdb-editor :model="item[2].content"></omdb-editor>
+                                            </el-main>
+                                        </el-container>
                                     </el-collapse-item>
                                 </el-collapse>
                             </el-main>
@@ -1207,6 +1242,22 @@ class Omdb{
                                                     </el-main>
                                                 </el-container>
                                                 <el-button type="text" icon="el-icon-date" slot="reference">#{scope.row[item['field']].length}#</el-button>
+                                            </el-popover>
+                                            <el-popover
+                                                placement="top"
+                                                width="550"
+                                                trigger="click"
+                                                popper-class="dataTablePopper"
+                                                v-else-if="_.includes(['msg','cmds','err','out','config','depot','attr'],item['field']) && !_.isEmpty(scope.row[item['field']])">
+                                                <el-container>
+                                                    <el-header style="height:30px;line-height:30px;padding:0px;">
+                                                        <el-button type="text" icon="el-icon-copy-document" class="el-button-copy" @click="onCopy(item['field'],scope.$index)"></el-button>
+                                                    </el-header>
+                                                    <el-main style="padding:0px;">
+                                                        <textarea rows="10" style="width:98%;white-space:nowrap;" :id="'textarea_'+scope.$index">#{scope.row[item['field']]}#</textarea>
+                                                    </el-main>
+                                                </el-container>
+                                                <el-button type="text" icon="el-icon-date" slot="reference">#{ _.size(scope.row[item['field']]) }#</el-button>
                                             </el-popover>
                                             <div v-else-if="_.includes(['map','set','list'],pickFtype(item['field']))">#{JSON.stringify(scope.row[item['field']],null,4)}#</div>
                                             <div v-else>#{scope.row[item['field']]}#</div>

@@ -33,9 +33,6 @@
 <script>
     mxResources.add('{{AppSubUrl}}/web/creative/graph/resources/grapheditor');
 </script>
-<!-- zTree Core CSS -->
-<link href="{{AppSubUrl}}/web/vendor/zTree/css/systemStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
-
 
 <style>
 
@@ -49,7 +46,7 @@
 		padding: 5px 5px 0px 5px!important;
 	}
 
-	/* Event view */
+	/* Job view */
 	.tree-view {
 		padding: 0px;
 	}
@@ -91,33 +88,6 @@
 	}
 
 
-	/* nav nav-tabs nav-tabs-line-2px li a */
-	.panel-title-btn .nav-tabs-line-2px{
-		margin: 0 -15px;
-	}
-	.panel-title-btn .nav-tabs-line-2px > li > a {
-		padding: 0px 15px
-	}
-
-	/* 自定义Panel */
-	.panel.panel-default.panel-white-border {
-		margin-bottom: 10px;
-		border: 1px solid rgb(250, 250, 250);
-	}
-
-	.panel-white-border .panel-heading .nav-tabs {
-		margin-left: -13px;
-		margin-top: -8px;
-		margin-right: -15px;
-	}
-
-	.panel-white-border .panel-title{
-		height: 18px;
-	}
-	.panel-white-border .panel-body {
-		padding:0 10px;
-	}
-
 	/* 告警详情页Tab */
 	.detail.tab-pane.Tab{
 		min-height: 72vh;
@@ -131,45 +101,6 @@
 		background-position-x: 50%;
 		background-position-y: 50%;
 		background-repeat: no-repeat;
-	}
-
-	/* 告警分析 */
-	form.job-view-detail > .form-group:nth-child(even) {
-		background: rgb(249, 249, 249);
-	}
-	form.job-view-detail > .form-group:nth-child(odd) {
-		background: rgb(255, 255, 255);
-	}
-
-	section.event-diagnosis > ul {
-		padding:15px 0px;
-		padding-left: 23vw;
-	}
-
-	section.event-diagnosis > ul > li > a{
-		font-size: 14px;
-		color: #333333;
-		background: transparent;
-	}
-
-	section.event-diagnosis > ul > li.active > a{
-		font-size: 14px;
-		box-shadow: 1px 1px 1px 1px #ddd;
-    	color: #ffffff!important;
-    	border-radius: 2px;
-    	background: rgb(130, 192, 255)!important;
-	}
-
-	section.event-diagnosis > div.content{
-		margin: 0px;
-		padding:0px 15px;
-		height:calc(90vh - 183px);
-		overflow:auto;
-	}
-
-	section.event-diagnosis > div.content > p{
-		border:1px solid #ddd;
-		padding:15px;
 	}
 
 	/* 告警统计widget */
@@ -217,9 +148,11 @@
 		font-weight: 600;
 	}
 
-	/* 属性选择，隐藏第一列checkbox */
-	.dt-button-collection.fixed.four-column > a:nth-child(1){
-		display: none;
+	/* el-table popper */
+	.dataTablePopper{
+		background: #ffffff;
+		padding:20px;
+		box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 	}
 
 	/* 全屏模式 */
@@ -235,27 +168,30 @@
 
 </style>
 
-<div id="app"></div>
+<main id="content" class="content">
+	<div id="app"></div>
+</main>
 
 <script src="{{AppSubUrl}}/web/js/model/Job.js"></script>
 <script src="{{AppSubUrl}}/web/js/model/Robot.js"></script>
-
-<!--zTree Core JS-->
-<script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.core-3.5.js"></script>
-<script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.excheck-3.5.js"></script>
-<script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.exedit-3.5.js"></script>
 
 <!-- ECharts单文件引入 --> 
 <script src="{{AppSubUrl}}/web/vendor/echart/echarts.min.js"></script>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
 
-<link rel="vc" href="{{AppSubUrl}}/web/component/job/job-datatable-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/job/job-diagnosis-datatable-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/tag/mx-tag.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/tag/mx-tag-tree.html"></link>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/search/search-base-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/search/search-preset-component_{{.Lang}}.html"></link>
 
-<link rel="vc" href="{{AppSubUrl}}/web/component/probe/probe-tree-component.html"></link>
+<script>
+	$(function(){
+		let maxJob = new Job();
+		maxJob.init();
+		maxJob.mount("#app",145)
+	})
+</script>
 
 {{template "base/footer" .}}

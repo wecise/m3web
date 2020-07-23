@@ -177,10 +177,14 @@
 
                 _.delay(()=>{
                     this.editor.setValue(this.model.newInput);
+                    this.editor.focus(); 
+                    let row = this.editor.session.getLength() - 1;
+                    let column = this.editor.session.getLine(row).length;
+                    this.editor.gotoLine(row + 1, column);
                 },1000)
                 
             },
-            updateToolbar () {
+            updateToolbar(){
                 this.refs.saveButton.disabled = this.editor.session.getUndoManager().isClean();
                 this.refs.undoButton.disabled = !this.editor.session.getUndoManager().hasUndo();
                 this.refs.redoButton.disabled = !this.editor.session.getUndoManager().hasRedo();

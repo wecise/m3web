@@ -20,7 +20,9 @@ class Knowledge {
 
         VueLoader.onloaded(["ai-robot-component",
                             "search-preset-component",
-                            "search-base-component"
+                            "search-base-component",
+                            "mx-tag",
+                            "mx-tag-tree"
                         ],function() {
 
             $(function() {
@@ -470,8 +472,7 @@ class Knowledge {
                         return {
                             knowledge: {
                                 list: []
-                            },
-                            currentItem: null
+                            }
                         }
                     },
                     template:   `<el-container style="height:100%;">
@@ -491,7 +492,7 @@ class Knowledge {
                                                             height: auto;
                                                             line-height: 40px;
                                                             padding: 0px 20px 0 0;"> 
-                                                    <div style="width:90%;">
+                                                    <div style="width:90%;display: -webkit-box;">
                                                         <span><i class="el-icon-user"></i> #{item.author}#</span>
                                                         <el-divider direction="vertical"></el-divider>
                                                         编辑于  #{ item | pickTime }#
@@ -499,25 +500,7 @@ class Knowledge {
                                                         位置 #{ item.parent }#
                                                         <el-divider direction="vertical"></el-divider>
                                                         <i class="el-icon-price-tag" style="color:#409eff;"></i>
-                                                        <el-select
-                                                            v-model="item.tags"
-                                                            multiple
-                                                            filterable
-                                                            allow-create
-                                                            default-first-option
-                                                            class="el-select-tags"
-                                                            @change="onChange"
-                                                            @remove-tag="onRemoveTag"
-                                                            @mouseover.native="currentItem = item"
-                                                            style="width:300px;"
-                                                            placeholder="知识标签">
-                                                            <el-option
-                                                                v-for="tag in item.tags"
-                                                                :key="tag"
-                                                                :label="tag"
-                                                                :value="tag">
-                                                            </el-option>
-                                                        </el-select>
+                                                        <mx-tag domain='knowledge' :model.sync="item.tags" :id="item.id" limit="4" ></mx-tag>
                                                     </div>
                                                     <div style="width:10%;text-align:right;">
                                                         阅读 ( #{item | pickRate}# )
@@ -530,7 +513,7 @@ class Knowledge {
                                                             height: auto;
                                                             line-height: 40px;
                                                             padding: 0px 20px 0 0;"> 
-                                                    <div style="width:90%;">
+                                                    <div style="width:90%;display: -webkit-box;">
                                                         <span><i class="el-icon-user"></i> #{item.author}#</span>
                                                         <el-divider direction="vertical"></el-divider>
                                                         编辑于 #{ item | pickTime }#
@@ -538,25 +521,7 @@ class Knowledge {
                                                         位置 #{ item.parent }#
                                                         <el-divider direction="vertical"></el-divider>
                                                         <i class="el-icon-price-tag" style="color:#409eff;"></i>
-                                                        <el-select
-                                                            v-model="item.tags"
-                                                            multiple
-                                                            filterable
-                                                            allow-create
-                                                            default-first-option
-                                                            class="el-select-tags"
-                                                            @change="onChange"
-                                                            @remove-tag="onRemoveTag"
-                                                            @mouseover.native="currentItem = item"
-                                                            style="width:300px;"
-                                                            placeholder="知识标签">
-                                                            <el-option
-                                                                v-for="tag in item.tags"
-                                                                :key="tag"
-                                                                :label="tag"
-                                                                :value="tag">
-                                                            </el-option>
-                                                        </el-select>
+                                                        <mx-tag domain='knowledge' :model.sync="item.tags" :id="item.id" limit="4" ></mx-tag>
                                                     </div>
                                                     <div style="width:10%;text-align:right;">
                                                         阅读 ( #{item | pickRate}# )
@@ -649,14 +614,6 @@ class Knowledge {
                                     return _.extend(v,{content:''});
                                 }
                             })
-                        },
-                        onChange(val){
-                            let input = {action: "+", tags: val, ids: [this.currentItem.id]};
-                            let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
-                        },
-                        onRemoveTag(val){
-                            let input = {action: "-", tags: [val], ids: [this.currentItem.id]};
-                            let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
                         }
     
                     }
