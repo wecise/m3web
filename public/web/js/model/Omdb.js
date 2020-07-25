@@ -366,9 +366,6 @@ class Omdb{
             props:{
                 model: String
             },
-            data(){
-
-            },
             template:  `<div style="width:100%;height:100%;" ref="editor"></div>`,
             mounted(){
                 this.$nextTick().then(()=> {
@@ -1827,7 +1824,7 @@ class Omdb{
                                         </el-container>
                                     </el-aside>
                                     <el-main style="padding:0px;overflow:hidden;" ref="mainView">
-                                        <el-tabs v-model="main.activeIndex" type="border-card" closable @tab-remove="mainTabsRemove" @tab-click="mainTabsClick">
+                                        <el-tabs v-model="main.activeIndex" type="border-card" closable @tab-remove="mainTabsRemove" @tab-click="mainTabsClick" v-if="main.tabs.length > 0">
                                             <el-tab-pane
                                                 :key="item.name"
                                                 v-for="(item, index) in main.tabs"
@@ -1851,6 +1848,35 @@ class Omdb{
                                                 <omdb-class-console :id="id+'-class-'+item.name" :model="item.model" v-if="item.type=='omdb-class-console'"  :ref="'omdbClassRef-'+id+'-class-'+item.name""></omdb-class-console>
                                             </el-tab-pane>
                                         </el-tabs>
+                                        <div style="background:#ffffff;padding:20px;height:100%;" v-else>
+                                            <h2 style="margin: 0px 0px 40px 0px;">欢迎使用#{ $t('omdb.title') }#</h2>
+                                            <p style="display:flex;align-items:flex-end;">
+                                                <el-button style="width:100px;height:90px;">
+                                                    <i class="el-icon-office-building" style="font-size:48px;"></i> <p>类管理</p>
+                                                </el-button>
+                                                <!--el-link style="margin-left: 20px;">文章</el-link>
+                                                <el-link style="margin-left: 20px;">视频</el-link-->
+                                            </p>
+                                            <p style="display:flex;align-items:flex-end;">
+                                                <el-button style="width:100px;height:90px;">
+                                                    <i class="el-icon-postcard" style="font-size:48px;"></i> <p>属性管理</p>
+                                                </el-button>
+                                            </p>
+                                            <p style="display:flex;align-items:flex-end;">
+                                                <el-button style="width:100px;height:90px;">
+                                                    <i class="el-icon-s-data" style="font-size:48px;"></i> <p>数据管理</p>
+                                                </el-button>
+                                            </p>
+                                            <p style="display:flex;align-items:flex-end;">
+                                                <el-button style="width:100px;height:90px;">
+                                                    <i class="el-icon-money" style="font-size:48px;"></i> <p>关系管理</p>
+                                                </el-button>
+                                            </p>
+                                            <p style="margin-top:40px;">
+                                                如有任何意见或建议，请及时反馈给我们。
+                                                <el-link href="mailto:m3@wecise.com">Email：m3@wecise.com</el-link>
+                                            </p>
+                                        </div>
                                     </el-main>
                                 </el-container>`,
                     data: {

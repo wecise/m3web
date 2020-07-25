@@ -194,7 +194,7 @@
 
 						this.getParentNode(tNode.name);
 						
-						let name = [this.nodePath.slice(1),value].join("/");
+						let name = _.concat(this.nodePath.slice(1),[value]).join("/");
 						let term = {domain: this.model.domain, tag: name};
 						let rtn = fsHandler.callFsJScript("/matrix/tags/tagDirAdd.js", encodeURIComponent(JSON.stringify(term)));
 						

@@ -803,6 +803,9 @@
                                                 <div v-else-if="item.field==='name'">
                                                     <el-link type="info" :underline="false" @click.native.prevent="forward(scope.row)" >#{scope.row[item.field]}#</el-link>
                                                 </div>
+                                                <div v-else-if="item.field==='tags'">
+                                                    <mx-tag domain='files' :model.sync="scope.row.tags" :id="scope.row.id" limit="1"></mx-tag>
+                                                </div>
                                                 <div v-else>
                                                     #{scope.row[item.field]}#
                                                 </div>
@@ -1686,7 +1689,7 @@
                     
                     let _name = '新文件夹_' + _.now();
                     let _type = 'dir';
-                    let _attr = {remark: '', ctime: _.now(), author: this.signedUserName};
+                    let _attr = {remark: '', ctime: _.now(), author: window.SignedUser_UserName};
     
                     let rtn = fsHandler.fsNew(_type, this.rootPath, _name, null, _attr);
                     

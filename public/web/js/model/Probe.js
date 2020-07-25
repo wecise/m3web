@@ -122,7 +122,10 @@ class Probe extends Matrix {
                                         <!--el-table-column type="selection" align="center"></el-table-column--> 
                                         <el-table-column width="120">
                                             <template slot-scope="scope" v-if="!_.isEmpty(scope.row.depot)">
-                                                <el-button type="success" @click="onToogleExpand(scope.row)">查看脚本</el-button>
+                                                <el-button type="success" @click="onToogleExpand(scope.row)" :loading="scope.row.loading">查看脚本
+                                                    <span class="el-icon-arrow-down" v-if="scope.row.expand"></span>
+                                                    <span class="el-icon-arrow-right" v-else></span>
+                                                </el-button>
                                             </template>
                                         </el-table-column>
                                         <el-table-column type="expand" width="0">
@@ -303,21 +306,50 @@ class Probe extends Matrix {
                         
                     },
                     onToogleExpand(row,index){
-                        
-                        this.$refs.table.toggleRowExpansion(row);
 
-                        // 根据depot名称列表，获取脚本信息
-                        let depots = {};
-                        _.forEach(row.depot,(v,k)=>{
-                            let value = JSON.parse(v);
-                            let versions = _.map(value,'version');
-                            let scriptObj = _.map(versions,(val)=>{
-                                return scriptHandler.depotGet({name:k,version:val});
-                            })
-                            _.extend(depots, {[k]:scriptObj[0]});
+                        if(row.expand){
+                            this.$refs.table.toggleRowExpansion(row,false);
+                            this.$set(row, 'expand', !row.expand);
+                            return false;
+                        }
+
+                        this.$set(row,'loading',true);
+
+                        _.forEach(this.dt.rows,(item) => {
+                            if (row.id != item.id) {
+                                this.$set(item, 'expand', false);
+                                this.$refs.table.toggleRowExpansion(item, false);
+                            }
                         })
 
-                        this.$set(row, 'depots', depots);
+                        const self = this;
+                        var loadData = function(){
+                            // 根据depot名称列表，获取脚本信息
+                            let depots = {};
+                            _.forEach(row.depot,(v,k)=>{
+                                let value = JSON.parse(v);
+                                let versions = _.map(value,'version');
+                                let scriptObj = _.map(versions,(val)=>{
+                                    return scriptHandler.depotGet({name:k,version:val});
+                                })
+                                _.extend(depots, {[k]:scriptObj[0]});
+                            })
+
+                            self.$set(row, 'depots', depots);
+                        };
+
+                        loadData();
+
+                        if( !_.isUndefined(row.depots) ){
+                            _.delay(()=>{
+                                self.$refs.table.toggleRowExpansion(row);
+                                self.$set(row,'loading',false);
+                                self.$set(row, 'expand', !row.expand);
+                            },1000)
+                        } else {
+                            console.log(_.now())
+                            setTimeout( loadData, 50 );
+                        }
 
                     },
                     onExport(type){
@@ -470,7 +502,21 @@ class Probe extends Matrix {
                                 fileUpdate: false
                             }
                         },
-                        info: []
+                        info: [],
+                        dialog: {
+                            scriptDeploy: {
+                                show: false,
+                                rows: [],
+                                script: {},
+                                zabbix: false
+                            },
+                            scriptUnDeploy: {
+                                show: false,
+                                rows: [],
+                                script: {},
+                                zabbix: false
+                            }
+                        }
                     }
                 },
                 template:   `<el-container style="width:100%;height:100%;">
@@ -517,7 +563,39 @@ class Probe extends Matrix {
                                         ref="table"
                                         v-if="!_.isEmpty(dt.rows)">
                                         <el-table-column type="selection" align="center"></el-table-column> 
-                                        <el-table-column type="expand" width="0" >
+                                        <el-table-column label="脚本库名称" prop="name" width="200" sortable></el-table-column>
+                                        <el-table-column label="下发脚本版本" prop="version" width="120" sortable></el-table-column>
+                                        <el-table-column
+                                            sortable 
+                                            show-overflow-tooltip
+                                            v-for="(item,index) in dt.columns"
+                                            :key="index"
+                                            :prop="item.field"
+                                            :label="item ? item.title : ''"
+                                            :width="item.width"
+                                            v-if="item.visible">
+                                                <template slot-scope="scope">
+                                                    <div v-html='item.render(scope.row, scope.column, scope.row[item.field], scope.$index)' 
+                                                        v-if="typeof item.render === 'function'">
+                                                    </div>
+                                                    <div v-else>
+                                                        #{scope.row[item.field]}#
+                                                    </div>
+                                                </template>
+                                        </el-table-column>
+                                        <el-table-column label="下发状态" width="120" prop="status">
+                                            <template slot-scope="scope">
+                                                <el-button type="success" @click="onToogleExpand(scope.row,scope.$index)" :loading="scope.row.loading" v-if="scope.row.status == 1">已下发 
+                                                    <span class="el-icon-arrow-down" v-if="scope.row.expand"></span>
+                                                    <span class="el-icon-arrow-right" v-else></span>
+                                                </el-button>
+                                                <el-button type="warning" @click="onToogleExpand(scope.row,scope.$index)" :loading="scope.row.loading" v-else>未下发
+                                                    <span class="el-icon-arrow-down" v-if="scope.row.expand"></span>
+                                                    <span class="el-icon-arrow-right" v-else></span>
+                                                </el-button>
+                                            </template>
+                                        </el-table-column>
+                                        <el-table-column type="expand" width="0">
                                             <template slot-scope="props">
                                                 <el-container style="width:90%;height:100%;min-height:40vh;background: #ffffff;">
                                                     <el-aside style="width:250px;background: #f2f3f5;">
@@ -599,7 +677,7 @@ class Probe extends Matrix {
                                                                                 </span>
                                                                                 <el-dropdown-menu slot="dropdown">
                                                                                     <el-dropdown-item @click.native="onFileEditor(item, props.row)">编辑</el-dropdown-item>
-                                                                                    <el-dropdown-item @click.native.stop="onFileDelete(item, props.row)" divided>删除</el-dropdown-item>
+                                                                                    <!--el-dropdown-item @click.native.stop="onFileDelete(item, props.row)" divided>删除</el-dropdown-item-->
                                                                                     <el-dropdown-item divided>
                                                                                         <span style="text-align:left;">
                                                                                             <p>文件名称：#{item.name}#</p>
@@ -698,43 +776,81 @@ class Probe extends Matrix {
                                                                             </el-transfer>
                                                                         </el-form-item>
                                                                     <el-form>
+                                                                    <el-dialog :title="'下发脚本: ' + dialog.scriptDeploy.script.name + '-' + dialog.scriptDeploy.script.selectedVersion" :visible.sync="dialog.scriptDeploy.show">
+                                                                        <el-container>
+                                                                            <el-main style="padding:0px;">
+                                                                                <el-table
+                                                                                    :data="dialog.scriptDeploy.rows"
+                                                                                    style="width: 100%">
+                                                                                    <el-table-column type="index"></el-table-column>
+                                                                                    <el-table-column prop="host"
+                                                                                        label="服务器"
+                                                                                        width="180">
+                                                                                    </el-table-column>
+                                                                                    <el-table-column
+                                                                                        label="下发状态">
+                                                                                        <template slot-scope="scope">
+                                                                                            <el-button type="primary" :loading="scope.row.loading" v-if="scope.row.status == 0">准备</el-button>
+                                                                                            <el-button type="warning" :loading="scope.row.loading" v-else-if="scope.row.status == 1">正在下发</el-button>
+                                                                                            <el-button type="success" :loading="scope.row.loading" v-else-if="scope.row.status == 2">下发成功</el-button>
+                                                                                            <el-button type="danger" :loading="scope.row.loading" v-else-if="scope.row.status == 3">下发失败</el-button>
+                                                                                        </template>
+                                                                                    </el-table-column>
+                                                                                    <el-table-column
+                                                                                        prop="msg"
+                                                                                        label="消息">
+                                                                                    </el-table-column>
+                                                                                </el-table>
+                                                                            </el-main>
+                                                                            <el-footer style="line-height:60px;">
+                                                                                <el-checkbox v-model="dialog.scriptDeploy.zabbix" border>Zabbix探针</el-checkbox>
+                                                                            </el-footer>
+                                                                        </el-container>
+                                                                        <div slot="footer" class="dialog-footer">
+                                                                            <el-button @click="dialog.scriptDeploy.show = false">取 消</el-button>
+                                                                            <el-button type="primary" @click="onScriptDeployHandler(dialog.scriptDeploy)">下 发</el-button>
+                                                                        </div>
+                                                                    </el-dialog>
+                                                                    <el-dialog :title="'取消下发脚本: ' + dialog.scriptUnDeploy.script.name + '-' + dialog.scriptUnDeploy.script.selectedVersion" :visible.sync="dialog.scriptUnDeploy.show">
+                                                                        <el-container>
+                                                                            <el-main style="padding:0px;">
+                                                                                <el-table
+                                                                                    :data="dialog.scriptUnDeploy.rows"
+                                                                                    style="width: 100%">
+                                                                                    <el-table-column type="index"></el-table-column>
+                                                                                    <el-table-column prop="host"
+                                                                                        label="服务器"
+                                                                                        width="180">
+                                                                                    </el-table-column>
+                                                                                    <el-table-column
+                                                                                        label="取消下发状态">
+                                                                                        <template slot-scope="scope">
+                                                                                            <el-button type="primary" :loading="scope.row.loading" v-if="scope.row.status == 0">准备</el-button>
+                                                                                            <el-button type="warning" :loading="scope.row.loading" v-else-if="scope.row.status == 1">正在取消下发</el-button>
+                                                                                            <el-button type="success" :loading="scope.row.loading" v-else-if="scope.row.status == 2">取消下发成功</el-button>
+                                                                                            <el-button type="danger" :loading="scope.row.loading" v-else-if="scope.row.status == 3">取消下发失败</el-button>
+                                                                                        </template>
+                                                                                    </el-table-column>
+                                                                                    <el-table-column
+                                                                                        prop="msg"
+                                                                                        label="消息">
+                                                                                    </el-table-column>
+                                                                                </el-table>
+                                                                            </el-main>
+                                                                            <el-footer style="line-height:60px;">
+                                                                                <el-checkbox v-model="dialog.scriptUnDeploy.zabbix" border>Zabbix探针</el-checkbox>
+                                                                            </el-footer>
+                                                                        </el-container>
+                                                                        <div slot="footer" class="dialog-footer">
+                                                                            <el-button @click="dialog.scriptUnDeploy.show = false">取 消</el-button>
+                                                                            <el-button type="primary" @click="onScriptUnDeployHandler(dialog.scriptUnDeploy)">取消下发</el-button>
+                                                                        </div>
+                                                                    </el-dialog>
                                                                 </el-tab-pane>
                                                             </el-tabs>
                                                         </el-main>
                                                     </el-container>
                                                 </el-container>
-                                            </template>
-                                        </el-table-column>
-                                        <el-table-column label="脚本库名称" prop="name" width="200" sortable></el-table-column>
-                                        <el-table-column label="下发脚本版本" prop="version" width="120" sortable></el-table-column>
-                                        <el-table-column
-                                            sortable 
-                                            show-overflow-tooltip
-                                            v-for="(item,index) in dt.columns"
-                                            :key="index"
-                                            :prop="item.field"
-                                            :label="item ? item.title : ''"
-                                            :width="item.width"
-                                            v-if="item.visible">
-                                                <template slot-scope="scope">
-                                                    <div v-html='item.render(scope.row, scope.column, scope.row[item.field], scope.$index)' 
-                                                        v-if="typeof item.render === 'function'">
-                                                    </div>
-                                                    <div v-else>
-                                                        #{scope.row[item.field]}#
-                                                    </div>
-                                                </template>
-                                        </el-table-column>
-                                        <el-table-column label="下发状态" width="120" prop="status">
-                                            <template slot-scope="scope">
-                                                <el-button type="success" @click="onToogleExpand(scope.row,scope.$index)" :loading="scope.row.loading" v-if="scope.row.status == 1">已下发 
-                                                    <span class="el-icon-arrow-down" v-if="scope.row.expand"></span>
-                                                    <span class="el-icon-arrow-right" v-else></span>
-                                                </el-button>
-                                                <el-button type="warning" @click="onToogleExpand(scope.row,scope.$index)" :loading="scope.row.loading" v-else>未下发
-                                                    <span class="el-icon-arrow-down" v-if="scope.row.expand"></span>
-                                                    <span class="el-icon-arrow-right" v-else></span>
-                                                </el-button>
                                             </template>
                                         </el-table-column>
                                         <el-table-column label="标签" prop="tags" width="200">
@@ -1413,60 +1529,26 @@ class Probe extends Matrix {
 
                         // 取消下发
                         if(direction == 'left'){
-                            let params = {
-                                hosts: movedKeys,
-                                name: row.name,
-                                version: row.selectedVersion,
-                            }
 
-                            if( _.indexOf(row.tags,'zabbix') != -1 || _.indexOf(row.tags,'ZABBIX') != -1 ){
-                                scriptHandler.unDeployToZabbixAgent(params);
-                            }
-
-                            this.$message({
-                                type: "info",
-                                message: "取消下发执行中，请稍候。。。"
+                            this.dialog.scriptUnDeploy.show = true;
+                            
+                            
+                            // 取消下发服务器列表
+                            this.dialog.scriptUnDeploy.script = row;
+                            this.dialog.scriptUnDeploy.rows = _.map(movedKeys,(v)=>{
+                                return { host:v, status: 0, loading: false};
                             })
 
-                            _.delay(()=>{
-                                
-                                rtn = scriptHandler.depotUnDeploy(params);
+                            if( _.indexOf(row.tags,'zabbix') != -1 || _.indexOf(row.tags,'ZABBIX') != -1 ){
+                                this.dialog.scriptUnDeploy.zabbix = true;
+                            }
 
-                                if(rtn == 1){    
-                                    
-                                    this.$message({
-                                        type: "success",
-                                        message: "取消下发成功！"
-                                    })
-
-                                    this.tagAdd('未下发',row);
-                                    this.tagDelete('已下发',row);
-
-                                    this.onScriptRefresh();
-
-                                } else {
-                                    this.$message({
-                                        type: "error",
-                                        duration: 6000,
-                                        message: "取消下发失败 " + rtn
-                                    })
-
-                                }
-                            },2000)
                             
                         } 
                         // 下发
                         else {
-
-                            if(row.status == 1){
-                                this.$message({
-                                    type: "warning",
-                                    message: "该脚本库已有版本下发，请确认！"
-                                })
-                                
-                                this.$set(row.fileObj[row.selectedVersion],'deployedServers',[]);
-                                return false;
-                            }
+                            
+                            this.dialog.scriptDeploy.show = true;
                             
                             let editor = ace.edit(this.$refs['commandRef'+row.id]);
                             this.$set(row,'command', _.trim(editor.getValue()));
@@ -1476,53 +1558,123 @@ class Probe extends Matrix {
                                     type: "warning",
                                     message: "请输入zabbix key！"
                                 })
-                                this.$set(row.fileObj[row.selectedVersion],'deployedServers',[]);
                                 return false;
                             }
 
-                            let params = {
-                                hosts: movedKeys,
-                                name: row.name,
-                                version: row.selectedVersion,
-                                key: row.zabbixKey,
-                                command: row.command
-                            }
-
-                            rtn = scriptHandler.depotDeploy(params);
-
-                            this.$message({
-                                type: "info",
-                                message: "下发执行中，请稍候。。。"
+                            // 下发服务器列表
+                            this.dialog.scriptDeploy.script = row;
+                            this.dialog.scriptDeploy.rows = _.map(movedKeys,(v)=>{
+                                return { host:v, status: 0, loading: false};
                             })
 
-                            _.delay(()=>{
-                                if(rtn == 1){
-                                
-                                    this.$message({
-                                        type: "success",
-                                        message: "下发成功！"
-                                    })
-                                    
-                                    if( _.indexOf(row.tags,'zabbix') != -1 || _.indexOf(row.tags,'ZABBIX') != -1 ){
-                                        scriptHandler.deployToZabbixAgent(params);
-                                    }
-    
-                                    this.tagAdd('已下发',row);
-                                    this.tagDelete('未下发',row);
+                            if( _.indexOf(row.tags,'zabbix') != -1 || _.indexOf(row.tags,'ZABBIX') != -1 ){
+                                this.dialog.scriptDeploy.zabbix = true;
+                            }
 
-                                    this.onScriptRefresh();
-    
-                                } else {
-                                    this.$message({
-                                        type: "error",
-                                        duration: 6000,
-                                        message: "下发失败 " + rtn
-                                    })
-                                    this.$set(row.fileObj[row.selectedVersion],'deployedServers',[]);
-                                }
-                            },3000)
                             
                         }
+                    },
+                    onScriptDeployHandler(items){
+                         
+                        _.forEach(items.rows,(item)=>{
+
+                            // 下发开始
+                            item.loading = true;
+                            item.status = 1;
+
+                            // 一台一台下发
+                            let params = {
+                                hosts: [item.host],
+                                name: items.script.name,
+                                version: items.script.selectedVersion,
+                                key: items.script.zabbixKey,
+                                command: items.script.command
+                            }
+                            
+                            _.delay(()=>{
+                                try{
+                                    let rtn = items.zabbix ? scriptHandler.deployToZabbixAgent(params) : scriptHandler.depotDeploy(params);
+                                    // 下发成功
+                                    if(rtn == 1){
+                                        item.status = 2;
+                                        items.script.fileObj[items.script.selectedVersion]['deployedServers'].push(item.host);
+                                        items.script.status = 1;
+    
+                                        this.tagAdd('未下发', items.script);
+                                        this.tagDelete('已下发', items.script);
+                                    } 
+                                    // 下发失败
+                                    else{
+                                        item.status = 3;
+                                        item.msg = rtn;
+                                    }
+                                    item.loading = false;
+    
+                                } catch(err){
+                                    // 下发失败
+                                    item.status = 3;
+                                    item.loading = false;
+                                    item.msg = err;
+                                    return;
+                                }
+                            },500)
+
+                        })
+                    },
+                    onScriptUnDeployHandler(items){
+                        
+                        var status = 1;
+                        var overStatus = [];
+                        _.forEach(items.rows,(item,index)=>{
+
+                            // 取消下发开始
+                            item.loading = true;
+                            item.status = 1;
+
+                            // 一台一台取消下发
+                            let params = {
+                                hosts: [item.host],
+                                name: items.script.name,
+                                version: items.script.selectedVersion
+                            }
+                            
+                            _.delay(()=>{
+                                try{
+                                    let rtn = items.zabbix ? scriptHandler.unDeployToZabbixAgent(params) : scriptHandler.depotUnDeploy(params);
+                                    // 取消下发成功
+                                    if(rtn == 1){
+                                        item.status = 2;
+                                        items.script.fileObj[items.script.selectedVersion]['deployedServers'] = _.difference(items.script.fileObj[items.script.selectedVersion]['deployedServers'], [item.host]);
+                                        status = 0;
+                                        overStatus[index] = 1;
+                                    } 
+                                    // 取消下发失败
+                                    else{
+                                        item.status = 3;
+                                        overStatus[index] = 0;
+                                        item.msg = rtn;
+                                    }
+                                    item.loading = false;
+
+                                } catch(err){
+                                    // 取消下发失败
+                                    item.status = 3;
+                                    item.loading = false;
+                                    item.msg = err;
+                                    overStatus[index] = 0;
+                                    return;
+                                }
+                            },500)
+
+                        })
+
+                        _.delay(()=>{
+                            this.$set(items.script,'status',status);
+                            if(items.script.status == 0){
+                                this.tagAdd('未下发', items.script);
+                                this.tagDelete('已下发', items.script);
+                            }
+                        }, 500 * items.rows.length + 500)
                     },
                     // 脚本上传
                     onScriptUpload(){
@@ -1540,7 +1692,7 @@ class Probe extends Matrix {
                                         version: '1.0.0',
                                         remark: "",
                                         uploadfile: null,
-                                        tags: ['script','zabbix'],
+                                        tags: ['script'],
                                         command: "",
                                         wnd: wnd
                                     },

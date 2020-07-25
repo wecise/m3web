@@ -741,23 +741,7 @@ Vue.component("mx-fs-info",{
                                     </el-form-item>
                                     
                                     <el-form-item label="标签">
-                                        <el-select
-                                            v-model="model.tags"
-                                            multiple
-                                            filterable
-                                            allow-create
-                                            default-first-option
-                                            class="el-select-tags"
-                                            placeholder="标签"
-                                            @change="onChangeTag"
-                                            @remove-tag="onRemoveTag">
-                                            <el-option
-                                                v-for="tag in model.tags"
-                                                :key="tag"
-                                                :label="tag"
-                                                :value="tag">
-                                            </el-option>
-                                        </el-select>
+                                        <mx-tag domain='files' :model.sync="model.tags" :id="model.id" limit="4"></mx-tag>
                                     </el-form-item>
 
                                 </el-form>
@@ -914,14 +898,6 @@ Vue.component("mx-fs-info",{
                     message: _rtn.message
                 })
             }
-        },
-        onChangeTag(val){
-            let input = {action: "+", tags: val, ids: [this.model.id]};
-            let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
-        },
-        onRemoveTag(val){
-            let input = {action: "-", tags: [val], ids: [this.model.id]};
-            let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
         }
     }
 })
