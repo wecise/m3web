@@ -44,7 +44,11 @@ class Job extends Matrix {
                             dt:{
                                 rows:[],
                                 columns: [],
-                                selected: []
+                                selected: [],
+                                pagination:{
+                                    pageSize: 10,
+                                    currentPage: 1
+                                }
                             },
                             info: []
                         }
@@ -109,7 +113,7 @@ class Job extends Matrix {
                                     </el-header>   
                                     <el-main style="padding:0px;">
                                         <el-table
-                                            :data="dt.rows"
+                                            :data="dt.rows.slice((dt.pagination.currentPage - 1) * dt.pagination.pageSize,dt.pagination.currentPage * dt.pagination.pageSize)"
                                             highlight-current-row="true"
                                             style="width: 100%"
                                             :row-class-name="rowClassName"
@@ -182,7 +186,15 @@ class Job extends Matrix {
                                         </el-table>
                                     </el-main>
                                     <el-footer  style="height:30px;line-height:30px;">
-                                        #{ info.join(' &nbsp; | &nbsp;') }#
+                                        <!--#{ info.join(' &nbsp; | &nbsp;') }#-->
+                                        <el-pagination
+                                            @size-change="onPageSizeChange"
+                                            @current-change="onCurrentPageChange"
+                                            :page-sizes="[10, 15, 20]"
+                                            :page-size="dt.pagination.pageSize"
+                                            :total="dt.rows.length"
+                                            layout="total, sizes, prev, pager, next">
+                                        </el-pagination>
                                     </el-footer>
                                 </el-container>`,
                     filters: {
@@ -204,6 +216,14 @@ class Job extends Matrix {
 
                     },
                     methods: {
+                        onPageSizeChange(val) {
+                            console.log(1,val)
+                            this.dt.pagination.pageSize = val;
+                        },
+                        onCurrentPageChange(val) {
+                            console.log(2,val)
+                            this.dt.pagination.currentPage = val;
+                        },
                         pickFtype(key){
                             
                             let rtn = 'string';
@@ -389,7 +409,7 @@ class Job extends Matrix {
                                                     <el-form-item label="类型" style="font-size:12px;" v-if="mx.global.register.jobs.type[item.type]">#{mx.global.register.jobs.type[item.type][1]}#</el-form-item>
                                                     <el-form-item label="开始时间">#{moment(item.stime).format("YYYY-MM-DD HH:mm:ss")}#</el-form-item>
                                                     <el-form-item label="结束时间">#{moment(item.etime).format("YYYY-MM-DD HH:mm:ss")}#</el-form-item>
-                                                    <el-form-item label="耗时">#{moment(item.etime).from(item.stime,true)}#</el-form-item>
+                                                    <el-form-item label="耗时">#{ item | pickDiff }#</el-form-item>
                                                     <el-form-item label="命令" v-if="item.cmd"><mx-editor :model="item.cmd | pickString" cHeight="200px"></el-form-item>
                                                     <el-form-item label="输出" v-if="item.out"><mx-editor :model="item.out" cHeight="200px"></mx-editor></el-form-item>
                                                     <el-form-item label="错误" v-if="item.err"><mx-editor :model="item.err" cHeight="200px"></mx-editor></el-form-item>
@@ -398,7 +418,17 @@ class Job extends Matrix {
                                             </el-card>
                                         </el-timeline-item>
                                     </el-timeline>
-                                </div>`
+                                </div>`,
+                    filters: {
+                        pickDiff(item){
+                            let timeDiff = moment(item.etime).diff(moment(item.stime), "millisecond");
+                            if(timeDiff > 1000){
+                                return moment(item.etime).diff(moment(item.stime), "seconds") + ' 秒';    
+                            } else {
+                                return timeDiff + ' 毫秒';    
+                            }
+                        }
+                    }
                 })
 
                 // 时间轴
@@ -433,7 +463,7 @@ class Job extends Matrix {
                                                         #{moment(item.etime).format("YYYY-MM-DD HH:mm:ss")}#
                                                     </el-form-item>
                                                     <el-form-item label="耗时">
-                                                        #{moment(item.etime).from(item.stime,true)}#
+                                                        #{ item | pickDiff }#
                                                     </el-form-item>
                                                     <el-form-item label="命令" v-if="item.cmds">
                                                         <mx-editor :model="item.cmds | pickString" cHeight="200px">
@@ -469,6 +499,14 @@ class Job extends Matrix {
                                 }
                             } catch(err){
                                 return '';
+                            }
+                        },
+                        pickDiff(item){
+                            let timeDiff = moment(item.etime).diff(moment(item.stime), "millisecond");
+                            if(timeDiff > 1000){
+                                return moment(item.etime).diff(moment(item.stime), "seconds") + ' 秒';    
+                            } else {
+                                return timeDiff + ' 毫秒';    
                             }
                         }
                     }
@@ -648,15 +686,13 @@ class Job extends Matrix {
                                         <div v-if="item.type==='diagnosis'">
                                             <el-tabs v-model="layout.main.detail.activeIndex" style="background:#ffffff;" class="el-tabs-bottom-line">
                                                 <el-tab-pane v-for="it in item.child" :key="it.name" :label="it.title" :name="it.name">
-                                                    <div v-if="it.type==='detail'">
-                                                        <job-diagnosis-detail :id="it.name+ '-detail'" :model="it.model.detail"></job-diagnosis-detail>
-                                                    </div>
-                                                    <div v-if="it.type==='journal'">
-                                                        <job-diagnosis-journal :model="it.model"></job-diagnosis-journal>
-                                                    </div>
-                                                    <div v-if="it.type==='cmd'">
-                                                        <job-diagnosis-cmd :id="it.name+ '-cmd'" :model="it.model"></job-diagnosis-cmd>
-                                                    </div>
+                                                    
+                                                    <job-diagnosis-detail :id="it.name+ '-detail'" :model="it.model.detail" v-if="it.type==='detail'"></job-diagnosis-detail>
+                                                
+                                                    <job-diagnosis-journal :model="it.model" v-if="it.type==='journal'"></job-diagnosis-journal>
+                                                
+                                                    <job-diagnosis-cmd :id="it.name+ '-cmd'" :model="it.model" v-if="it.type==='cmd'"></job-diagnosis-cmd>
+                                                    
                                                 </el-tab-pane>
                                             </el-tabs>
                                         </div>
@@ -820,7 +856,7 @@ class Job extends Matrix {
                     this.$refs.searchRef.search();
                 },
                 onRefreshByTag(tag){
-                    this.options.term = tag;
+                    this.options.term = `tags=${tag}`;
                     this.$refs.searchRef.search();
                 },
                 hideTabEventViewConsoleUl(){

@@ -229,12 +229,19 @@
 			this.view.list = fsHandler.callFsJScript(`/matrix/view/action.js`, encodeURIComponent(term)).message;
 
 			// 搜索辅助
-			this.suggestions = fsHandler.callFsJScript("/matrix/search/suggestions.js",this.options.api.parent).message;
+			try{
+				this.suggestions = fsHandler.callFsJScript("/matrix/search/suggestions.js",this.options.api.parent).message;
+			} catch(err){
+
+			}
+			
 	    },
 	    mounted(){
 			   
-			// 预搜索
-			this.search();
+			//是否启用自动搜索
+			if(this.options.autoSearch){
+				this.search();
+			}
 
 			// 搜索Button Enter事件
 			$(document).keypress((event)=> {
@@ -260,10 +267,14 @@
 				_.extend(this.$root.options,{ view:{ eidtEnable: true, show: true, value: item.name }});
 			},
 			onFetchSuggestions(queryString, cb){
-				var suggestions = this.suggestions;
-				var results = queryString ? suggestions.filter(this.createFilter(queryString)) : suggestions;
-				// 调用 callback 返回建议列表的数据
-				cb(results);
+				try{
+					var suggestions = this.suggestions;
+					var results = queryString ? suggestions.filter(this.createFilter(queryString)) : suggestions;
+					// 调用 callback 返回建议列表的数据
+					cb(results);
+				} catch(err){
+					
+				}
 			},
 			createFilter(queryString) {
 				return (v) => {
@@ -274,18 +285,6 @@
 				this.search();
 			},
 			search(){
-
-				//是否启用自动搜索
-				if(!this.options.autoSearch){
-					if(_.isEmpty(this.options.term)) {
-						// this.$message({
-						// 	type: "info",
-						// 	message: "请确定搜索关键字！"
-						// })
-						return false;
-					}	
-				}
-				
 
 				// 预设值
 				let ifHistory = this.options.others.ifHistory?"":"#";

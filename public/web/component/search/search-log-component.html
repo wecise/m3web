@@ -170,8 +170,12 @@
 	        }
 	    },
 	    created(){
-            // 搜索辅助
-			this.suggestions = fsHandler.callFsJScript("/matrix/search/suggestions.js",this.options.api.parent).message;
+			try{
+				// 搜索辅助
+				this.suggestions = fsHandler.callFsJScript("/matrix/search/suggestions.js",this.options.api.parent).message;
+			} catch(err){
+
+			}
 	    },
 	    mounted(){
 			   
@@ -192,10 +196,14 @@
 	    },
 	    methods: {
 			onFetchSuggestions(queryString, cb){
-				var suggestions = this.suggestions;
-				var results = queryString ? suggestions.filter(this.createFilter(queryString)) : suggestions;
-				// 调用 callback 返回建议列表的数据
-				cb(results);
+				try{
+					var suggestions = this.suggestions;
+					var results = queryString ? suggestions.filter(this.createFilter(queryString)) : suggestions;
+					// 调用 callback 返回建议列表的数据
+					cb(results);
+				} catch(err){
+					
+				}
 			},
 			createFilter(queryString) {
 				return (v) => {

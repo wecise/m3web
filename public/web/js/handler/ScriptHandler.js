@@ -54,6 +54,7 @@ class ScriptHandler {
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
+                    fsHandler.callFsJScript(`/matrix/depot/setScriptListToCache.js`);
                 }
 
             },
@@ -91,6 +92,7 @@ class ScriptHandler {
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
+                    fsHandler.callFsJScript(`/matrix/depot/setScriptListToCache.js`);
                 }
 
             },
@@ -140,6 +142,7 @@ class ScriptHandler {
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
+                    fsHandler.callFsJScript(`/matrix/depot/setScriptListToCache.js`);
                 }
 
             },
@@ -270,6 +273,7 @@ class ScriptHandler {
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
+                    fsHandler.callFsJScript(`/matrix/depot/setScriptListToCache.js`);
                 }
 
             },
@@ -316,6 +320,7 @@ class ScriptHandler {
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
+                    fsHandler.callFsJScript(`/matrix/depot/setScriptListToCache.js`);
                 }
             },
             error: function(xhr, textStatus, errorThrown){

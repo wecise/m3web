@@ -535,7 +535,7 @@ class OmdbHandler {
 
         try {
             var xhr = new XMLHttpRequest();
-            xhr.open("GET", `/mxobject/export?recursive=true&filetype=${event.filetype}&template=${event.template}&class=${encodeURIComponent(event.class)}&ignoreclass=${encodeURIComponent(event.ignoreClass)}&limit=${event.limit}`, true);
+            xhr.open("GET", `/mxobject/export?recursive=true&relation_defined=${event.ifRelation}&filetype=${event.filetype}&template=${event.template}&class=${encodeURIComponent(event.class)}&ignoreclass=${encodeURIComponent(event.ignoreClass)}&limit=${event.limit}`, true);
             xhr.setRequestHeader("Content-type","text/csv");
             xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
             xhr.onreadystatechange = function() {

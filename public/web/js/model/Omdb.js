@@ -1254,7 +1254,7 @@ class Omdb{
                                                         <textarea rows="10" style="width:98%;white-space:nowrap;" :id="'textarea_'+scope.$index">#{scope.row[item['field']]}#</textarea>
                                                     </el-main>
                                                 </el-container>
-                                                <el-button type="text" icon="el-icon-date" slot="reference">#{ _.size(scope.row[item['field']]) }#</el-button>
+                                                <el-button type="text" slot="reference">#{ _.truncate(scope.row[item['field']], {'length': 24}) }# <i class="el-icon-more-outline"></i></el-button>
                                             </el-popover>
                                             <div v-else-if="_.includes(['map','set','list'],pickFtype(item['field']))">#{JSON.stringify(scope.row[item['field']],null,4)}#</div>
                                             <div v-else>#{scope.row[item['field']]}#</div>
@@ -1985,6 +1985,8 @@ class Omdb{
                                         label: 'class'
                                     },
                                     model: {
+                                        ifCheckStrictly: true,
+                                        ifRelation: true,
                                         ifData: false, 
                                         ifAllData: false,
                                         limit: 10,
@@ -2009,7 +2011,8 @@ class Omdb{
                                 },
                                 template: `<el-container style="height:100%;">
                                                 <el-header style="height:auto;line-height:40px;min-height:40px;background: #f2f3f5;">
-                                                    <el-checkbox v-model="model.ifData" label="导出数据"></el-checkbox>
+                                                    <el-checkbox v-model="model.ifRelation" label="导出关系"></el-checkbox>
+                                                    <el-checkbox v-model="model.ifData" label="导出数据" style="margin-left:20px;"></el-checkbox>
                                                     <p v-if="model.ifData">
                                                         <el-radio-group v-model="model.ifAllData">
                                                             <el-radio :label="true" border>导出所有数据</el-radio>
@@ -2017,6 +2020,7 @@ class Omdb{
                                                         </el-radio-group>
                                                         <el-input-number v-model="model.limit" v-if="!model.ifAllData && model.ifData != -1" style="width:30%;margin-left:10px;"></el-input-number>  
                                                     </p>
+                                                    <el-checkbox v-model="model.ifCheckStrictly" label="节点关联" style="margin-left:20px;float:right;"></el-checkbox>
                                                 </el-header>
                                                 <el-main style="padding:10px;">
                                                     <el-tree
@@ -2024,9 +2028,8 @@ class Omdb{
                                                         ref="classTree"
                                                         show-checkbox
                                                         node-key="class"
-                                                        check-strictly="true"
+                                                        :check-strictly="!model.ifCheckStrictly"
                                                         :default-expanded-keys="[_.first(classList).id]"
-                                                        :default-expanded-keys="[model.class]"
                                                         :props="defaultProps"
                                                         check-on-click-node="true"
                                                         style="background-color:transparent;">

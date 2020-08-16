@@ -924,35 +924,35 @@ class Config {
                 let main = {
                     delimiters: ['#{', '}#'],
                     template:   `<el-container style="height: calc(100vh - 85px);background-color:#f6f6f6;">
-                                    <el-header style="height: 30px;line-height: 30px;background:transparent;border-bottom:1px solid #dddddd; padding: 0px 10px;">
+                                    <el-header style="height: 35px;line-height: 35px;background:transparent;border-bottom:1px solid #dddddd; padding: 0px 10px;">
                                         <el-dropdown placement="top-start" trigger="click">
                                             <el-tooltip content="文件" open-delay="500">
                                                 <el-button type="text" icon="el-icon-menu"></el-button>
                                             </el-tooltip>
                                             <el-dropdown-menu slot="dropdown">
                                                 <el-dropdown-item>
-                                                    <label for="auto-file-upload" class="custom-file-upload" style="border: 1px dashed rgb(204, 204, 204);display: inline-block;padding: 6px 12px;cursor: pointer;">
-                                                        <i class="fas fa-file-import"></i> 导入
+                                                    <label for="auto-file-upload" class="custom-file-upload" style="display: inline-block;padding: 6px 12px;cursor: pointer;">
+                                                        <i class="el-icon-download"></i> 导入
                                                     </label>
                                                     <input id="auto-file-upload" type="file" @change="configImport" required="required" style="display:none;" />
                                                 </el-dropdown-item>
                                                 <el-dropdown-item>
-                                                    <el-button type="text" @click="configExport"><i class="fas fa-file-export"></i> 导出</el-button>
+                                                    <el-button type="text" @click="configExport"><i class="el-icon-upload2"></i> 导出</el-button>
                                                 </el-dropdown-item>
                                             </el-dropdown-menu>
                                         </el-dropdown>
-                                        <el-button-group>
-                                            <el-tooltip content="新增" open-delay="500">
-                                                <el-button type="text" @click="configNew" icon="el-icon-plus"></el-button>
-                                            </el-tooltip>
-                                            <el-tooltip content="删除" open-delay="500">
-                                                <el-button type="text" @click="configDelete" v-show="!_.isEmpty(configTabs.tabs)" icon="el-icon-delete"></el-button>
-                                            </el-tooltip>
-                                            <el-tooltip content="保存" open-delay="500">
-                                                <el-button type="text" @click="configUpdate" v-show="!_.isEmpty(configTabs.tabs)" icon="el-icon-position"></el-button>
-                                            </el-tooltip>
-                                            <!--el-button type="text" @click="configDegug" v-show="!_.isEmpty(configTabs.tabs)" icon="fas fa-tv"></el-button-->
-                                        </el-button-group>
+                                    
+                                        <el-tooltip content="新增" open-delay="500">
+                                            <el-button type="text" @click="configNew"><i class="el-icon-plus" style="color:#000000;font-size:15px;"><i></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="删除" open-delay="500">
+                                            <el-button type="text" @click="configDelete" v-show="!_.isEmpty(configTabs.tabs)"><i class="el-icon-delete" style="color:#ff0000;font-size:15px;"><i></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="保存" open-delay="500">
+                                            <el-button type="text" @click="configUpdate" v-show="!_.isEmpty(configTabs.tabs)"><i class="el-icon-edit-outline" style="color:#009688;font-size:15px;"><i></el-button>
+                                        </el-tooltip>
+                                        <!--el-button type="text" @click="configDegug" v-show="!_.isEmpty(configTabs.tabs)" icon="fas fa-tv"></el-button-->
+                                    
                                         <!--el-dropdown placement="top-start" trigger="click">
                                             <el-tooltip content="模板" open-delay="500">
                                                 <el-button type="text" v-show="!_.isEmpty(configTabs.tabs)" icon="fas fa-boxes"></el-button>
@@ -1025,7 +1025,7 @@ class Config {
                                         </el-container>
                                     </el-main>
                                     <el-footer style="height: 30px;line-height: 30px;padding: 0 10px;">
-                                        <i class="fas fa-user"></i> #{window.SignedUser_UserName}#    <i class="fas fa-clock"></i> #{moment().format("LLL")}# </Footer>
+                                        <i class="el-icon-user"></i> #{window.SignedUser_UserName}#    <i class="el-icon-timer"></i> #{moment().format(mx.global.register.format)}# </Footer>
                                     </el-footer>     
                                 </el-container>`,
                     data: {

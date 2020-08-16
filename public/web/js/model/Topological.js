@@ -2211,16 +2211,6 @@ class Topological {
                     let values = _.map(files,'label');
                     this.$set(this.options.files,'list', files);
                     this.$set(this.options.files,'value', values);
-
-                    // // mark && highlight
-                    // _.delay(()=>{
-                    //     window.$ctx = $(".el-table table");   
-                    //     window.$ctx.unmark({
-                    //         done: ()=>{
-                    //             window.$ctx.mark(this.options.term.split(","), {});
-                    //         }
-                    //     });
-                    // },5000)
                       
                 },
                 onNodeClick(){

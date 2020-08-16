@@ -2782,16 +2782,16 @@ class System {
 													</div>
 													<div v-else>
 														<el-tooltip content="新建组织" open-delay="500" placement="top">
-															<el-button type="text" @click="$parent.$parent.$parent.$parent.$parent.$refs.ldapManage.newGroup(scope.row,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-folder-add"></el-button>
+															<el-button type="text" @click="$parent.$parent.$parent.$parent.$parent.$refs.ldapManage.newGroup(scope.row,$event)" icon="el-icon-folder-add"></el-button>
 														</el-tooltip>
 														<el-tooltip content="新建用户" open-delay="500" placement="top">
-															<el-button type="text" @click="$parent.$parent.$parent.$parent.$parent.$refs.ldapManage.newUser(scope.row,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-plus"></el-button>
+															<el-button type="text" @click="$parent.$parent.$parent.$parent.$parent.$refs.ldapManage.newUser(scope.row,$event)" icon="el-icon-plus"></el-button>
 														</el-tooltip>
 														<el-tooltip content="编辑" open-delay="500" placement="top">
 															<el-button type="text" icon="el-icon-setting"></el-button>
 														</el-tooltip>
 														<el-tooltip content="删除" open-delay="500" placement="top">
-															<el-button type="text" @click="$parent.$parent.$parent.$parent.$parent.$refs.ldapManage.onDeleteUser(scope.row,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-delete" v-if="!_.includes(['/系统组','/'],scope.row.fullname)"></el-button>
+															<el-button type="text" @click="$parent.$parent.$parent.$parent.$parent.$refs.ldapManage.onDeleteUser(scope.row,$event)" icon="el-icon-delete" v-if="!_.includes(['/系统组','/'],scope.row.fullname)"></el-button>
 														</el-tooltip>
 													</div>
 												</template>
@@ -2846,24 +2846,29 @@ class System {
 						},
 						initData(){
 							const self = this;
-							
+							console.log(11,this.model)
 							let init = function(){
 								
-								_.extend(self.dt, {columns: _.map(self.model.columns, function(v){
+								try{
+									_.extend(self.dt, {columns: _.map(self.model.columns, function(v){
+										
+										if(_.isUndefined(v.visible)){
+											_.extend(v, { visible: true });
+										}
+		
+										if(!v.render){
+											return v;
+										} else {
+											return _.extend(v, { render: eval(v.render) });
+										}
+										
+									})});
+		
+									_.extend(self.dt, {rows: self.model.rows});
 									
-									if(_.isUndefined(v.visible)){
-										_.extend(v, { visible: true });
-									}
-	
-									if(!v.render){
-										return v;
-									} else {
-										return _.extend(v, { render: eval(v.render) });
-									}
-									
-								})});
-	
-								_.extend(self.dt, {rows: self.model.rows});
+								} catch(err){
+									console.log(err);
+								}
 							};
 	
 							_.delay(()=>{
@@ -2973,7 +2978,17 @@ class System {
 							},
 							model:{
 								rows: [],
-								columns: []
+								columns: [
+											{"field":"email",title:"邮件", render: `var s=function(row, column, cellValue, index){
+												return cellValue ? cellValue.join(" ") : "";
+											};eval(s);`},
+											{"field":"username",title:"用户名"},
+											{"field":"passwd",title:"口令", visible:false},
+											{"field":"parent",title:"组"},
+											{"field":"isactive",title:"状态", render:`var s=function(row, column, cellValue, index){
+												return cellValue ? "正常" : "禁用";
+											};eval(s);`},
+											{"field":"fullname", title:"操作"}]
 							},
 							byObjectTreeModel: {
 								data: [],
@@ -2989,24 +3004,12 @@ class System {
 							byPropertyTreeNodes: []
 						}
 					},
-					watch: {
-						
-					},
 					created(){
 						eventHub.$on('user-table-select',this.loadByClassTreeNodes);
 						eventHub.$on("user-remove", this.removeUserData);
 						eventHub.$on("byObjectTree-select", this.setByObjectTreeModel)
 						eventHub.$on("byPropertyTree-select", this.setByPropertyTreeModel)
-
-						this.$set(this.model, 'columns', fsHandler.callFsJScript("/matrix/user/getUserListByOrg.js",null).message.columns);
-					},
-					mounted(){
 						
-						this.$nextTick( ()=> {
-
-							
-							
-						})
 					},
 					methods: {
 						loadUserData(event) {
@@ -3163,13 +3166,26 @@ class System {
 				// Grok变量管理
 				Vue.component('grok-manage',{
 					delimiters: ['#{', '}#'],
+					data(){
+						return {
+							dt:{
+								rows: [],
+								columns: [],
+								selected: [],
+								pagination:{
+									pageSize: 10,
+									currentPage: 1
+								}
+							}
+						}
+					},
 					template: 	`<el-container style="height:100%;">
 									<el-header style="height:30px;line-height:30px;">
-										<h4>解析规则</h4>
+										<h4 style="margin:0px;">解析规则</h4>
 									</el-header>
-									<el-main style="height:100%;">
+									<el-main style="height:100%;padding:0px;overflow:hidden;">
 										<el-table
-											:data="dt.rows"
+											:data="dt.rows.slice((dt.pagination.currentPage - 1) * dt.pagination.pageSize,dt.pagination.currentPage * dt.pagination.pageSize)"
 											stripe
 											highlight-current-row
 											fit="true"
@@ -3179,7 +3195,7 @@ class System {
 											@current-change="onSelectionChange">
 											<el-table-column type="index" label="序号" sortable align="center">
 												<template slot-scope="scope">
-													<div style="width:100%; text-align: center;"> <b> #{scope.$index + 1}# </b> </div>
+													<div style="width:100%; text-align: center;"> <b> #{ (scope.$index + 1) + (dt.pagination.currentPage - 1) * dt.pagination.pageSize }# </b> </div>
 												</template>
 											</el-table-column>
 											<!--el-table-column type="selection" align="center">
@@ -3209,23 +3225,31 @@ class System {
 											</el-table-column>
 										</el-table>
 									</el-main>
+									<el-footer style="height:40px;line-height:40px;">
+										<!--#{ info.join(' &nbsp; | &nbsp;') }#-->
+										<el-pagination
+											style="padding: 8px 0px;"
+											@size-change="onPageSizeChange"
+											@current-change="onCurrentPageChange"
+											:page-sizes="[10, 15, 20]"
+											:page-size="dt.pagination.pageSize"
+											:total="dt.rows.length"
+											layout="total, sizes, prev, pager, next">
+										</el-pagination>
+									</el-footer>
 								</el-container>`,
-					data(){
-						return {
-							dt:{
-								rows: [],
-								columns: [],
-								selected: []
-							}
-						}
-					},
 					created(){
 						this.initData();
 					},
-					mounted(){
-						
-					},
 					methods: {
+						onPageSizeChange(val) {
+							console.log(1,val)
+							this.dt.pagination.pageSize = val;
+						},
+						onCurrentPageChange(val) {
+							console.log(2,val)
+							this.dt.pagination.currentPage = val;
+						},
 						rowClassName({row, rowIndex}){
                             return `row-${rowIndex}`;
                         },
@@ -3263,6 +3287,9 @@ class System {
 						}
 					}
 				})
+
+
+				/* * * * * * * * * * * * * * *  应用管理 * * * * * * * * * * * * * * * * * * * * * * * * * * * *  */
 
 				// 应用管理
 				Vue.component('tools-manage',{
@@ -3496,6 +3523,9 @@ class System {
 					}
 				})
 
+
+				/* * * * * * * * * * * * * * *  日历管理 * * * * * * * * * * * * * * * * * * * * * * * * * * * *  */
+
 				// 日历管理
 				Vue.component('calendar-manage',{
 					delimiters: ['${', '}'],
@@ -3669,7 +3699,7 @@ class System {
 											</el-menu-item>
 										</el-menu>
 									</el-aside>
-									<el-main style="padding:0px;" ref="mainView">
+									<el-main style="padding:0px;overflow:hidden;" ref="mainView">
 										<component v-bind:is="currentView" transition="fade" transition-mode="out-in"></component>
 									</el-main>
 								</el-container>  `,

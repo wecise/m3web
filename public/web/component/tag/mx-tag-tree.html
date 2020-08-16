@@ -17,7 +17,8 @@
 				<el-tree 
 					node-key="name"
 					highlight-current="true"
-					:default-expand-all="true"
+					:default-expand-all="false"
+					:default-expanded-keys="defaultExpandedKeys"
 					:data="nodes" 
 					:props="defaultProps" 
 					draggable
@@ -30,7 +31,6 @@
 					@node-drag-end="onDragEnd"
 					@node-drop="onDrop"
 					@node-click="onNodeClick"
-					@node-expand="onNodeExpand"
 					style="background: transparent;"
 					ref="tree">
 					<span slot-scope="{ node, data }" style="width:100%;height:30px;line-height: 30px;"  @mouseenter="onMouseEnter(data)" @mouseleave="onMouseLeave(data)">
@@ -69,6 +69,7 @@
 					label: 'name'
 				},
 				nodes: [],
+				defaultExpandedKeys: [""],
 				nodePath: [],
 				movePath: []
 			}
@@ -80,7 +81,8 @@
 		},
 		mounted() {
 			this.$nextTick(()=> {
-				
+				// 打开指定层级
+				// this.recursiveTraverse(this.nodes);
 			})
 		},
 		methods:{
@@ -93,36 +95,21 @@
 			onMouseLeave(data){
 				this.$set(data, 'show', false)
 			},
-			recursiveTraverse(node) {
+			recursiveTraverse(nodes) {
 
-				let rtn = null;
+				_.forEach(nodes, (v,k)=>{
+					
+					if(k < 1){
+						this.defaultExpandedKeys.push(v.name);
+					} 
 
-				rtn = _.map(node, (v,k)=>{
-					return {cid: v.name, parent:'A2', rtype:'A2', name: v.name, title: v.name, nodes: this.recursiveTraverse(v.nodes), iconSkin: 'el-icon-price-tag',del:false};
-				});
-
-				return rtn;
-			},
-			onNodeExpand(tNode){
-				
-				if(tNode.rtype === 'A2' && tNode.parent == null){
-					let tagDir = tagHandler.getTagDir(this.model.domain);
-					// 忽略第一层
-					_.extend(_.find(this.nodes,{cid:tNode.cid}), {nodes: this.recursiveTraverse(tagDir.nodes)});
-
-					return;
-				}
+					this.recursiveTraverse(v.nodes);
+				})
 
 			},
 			onNodeClick(tNode){
+				console.log(tNode)
 				
-				// 根据标签名过滤列表
-				// if(this.model.domain == 'probe'){
-				// 	this.$root.getProbeListByTag(tNode.name);
-				// } else {
-				// 	this.$root.$refs.scriptView.getScriptListByTag(tNode.name);
-				// }
-
 				this.fun(tNode.name);
 
 			},

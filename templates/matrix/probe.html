@@ -32,8 +32,6 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/search/search-base-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/search/search-preset-component_{{.Lang}}.html"></link>
 
-<link rel="vc" href="{{AppSubUrl}}/web/component/script/script-datatable.html"></link>
-
 <script src="{{AppSubUrl}}/web/vendor/jquery/jquery-migrate-1.1.0.min.js"></script>
 
 <main id="content" class="content">
@@ -201,9 +199,6 @@
 		padding: 0px!important;
 	}
 
-    
-
-
     #job-view-container .el-tabs--border-card {
         border: unset;
     }
@@ -213,6 +208,11 @@
 		background: #ffffff;
 		padding:20px;
 		box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+	}
+
+	/* 重载搜索框按钮样式 */
+	.job-view-header .grid-content.search-base.search-base-component .el-button--default.el-button--small.el-popover__reference.el-button{
+		border-left:2px solid #dddddd;
 	}
 
 </style>

@@ -93,7 +93,8 @@
                         enable: false
                     },
                     callback: {
-                        onClick: this.onClick
+                        onClick: this.onClick,
+                        onExpand: this.onExpand
                     },
                     data: {
                         simpleData: {
@@ -132,23 +133,22 @@
             })
         },
         methods:{
-            init: function () {
-                const self = this;
-
-                if(!_.isEmpty(self.zTree)){
-                    self.zTree.destroy();
+            init() {
+                
+                if(!_.isEmpty(this.zTree)){
+                    this.zTree.destroy();
                 }
 
-                _.delay(function() {
-                    self.initData([{cid: -1, treeNode: null}]);
+                _.delay(()=> {
+                    this.initData([{cid: -1, treeNode: null}]);
                 },500);
 
-                _.delay(function() {
-                    self.initPlugIn();
+                _.delay(()=> {
+                    this.initPlugIn();
                 },2500);
 
             },
-	        initPlugIn: function(){
+	        initPlugIn(){
                 const self = this;
 
                 $("#omdb-class-tree").contextMenu({
@@ -413,10 +413,10 @@
                     if (_.isEmpty(rtn)) {
                         return;
                     }
-                    
+                                  
                     if( v.cid === -1 ) {
 
-                        let _arr = _.map(rtn,(v)=>{ return _.merge(v,{rtype:'A1', open:true, isParent:true})});
+                        let _arr = _.map(rtn,(v)=>{ return _.merge(v,{rtype:'A1', open:false, isParent:true})});
 
                         _.merge(this.zNodes[0],{ children: _arr});
                         
@@ -473,10 +473,14 @@
 
                 return _rtn;
 	        },
-            onClick(event, treeId, treeNode, clickFlisParentag) {
+            onClick( event, treeId, treeNode, clickFlisParentag ) {
+                
                 const self = this;
 
                 self.selectedNode = treeNode;
+
+                // 菜单淡入效果
+                $("#" + treeNode.tId + "_ul").addClass("animated fadeIn");
 
                 if(treeNode.cid === 'A1' && treeNode.rtype === 'A1') {
                     self.initData([{cid: -1, treeNode: null}]);
@@ -701,8 +705,15 @@
 
                 }
 
+                $("#" + treeNode.tId + ".animated.fadeIn").removeClass("animated fadeIn");
+
             },
-            addCountDom: function (treeId, treeNode) {
+            onExpand(event, treeId, treeNode){
+                let zTree = $.fn.zTree.getZTreeObj(this.id);
+                zTree.selectNode(treeNode);
+                $("#"+treeNode.tId+"_a").click();
+            },
+            addCountDom(treeId, treeNode) {
                 const self = this;
                 let aObj = $("#" + treeNode.tId + "_a");
 
@@ -713,10 +724,10 @@
                     }
                 }
             },
-            removeHoverDom: function (treeId, treeNode) {
+            removeHoverDom(treeId, treeNode) {
                 $("#toolbars_"+treeNode.tId).unbind().remove();
             },
-            refresh: function(event) {
+            refresh(event) {
                 const self = this;
 
                 let pNode = self.selectedNode;

@@ -282,10 +282,6 @@ class FsHandler {
 
         let _issys = false;
 
-        /*if(_.startsWith(dstpath,'/extend') || _.startsWith(dstpath,'/script') || _.startsWith(dstpath,'/app') || _.isEqual(dstpath,'/')){
-            _issys = true;
-        }*/
-
         if(window.SignedUser_IsAdmin){
             _issys = true;
         }
@@ -519,17 +515,61 @@ class FsHandler {
     *
     *
     */
-   fsReport(ftype, name, content, attr){
-    let rtn = null;
+    fsReport(ftype, name, content, attr){
+        let rtn = null;
 
-    let _tmp = fsHandler.fsNew(ftype, `/home/${window.SignedUser_UserName}/Documents/report`, name, content, attr);
+        let _tmp = fsHandler.fsNew(ftype, `/home/${window.SignedUser_UserName}/Documents/report`, name, content, attr);
 
-    if(_tmp === 1){
-        rtn = `/home/${window.SignedUser_UserName}/Documents/report/${name}`;
-    }
+        if(_tmp === 1){
+            rtn = `/home/${window.SignedUser_UserName}/Documents/report/${name}`;
+        }
 
-    return rtn;
-};
+        return rtn;
+    };
+
+    /*
+    *   文件系统
+    *
+    *   同步文件系统到本地
+    *
+    *   参数：
+    *
+    *
+    */
+    fsSyncToLocal(item){
+        let rtn = null;
+
+        let url = `/fs/tolocal${item.fullname}`;
+
+        if(window.SignedUser_IsAdmin){
+            url += '?issys=true';
+        }
+
+        jQuery.ajax({
+            url: url,
+            type: 'POST',
+            dataType: "json",
+            async:false,
+            beforeSend: function(xhr) {
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function(data, textStatus, xhr) {
+
+                userHandler.ifSignIn(data);
+
+                if( _.lowerCase(data.status) == "ok"){
+                    rtn = 1;
+                }
+
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                rtn=xhr.responseJSON;
+            }
+        })
+
+        return rtn;
+    };
 
 
     /*

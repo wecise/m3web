@@ -76,7 +76,11 @@ class Probe extends Matrix {
                         dt:{
                             rows:[],
                             columns: [],
-                            selected: []
+                            selected: [],
+                            pagination:{
+                                pageSize: 10,
+                                currentPage: 1
+                            }
                         },
                         info: [],
                         loading: false
@@ -108,7 +112,7 @@ class Probe extends Matrix {
                                 </el-header>   
                                 <el-main style="width:100%;padding:0px;">
                                     <el-table
-                                        :data="dt.rows"
+                                        :data="dt.rows.slice((dt.pagination.currentPage - 1) * dt.pagination.pageSize,dt.pagination.currentPage * dt.pagination.pageSize)"
                                         highlight-current-row="true"
                                         style="width: 100%;"
                                         :row-class-name="rowClassName"
@@ -132,7 +136,8 @@ class Probe extends Matrix {
                                             <template slot-scope="scope">
                                                 <el-container style="width:90%;height:100%;min-height:40vh;background: #f2f3f5;">
                                                     <el-main style="height:100%;">
-                                                        <el-button type="default" v-for="(item,key) in scope.row.depots" style="position:relative;box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);max-width: 12em;width: 12em;height:110px;margin:5px;">
+                                                        <el-button type="default" v-for="(item,key) in scope.row.depots" 
+                                                                style="position:relative;box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);max-width: 12em;width: 12em;height:110px;margin:5px;">
                                                             <i class="el-icon-document" style="font-size:48px;color:#f8a502;"></i>
                                                             <span style="text-align:center;">
                                                                 <p>#{item.name}#</p>
@@ -182,13 +187,13 @@ class Probe extends Matrix {
                                         <el-table-column label="Toe探针" width="120">
                                             <template slot-scope="scope">
                                                 <el-tooltip content="启动" open-delay="500" v-if="scope.row.agentstatus.toe == '1'">
-                                                    <el-button type="success">
-                                                        <i class="el-icon-video-play"></i> 启动中
+                                                    <el-button type="text">
+                                                        启动中
                                                     </el-button>
                                                 </el-tooltip>
                                                 <el-tooltip content="停止" open-delay="500" v-else>
-                                                    <el-button type="danger">
-                                                        <i class="el-icon-video-pause"></i> 停止中
+                                                    <el-button type="text">
+                                                        停止中
                                                     </el-button>
                                                 </el-tooltip>
                                             </template>
@@ -213,7 +218,15 @@ class Probe extends Matrix {
                                     </el-table>
                                 </el-main>
                                 <el-footer  style="height:30px;line-height:30px;">
-                                    #{ info.join(' &nbsp; | &nbsp;') }#
+                                    <!--#{ info.join(' &nbsp; | &nbsp;') }#-->
+                                    <el-pagination
+                                        @size-change="onPageSizeChange"
+                                        @current-change="onCurrentPageChange"
+                                        :page-sizes="[10, 15, 20]"
+                                        :page-size="dt.pagination.pageSize"
+                                        :total="dt.rows.length"
+                                        layout="total, sizes, prev, pager, next">
+                                    </el-pagination>
                                 </el-footer>
                             </el-container>`,
                 filters:{
@@ -222,13 +235,15 @@ class Probe extends Matrix {
                     }
                 },
                 watch: {
-                    model: {
+                    'model.rows': {
                         handler(val,oldVal){
-                            this.initData();
+                            if(val !== oldVal){
+                                this.dt.rows = [];
+                                this.initData();
+                            }
                             this.layout();
                         },
-                        deep:true,
-                        immediate:true
+                        deep:true
                     },
                     dt: {
                         handler(val,oldVal){
@@ -245,6 +260,12 @@ class Probe extends Matrix {
                     
                 },
                 methods: {
+                    onPageSizeChange(val) {
+                        this.dt.pagination.pageSize = val;
+                    },
+                    onCurrentPageChange(val) {
+                        this.dt.pagination.currentPage = val;
+                    },
                     layout(){
                         let doLayout = ()=>{
                             if($(".el-table-column--selection",this.$el).is(':visible')){
@@ -278,6 +299,10 @@ class Probe extends Matrix {
                             })});
 
                             _.extend(self.dt, {rows: self.model.rows});
+
+                            _.forEach(self.dt.rows,(v)=>{
+                                self.$set(v, 'expand', false);
+                            })
                         };
 
                         _.delay(()=>{
@@ -324,30 +349,35 @@ class Probe extends Matrix {
 
                         const self = this;
                         var loadData = function(){
-                            // 根据depot名称列表，获取脚本信息
-                            let depots = {};
-                            _.forEach(row.depot,(v,k)=>{
-                                let value = JSON.parse(v);
-                                let versions = _.map(value,'version');
-                                let scriptObj = _.map(versions,(val)=>{
-                                    return scriptHandler.depotGet({name:k,version:val});
+                           try{
+                                // 根据depot名称列表，获取脚本信息
+                                let depots = {};
+                                _.forEach(row.depot,(v,k)=>{
+                                    let value = JSON.parse(v);
+                                    let versions = _.map(value,'version');
+                                    let scriptObj = _.map(versions,(val)=>{
+                                        return scriptHandler.depotGet({name:k,version:val});
+                                    })
+                                    _.extend(depots, {[k]:scriptObj[0]});
                                 })
-                                _.extend(depots, {[k]:scriptObj[0]});
-                            })
 
-                            self.$set(row, 'depots', depots);
+                                self.$set(row, 'depots', depots);
+                            } catch(err){
+                                console.log(err)
+                            } finally {
+                                _.extend(row, { activeTab: 'probe' } );
+                            }
                         };
 
                         loadData();
 
                         if( !_.isUndefined(row.depots) ){
                             _.delay(()=>{
-                                self.$refs.table.toggleRowExpansion(row);
-                                self.$set(row,'loading',false);
-                                self.$set(row, 'expand', !row.expand);
-                            },1000)
+                                this.$refs.table.toggleRowExpansion(row);
+                                this.$set(row,'loading',false);
+                                this.$set(row, 'expand', !row.expand);
+                            },500)
                         } else {
-                            console.log(_.now())
                             setTimeout( loadData, 50 );
                         }
 
@@ -487,7 +517,11 @@ class Probe extends Matrix {
                         dt:{
                             rows:[],
                             columns: [],
-                            selected: []
+                            selected: [],
+                            pagination:{
+                                pageSize: 10,
+                                currentPage: 1
+                            }
                         },
                         servers: {
                             list: [],
@@ -549,9 +583,9 @@ class Probe extends Matrix {
                                         </el-button>
                                     </el-tooltip>
                                 </el-header>   
-                                <el-main style="width:100%;padding:0px;">
+                                <el-main style="width:100%;padding:0px;overflow:hidden;">
                                     <el-table
-                                        :data="dt.rows"
+                                        :data="dt.rows.slice((dt.pagination.currentPage - 1) * dt.pagination.pageSize,dt.pagination.currentPage * dt.pagination.pageSize)"
                                         highlight-current-row="true"
                                         style="width: 100%"
                                         :row-class-name="rowClassName"
@@ -870,8 +904,16 @@ class Probe extends Matrix {
                                         </el-table-column>
                                     </el-table>
                                 </el-main>
-                                <el-footer  style="height:30px;line-height:30px;">
-                                    #{ info.join(' &nbsp; | &nbsp;') }#
+                                <el-footer style="height:30px;line-height:30px;">
+                                    <!--#{ info.join(' &nbsp; | &nbsp;') }#-->
+                                    <el-pagination
+                                        @size-change="onPageSizeChange"
+                                        @current-change="onCurrentPageChange"
+                                        :page-sizes="[10, 15, 20]"
+                                        :page-size="dt.pagination.pageSize"
+                                        :total="dt.rows.length"
+                                        layout="total, sizes, prev, pager, next">
+                                    </el-pagination>
                                 </el-footer>
                             </el-container>`,
                 filters: {
@@ -932,6 +974,14 @@ class Probe extends Matrix {
                     })
                 },
                 methods: {
+                    onPageSizeChange(val) {
+                        console.log(1,val)
+                        this.dt.pagination.pageSize = val;
+                    },
+                    onCurrentPageChange(val) {
+                        console.log(2,val)
+                        this.dt.pagination.currentPage = val;
+                    },
                     layout(){
                         let doLayout = ()=>{
                             if($(".el-table-column--selection",this.$el).is(':visible')){
@@ -986,7 +1036,7 @@ class Probe extends Matrix {
                         }
                     },
                     getServerList(){
-                        let rtn = fsHandler.callFsJScript("/matrix/probe/getServerList.js",null).message;
+                        let rtn = fsHandler.callFsJScript("/matrix/depot/getServerList.js",null).message;
                         this.$set(this.servers,'list', rtn);
                     },
                     pickFiles(row){
@@ -1278,8 +1328,16 @@ class Probe extends Matrix {
                                         this.$set(this.row, 'newVersion', this.row.newVersion);
                                         this.$set(this.row, 'type', 'M');
 
-                                        console.log(this.row)
-                                        scriptHandler.updateDepotFileContent(this.row);    
+                                        scriptHandler.updateDepotFileContent(this.row);
+
+                                        _.delay(()=>{
+                                            this.$message({
+                                                type:"success",
+                                                message: "文件更新成功！"
+                                            })
+                                            this.control.form.show = false;
+                                            wnd.close();
+                                        },500)
                                         
                                     }).catch(()=>{
 
@@ -1328,7 +1386,7 @@ class Probe extends Matrix {
                                     let term = {name:row.name, version:val};
                                     
                                     // 查询该版本是否是下发版本
-                                    ifDeployed = fsHandler.callFsJScript("/matrix/probe/getScriptDeployVersion.js", encodeURIComponent(JSON.stringify(term))).message;
+                                    ifDeployed = fsHandler.callFsJScript("/matrix/depot/getScriptDeployVersion.js", encodeURIComponent(JSON.stringify(term))).message;
     
                                     // 如果是下发版本，获取下发服务器信息
                                     let v = {};
@@ -1600,8 +1658,8 @@ class Probe extends Matrix {
                                         items.script.fileObj[items.script.selectedVersion]['deployedServers'].push(item.host);
                                         items.script.status = 1;
     
-                                        this.tagAdd('未下发', items.script);
-                                        this.tagDelete('已下发', items.script);
+                                        this.tagAdd('已下发', items.script);
+                                        this.tagDelete('未下发', items.script);
                                     } 
                                     // 下发失败
                                     else{
@@ -1692,7 +1750,7 @@ class Probe extends Matrix {
                                         version: '1.0.0',
                                         remark: "",
                                         uploadfile: null,
-                                        tags: ['script'],
+                                        tags: [],
                                         command: "",
                                         wnd: wnd
                                     },
@@ -1909,7 +1967,7 @@ class Probe extends Matrix {
                                         <el-header style="height:120px;padding:0px;">
                                             <probe-card-component :model="model.summary"></probe-card-component>
                                         </el-header>
-                                        <el-main style="padding:0px;">
+                                        <el-main style="padding:0px;overflow:hidden;">
                                             <probe-manage :model="model.list"></probe-manage>
                                         </el-main>
                                     </el-container>
@@ -1948,39 +2006,79 @@ class Probe extends Matrix {
                 data(){
                     return {
                         model: {},
-                        splitInst: null
+                        splitInst: null,
+                        options: {
+                            // 视图定义
+                            view: {
+                                eidtEnable: false,
+                                show: false,
+                                value: "all"
+                            },
+                            // 搜索窗口
+                            window: { name:"所有", value: ""},
+                            // 输入
+                            term: "",
+                            autoSearch: true,
+                            // 指定类
+                            class: "#/matrix/system/depot:",
+                            // 指定api
+                            api: {parent: "depot",name: "getScriptList.js"},
+                            // 其它设置
+                            others: {
+                                // 是否包含历史数据
+                                ifHistory: false,
+                                // 是否包含Debug信息
+                                ifDebug: false,
+                                // 指定时间戳
+                                forTime:  ' for vtime ',
+                            }
+                        }
                     }
                 },
                 template: `<el-container style="height:calc(100vh - 145px);width:100%;">
                                 <el-aside ref="leftView" style="background:#f2f3f5;margin: -10px 0px -10px -10px;">
-                                    <mx-tag-tree :model="{parent:'/probe',name:'script_tree_data.js',domain:'script'}" :fun="onRefreshByTag" ref="scriptTagTree"></mx-tag-tree>
+                                    <mx-tag-tree :model="{parent:'/depot',name:'script_tree_data.js',domain:'script'}" :fun="onRefreshByTag" ref="scriptTagTree"></mx-tag-tree>
                                 </el-aside>
-                                <el-main style="padding:0px;width:100%;" ref="mainView">
+                                <el-main style="padding:0px;width:100%;overflow:hidden;" ref="mainView">
                                     <el-container style="height:100%;">
-                                        <el-main style="padding:0px;width:100%;">
+                                        <el-header class="job-view-header" style="height: 40px;line-height: 40px;padding: 0px;">
+                                            <search-base-component :options="options"
+                                                                ref="searchRef"
+                                                                class="grid-content"></search-base-component>
+                                        </el-header>
+                                        <el-main style="padding:10px 0 0 0;width:100%;overflow:hidden;">
                                             <script-manage :model="model.list" ref="scriptManageRef"></script-manage>
                                         </el-main>
                                     </el-container>
                                 </el-main>
                             </el-container>`,
-                created(){
-                    this.getScriptList();
-                },
                 mounted(){
                     this.$nextTick().then(()=>{
                         
                         let init = ()=>{
                             if($(this.$refs.scriptManageRef.$el).is(':visible')){
-                                this.getScriptList();
                                 this.initSplitH();
                             } else {
                                 setTimeout(init,50);
                             }
                         }
                         init();
+
+                        // 数据设置
+                        this.setData();
+
+                        // watch数据更新
+                        this.$watch(
+                            "$refs.searchRef.result",(val, oldVal) => {
+                                this.setData();
+                            }
+                        );
                     })   
                 },
                 methods: {
+                    setData(){
+                        this.$set(this.model, 'list', this.$refs.searchRef.result.list);
+                    },
                     initSplitH(){
                         this.splitInst = Split([this.$refs.leftView.$el, this.$refs.mainView.$el], {
                             sizes: [20, 80],
@@ -1991,16 +2089,15 @@ class Probe extends Matrix {
                             direction: 'horizontal',
                             expandToMin: true
                         });
-                        _.delay(()=>{
-                            $(this.$refs.leftView.$el).toggle();
-                        },10)
+                        
                     },
                     // 获取所有脚本列表
                     getScriptList(){
-                        this.model = fsHandler.callFsJScript("/matrix/probe/getScriptList.js").message;
+                        this.$refs.searchRef.search();
                     },
                     onRefreshByTag(tag){
-                        this.model = fsHandler.callFsJScript("/matrix/probe/getScriptList.js", encodeURIComponent(tag)).message;
+                        this.options.term = `tags=${tag}`;
+                        this.$refs.searchRef.search();
                     },
                     onToggle(){
                         $(this.$refs.leftView.$el).toggle();
