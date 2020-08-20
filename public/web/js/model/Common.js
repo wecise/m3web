@@ -322,10 +322,15 @@ Vue.component("mx-fs-editor",{
         },
         onCloseTab(){
             if(!_.isEmpty(this.tabs.activeIndex)){
+                
+                // 检查是否做过修改
+                
                 this.tabRemove(this.tabs.activeIndex);
             }
         },
         onCloseWin(){
+            // 检查是否做过修改
+
             this.winContainer.close();
         },
         onReload(){

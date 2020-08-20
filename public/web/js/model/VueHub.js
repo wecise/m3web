@@ -68,5 +68,6 @@ setInterval(()=>{
     $(".el-checkbox-group > label").addClass("el-checkbox");
     $(".el-radio-group > label").addClass("el-radio");
     $("i[class^='elicon']").css("font-size","14px");
+    $(".ElTreeNode").removeClass("ElTreeNode");
 //    $(".el-tabs__nav.is-left > div:eq(0)").addClass("el-tabs__active-bar");
 },50)

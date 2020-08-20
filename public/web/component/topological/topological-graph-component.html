@@ -799,8 +799,8 @@
                                 strokeWidth: 1,
                                 strokeColor: '#333333',
                                 value: {
-                                        name: 'straight', cnTitle:'直线', title:'isometricEdgeStyle', keys:[mxConstants.STYLE_EDGE, mxConstants.STYLE_CURVED, mxConstants.STYLE_NOEDGESTYLE], values:[null, null, null]
-                                },
+                                        name: 'isometric1', cnTitle:'等距1', title:'isometricEdgeStyle', keys:[mxConstants.STYLE_EDGE, mxConstants.STYLE_ELBOW, mxConstants.STYLE_CURVED, mxConstants.STYLE_NOEDGESTYLE], values:['isometricEdgeStyle', null, null, null]
+                                    },
                                 list: [
                                     {
                                         name: 'straight', cnTitle:'直线', title:'isometricEdgeStyle', keys:[mxConstants.STYLE_EDGE, mxConstants.STYLE_CURVED, mxConstants.STYLE_NOEDGESTYLE], values:[null, null, null]
@@ -1583,7 +1583,7 @@
                                 }
                                 // render:url
                                 else {
-                                    if(window.COMPANY_OSPACE == 'hdim'){
+                                    if( _.includes(mx.global.register.topological.contextMenu.white, window.COMPANY_OSPACE) ){
                                         vars[v.name] = menu.addItem(v.title,null,()=>{
                                             this.processHandler(node,v);
                                         },submenuAction);
@@ -1592,7 +1592,7 @@
                                 
                             })
 
-                            if(window.COMPANY_OSPACE == 'hdim'){
+                            if( _.includes(mx.global.register.topological.contextMenu.white, window.COMPANY_OSPACE) ){
                                 menu.addItem('同行同住', null, ()=>{
                                     let rtn = fsHandler.callFsJScript("/bizApi/hdim/getSameRecordGraphByPeople.js", encodeURIComponent(cell.getValue())).message.data;
                                     this.loadSubGraphBySameRecord({
@@ -1720,7 +1720,7 @@
                         
                         menu.addSeparator();
 
-                        menu.addItem('删除边', null, (evt)=>{
+                        menu.addItem('隐藏边', null, (evt)=>{
                             this.deleteSelectedCells(graph,evt != null && mxEvent.isShiftDown(evt));
                         });
                     }
@@ -1943,7 +1943,7 @@
                             
                             let source = graph.getModel().getCell(k.source);
                             let target = graph.getModel().getCell(k.target);
-
+                            
                             let baseEdgeStyle = `edgeStyle=${this.model.graph.style.edge.value.title};html=1;rounded=1;jettySize=auto;orthogonalLoop=1;endArrow=block;endFill=1;`;
                             let direction = '';
 
@@ -2910,6 +2910,9 @@
                 
                 // 缓存最后一次布局
                 localStorage.setItem("GRAPH-LAYOUT",layout.default);
+
+                // 设置为指定样式
+                this.onEdgeStyleChange(this.model.graph.style.edge.value);
 
                 
             },

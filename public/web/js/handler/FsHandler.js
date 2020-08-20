@@ -586,7 +586,13 @@ class FsHandler {
 
         let _srcpath = srcpath.replace(/\/\//g,'/');
 
-        let fileName = `${window.location.host}_${window.COMPANY_OSPACE}_${_.last(srcpath.split("/"))}_${moment().format("YYYY-MM-DD HH:mm:SS")}.zip`;
+        let fileName = "";
+        
+        if( srcpath == '/' ){
+            fileName = `${window.location.host}_${window.COMPANY_OSPACE}_dfs_${moment().format("YYYY-MM-DD hh:mm:SS")}.zip`;
+        } else {
+            fileName = `${window.location.host}_${window.COMPANY_OSPACE}_${_.last(srcpath.split("/"))}_${moment().format("YYYY-MM-DD hh:mm:SS")}.zip`;
+        }
 
         if(window.SignedUser_IsAdmin){
             _issys = true;

@@ -898,7 +898,7 @@
                                                             @keyup.enter.native="$event.target.blur"
                                                             @blur.self="onRename(scope.row, scope.$index)" :ref="'input_'+scope.row.id"></el-input>
                                                     </el-link>
-                                                    <el-link type="info" :underline="false" @dblclick.native.prevent="forward(scope.row)" @click.native.prevent="onSetFocus(scope.row)" v-show="!scope.row.editable">
+                                                    <el-link type="info" :underline="true" @dblclick.native.prevent="forward(scope.row)" @click.native.prevent="onSetFocus(scope.row)" v-show="!scope.row.editable">
                                                         #{scope.row.name}#
                                                     </el-link>
                                                     
@@ -2216,32 +2216,6 @@
 
                                 }
     
-                                // let app = {
-                                //     cnname: me.app.cnname,
-                                //     enname: me.app.enname,
-                                //     icon: me.app.icon.value.replace(/\/fs\/assets\/images\/apps\/png\//,'').replace(/\?type=download&issys=true/,''),
-                                //     seat: me.app.seat,
-                                //     url: me.app.url
-                                // };
-    
-                                // let rtn = fsHandler.callFsJScript("/matrix/apps/app.js",encodeURIComponent(JSON.stringify(app)));
-                                // if( _.lowerCase(rtn.status) == "ok"){
-                                //     alertify.success("应用发布成功");
-                                //     eventHub.$emit("APP-REFRESH-EVENT");
-    
-                                //     $("ul.nav").find("li>a[title='应用']").popover({
-                                //         container: "body",
-                                //         title: "",
-                                //         content: `${me.app.cnname} 应用发布成功！`
-                                //     }).popover('show');
-    
-                                //     _.delay(function(){
-                                //         $("ul.nav").find("li>a[data-original-title='应用']").popover('destroy');
-                                //     },8000)
-    
-    
-                                //     wnd.close();
-                                // }
                             },
                             cancel:function(){
                                 wnd.close();
@@ -2259,9 +2233,11 @@
                             window.jsPanel.activePanels.getPanel(`jsPanel-editor`).front();
                             window.editorApp.$refs.fsEditor.tabAdd(node);
                         } 
-                    } catch(err){
+                    } catch(err) {
+
                         // 打开窗体
                         let win = maxWindow.winEditor("M³ Devops", `<div id="fs-editor-template" style="width: 100%;height: 100%;"></div>`, null, null);
+                        
                         // vue组件实例化
                         window.editorApp = new Vue({
                             data: {
@@ -2271,6 +2247,15 @@
                             },  
                             template: `<mx-fs-editor :model="model" :root="this.root" :winContainer="win" ref="fsEditor"></mx-fs-editor>`
                         }).$mount(`#fs-editor-template`);
+
+                        /* $(document).on('jspanelstatuschange', (event, id)=> {
+                            if( id === "jsPanel-editor" ) {
+                                var status = $('#' + id).data('status') || 'beforeclose';
+                                if(status == 'beforeclose'){
+                                    
+                                }
+                            }
+                        }); */
                         
                     } 
     
@@ -2360,18 +2345,6 @@
                     }).catch(() => {
                             
                     }); 
-
-                    // alertify.confirm(`确认要导出 ${path} 目录下的所有文件?`, function (e) {
-                    //     if (e) {
-                    //         fsHandler.fsZip(path);
-                    //         self.$message({
-                    //             type: "info",
-                    //             message: "导出操作将提交至后台，请稍后。。。"
-                    //         })
-                    //     } else {
-                            
-                    //     }
-                    // });
     
                 },
                 importIt(event) {
@@ -2411,28 +2384,6 @@
                             
                     }); 
                     
-                    // alertify.confirm(`确认要导入 ${file.name} 文件，导入后将覆盖原有文件，请确认！<br><br>
-                    //                     文件名称：${file.name}<br><br>
-                    //                     修改时间：${file.lastModifiedDate}<br><br>
-                    //                     文件大小：${mx.bytesToSize(file.size)}`, function (e) {
-                    //     if (e) {
-                    //         let rtn = fsHandler.fsUnZip(self.rootPath, file);
-
-                    //         self.$message({
-                    //             type: "info",
-                    //             message: "导入操作将提交至后台，请稍后。。。"
-                    //         })
-
-                    //         if(rtn == 1){
-                    //             self.load();
-                    //         }
-                    //     } else {
-                            
-                    //     }
-    
-                    //     event.target.value = null;
-    
-                    // });
                 },
                 syncIt(){
                     const self = this

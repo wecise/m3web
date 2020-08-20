@@ -49,7 +49,7 @@ class UserHandler{
 
             },
             error: function (xhr, textStatus, errorThrown) {
-                console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseText);
+                rtn = xhr.responseText;
             }
 
         })
@@ -89,13 +89,61 @@ class UserHandler{
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
-                    alertify.success("用户添加成功" + " " + moment().format("LLL"));
                 }
 
             },
             error: function (xhr, textStatus, errorThrown) {
-                return 0;
-                console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseText);
+                rtn = xhr.responseText;
+            }
+
+        })
+
+        return rtn;
+
+    };
+
+    /* 
+        用户更新
+    */
+    userUpdate(event,token) {
+        let rtn = 0;
+
+        let form = new FormData();
+        form.append("email", event.email);
+        form.append("isactive", event.isactive);
+        form.append("isadmin", event.isadmin);
+        
+
+        jQuery.ajax({
+            url: `/admin/users/${event.id}`,
+            dataType: 'json',
+            type: 'POST',
+            processData: false,
+            contentType: false,
+            mimeType: "multipart/form-data",
+            async: false,
+            data: form,
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("X-Csrf-Token", token);
+                // Pace.restart();
+            },
+            complete: function (xhr, textStatus) {
+                // 初始化新用户文件系统
+                if(event.otype == 'usr'){
+                    userHandler.userFsInit(event.username);
+                }
+            },
+            success: function (data, status) {
+
+                userHandler.ifSignIn(data);
+
+                if( _.lowerCase(data.status) == "ok"){
+                    rtn = 1;
+                }
+
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                rtn = xhr.responseText;
             }
 
         })
@@ -196,14 +244,11 @@ class UserHandler{
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
-                    alertify.success("成功" + " " + moment().format("LLL"));
                 }
 
             },
             error: function(xhr, textStatus, errorThrown) {
-                rtn = 0;
-                alertify.error("失败" + " " + xhr.responseText);
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+                rtn = xhr.responseText;
             }
         });
         return rtn;
@@ -246,13 +291,13 @@ class UserHandler{
             dataType: 'json',
             type: 'POST',
             async: false,
-            data: { name:  event.name, parent: "", member: event.ids },
+            data: { name:  event.name, parent: event.parent, member: event.member },
             beforeSend:function(xhr){
             },
             complete: function(xhr, textStatus) {
             },
             success: function (data, status) {
-
+                
                 userHandler.ifSignIn(data);
 
                 if( _.lowerCase(data.status) == "ok"){
@@ -268,21 +313,23 @@ class UserHandler{
     };
 
     /* Delete group permissions */
-    deleteGroupPermissions(event) {
+    deleteGroupPermissions(event,token) {
         let rtn = null;
-
-
+        
         jQuery.ajax({
             url: `/admin/perms/group/${event.id}`,
             dataType: 'json',
-            type: 'POST',
+            type: 'DELETE',
+            processData: false,
+            contentType: false,
             async: false,
             beforeSend:function(xhr){
+                xhr.setRequestHeader("X-Csrf-Token", token);
             },
             complete: function(xhr, textStatus) {
             },
             success: function (data, status) {
-
+                
                 userHandler.ifSignIn(data);
 
                 if( _.lowerCase(data.status) == "ok"){
@@ -361,7 +408,6 @@ class UserHandler{
     /* Get group permissions list by parent */
     getGroupPermissionsById(event) {
         let rtn = null;
-
 
         jQuery.ajax({
             url: `/admin/perms/group?parent=${event.id}`,

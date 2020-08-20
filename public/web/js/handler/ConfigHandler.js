@@ -132,12 +132,9 @@ class ConfigHandler {
     *  Config Export From ETCD
     *
     */
-    configExport(key) {
-        let rtn = 0;
-
+    configExport(key,el) {
+        
         let fileName = `ETCD${key}_${moment().format("YYYY-MM-DD_HH:mm:SS")}.json`;
-
-        // Pace.restart();
 
         try {
             var xhr = new XMLHttpRequest();
@@ -148,8 +145,10 @@ class ConfigHandler {
                 if (xhr.readyState == 4 && xhr.status == 200) {
                     var blob = new Blob([xhr.response], {type: "octet/stream"});
                     saveAs(blob, fileName);
-                    alertify.success("导出成功" + " " + fileName);
-                    rtn = 1;
+                    el.$message({
+                        type: "success",
+                        message: "配置导出成功 " + fileName
+                    })  
                 }
             }
             xhr.responseType = "arraybuffer";
@@ -158,7 +157,6 @@ class ConfigHandler {
             
         }
         
-        return rtn;
     }
 
     /*

@@ -1653,7 +1653,7 @@ class Window {
                 
                 $(".jsPanel").css({
                     "position":"absolute",
-                    "z-index": "10001"
+                    "z-index": "100"
                 });
 
                 this.find(".jsPanel-headerbar",this).css({

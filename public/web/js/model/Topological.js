@@ -1648,20 +1648,24 @@ class Topological {
                     }
                 }
             },
-            template:   `<el-card :body-style="{ padding: '10px' }" v-show="model.rows.length">
-                            <el-image style="width: 100px; height: 100px" :src="model | pickIcon" fit="scale-down" @error="onErrorPickIcon"></el-image>
-                            <el-form label-position="left" label-width="80px" class="form-no-border">
-                                <el-form-item :label="key" v-for="(value,key) in model.rows[0]" style="margin-bottom: 10px;">
-                                    <el-select v-model="value" placeholder="选择关系类型" @change="onEdgeChange" v-if="key==='value'">
-                                        <el-option v-for="item in edges.list" 
-                                            :key="item.name"
-                                            :value="item.name"
-                                            :label="item.remedy"></el-option>
-                                    </el-select>
-                                    <el-input type="text" :value="value"  v-else></el-input>
-                                </el-form-item>
-                            </el-form>
-                        </el-card>`,
+            template:   `<el-container style="height:100%;">
+                            <el-main>
+                                <el-card :body-style="{ padding: '10px' }" v-show="model.rows.length">
+                                    <el-image style="width: 100px; height: 100px" :src="model | pickIcon" fit="scale-down" @error="onErrorPickIcon"></el-image>
+                                    <el-form label-position="left" label-width="80px" class="form-no-border">
+                                        <el-form-item :label="key" v-for="(value,key) in model.rows[0]" style="margin-bottom: 10px;">
+                                            <el-select v-model="value" placeholder="选择关系类型" @change="onEdgeChange" v-if="key==='value'">
+                                                <el-option v-for="item in edges.list" 
+                                                    :key="item.name"
+                                                    :value="item.name"
+                                                    :label="item.remedy"></el-option>
+                                            </el-select>
+                                            <el-input type="text" :value="value"  v-else></el-input>
+                                        </el-form-item>
+                                    </el-form>
+                                </el-card>
+                            </el-main>
+                        </el-container>`,
             filters: {
                 pickIcon(evt){
                     try {

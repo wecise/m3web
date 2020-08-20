@@ -511,21 +511,27 @@ class Config {
                             }
                         },
                         onReset(){
-                            const self = this;
+                            const h = this.$createElement;
+                            this.$msgbox({
+                                    title: `确认要删除下列数据`, 
+                                    message: h( 'span', null, _.map(this.selectedRows, (v)=>{ return h('p',null, v.id); }) ),
+                                    showCancelButton: true,
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                    type: 'warning'
+                            }).then(() => {
 
-                            alertify.confirm(`确认要删除下列数据?<br><br>
-                                            ${_.map(self.selectedRows,'id').join("<br><br>")}`, function (e) {
-                                if (e) {
-                                    let item = {class:"/matrix/", ids: _.map(self.selectedRows,'id').join("', '"), ifDeleteVersionData: self.ifDeleteVersionData};
-                                    let act = fsHandler.callFsJScript("/matrix/config/action-by-delete.js",encodeURIComponent(JSON.stringify(item))).message;
-                                    _.delay(()=>{
-                                        let rtn = fsHandler.callFsJScript("/matrix/config/data-by-name.js", encodeURIComponent(self.model.name)).message;
-                                        self.rows = rtn.rows;
-                                    })
-                                } else {
+                                let item = {class:"/matrix/", ids: _.map(this.selectedRows,'id').join("', '"), ifDeleteVersionData: this.ifDeleteVersionData};
+                                let act = fsHandler.callFsJScript("/matrix/config/action-by-delete.js",encodeURIComponent(JSON.stringify(item))).message;
+                                _.delay(()=>{
+                                    let rtn = fsHandler.callFsJScript("/matrix/config/data-by-name.js", encodeURIComponent(this.model.name)).message;
+                                    this.rows = rtn.rows;
+                                })
+
+                            }).catch(() => {
                                     
-                                }
-                            });
+                            }); 
+                            
                         },
                         onLoad(){
                             let rtn = fsHandler.callFsJScript("/matrix/config/data-by-name.js", encodeURIComponent(this.model.name)).message;
@@ -942,12 +948,12 @@ class Config {
                                             </el-dropdown-menu>
                                         </el-dropdown>
                                     
-                                        <el-tooltip content="新增" open-delay="500">
+                                        <!--el-tooltip content="新增" open-delay="500">
                                             <el-button type="text" @click="configNew"><i class="el-icon-plus" style="color:#000000;font-size:15px;"><i></el-button>
-                                        </el-tooltip>
-                                        <el-tooltip content="删除" open-delay="500">
+                                        </el-tooltip-->
+                                        <!--el-tooltip content="删除" open-delay="500">
                                             <el-button type="text" @click="configDelete" v-show="!_.isEmpty(configTabs.tabs)"><i class="el-icon-delete" style="color:#ff0000;font-size:15px;"><i></el-button>
-                                        </el-tooltip>
+                                        </el-tooltip-->
                                         <el-tooltip content="保存" open-delay="500">
                                             <el-button type="text" @click="configUpdate" v-show="!_.isEmpty(configTabs.tabs)"><i class="el-icon-edit-outline" style="color:#009688;font-size:15px;"><i></el-button>
                                         </el-tooltip>
@@ -1079,40 +1085,56 @@ class Config {
                             }
                         },
                         configImport(event){
-                            const self = this;
-
+                            
                             let file = event.target.files[0];
+                            const h = this.$createElement;
 
-                            alertify.confirm(`确认要导入配置?<br><br>
-                                                文件名称：${file.name}<br><br>
-                                                修改时间：${file.lastModifiedDate}<br><br>
-                                                文件大小：${mx.bytesToSize(file.size)}`, function (e) {
-                                if (e) {
-                                    let rtn = configHandler.configImport(file,null);
+                            this.$msgbox({
+                                    title: `确认要导入配置`, 
+                                    message: h('span', null, [
+                                        h('p', null, `文件名称：${file.name}`),
+                                        h('p', null, `修改时间：${file.lastModifiedDate}`),
+                                        h('p', null, `文件大小：${mx.bytesToSize(file.size)}`)
+                                    ]),
+                                    showCancelButton: true,
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                    type: 'warning'
+                            }).then(() => {
 
-                                    if(rtn === 1){
-                                        eventHub.$emit("CONFIG-TREE-REFRESH-EVENT", '/');
-                                    }
-                                } else {
-                                    
+                                let rtn = configHandler.configImport(file,null);
+
+                                if(rtn == 1){
+                                    eventHub.$emit("CONFIG-TREE-REFRESH-EVENT", '/');
                                 }
-                            });
+
+                            }).catch(() => {
+                                    
+                            }); 
+                                        
                         },
                         configExport(){
-                            const self = this;
-
-                            if(!self.configTreeSelectedNode.key){
-                                alertify.log("请选择需要导出的节点!");
+                            
+                            if(!this.configTreeSelectedNode.key){
+                                this.$message({
+                                    type: "info",
+                                    message: "请选择需要导出的节点!"
+                                })
                                 return false;
                             }
 
-                            alertify.confirm(`确认要导出 ${self.configTreeSelectedNode.key} 下的配置?`, function (e) {
-                                if (e) {
-                                    let rtn = configHandler.configExport(self.configTreeSelectedNode.key);
-                                } else {
-                                    
-                                }
+                            this.$confirm(`确认要导出 ${this.configTreeSelectedNode.key} 下的配置?`, '提示', {
+                                confirmButtonText: '确定',
+                                cancelButtonText: '取消',
+                                type: 'warning'
+                            }).then(() => {
+								
+                                configHandler.configExport(this.configTreeSelectedNode.key,this);
+                                
+                            }).catch(() => {
+                                
                             });
+
                         },
                         configOpen(treeNode){
                             
@@ -1272,38 +1294,46 @@ class Config {
                                     }
                                 },
                                 mounted(){
-                                    const me = this;
-                                    
                                     // 初始化位置
-                                    me.parent = self.configTreeSelectedNode.key || '/';
+                                    this.parent = self.configTreeSelectedNode.key || '/';
                                 },
                                 methods: {
                                     save(){
-                                        const me = this;
-
-                                        me.formItem.key = [me.parent, me.name].join("/").replace(/\/\//g,'/');
                                         
-                                        alertify.confirm(`确认要添加以下配置?<br><br>
-                                            位置：${me.formItem.key}<br><br>
-                                            值：${_.truncate(me.formItem.value)}<br><br>
-                                            TTL：${me.formItem.ttl}<br><br>`, function (e) {
-                                            if (e) {
-                                                let rtn = configHandler.configAdd(me.formItem);
-                                                if(rtn == 1){
-                                                    me.$message({
-                                                        type: "success",
-                                                        message: "保存成功！"
-                                                    })
-                                                    eventHub.$emit("CONFIG-TREE-REFRESH-EVENT",me.formItem.key);
-                                                    me.cancel();
-                                                }
-                                            }  else {
-                                                me.$message({
+                                        this.formItem.key = [this.parent, this.name].join("/").replace(/\/\//g,'/');
+                                        
+                                        const h = this.$createElement;
+										this.$msgbox({
+												title: `确认要添加以下配置`, 
+												message: h('span', null, [
+													h('p', null, `位置：${this.formItem.key}`),
+													h('p', null, `值：${_.truncate(this.formItem.value)}`),
+													h('p', null, `TTL：${ this.formItem.ttl ? this.formItem.ttl : ''}`)
+												]),
+												showCancelButton: true,
+												confirmButtonText: '确定',
+												cancelButtonText: '取消',
+												type: 'warning'
+										}).then(() => {
+
+											let rtn = configHandler.configAdd(this.formItem);
+                                            if(rtn == 1){
+                                                this.$message({
+                                                    type: "success",
+                                                    message: "保存成功！"
+                                                })
+                                                eventHub.$emit("CONFIG-TREE-REFRESH-EVENT", this.formItem.key);
+                                                this.cancel();
+                                            } else {
+                                                this.$message({
                                                     type: "error",
                                                     message: "保存失败：" + rtn
                                                 })
                                             }
-                                        });
+
+										}).catch(() => {
+												
+										}); 
 
                                     },
                                     cancel(){
@@ -1323,54 +1353,74 @@ class Config {
                             
                             item.ttl = _.find(this.configTabs.tabs,{name:this.configTabs.activeIndex}).model.ttl;
 
-                            alertify.confirm(`确认要更新以下配置?<br><br>
-                                位置：${item.key}<br><br>
-                                值：${_.truncate(item.value)}<br><br>
-                                TTL：${item.ttl}<br><br>`,  (e)=>{
-                                if (e) {
-                                    let rtn = configHandler.configAdd(item);
-                                    if(rtn == 1){
-                                        this.$message({
-                                            type: "success",
-                                            message: "更新成功！"
-                                        })
-                                        eventHub.$emit("CONFIG-TREE-REFRESH-EVENT", item.key);
-                                    } else {
-                                        this.$message({
-                                            type: "error",
-                                            message: "更新失败：" + rtn
-                                        })
-                                    }
+
+                            const h = this.$createElement;
+                            this.$msgbox({
+                                    title: `确认要更新以下配置`, 
+                                    message: h('span', null, [
+                                        h('p', null, `位置：${item.key}`),
+                                        h('p', null, `值：${_.truncate(item.value)}`),
+                                        h('p', null, `TTL：${item.ttl}`)
+                                    ]),
+                                    showCancelButton: true,
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                    type: 'warning'
+                            }).then(() => {
+
+                                let rtn = configHandler.configAdd(item);
+                                if(rtn == 1){
+                                    this.$message({
+                                        type: "success",
+                                        message: "更新成功！"
+                                    })
+                                    eventHub.$emit("CONFIG-TREE-REFRESH-EVENT", item.key);
                                 } else {
-                                    
+                                    this.$message({
+                                        type: "error",
+                                        message: "更新失败：" + rtn
+                                    })
                                 }
-                            });
+
+                            }).catch(() => {
+                                    
+                            }); 
+                            
                         },
                         configDelete(){
-                            const self = this;
+                            
+                            let item = this.configTreeSelectedNode;
 
-                            let item = self.configTreeSelectedNode;
+                            const h = this.$createElement;
+                            this.$msgbox({
+                                    title: `确认要删除以下配置`, 
+                                    message: h('span', null, [
+                                        h('p', null, `位置：${item.key}`),
+                                        h('p', null, `值：${_.truncate(item.value)}`),
+                                        h('p', null, `TTL：${item.ttl}`)
+                                    ]),
+                                    showCancelButton: true,
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                    type: 'warning'
+                            }).then(() => {
 
-                            alertify.confirm(`确认要删除以下配置?<br><br>
-                                位置：${item.key}<br><br>
-                                值：${_.truncate(item.value)}<br><br>
-                                TTL：${item.ttl}<br><br>`, function (e) {
-                                if (e) {
-                                    let rtn = configHandler.configDelete(item);
+                                let rtn = configHandler.configDelete(item);
                                     
-                                    if(rtn == 1){
-                                        // 刷新Tree
-                                        eventHub.$emit("CONFIG-TREE-REFRESH-EVENT",item.key);
-                                        // 关闭Tab
-                                        self.configClose(item.key);
-                                        // 重置选择
-                                        self.configTreeSelectedNode = null;
+                                if(rtn == 1){
+                                    // 刷新Tree
+                                    eventHub.$emit("CONFIG-TREE-REFRESH-EVENT",item.key);
+                                    // 关闭Tab
+                                    this.configClose(item.key);
+                                    // 重置选择
+                                    this.configTreeSelectedNode = null;
 
-                                    }
-                                } else {
-                                    
                                 }
-                            });
+
+                            }).catch(() => {
+                                    
+                            }); 
+
                         },
                         configCopy(item){
                             new Clipboard(`.copy${objectHash.sha1(item)}`, {

@@ -20,7 +20,8 @@ class System {
 
 		VueLoader.onloaded(["ai-robot-component",
 							"mx-tag",
-							"mx-tag-tree"
+							"mx-tag-tree",
+							"mx-tag-all-tree"
 							],function() {
 
 			$(function() {
@@ -237,8 +238,6 @@ class System {
 						}
 					}
 				})
-
-				
 
 				Vue.component('user-trewe-component',{
 					delimiters: ['#{', '}#'],
@@ -1848,12 +1847,6 @@ class System {
 											<el-tooltip content="新增公司信息">
 												<el-button type="text" icon="el-icon-plus" @click="companyNew" >新增</el-button>
 											</el-tooltip>
-											<el-tooltip content="更新公司信息">
-												<el-button type="text" icon="el-icon-edit" @click="companyUpdate" >编辑</el-button>
-											</el-tooltip>
-											<el-tooltip content="删除公司信息">
-												<el-button type="text" icon="el-icon-delete" @click="companyDelete" >删除</el-button>
-											</el-tooltip>
 											<el-tooltip content="更新文件系统">
 												<el-button type="text" icon="el-icon-files" @click="updateFs">更新</el-button>
 											</el-tooltip>
@@ -1904,6 +1897,18 @@ class System {
 														<el-avatar shape="circle" size="48" :src="scope.row[item.field]"></el-avatar>
 													</span>
 													<span  v-else>#{scope.row[item.field]}#</el-avatar>
+												</template>
+											</el-table-column>
+											<el-table-column label="操作" width="130" fixed="right">
+												<template slot-scope="scope">
+													<div>
+														<el-tooltip content="更新公司信息" open-delay="500" placement="top">
+															<el-button type="text" icon="el-icon-edit" @click="onCompanyUpdate(scope.row)"></el-button>
+														</el-tooltip>
+														<el-tooltip content="删除公司信息" open-delay="500" placement="top">
+															<el-button type="text" icon="el-icon-delete" @click="onCompanyDelete(scope.row)"></el-button>
+														</el-tooltip>
+													</div>
 												</template>
 											</el-table-column>
 										</el-table>
@@ -1971,7 +1976,7 @@ class System {
 								
 							}
 						},
-						companyUpdate(){
+						onCompanyUpdate(row){
 							const self = this;
 							let rId = `system-company-container-${_.now()}`;
 							let wnd = null;
@@ -2048,7 +2053,7 @@ class System {
 												</el-footer>
 											</el-container>`,
 								created(){
-									_.extend(this.form,self.dt.selected);
+									_.extend(this.form, row);
 									this.upload.preLogoImageUrl = this.form.logo;
 									this.upload.preIconImageUrl = this.form.icon;
 								},
@@ -2078,28 +2083,38 @@ class System {
 									companySave() {
 										const me = this;
 
-										alertify.confirm(`确定要更新该公司信息? <br><br> 
-															公司全称：${me.form.fullname}<br><br>
-															公司名称：${me.form.name}<br><br>
-															应用名称：${me.form.ospace}<br><br>
-															标题：${me.form.title}`, function (e) {
-											if (e) {
-												let rtn = companyHandler.companyUpdate(me.form);
-												
-												if(rtn == 1){
-													self.initData();
-												}
-												
-												me.$message({
-													type: "info",
-													message: "更新操作将提交至后台，请稍后刷新确认。。。"
-												});
+										const h = this.$createElement;
+										this.$msgbox({
+												title: `确定要更新该公司信息`, 
+												message: h('span', null, [
+													h('p', null, `公司全称：${me.form.fullname}`),
+													h('p', null, `公司名称：${me.form.name}`),
+													h('p', null, `应用名称：${me.form.ospace}`),
+													h('p', null, `标题：${me.form.title}`)
+												]),
+												showCancelButton: true,
+												confirmButtonText: '确定',
+												cancelButtonText: '取消',
+												type: 'warning'
+										}).then(() => {
 
-												wnd.close();
-											} else {
+											let rtn = companyHandler.companyUpdate(me.form);
 												
+											if(rtn == 1){
+												self.initData();
 											}
-										});
+											
+											me.$message({
+												type: "info",
+												message: "更新操作将提交至后台，请稍后刷新确认。。。"
+											});
+
+											wnd.close();
+
+										}).catch(() => {
+												
+										}); 
+										
 									},
 									closeMe(){
 										wnd.close();
@@ -2242,34 +2257,43 @@ class System {
 
 							new Vue(main).$mount(`#${rId}`);
 						},
-						companyDelete() {
+						onCompanyDelete(row) {
 							const self = this;
 
-							if(self.dt.selected.ospace === 'matrix' || self.dt.selected.name === 'wecise' ){
+							if(row.ospace === 'matrix' || row.name === 'wecise' ){
 								self.$message({
 									message: "系统账户，不可以删除！",
 									type: 'error'});
 								return false;
 							} 
 
-							alertify.confirm(`确定要删除该公司? <br><br> 
-												公司全称：${self.dt.selected.fullname}<br><br>
-												公司名称：${self.dt.selected.name}<br><br>
-												应用名称：${self.dt.selected.ospace}<br><br>
-												标题：${self.dt.selected.title}`, function (e) {
-								if (e) {
-									let rtn = companyHandler.companyDelete(self.dt.selected.name);
-									self.$message({
-										type: "info",
-										message: "删除操作将提交至后台，请稍后刷新确认。。。"
-									});
-									if(rtn == 1){
-										self.initData();
-									}
-								} else {
-									
+							const h = this.$createElement;
+							this.$msgbox({
+									title: `确定要删除该公司`, 
+									message: h('span', null, [
+										h('p', null, `公司全称：${row.fullname}`),
+										h('p', null, `公司名称：${row.name}`),
+										h('p', null, `应用名称：${row.ospace}`),
+										h('p', null, `标题：${row.title}`)
+									]),
+									showCancelButton: true,
+									confirmButtonText: '确定',
+									cancelButtonText: '取消',
+									type: 'warning'
+							}).then(() => {
+
+								let rtn = companyHandler.companyDelete(row.name);
+								self.$message({
+									type: "info",
+									message: "删除操作将提交至后台，请稍后刷新确认。。。"
+								});
+								if(rtn == 1){
+									self.initData();
 								}
-							});
+
+							}).catch(() => {
+									
+							}); 
 							
 						},
 						updateFs(){
@@ -2296,10 +2320,7 @@ class System {
 							nodes: []
 						}
 					},
-					template: 	`<el-container>
-									<el-header style="line-height:40px;height:40px;padding:0px 5px;">
-										<h4 style="margin:5px;"><i class="el-icon-school"></i> 组织、人员管理</h4>
-									</el-header>
+					template: 	`<el-container style="height:100%;">
 									<el-main style="padding:0px;">
 										<el-tree 
 											node-key="fullname"
@@ -2323,10 +2344,9 @@ class System {
 													<span class="el-icon-user" style="color:#67c23a;"></span>
 													<span>#{node.label}#</span>
 													<el-button v-show="data.show" type="text" @click="onDeleteUser(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-delete" v-if="data.username != 'admin'"></el-button>
-													<el-button v-show="data.show" type="text" @click="editUser(data,$event)" style="float:right;width:14px;margin-left:5px;" icon="el-icon-edit"></el-button>
 												</span>
 											</span>                  
-										</el-tree>	
+										</el-tree>
 									</el-main>
 								</el-container>`,
 					created(){
@@ -2338,22 +2358,27 @@ class System {
 							this.initNodes();
 						},
 						initNodes() {
+							const self = this;
 
 							var users = function(parent) {
 
 								var data = userHandler.userList(parent).message;
-								
 								var itemArr = [];
+
 								_.forEach(data,(v)=>{
-									if (parent === v.parent) {
-										itemArr.push( _.extend(v,{children: users(v.fullname), show:false }) );
+									if(v.parent){
+										if( parent === v.parent ) {
+											itemArr.push( _.extend(v,{children: users(v.fullname), show:false }) );
+										}
 									}
+									
 								})
 								
 								return _.sortBy(itemArr,'fullname');
 							};
 
-							this.nodes = users(this.root);
+							this.nodes = [];
+							this.nodes.push( {id:0, parent:null, fullname: this.root, name: '/', username: '组织', otype:'org', children: users(this.root), show:false } );
 
 						},
 						onNodeClick(node){
@@ -2416,7 +2441,6 @@ class System {
 															<el-input type="password" v-model="checkPass" autocomplete="off" show-password></el-input>
 														</el-form-item>
 
-
 														<el-form-item label="激活">
 															<el-switch v-model="ldap.isactive" true-value="true" false-value="false"></el-switch>
 														</el-form-item>
@@ -2424,14 +2448,13 @@ class System {
 														<el-form-item label="管理员">
 															<el-switch v-model="ldap.isadmin" true-value="true" false-value="false"></el-switch>
 														</el-form-item>
-
-														<el-form-item>
-															<el-button type="warning" v-if="loading"><i class="el-icon-loading"></i> 创建用户、同步文件系统，请稍后。。。</el-button>
-															<el-button type="primary" @click="save" v-else>创建用户</el-button>
-														</el-form-item>
 														
 													</form>
 												</el-main>
+												<el-footer style="text-align:right;">
+													<el-button type="warning" v-if="loading"><i class="el-icon-loading"></i> 创建用户、同步文件系统，请稍后。。。</el-button>
+													<el-button type="primary" @click="onSave" v-else>创建用户</el-button>
+												</el-footer>
 											</el-container>`,
 								data: {
 									ldap: {
@@ -2447,24 +2470,12 @@ class System {
 									loading: false
 								},
 								created(){
-									this.ldap.parent = !_.isEmpty(self.selectedNode.fullname)?self.selectedNode.fullname:'/用户组';
-								},
-								mounted:function(){
-									let me = this;
-
-									me.$nextTick(function() {
-										me.init();
-									})
+									this.ldap.parent = !_.isEmpty(self.selectedNode.fullname)?self.selectedNode.fullname:'/';
 								},
 								methods: {
-									init: function(){
-										let me = this;
-
-									},
-									save: function(){
-										let me = this;
-
-										if (_.isEmpty(me.ldap.username)) {
+									onSave(){
+										
+										if (_.isEmpty(this.ldap.username)) {
 											
 											this.$message({
 												type: "warning",
@@ -2473,7 +2484,7 @@ class System {
 											return false;
 										}
 
-										if (_.isEmpty(me.email)) {
+										if (_.isEmpty(this.email)) {
 											this.$message({
 												type: "warning",
 												message: `邮件不能为空！`
@@ -2481,7 +2492,7 @@ class System {
 											return false;
 										}
 
-										if (_.isEmpty(me.ldap.passwd)) {
+										if (_.isEmpty(this.ldap.passwd)) {
 											this.$message({
 												type: "warning",
 												message: `密码不能为空！`
@@ -2489,7 +2500,7 @@ class System {
 											return false;
 										}
 
-										if (_.isEmpty(me.checkPass)) {
+										if (_.isEmpty(this.checkPass)) {
 											this.$message({
 												type: "warning",
 												message: `确认密码不能为空！`
@@ -2497,7 +2508,7 @@ class System {
 											return false;
 										}
 
-										if ( me.ldap.passwd !== me.checkPass) {
+										if ( this.ldap.passwd !== this.checkPass) {
 											this.$message({
 												type: "warning",
 												message: `确认密码不一致！`
@@ -2505,20 +2516,20 @@ class System {
 											return false;
 										}
 
-										me.loading = true;
+										this.loading = true;
 
 										_.delay(()=>{
 											
 											let _csrf = window.CsrfToken.replace(/'/g,"");
-											let rtn = userHandler.userAdd(me.ldap, _csrf);
+											let rtn = userHandler.userAdd(this.ldap, _csrf);
 	
-											if(rtn===1){
+											if(rtn == 1){
 												this.$message({
 													type: "success",
-													message: `用户: ${me.ldap.username} ${me.email} 添加成功！`
+													message: `用户: ${this.ldap.username} ${this.email} 添加成功！`
 												})
 												
-												me.loading = false;
+												this.loading = false;
 	
 												_.delay(()=>{
 													self.initNodes;
@@ -2535,19 +2546,16 @@ class System {
 							
 							new Vue(config).$mount("#ldap-newUser-container");
 						},
-						editUser(data,event){
-
-						},
 						onDeleteUser(data,event){
 
-							if(data.fullname === '/系统组'){
+							if(data.fullname === '/system'){
 								this.$message({
 									type: "warning",
 									message: "系统组，禁止删除！"
 								})
 								return false;
 							}
-							if(data.fullname === '/系统组/admin'){
+							if(data.fullname === '/system/admin'){
 								this.$message({
 									type: "warning",
 									message: "系统管理员，禁止删除！"
@@ -2616,13 +2624,12 @@ class System {
 														<el-form-item label="名称">
 															<el-input v-model="ldap.username" autofocus></el-input>
 														</el-form-item>
-
-														<el-form-item>
-															<el-button type="primary" @click="save">创建组</el-button>
-														</el-form-item>
 														
 													</form>
 												</el-main>
+												<el-footer style="text-align:right;">
+													<el-button type="primary" @click="save">创建组</el-button>
+												</el-footer>
 											</el-container>`,
 								data: {
 									ldap: {
@@ -2635,7 +2642,7 @@ class System {
 									}
 								},
 								created(){
-									this.ldap.parent = !_.isEmpty(self.selectedNode.fullname)?self.selectedNode.fullname:'/用户组';
+									this.ldap.parent = !_.isEmpty(self.selectedNode.fullname)?self.selectedNode.fullname:'/';
 								},
 								mounted:function(){
 									let me = this;
@@ -2713,10 +2720,10 @@ class System {
 					template:   `<el-container style="width:100%;height:100%;">
 									<el-header style="height:30px;line-height:30px;">
 										<el-tooltip content="切换视图" open-delay="500" placement="top">
-											<el-button type="text" icon="el-icon-s-fold" @click="onToggle"></el-button>
+											<el-button type="text" icon="el-icon-s-fold" @click="onTogglePanel"></el-button>
 										</el-tooltip>
 										<el-tooltip content="刷新" open-delay="500" placement="top">
-											<el-button type="text" icon="el-icon-refresh" @click="$root.getProbeList"></el-button>
+											<el-button type="text" icon="el-icon-refresh" @click="initData"></el-button>
 										</el-tooltip>
 										<el-tooltip content="导出" delay-time="500">
 											<el-dropdown @command="onExport">
@@ -2749,7 +2756,41 @@ class System {
 											<el-table-column type="selection" align="center"></el-table-column> 
 											<el-table-column type="expand">
 												<template slot-scope="scope">
-													
+													<el-container>
+														<el-main>
+															<el-form label-width="80px">
+
+																<el-form-item label="组名称">
+																	<el-input v-model="scope.row.parent" autofocus disabled="true"></el-input>
+																</el-form-item>
+
+																<el-form-item label="用户名">
+																	<el-input v-model="scope.row.username" autofocus disabled="true"></el-input>
+																</el-form-item>
+
+																<el-form-item label="邮箱">
+																	<el-input v-model="scope.row.email"></el-input>
+																</el-form-item>
+
+																<el-form-item label="密码">
+																	<el-input type="password" v-model="scope.row.passwd" autocomplete="off" disabled="true" show-password></el-input>
+																</el-form-item>
+																
+																<el-form-item label="激活">
+																	<el-switch v-model="scope.row.isactive" true-value="true" false-value="false"></el-switch>
+																</el-form-item>
+																
+																<el-form-item label="管理员">
+																	<el-switch v-model="scope.row.isadmin" true-value="true" false-value="false"></el-switch>
+																</el-form-item>
+																
+															</form>
+														</el-main>
+														<el-footer style="text-align:right;">
+															<el-button type="default" @click="onToogleExpand(scope.row, scope.$index)">取消</el-button>
+															<el-button type="primary" @click="onUpdateUser(scope.row, scope.$index)">更新用户</el-button>
+														</el-footer>
+													</el-container>
 												</template>
 											</el-table-column>
 											<el-table-column
@@ -2765,22 +2806,38 @@ class System {
 														<div v-html='item.render(scope.row, scope.column, scope.row[item.field], scope.$index)' 
 															v-if="typeof item.render === 'function'">
 														</div>
+														<div v-else-if="_.includes(['email'],item.field)">
+															<el-select :value="_.first(scope.row[item.field]).split(',')" v-if="!_.isEmpty(scope.row[item.field])" placeholder="Email">
+																<el-option
+																v-for="subItem in scope.row[item.field][0].split(',')"
+																:key="subItem"
+																:label="subItem"
+																:value="subItem">
+																</el-option>
+															</el-select>
+														</div>
 														<div v-else>
 															#{scope.row[item.field]}#
 														</div>
 													</template>
 											</el-table-column>
-											<el-table-column label="操作" width="130">
+											<el-table-column label="操作" width="160">
 												<template slot-scope="scope">
 													<div v-if="scope.row.otype=='usr'">
+														<el-tooltip content="授权" open-delay="500" placement="top">
+															<el-button type="text" icon="el-icon-s-check"></el-button>
+														</el-tooltip>
 														<el-tooltip content="编辑" open-delay="500" placement="top">
-															<el-button type="text" icon="el-icon-setting"></el-button>
+															<el-button type="text" icon="el-icon-edit" @click="onToogleExpand(scope.row, scope.$index)"></el-button>
 														</el-tooltip>
 														<el-tooltip content="删除" open-delay="500" placement="top">
 															<el-button type="text" icon="el-icon-delete"></el-button>
 														</el-tooltip>
 													</div>
 													<div v-else>
+														<el-tooltip content="授权" open-delay="500" placement="top">
+															<el-button type="text" icon="el-icon-s-check"></el-button>
+														</el-tooltip>
 														<el-tooltip content="新建组织" open-delay="500" placement="top">
 															<el-button type="text" @click="$parent.$parent.$parent.$parent.$parent.$refs.ldapManage.newGroup(scope.row,$event)" icon="el-icon-folder-add"></el-button>
 														</el-tooltip>
@@ -2788,7 +2845,7 @@ class System {
 															<el-button type="text" @click="$parent.$parent.$parent.$parent.$parent.$refs.ldapManage.newUser(scope.row,$event)" icon="el-icon-plus"></el-button>
 														</el-tooltip>
 														<el-tooltip content="编辑" open-delay="500" placement="top">
-															<el-button type="text" icon="el-icon-setting"></el-button>
+															<el-button type="text" icon="el-icon-edit" @click="onToogleExpand(scope.row, scope.$index)"></el-button>
 														</el-tooltip>
 														<el-tooltip content="删除" open-delay="500" placement="top">
 															<el-button type="text" @click="$parent.$parent.$parent.$parent.$parent.$refs.ldapManage.onDeleteUser(scope.row,$event)" icon="el-icon-delete" v-if="!_.includes(['/系统组','/'],scope.row.fullname)"></el-button>
@@ -2846,7 +2903,7 @@ class System {
 						},
 						initData(){
 							const self = this;
-							console.log(11,this.model)
+							
 							let init = function(){
 								
 								try{
@@ -2900,18 +2957,319 @@ class System {
 							
 							this.$refs.table.toggleRowExpansion(row);
 	
-							// 根据depot名称列表，获取脚本信息
-							let depots = {};
-							_.forEach(row.depot,(v,k)=>{
-								let value = JSON.parse(v);
-								let versions = _.map(value,'version');
-								let scriptObj = _.map(versions,(val)=>{
-									return scriptHandler.depotGet({name:k,version:val});
-								})
-								_.extend(depots, {[k]:scriptObj[0]});
-							})
+						},
+						onExport(type){
+					
+							let options = {
+								csvEnclosure: '',
+								csvSeparator: ', ',
+								csvUseBOM: true,
+								ignoreColumn: [0,1],
+								fileName: `tableExport_${moment().format("YYYY-MM-DD HH:mm:ss")}`,
+								type: type,
+							};
 	
-							this.$set(row, 'depots', depots);
+							if(type === 'png'){
+								//$(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+								$(this.$refs.table.$el.querySelector("table.el-table__body")).tableExport(options);
+							} else if(type === 'pdf'){
+								_.extend(options, {
+									jspdf: {orientation: 'l',
+											format: 'a3',
+											margins: {left:10, right:10, top:20, bottom:20},
+											autotable: {styles: {fillColor: 'inherit', 
+																	textColor: 'inherit'},
+														tableWidth: 'auto'}
+									}
+								});
+								$(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+							} else {
+								$(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+							}
+							
+						},
+						onTogglePanel(){
+							// So bad
+							$(this.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$refs.leftView.$el).toggle();
+						},
+						onUpdateUser(row,index){
+
+							this.$confirm(`确认要更新该用户：${row.fullname}？`, '提示', {
+                                confirmButtonText: '确定',
+                                cancelButtonText: '取消',
+                                type: 'warning'
+                            }).then(() => {
+								
+								
+								let _csrf = window.CsrfToken.replace(/'/g,"");
+								let rtn = userHandler.userUpdate(row, _csrf);
+
+								if(rtn == 1){
+									this.$message({
+										type: "success",
+										message: `更新用户: ${row.username} 成功！`
+									})
+								}
+
+								this.$set(row,'email', row.email.split(","));
+								this.dt.rows[index] = row;
+                                
+                            }).catch(() => {
+                                
+                            });
+
+						}
+					}
+				})
+
+				// 组管理 管理用
+				Vue.component("user-roleGroup",{
+					delimiters: ['#{', '}#'],
+					data(){
+						return {
+							dt:{
+								rows:[],
+								columns: [
+									{ "field":"name", title:"名称" },
+									{ "field":"fullname", title:"全名称", visible:false},
+									{ "field":"id", title:"ID", visible:false },
+									{ "field":"isldap", title:"LDAP" },
+									{ "field":"parent", title:"父节点" },
+									{ "field":"member", title:"成员", width:200 },
+									{ "field":"fields", title:"属性", width:200 },
+									{ "field":"readexps", title:"数据表达式", width:200 },
+									{ "field":"readonly", title:"读权限", width:200 },
+									{ "field":"writable", title:"写权限", width:200 },
+									{ "field":"selected", title:"选择", width:200, visible:false }
+								]
+							},
+							info: [],
+							fullname: ["/"]
+						}
+					},
+					template:   `<el-container style="width:100%;height: calc(100% - 55px);">
+									<el-header style="height:35px;line-height:35px;">
+										<el-row>
+											<el-col :span="12">
+												<el-breadcrumb separator=">">
+													<el-breadcrumb-item>
+														<el-button type="text" @click="onForward('')"><i class="el-icon-s-home"></i> 角色组</el-button>
+													</el-breadcrumb-item>
+													<el-breadcrumb-item  v-for="(item,index) in fullname" v-if="index > 0">
+														<el-button type="text" @click="onForward(fullname.slice(0,index+1).join('/'))">#{item}#</el-button>
+													</el-breadcrumb-item>
+												</el-breadcrumb>
+											</el-col>
+											<el-col :span="12" style="text-align:right;">
+												<el-tooltip content="切换视图" open-delay="500" placement="top">
+													<el-button type="text" icon="el-icon-s-fold" @click="onToggle"></el-button>
+												</el-tooltip>
+												<el-tooltip content="新建角色组" open-delay="500" placement="top">
+													<el-button type="text" icon="el-icon-plus" @click="onNewRole" style="padding-left:5px;"></el-button>
+												</el-tooltip>
+												<el-tooltip content="刷新" open-delay="500" placement="top">
+													<el-button type="text" icon="el-icon-refresh" @click="onRefresh"></el-button>
+												</el-tooltip>
+												<el-tooltip content="导出" delay-time="500">
+													<el-dropdown @command="onExport">
+														<span class="el-dropdown-link">
+															<i class="el-icon-download el-icon--right"></i>
+														</span>
+														<el-dropdown-menu slot="dropdown">
+															<el-dropdown-item command="csv">CSV</el-dropdown-item>
+															<el-dropdown-item command="json">JSON</el-dropdown-item>
+															<!--el-dropdown-item command="pdf">PDF</el-dropdown-item-->
+															<el-dropdown-item command="png">PNG</el-dropdown-item>
+															<!--el-dropdown-item command="sql">SQL</el-dropdown-item-->
+															<el-dropdown-item command="xls">XLS (Excel 2000 HTML format)</el-dropdown-item>
+														</el-dropdown-menu>
+													</el-dropdown>
+												</el-tooltip>
+											</el-col>
+										</el-row>
+									</el-header>   
+									<el-main style="width:100%;padding:0px;">
+										<el-table
+											:data="dt.rows"
+											highlight-current-row="true"
+											style="width: 100%;"
+											:row-class-name="rowClassName"
+											:header-cell-style="headerRender"
+											@row-dblclick="onRowDblclick"
+											@row-contextmenu="onRowContextmenu"
+											@selection-change="onSelectionChange"
+											@current-change="onCurrentChange"
+											ref="table">
+											<el-table-column type="selection" align="center"></el-table-column> 
+											<el-table-column type="expand">
+												<template slot-scope="scope">
+													
+												</template>
+											</el-table-column>
+											<el-table-column
+												sortable 
+												show-overflow-tooltip
+												v-for="(item,index) in dt.columns"
+												:key="index"
+												:prop="item.field"
+												:label="item ? item.title : ''"
+												:width="item.width"
+												v-if="item.visible">
+													<template slot-scope="scope">
+														<div v-html='item.render(scope.row, scope.column, scope.row[item.field], scope.$index)' 
+															v-if="typeof item.render === 'function'">
+														</div>
+														<div v-else-if="_.includes(['name'],item.field)">
+															<el-link type="info" :underline="true" @dblclick.native.prevent="onForward(scope.row.fullname)">
+																#{scope.row.name}#
+															</el-link>
+														</div>
+														<div v-else-if="_.includes(['fields', 'member', 'writable', 'readexps', 'readonly'],item.field)">
+															<el-select :value="_.first(scope.row[item.field])" :placeholder="_.upperFirst(item.field)">
+																<el-option
+																v-for="subItem in scope.row[item.field]"
+																:key="subItem"
+																:label="subItem"
+																:value="subItem">
+																</el-option>
+															</el-select>
+														</div>
+														<div v-else>
+															#{ scope.row[item.field] }#
+														</div>
+													</template>
+											</el-table-column>
+											<el-table-column label="标签" prop="tags" width="200">
+												<template slot-scope="scope">
+													<mx-tag domain='script' :model.sync="scope.row.tags" :id="scope.row.id" limit="1"></mx-tag>
+												</template>
+											</el-table-column>
+											<el-table-column label="操作" width="130" fixed="right">
+												<template slot-scope="scope">
+													<div>
+														<el-tooltip content="新建角色组" open-delay="500" placement="top">
+															<el-button type="text" icon="el-icon-plus" @click="onNewRole(scope.row)"></el-button>
+														</el-tooltip>
+														<el-tooltip content="编辑" open-delay="500" placement="top">
+															<el-button type="text" icon="el-icon-edit"></el-button>
+														</el-tooltip>
+														<el-tooltip content="删除" open-delay="500" placement="top">
+															<el-button type="text" icon="el-icon-delete" @click="onDeleteRole(scope.row)"></el-button>
+														</el-tooltip>
+													</div>
+												</template>
+											</el-table-column>
+										</el-table>
+									</el-main>
+									<el-footer  style="height:30px;line-height:30px;">
+										#{ info.join(' &nbsp; | &nbsp;') }#
+									</el-footer>
+								</el-container>`,
+					filters:{
+						pickDatetime(item){
+							return moment(item).format(mx.global.register.format);      
+						}
+					},
+					watch: {
+						dt: {
+							handler(val,oldVal){
+								this.info = [];
+								this.info.push(`共 ${this.dt.rows.length} 项`);
+								this.info.push(`已选择 ${this.dt.selected.length} 项`);
+								this.info.push(moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
+							},
+							deep:true,
+							immediate:true
+						}
+					},
+					mounted(){
+						this.initData();
+					},
+					methods: {
+						layout(){
+							let doLayout = ()=>{
+								if($(".el-table-column--selection",this.$el).is(':visible')){
+									_.delay(()=>{
+										//this.$refs.table.setCurrentRow(this.dt.rows[0]);
+										this.$refs.table.doLayout();
+									},1000)
+								} else {
+									setTimeout(doLayout,50);
+								}
+							}
+							doLayout();
+						},
+						initData(){
+							const self = this;
+							
+							this.dt.rows = userHandler.getGroupPermissionsByParent({parent:""});
+
+							let init = function(){
+								
+								try{
+									_.extend(self.dt, {columns: _.map(self.dt.columns, function(v){
+										
+										if(_.isUndefined(v.visible)){
+											_.extend(v, { visible: true });
+										}
+		
+										if(!v.render){
+											return v;
+										} else {
+											return _.extend(v, { render: eval(v.render) });
+										}
+										
+									})});
+									
+								} catch(err){
+									console.log(err);
+								}
+							};
+	
+							_.delay(()=>{
+								init();
+							},1000)
+							
+						},
+						rowClassName({row, rowIndex}){
+							return `row-${rowIndex}`;
+						},
+						headerRender({ row, column, rowIndex, columnIndex }){
+							if (rowIndex === 0) {
+								//return 'text-align:center;';
+							}
+						},
+						onRefresh(){
+							this.initData();
+						},
+						onForward(fullname){
+							let rtn = userHandler.getGroupPermissionsByParent({parent: fullname});
+							
+							if(!_.isEmpty(rtn)){
+								this.dt.rows = rtn;
+
+								if(fullname){
+									this.fullname = fullname.split("/");
+								} else {
+									this.fullname = ["/"];
+								}
+							}
+						},
+						onSelectionChange(val) {
+							this.dt.selected = [val];
+						},
+						onCurrentChange(val){
+							this.dt.selected = [val];
+						},
+						onRowContextmenu(row, column, event){
+							
+						},
+						onRowDblclick(row, column, event){
+							
+						},
+						onToogleExpand(row,index){
+							
+							this.$refs.table.toggleRowExpansion(row);
 	
 						},
 						onExport(type){
@@ -2946,6 +3304,602 @@ class System {
 						},
 						onToggle(){
 							this.$root.$refs.probeView.onToggle();
+						},
+						onNewRole(row){
+							const self = this;
+
+							let wnd = null;
+
+							try{
+								if(jsPanel.activePanels.getPanel('jsPanel-user')){
+									jsPanel.activePanels.getPanel('jsPanel-user').close();
+								}
+							}catch(error){
+			
+							}
+							finally{
+								wnd = maxWindow.winUser("新建角色组",`<div id="ldap-newRoleGroup-container"></div>`,null,null); 
+							}
+
+							new Vue({
+								delimiters: ['#{', '}#'],
+								template: `<el-container>
+												<el-main>
+													<el-form ref="form" label-width="80px">
+
+														<el-form-item label="角色组名称">
+															<el-input v-model="role.name"></el-input>
+														</el-form-item>
+
+														<el-form-item label="父节点">
+															<el-input v-model="role.parent" autofocus></el-input>
+														</el-form-item>
+														
+													</form>
+												</el-main>
+												<el-footer style="text-align:right;">
+													<el-button type="primary" @click="onSave">创建角色组</el-button>
+												</el-footer>
+											</el-container>`,
+								data: {
+									role: {
+										name: "", 
+										parent: "",
+										member: []                  
+									}
+								},
+								created(){
+									if(!_.isEmpty(row)){
+										this.role.parent = row.fullname;
+									}
+								},
+								methods: {
+									onSave(){
+										
+										if (_.isEmpty(this.role.name)) {
+											this.$message({
+												type: 'warning',
+												message: '角色组名称不能为空！!'
+											});
+											return false;
+										}
+
+										let rtn = userHandler.addGroupPermissions(this.role);
+
+										if(rtn == 1){
+											this.$message({
+												type: 'success',
+												message: `角色组: ${this.role.name} 添加成功！`
+											});
+											
+											_.delay(()=>{
+												self.onRefresh();
+												wnd.close();
+											},500);
+
+										}
+
+									}
+								}
+							}).$mount("#ldap-newRoleGroup-container");
+						},
+						onDeleteRole(row){
+							const self = this;
+
+							if( row.isldap ){
+								this.$message({
+									type: "warning",
+									message: "系统角色组，禁止删除！"
+								})
+								return false;
+							}
+
+							this.$confirm(`确认要删除该角色组：${row.fullname}？`, '提示', {
+                                confirmButtonText: '确定',
+                                cancelButtonText: '取消',
+                                type: 'warning'
+                            }).then(() => {
+								
+								let _csrf = window.CsrfToken;
+								let rtn = userHandler.deleteGroupPermissions(row,_csrf);
+                                
+                                if(rtn == 1){
+                                    this.$message({
+                                        type: 'success',
+                                        message: '删除成功!'
+									});
+									
+									_.delay(()=>{
+										self.onRefresh();
+									},500)
+									
+                                } else {
+									this.$message({
+                                        type: 'error',
+                                        message: '删除失败: ' + rtn
+                                    });
+								}
+                            }).catch(() => {
+                                
+                            });
+						}
+					}
+				})
+
+				// 组管理 选择用
+				Vue.component("user-roleGroup-select",{
+					delimiters: ['#{', '}#'],
+					data(){
+						return {
+							dt:{
+								rows:[],
+								columns: [
+									{ "field":"name", title:"名称" },
+									{ "field":"fullname", title:"全名称", visible:false},
+									{ "field":"id", title:"ID", visible:false },
+									{ "field":"isldap", title:"LDAP" },
+									{ "field":"parent", title:"父节点" },
+									{ "field":"member", title:"成员", width:200 },
+									{ "field":"fields", title:"属性", width:200 },
+									{ "field":"readexps", title:"数据表达式", width:200 },
+									{ "field":"readonly", title:"读权限", width:200 },
+									{ "field":"writable", title:"写权限", width:200 },
+									{ "field":"selected", title:"选择", width:200, visible:false }
+								]
+							},
+							info: [],
+							fullname: ["/"]
+						}
+					},
+					template:   `<el-container style="width:100%;height: calc(100% - 55px);">
+									<el-header style="height:35px;line-height:35px;">
+										<el-row>
+											<el-col :span="12">
+												<el-breadcrumb separator=">">
+													<el-breadcrumb-item>
+														<el-button type="text" @click="onForward('')"><i class="el-icon-s-home"></i> 角色组</el-button>
+													</el-breadcrumb-item>
+													<el-breadcrumb-item  v-for="(item,index) in fullname" v-if="index > 0">
+														<el-button type="text" @click="onForward(fullname.slice(0,index+1).join('/'))">#{item}#</el-button>
+													</el-breadcrumb-item>
+												</el-breadcrumb>
+											</el-col>
+											<el-col :span="12" style="text-align:right;">
+												<el-tooltip content="更新权限" open-delay="500">
+													<el-button type="text" icon="el-icon-edit-outline" @click="$parent.$parent.onUpdatePermission"></el-button>
+												</el-tooltip>	
+												<el-tooltip content="刷新" open-delay="500" placement="top">
+													<el-button type="text" icon="el-icon-refresh" @click="onRefresh"></el-button>
+												</el-tooltip>
+												<el-tooltip content="导出" delay-time="500">
+													<el-dropdown @command="onExport">
+														<span class="el-dropdown-link">
+															<i class="el-icon-download el-icon--right"></i>
+														</span>
+														<el-dropdown-menu slot="dropdown">
+															<el-dropdown-item command="csv">CSV</el-dropdown-item>
+															<el-dropdown-item command="json">JSON</el-dropdown-item>
+															<!--el-dropdown-item command="pdf">PDF</el-dropdown-item-->
+															<el-dropdown-item command="png">PNG</el-dropdown-item>
+															<!--el-dropdown-item command="sql">SQL</el-dropdown-item-->
+															<el-dropdown-item command="xls">XLS (Excel 2000 HTML format)</el-dropdown-item>
+														</el-dropdown-menu>
+													</el-dropdown>
+												</el-tooltip>
+											</el-col>
+										</el-row>
+									</el-header>   
+									<el-main style="width:100%;padding:0px;">
+										<el-table
+											:data="dt.rows"
+											highlight-current-row="true"
+											style="width: 100%;"
+											:row-class-name="rowClassName"
+											:header-cell-style="headerRender"
+											@row-dblclick="onRowDblclick"
+											@row-contextmenu="onRowContextmenu"
+											@selection-change="onSelectionChange"
+											@current-change="onCurrentChange"
+											ref="table">
+											<el-table-column type="selection" align="center"></el-table-column> 
+											<el-table-column type="expand">
+												<template slot-scope="scope">
+													
+												</template>
+											</el-table-column>
+											<el-table-column
+												sortable 
+												show-overflow-tooltip
+												v-for="(item,index) in dt.columns"
+												:key="index"
+												:prop="item.field"
+												:label="item ? item.title : ''"
+												:width="item.width"
+												v-if="item.visible">
+													<template slot-scope="scope">
+														<div v-html='item.render(scope.row, scope.column, scope.row[item.field], scope.$index)' 
+															v-if="typeof item.render === 'function'">
+														</div>
+														<div v-else-if="_.includes(['name'],item.field)">
+															<el-link type="info" :underline="true" @dblclick.native.prevent="onForward(scope.row.fullname)">
+																#{scope.row.name}#
+															</el-link>
+														</div>
+														<div v-else-if="_.includes(['fields', 'member', 'writable', 'readexps', 'readonly'],item.field)">
+															<el-select :value="_.first(scope.row[item.field])" :placeholder="_.upperFirst(item.field)">
+																<el-option
+																v-for="subItem in scope.row[item.field]"
+																:key="subItem"
+																:label="subItem"
+																:value="subItem">
+																</el-option>
+															</el-select>
+														</div>
+														<div v-else>
+															#{ scope.row[item.field] }#
+														</div>
+													</template>
+											</el-table-column>
+											<el-table-column label="标签" prop="tags" width="200">
+												<template slot-scope="scope">
+													<mx-tag domain='script' :model.sync="scope.row.tags" :id="scope.row.id" limit="1"></mx-tag>
+												</template>
+											</el-table-column>
+										</el-table>
+									</el-main>
+									<el-footer  style="height:30px;line-height:30px;">
+										#{ info.join(' &nbsp; | &nbsp;') }#
+									</el-footer>
+								</el-container>`,
+					filters:{
+						pickDatetime(item){
+							return moment(item).format(mx.global.register.format);      
+						}
+					},
+					watch: {
+						dt: {
+							handler(val,oldVal){
+								this.info = [];
+								this.info.push(`共 ${this.dt.rows.length} 项`);
+								this.info.push(`已选择 ${this.dt.selected.length} 项`);
+								this.info.push(moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
+							},
+							deep:true,
+							immediate:true
+						}
+					},
+					mounted(){
+						this.initData();
+					},
+					methods: {
+						layout(){
+							let doLayout = ()=>{
+								if($(".el-table-column--selection",this.$el).is(':visible')){
+									_.delay(()=>{
+										//this.$refs.table.setCurrentRow(this.dt.rows[0]);
+										this.$refs.table.doLayout();
+									},1000)
+								} else {
+									setTimeout(doLayout,50);
+								}
+							}
+							doLayout();
+						},
+						initData(){
+							const self = this;
+							
+							this.dt.rows = userHandler.getGroupPermissionsByParent({parent:""});
+
+							let init = function(){
+								
+								try{
+									_.extend(self.dt, {columns: _.map(self.dt.columns, function(v){
+										
+										if(_.isUndefined(v.visible)){
+											_.extend(v, { visible: true });
+										}
+		
+										if(!v.render){
+											return v;
+										} else {
+											return _.extend(v, { render: eval(v.render) });
+										}
+										
+									})});
+									
+								} catch(err){
+									console.log(err);
+								}
+							};
+	
+							_.delay(()=>{
+								init();
+							},1000)
+							
+						},
+						rowClassName({row, rowIndex}){
+							return `row-${rowIndex}`;
+						},
+						headerRender({ row, column, rowIndex, columnIndex }){
+							if (rowIndex === 0) {
+								//return 'text-align:center;';
+							}
+						},
+						onRefresh(){
+							this.initData();
+						},
+						onForward(fullname){
+							let rtn = userHandler.getGroupPermissionsByParent({parent: fullname});
+							
+							if(!_.isEmpty(rtn)){
+								this.dt.rows = rtn;
+
+								if(fullname){
+									this.fullname = fullname.split("/");
+								} else {
+									this.fullname = ["/"];
+								}
+							}
+						},
+						onSelectionChange(val) {
+							this.dt.selected = [val];
+						},
+						onCurrentChange(val){
+							this.dt.selected = [val];
+						},
+						onRowContextmenu(row, column, event){
+							
+						},
+						onRowDblclick(row, column, event){
+							
+						},
+						onToogleExpand(row,index){
+							
+							this.$refs.table.toggleRowExpansion(row);
+	
+						},
+						onExport(type){
+					
+							let options = {
+								csvEnclosure: '',
+								csvSeparator: ', ',
+								csvUseBOM: true,
+								ignoreColumn: [0,1],
+								fileName: `tableExport_${moment().format("YYYY-MM-DD HH:mm:ss")}`,
+								type: type,
+							};
+	
+							if(type === 'png'){
+								//$(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+								$(this.$refs.table.$el.querySelector("table.el-table__body")).tableExport(options);
+							} else if(type === 'pdf'){
+								_.extend(options, {
+									jspdf: {orientation: 'l',
+											format: 'a3',
+											margins: {left:10, right:10, top:20, bottom:20},
+											autotable: {styles: {fillColor: 'inherit', 
+																	textColor: 'inherit'},
+														tableWidth: 'auto'}
+									}
+								});
+								$(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+							} else {
+								$(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+							}
+							
+						},
+						onToggle(){
+							this.$root.$refs.probeView.onToggle();
+						},
+						onNewRole(row){
+							const self = this;
+
+							let wnd = null;
+
+							try{
+								if(jsPanel.activePanels.getPanel('jsPanel-user')){
+									jsPanel.activePanels.getPanel('jsPanel-user').close();
+								}
+							}catch(error){
+			
+							}
+							finally{
+								wnd = maxWindow.winUser("新建角色组",`<div id="ldap-newRoleGroup-container"></div>`,null,null); 
+							}
+
+							new Vue({
+								delimiters: ['#{', '}#'],
+								template: `<el-container>
+												<el-main>
+													<el-form ref="form" label-width="80px">
+
+														<el-form-item label="角色组名称">
+															<el-input v-model="role.name"></el-input>
+														</el-form-item>
+
+														<el-form-item label="父节点">
+															<el-input v-model="role.parent" autofocus></el-input>
+														</el-form-item>
+														
+													</form>
+												</el-main>
+												<el-footer style="text-align:right;">
+													<el-button type="primary" @click="onSave">创建角色组</el-button>
+												</el-footer>
+											</el-container>`,
+								data: {
+									role: {
+										name: "", 
+										parent: "",
+										member: []                  
+									}
+								},
+								created(){
+									if(!_.isEmpty(row)){
+										this.role.parent = row.fullname;
+									}
+								},
+								methods: {
+									onSave(){
+										
+										if (_.isEmpty(this.role.name)) {
+											this.$message({
+												type: 'warning',
+												message: '角色组名称不能为空！!'
+											});
+											return false;
+										}
+
+										let rtn = userHandler.addGroupPermissions(this.role);
+
+										if(rtn == 1){
+											this.$message({
+												type: 'success',
+												message: `角色组: ${this.role.name} 添加成功！`
+											});
+											
+											_.delay(()=>{
+												self.onRefresh();
+												wnd.close();
+											},500);
+
+										}
+
+									}
+								}
+							}).$mount("#ldap-newRoleGroup-container");
+						},
+						onDeleteRole(row){
+							const self = this;
+
+							if( row.isldap ){
+								this.$message({
+									type: "warning",
+									message: "系统角色组，禁止删除！"
+								})
+								return false;
+							}
+
+							this.$confirm(`确认要删除该角色组：${row.fullname}？`, '提示', {
+                                confirmButtonText: '确定',
+                                cancelButtonText: '取消',
+                                type: 'warning'
+                            }).then(() => {
+								
+								let _csrf = window.CsrfToken;
+								let rtn = userHandler.deleteGroupPermissions(row,_csrf);
+                                
+                                if(rtn == 1){
+                                    this.$message({
+                                        type: 'success',
+                                        message: '删除成功!'
+									});
+									
+									_.delay(()=>{
+										self.onRefresh();
+									},500)
+									
+                                } else {
+									this.$message({
+                                        type: 'error',
+                                        message: '删除失败: ' + rtn
+                                    });
+								}
+                            }).catch(() => {
+                                
+                            });
+						}
+					}
+				})
+
+				// Api permission
+				Vue.component("api-permission",{
+					delimiters: ['#{', '}#'],
+					template: 	`<el-container style="height:100%;">
+									<el-aside style="background:#f2f3f5;" ref="leftView">
+										<mx-tag-all-tree :model="{parent:'/system',name:'tagdir_tree_data.js',domain:'*'}" :fun="onRefreshByTag" ref="tagdirTree"></mx-tag-all-tree>
+									</el-aside>
+									<el-main style="padding:0px;width:100%;overflow:hidden;" ref="mainView">
+										<el-container style="height:100%;">
+											<el-header class="job-view-header" style="height: 40px;line-height: 40px;padding: 0px;">
+												
+											</el-header>
+											<el-main style="padding:10px 0 0 0;width:100%;overflow:hidden;">
+												
+											</el-main>
+										</el-container>
+									</el-main>
+								</el-container>`,
+					methods:{
+						onRefreshByTag(){}
+					}
+				})
+
+				// App permission
+				Vue.component("app-permission",{
+					delimiters: ['#{', '}#'],
+					template: 	`<el-container style="height:100%;">
+									<el-aside style="background:#f2f3f5;" ref="leftView">
+										<mx-tag-all-tree :model="{parent:'/system',name:'tagdir_tree_data.js',domain:'*'}" :fun="onRefreshByTag" ref="tagdirTree"></mx-tag-all-tree>
+									</el-aside>
+									<el-main style="padding:0px;width:100%;overflow:hidden;" ref="mainView">
+										<el-container style="height:100%;">
+											<el-header class="job-view-header" style="height: 40px;line-height: 40px;padding: 0px;">
+												
+											</el-header>
+											<el-main style="padding:10px 0 0 0;width:100%;overflow:hidden;">
+												
+											</el-main>
+										</el-container>
+									</el-main>
+								</el-container>`,
+					methods:{
+						onRefreshByTag(){}
+					}
+				})
+
+				// Data permission
+				Vue.component("data-permission",{
+					delimiters: ['#{', '}#'],
+					template: 	`<el-container style="height:100%;">
+									<el-aside style="background:#f2f3f5;" ref="leftView">
+										<mx-tag-all-tree :model="{parent:'/system',name:'tagdir_tree_data.js',domain:'*'}" :fun="onRefreshByTag" ref="tagdirTree"></mx-tag-all-tree>
+									</el-aside>
+									<el-main style="padding:0px;width:100%;overflow:hidden;" ref="mainView">
+										<el-container style="height:100%;">
+											<el-header class="job-view-header" style="height: 40px;line-height: 40px;padding: 0px;">
+												
+											</el-header>
+											<el-main style="padding:10px 0 0 0;width:100%;overflow:hidden;">
+												
+											</el-main>
+										</el-container>
+									</el-main>
+								</el-container>`,
+					methods:{
+						onRefreshByTag(){}
+					}
+				})
+
+				// Tag permission
+				Vue.component("tagdir-permission",{
+					delimiters: ['#{', '}#'],
+					template: 	`<el-container style="height:100%;">
+									<el-aside style="background:#f2f3f5;" ref="leftView">
+										<mx-tag-all-tree :model="{parent:'/system',name:'tagdir_tree_data.js',domain:'*'}" :fun="onRefreshByTag" ref="tagdirTree"></mx-tag-all-tree>
+									</el-aside>
+									<el-main style="padding:0px;width:100%;overflow:hidden;" ref="mainView">
+										<el-container style="height:100%;">
+											<el-main style="padding:0px;width:100%;overflow:hidden;">
+												<user-roleGroup-select></user-roleGroup-select>
+											</el-main>
+										</el-container>
+									</el-main>
+								</el-container>`,
+					methods:{
+						onRefreshByTag(){},
+						onUpdatePermission(){
+
 						}
 					}
 				})
@@ -2953,22 +3907,6 @@ class System {
 				// 用户、权限管理
 				Vue.component('user-manage',{
 					delimiters: ['${', '}'],
-					template: 	`<el-container style="height:100%;">
-									<el-aside style="width:260px;height:100%;" ref="leftView">
-										<ldap-manage root="/" @update:selectedNode="loadUserData($event)" ref="ldapManage"></ldap-manage>
-									</el-aside>
-									<el-container style="height:100%;" ref="mainView">
-										<el-main style="padding:0px;">
-											<el-header style="height:40px;line-height:40px;">
-												<h4 style="margin:5px;"><i class="el-icon-user"></i> 用户信息</h4>
-											</el-header>
-											<el-main style="padding:0px;">
-												<user-list :model="model" ref="userList"></user-lis>
-												<el-divider>权限管理</el-divider>
-											</el-main>
-										</el-main>
-									</el-container>
-								</el-container>`,
 					data(){
 						return {
 							selectedNode: null,
@@ -2979,16 +3917,14 @@ class System {
 							model:{
 								rows: [],
 								columns: [
-											{"field":"email",title:"邮件", render: `var s=function(row, column, cellValue, index){
-												return cellValue ? cellValue.join(" ") : "";
-											};eval(s);`},
+											{"field":"email",title:"邮件"},
 											{"field":"username",title:"用户名"},
 											{"field":"passwd",title:"口令", visible:false},
 											{"field":"parent",title:"组"},
 											{"field":"isactive",title:"状态", render:`var s=function(row, column, cellValue, index){
 												return cellValue ? "正常" : "禁用";
 											};eval(s);`},
-											{"field":"fullname", title:"操作"}]
+											{"field":"fullname", title:"操作", visible:false}]
 							},
 							byObjectTreeModel: {
 								data: [],
@@ -3001,22 +3937,84 @@ class System {
 								options: {},  
 							},
 							byObjectTreeNodes: [],
-							byPropertyTreeNodes: []
+							byPropertyTreeNodes: [],
+							tabs: {
+								main: {
+									activeName: 'users'
+								}
+							},
+							splitInst: null
 						}
 					},
+					template: 	`<el-container style="height:100%;" class="user-manage-container">
+									<el-main style="padding:0px;overflow:hidden;">
+										<el-tabs v-model="tabs.main.activeName" type="border-card">
+											<el-tab-pane label="用户管理" name="users">
+												<el-container style="height:calc(100% - 40px);margin:-15px;">
+													<el-aside style="width:260px;height:100%;background:#f9f9f9;" ref="leftView">
+														<ldap-manage root="/" @update:selectedNode="onLoadUser($event)" ref="ldapManage"></ldap-manage>
+													</el-aside>
+													<el-container style="height: 100%;" ref="mainView">
+														<el-main style="padding:0px;overflow:hidden;">
+															<user-list :model="model" ref="userList"></user-lis>
+															<el-divider>权限管理</el-divider>
+														</el-main>
+													</el-container>
+												</el-container>
+											</el-tab-pane>
+											<el-tab-pane label="权限管理" name="permission">
+												<el-container style="height:calc(100% - 70px);background:#f9f9f9;">
+													<el-main style="padding:0px;overflow:hidden;">
+														<el-tabs value="app" tab-position="left">
+															<el-tab-pane label="应用权限" name="app">
+																<app-permission></app-permission>
+															</el-tab-pane>	
+															<el-tab-pane label="数据权限" name="data">
+																<data-permission></data-permission>
+															</el-tab-pane>
+															<el-tab-pane label="API权限" name="api">
+																<api-permission></api-permission>
+															</el-tab-pane>
+															<el-tab-pane label="Tag权限" name="tagdir">
+																<tagdir-permission></tagdir-permission>
+															</el-tab-pane>
+														</el-tabs>
+													</el-main>
+												</el-container>
+											</el-tab-pane>
+											<el-tab-pane label="角色管理" name="role">
+												<el-container style="height:100%;">
+													<el-main style="padding:0px;">
+														<user-roleGroup :checkSelect="false"></user-roleGroup>
+													</el-main>
+												</el-container>
+											</el-tab-pane>
+										</el-tabs>
+									</el-main>
+								</el-container>`,
 					created(){
-						eventHub.$on('user-table-select',this.loadByClassTreeNodes);
-						eventHub.$on("user-remove", this.removeUserData);
-						eventHub.$on("byObjectTree-select", this.setByObjectTreeModel)
-						eventHub.$on("byPropertyTree-select", this.setByPropertyTreeModel)
-						
+						this.onLoadUser("");
+					},
+					mounted(){
+						_.delay(()=>{
+							this.initSplit();
+						},1000)
 					},
 					methods: {
-						loadUserData(event) {
+						initSplit(){
+							
+							this.splitInst = Split([this.$refs.leftView.$el, this.$refs.mainView.$el], {
+								sizes: [20, 80],
+								minSize: [0, 0],
+								gutterSize: 5,
+								cursor: 'col-resize',
+								direction: 'horizontal'
+							});
+
+						},
+						onLoadUser(event) {
 							this.selectedNode = event;
 							this.model.rows = userHandler.userList(event.fullname).message;
-							this.byObjectTreeNodes = [];
-							this.byPropertyTreeNodes = [];
 						},
 						saveUserData(){
 							const self = this;
@@ -3066,8 +4064,6 @@ class System {
 							sql[2] = "/matrix/ldap";
 							sql[3] = "fullname='" + userData[0].fullname + "'";
 							sql[4] = "auth='" + JSON.stringify(auth) + "'";
-							
-							console.log("sql------>",sql.join(" "));
 							
 							jQuery.ajax({
 								url: "/mxobject/mql",
@@ -3145,18 +4141,6 @@ class System {
 														});
 
 														
-						},
-						setByObjectTreeModel: function(event) {
-							const self = this;
-
-							self.byObjectTreeModel.data = event;
-						},
-						setByPropertyTreeModel: function(event) {
-							const self = this;
-
-							self.byPropertyTreeModel.data = _.map(event[0].fields,function(v){
-																return {name:v};
-															});
 						}
 					}
 				})
