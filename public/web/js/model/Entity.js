@@ -975,7 +975,7 @@ class Entity extends Matrix {
                                                     </el-container>
                                                     
                                                     <el-container id="entity-view-console">
-                                                        <el-aside class="tree-view" style="background-color:#f6f6f6;" ref="leftView">
+                                                        <el-aside class="tree-view" style="background-color:#f2f2f2;" ref="leftView">
                                                             <entity-tree-component id="entity-tree" :model="{parent:'/entity',name:'tree_data.js',domain:'entity'}"></entity-tree-component>
                                                         </el-aside>
                                                         <el-main class="table-view" style="padding:5px;" ref="mainView">

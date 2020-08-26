@@ -48,7 +48,7 @@ class FileSystem {
                 }
             },
             template: `<el-container style="height:100%;">
-                            <el-header style="height:180px;line-height:140px;background-color:#f6f6f6;padding:10px;">
+                            <el-header style="height:180px;line-height:140px;background-color:#f2f2f2;padding:10px;">
                                 <el-form ref="form" :model="form" label-width="80px">
                                     <el-form-item label="项目名称：">
                                         <el-input v-model="form.name"></el-input>
@@ -235,7 +235,7 @@ class FileSystem {
                 node: {}
             },
             template: `<el-container style="height:100%;">
-                            <el-header style="height:30px;line-height:30px;background-color:#f6f6f6;">
+                            <el-header style="height:30px;line-height:30px;background-color:#f2f2f2;">
                                 复制到：<span v-if="!_.isEmpty(node.fullname)">#{node.fullname}#</span>
                             </el-header>
                             <el-main style="padding:10px;">
@@ -326,7 +326,7 @@ class FileSystem {
                 node: {}
             },
             template: `<el-container style="height:100%;">
-                            <el-header style="height:30px;line-height:30px;background-color:#f6f6f6;">
+                            <el-header style="height:30px;line-height:30px;background-color:#f2f2f2;">
                                 移动到：<span v-if="!_.isEmpty(node.fullname)">#{node.fullname}#</span>
                             </el-header>
                             <el-main style="padding:10px;">

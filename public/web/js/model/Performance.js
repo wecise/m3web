@@ -1033,7 +1033,7 @@ class Performance extends Matrix {
                                                     </el-container-->
 
                                                     <el-container id="performance-view-console" v-if="item.type==='main'">
-                                                        <el-aside class="tree-view" style="background-color:#f6f6f6;" ref="leftView">
+                                                        <el-aside class="tree-view" style="background-color:#f2f2f2;" ref="leftView">
                                                             <entity-tree-component id="performance-tree" :model="{parent:'/performance',name:'performance_tree_data.js',domain:'performance'}"></entity-tree-component>
                                                         </el-aside>
                                                         <el-main style="padding:5px;height:100%;" ref="mainView">

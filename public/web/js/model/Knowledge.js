@@ -109,7 +109,7 @@ class Knowledge {
                         }
                     },
                     template:   `<el-container style="height:100%;">
-                                    <el-header style="height:35px;line-height:35px;padding:0px 10px;display:flex;background:#f2f3f5;">
+                                    <el-header style="height:35px;line-height:35px;padding:0px 10px;display:flex;background:#f2f2f2;">
                                         <span style="width:40%;"><h5 style="color:#000000;">知识分类</h5></span>
                                         <span style="width:60%;text-align:right;">
                                             <el-button type="text" @click="initData" icon="el-icon-refresh"></el-button>
@@ -844,7 +844,7 @@ class Knowledge {
                                                      </p>
                                                 </div>
                                             </el-main>
-                                            <el-aside style="width:300px;overflow:hidden;background:#f2f3f5;margin:-20px -20px 0 0;" ref="leftView">
+                                            <el-aside style="width:300px;overflow:hidden;background:#f2f2f2;margin:-20px -20px 0 0;" ref="leftView">
                                                 <el-container style="height:100%;">
                                                     <el-header style="height:200px;line-height:200px;padding:0px;">
                                                         <knowledge-topn ref="topn"></knowledge-topn>

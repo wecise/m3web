@@ -606,7 +606,7 @@ class Log extends Matrix {
                                                     </el-main>
                                                 </el-container>
                                                 <el-container id="log-view-console">
-                                                    <el-aside class="tree-view" style="background-color:#f6f6f6;" ref="leftView">
+                                                    <el-aside class="tree-view" style="background-color:#f2f2f2;" ref="leftView">
                                                         <entity-tree-component id="log-tree" :model="{parent:'/log',name:'log_tree_data.js',domain:'log'}" ref="tagTree"></entity-tree-component>
                                                     </el-aside>
                                                     <el-main class="table-view" style="padding:5px;" ref="mainView">

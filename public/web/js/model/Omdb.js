@@ -739,7 +739,7 @@ class Omdb{
                 model: Object
             },
             template: `<el-container style="height: calc(100% - 30px);">
-                            <el-header style="height:30px;line-height:30px;background: #f2f3f5;">
+                            <el-header style="height:30px;line-height:30px;background: #f2f2f2;">
                                 <el-button-group>
                                     <el-tooltip content="复制" placement="bottom" open-delay="500">
                                         <el-button type="text" icon="fas fa-copy" class="btn-copy"></el-button>
@@ -825,7 +825,7 @@ class Omdb{
                 model: Object
             },
             template:   `<el-container style="height: calc(100vh - 110px);">
-                            <el-main style="padding:0px;overflow:hidden;background:#f2f3f5;">
+                            <el-main style="padding:0px;overflow:hidden;background:#f2f2f2;">
                                 <el-form label-width="80px" :model="formModel" style="width:70%;padding: 10px 0px;">
                                     <el-form-item label="类名称">
                                         <el-input v-model="formModel.name" :disabled="true"></el-input>
@@ -1251,7 +1251,7 @@ class Omdb{
                                                         <el-button type="text" icon="el-icon-copy-document" class="el-button-copy" @click="onCopy(item['field'],scope.$index)"></el-button>
                                                     </el-header>
                                                     <el-main style="padding:0px;">
-                                                        <textarea rows="10" style="width:98%;white-space:nowrap;" :id="'textarea_'+scope.$index">#{scope.row[item['field']]}#</textarea>
+                                                        <textarea rows="10" style="width:98%;white-space:nowrap;" :id="'textarea_'+scope.$index">#{ scope.row[item['field']] }#</textarea>
                                                     </el-main>
                                                 </el-container>
                                                 <el-button type="text" slot="reference">#{ _.truncate(scope.row[item['field']], {'length': 24}) }# <i class="el-icon-more-outline"></i></el-button>
@@ -2010,7 +2010,7 @@ class Omdb{
                                     }
                                 },
                                 template: `<el-container style="height:100%;">
-                                                <el-header style="height:auto;line-height:40px;min-height:40px;background: #f2f3f5;">
+                                                <el-header style="height:auto;line-height:40px;min-height:40px;background: #f2f2f2;">
                                                     <el-checkbox v-model="model.ifRelation" label="导出关系"></el-checkbox>
                                                     <el-checkbox v-model="model.ifData" label="导出数据" style="margin-left:20px;"></el-checkbox>
                                                     <p v-if="model.ifData">

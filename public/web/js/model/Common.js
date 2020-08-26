@@ -29,7 +29,7 @@ Vue.component("mx-editor",{
     },
     computed:{
         cStyle(){
-            return `width:100%;height:${this.cHeight};border:1px solid #f2f3f5;`;
+            return `width:100%;height:${this.cHeight};border:1px solid #f2f2f2;`;
         }
     },
     template:  `<div :style="cStyle" ref="editor"></div>`,
@@ -95,7 +95,7 @@ Vue.component("mx-fs-editor",{
         }
     },
     template:  `<el-container style="height: 100%;">
-                    <el-header style="height:30px;line-height:30px;background-color:#f6f6f6;border-bottom:1px solid #ddd;">
+                    <el-header style="height:30px;line-height:30px;background-color:#f2f2f2;border-bottom:1px solid #ddd;">
                         <el-dropdown style="padding-right: 10px;cursor:pointer;" trigger="click">
                             <span class="el-dropdown-link">
                                 文件
@@ -163,7 +163,7 @@ Vue.component("mx-fs-editor",{
                         </el-dialog>
                     </el-header>
                     <el-container style="height: 100%;min-height:300px;border-top:1px solid #fff;">
-                        <el-aside style="background-color:#f6f6f6;width:200px;overflow:hidden;" ref="leftView">
+                        <el-aside style="background-color:#f2f2f2;width:200px;overflow:hidden;" ref="leftView">
                             <mx-fs-tree :root="tree.root" v-if="!_.isEmpty(tabs.activeNode)"></mx-fs-tree>
                         </el-aside>
                         <el-main style="padding:0px;overflow:hidden;" ref="mainView">
@@ -575,7 +575,7 @@ Vue.component("mx-fs-open",{
         }
     },
     template: `<el-container>
-                    <el-header style="height:60px;line-height:60px;background-color:#f6f6f6;padding:10px;">
+                    <el-header style="height:60px;line-height:60px;background-color:#f2f2f2;padding:10px;">
                         <el-form ref="form" :model="form" label-width="80px">
                             <el-form-item label="选择目录：">
                                 <el-input v-model="node.fullname" v-if="!_.isEmpty(node.fullname)"></el-input>
@@ -1208,6 +1208,409 @@ Vue.component("mx-fs-tree",{
     }
 })
 
+/* Common Fs Tree For Select */
+Vue.component("mx-fs-tree-select",{
+    delimiters: ['#{', '}#'],
+    props: {
+        selected:Array,
+        root: String
+    },
+    data(){
+        return {
+            defaultProps: {
+                children: 'children',
+                label: 'name'
+            },
+            treeData: [],
+            filterText: ""
+        }
+    },
+    template:   `<el-container style="height:100%;">
+                    <el-header style="height:40px;line-height:40px;padding:0px 10px;">
+                        <el-input v-model="filterText" 
+                            placeholder="搜索" size="mini"
+                            clearable></el-input>
+                    </el-header>
+                    <el-main style="padding:0px 10px; height: 100%;">
+                        <el-tree :data="treeData" 
+                                :props="defaultProps" 
+                                node-key="fullname"
+                                highlight-current
+                                default-expand-all
+                                auto-expand-parent
+                                :default-checked-keys="selected"
+                                @node-click="onNodeClick"
+                                @check-change="onCheckChange"
+                                :filter-node-method="onFilterNode"
+                                style="background:transparent;"
+                                show-checkbox
+                                ref="tree">
+                            <span slot-scope="{ node, data }" style="width:100%;height:30px;line-height: 30px;"  @mouseenter="onMouseEnter(data)" @mouseleave="onMouseLeave(data)">
+                                <span v-if="data.ftype=='dir'">
+                                    <i class="el-icon-folder" style="color:#FFC107;"></i>
+                                    <span>#{node.label}#</span>
+                                </span>
+                                <span v-else>
+                                    <i class="el-icon-c-scale-to-original" style="color:#0088cc;"></i>
+                                    <span>#{node.label}#</span>
+                                </span>
+                            </span>  
+                        </el-tree>
+                    </el-main>
+                </el-container>`,
+    watch: {
+        filterText(val) {
+            if(_.isEmpty(val)){
+                this.onInit();
+            } else {
+                this.$refs.tree.filter(val);
+            }
+        }
+    },
+    created(){
+        this.onInit();
+    },
+    methods: {
+        onMouseEnter(item){
+            this.$set(item, 'show', true)
+        },
+        onMouseLeave(item){
+            this.$set(item, 'show', false)
+        },
+        onRefresh(item,index){
+            let childrenData = fsHandler.fsList(item.fullname);
+
+            this.$set(data, 'children', childrenData);
+        },
+        onNewDir(item,index){
+            this.$prompt('请输入目录名称', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消'
+              }).then(({ value }) => {
+                if(_.isEmpty(value)){
+                    this.$message({
+                        type: 'warning',
+                        message: '请输入目录名称！'
+                    });
+                    return false;
+                }
+
+                let _attr = {remark: '', ctime: _.now(), author: this.signedUserName, rate: 0};
+
+                let rtn = fsHandler.fsNew('dir', item.fullname, value, null, _attr);
+                
+                if(rtn == 1){
+                    this.$message({
+                        type: "success",
+                        message: "新建目录成功！"
+                    })
+                    _.delay(()=>{
+                        this.initData();
+                    },500)
+                } else {
+                    this.$message({
+                        type: "error",
+                        message: "新建目录失败，" + rtn.message
+                    })
+                }
+                
+              }).catch(() => {
+                this.$message({
+                  type: 'info',
+                  message: '取消输入'
+                });       
+              });
+            
+        },
+        onNewFile(item,index){
+            this.$prompt('请输入文件名称', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消'
+              }).then(({ value }) => {
+                if(_.isEmpty(value)){
+                    this.$message({
+                        type: 'warning',
+                        message: '请输入名称！'
+                    });
+                    return false;
+                }
+
+                let _attr = {remark: '', ctime: _.now(), author: this.signedUserName, rate: 0};
+
+                let rtn = fsHandler.fsNew('md', item.fullname, [value,'md'].join("."), null, _attr);
+                
+                if(rtn == 1){
+                    this.$message({
+                        type: "success",
+                        message: "新建成功！"
+                    })
+                    _.delay(()=>{
+                        this.initData();
+                    },500)
+                } else {
+                    this.$message({
+                        type: "error",
+                        message: "新建失败，" + rtn.message
+                    })
+                }
+                
+              }).catch(() => {
+                this.$message({
+                  type: 'info',
+                  message: '取消输入'
+                });       
+              });
+        },
+        onDelete(item,index){
+
+            this.$confirm(`确认要删除该目录或文件：${item.name}？`, '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                
+                let rtn = fsHandler.fsDelete(item.parent,item.name);
+                
+                if(rtn == 1){
+                    this.$messsage({
+                        type: "success",
+                        message: "删除成功！"
+                    })
+                    
+                    _.delay(()=>{
+                        this.initData();
+                    },1000)
+                    
+                } else {
+                    this.$messsage({
+                        type: "error",
+                        message: "删除失败！"
+                    })
+                }
+
+            }).catch(() => {
+                
+            });
+        },
+        onUpload(item,index){
+
+            let wnd = null;
+            let wndID = `jsPanel-upload-${objectHash.sha1(item.id)}`;
+
+            try{
+                if(jsPanel.activePanels.getPanel(wndID)){
+                    jsPanel.activePanels.getPanel(wndID).close();
+                }
+            } catch(error){
+
+            }
+            finally{
+                wnd = maxWindow.winUpload('文件上传', `<div id="${wndID}"></div>`, null, null);
+            }
+            
+            new Vue({
+                delimiters: ['#{', '}#'],
+                template:   `<el-container>
+                                <el-main>
+                                    <el-upload drag
+                                        multiple
+                                        show-file-list="false"
+                                        :action="upload.url"
+                                        :on-success="onSuccess"
+                                        :on-remove="onRemove"
+                                        list-type="text"
+                                        name="uploadfile">
+                                        <i class="el-icon-upload"></i>
+                                    </el-upload>
+                                </el-main>
+                                <el-footer>
+                                    <i class="fas fa-clock"></i> 上传文件：#{upload.fileList.length}# 
+                                </el-footer>
+                            </el-container>`,
+                data: {
+                    upload: {
+                        url: `/fs/${item.fullname}?issys=true`,
+                        fileList: []
+                    }
+                },
+                created(){
+                    
+                },
+                methods: {
+                    beforeUpload(file){
+                        
+                    },
+                    onSuccess(res,file,FileList){
+                        this.upload.fileList = FileList;
+                    },
+                    onRemove(file, fileList) {
+                        let rtn = fsHandler.fsDelete(item.fullname,file.name);
+                    },
+                    onPreview(file) {
+                        console.log(file);
+                    }
+                }
+            }).$mount(`#${wndID}`);
+            
+        },  
+        onFilterNode:_.debounce(function(value, data) {
+            if (!value) return true;
+            try{
+                let rtn = fsHandler.callFsJScript("/matrix/fs/getFsByTerm.js", encodeURIComponent(value)).message;
+                this.treeData = rtn;
+            } catch(err){
+                this.treeData = [];
+            }
+        },1000),
+        onNodeClick(data){
+            try{
+
+                if(!data.isdir) {
+                    eventHub.$emit("FS-NODE-OPENIT-EVENT", data, data.parent);
+
+                } else {
+
+                    let rtn = _.map(fsHandler.fsList(data.fullname),(v)=>{
+                        return _.extend(v,{show:false});
+                    });
+
+                    let childrenData = _.sortBy(rtn,'fullname');
+
+                    this.$set(data, 'children', childrenData);
+
+                    eventHub.$emit("FS-FORWARD-EVENT", data, data.fullname);
+                    
+                }
+
+                window.FS_TREE_DATA = this.$refs.tree.data;
+
+            } catch(err){
+
+            }
+
+        },
+        onCheckChange(data, checked, indeterminate){
+            this.$emit('update:selected', {data: this.$refs.tree.getCheckedKeys(),checked:checked});
+        },
+        onInit(){
+            if(window.FS_TREE_DATA){
+                this.treeData = window.FS_TREE_DATA;//fsHandler.callFsJScript("/matrix/devops/getFsForTree.js", encodeURIComponent(this.root)).message;
+            } else {
+                this.treeData = fsHandler.callFsJScript("/matrix/devops/getFsForTree.js", encodeURIComponent(this.root)).message;
+            }
+        }
+    }
+})
+
+/* Common App Tree For Select */
+Vue.component("mx-app-tree-select",{
+    delimiters: ['#{', '}#'],
+    data(){
+        return {
+            defaultProps: {
+                children: 'children',
+                label: 'name'
+            },
+            treeData: [],
+            filterText: ""
+        }
+    },
+    template:   `<el-container style="height:100%;">
+                    <el-header style="height:40px;line-height:40px;padding:0px 10px;">
+                        <el-input v-model="filterText" 
+                            placeholder="搜索" size="mini"
+                            clearable></el-input>
+                    </el-header>
+                    <el-main style="padding:0px 10px; height: 100%;">
+                        <el-tree :data="treeData" 
+                                :props="defaultProps" 
+                                node-key="id"
+                                highlight-current
+                                default-expand-all
+                                auto-expand-parent
+                                @node-click="onNodeClick"
+                                :filter-node-method="onFilterNode"
+                                style="background:transparent;"
+                                show-checkbox
+                                ref="tree">
+                            <span slot-scope="{ node, data }" style="width:100%;height:30px;line-height: 30px;"  @mouseenter="onMouseEnter(data)" @mouseleave="onMouseLeave(data)">
+                                <span v-if="data.ftype=='dir'">
+                                    <i class="el-icon-folder" style="color:#FFC107;"></i>
+                                    <span>#{node.label}#</span>
+                                </span>
+                                <span v-else>
+                                    <i class="el-icon-c-scale-to-original" style="color:#0088cc;"></i>
+                                    <span>#{node.label}#</span>
+                                </span>
+                            </span>  
+                        </el-tree>
+                    </el-main>
+                </el-container>`,
+    watch: {
+        filterText(val) {
+            if(_.isEmpty(val)){
+                this.onInit();
+            } else {
+                this.$refs.tree.filter(val);
+            }
+        }
+    },
+    created(){
+        this.onInit();
+    },
+    methods: {
+        onMouseEnter(item){
+            this.$set(item, 'show', true)
+        },
+        onMouseLeave(item){
+            this.$set(item, 'show', false)
+        },
+        onRefresh(item,index){
+            let childrenData = fsHandler.fsList(item.fullname);
+
+            this.$set(data, 'children', childrenData);
+        },
+        onFilterNode:_.debounce(function(value, data) {
+            if (!value) return true;
+            try{
+                let rtn = fsHandler.callFsJScript("/matrix/fs/getFsByTerm.js", encodeURIComponent(value)).message;
+                this.treeData = rtn;
+            } catch(err){
+                this.treeData = [];
+            }
+        },1000),
+        onNodeClick(data){
+            try{
+
+                if(!data.isdir) {
+                    eventHub.$emit("FS-NODE-OPENIT-EVENT", data, data.parent);
+
+                } else {
+
+                    let rtn = _.map(fsHandler.fsList(data.fullname),(v)=>{
+                        return _.extend(v,{show:false});
+                    });
+
+                    let childrenData = _.sortBy(rtn,'fullname');
+
+                    this.$set(data, 'children', childrenData);
+
+                    eventHub.$emit("FS-FORWARD-EVENT", data, data.fullname);
+                    
+                }
+
+                window.FS_TREE_DATA = this.$refs.tree.data;
+
+            } catch(err){
+
+            }
+
+        },
+        onInit(){
+            this.treeData = fsHandler.callFsJScript("/matrix/system/getAppList.js").message;
+        }
+    }
+})
 
 /* Common Entity new */
 Vue.component("mx-entity-new",{
@@ -1553,6 +1956,109 @@ Vue.component("mx-class-tree",{
 
             } finally{
                 this.selected = data;
+            }
+
+        }
+    }
+})
+
+/* Common Class Tree Select */
+Vue.component("mx-class-tree-select",{
+    delimiters: ['#{', '}#'],
+    props: {
+        selected: Array,
+        root: String
+    },
+    data(){
+        return {
+            treeData: [],
+            selected: null,
+            defaultProps: {
+                children: 'children',
+                label: 'alias'
+            },
+            filterText: ""
+        }
+    },
+    template:   `<el-container style="height:60vh;">
+                    <el-header style="height:40px;line-height:40px;padding:0px 10px;">
+                        <el-input v-model="filterText" 
+                            placeholder="搜索" size="mini"
+                            clearable></el-input>
+                    </el-header>
+                    <el-main style="padding:0px 10px; height: 100%;">
+                        <el-tree :data="treeData" 
+                                :props="defaultProps" 
+                                :default-checked-keys="selected"
+                                node-key="id"
+                                show-checkbox
+                                highlight-current
+                                default-expand-all
+                                auto-expand-parent
+                                @node-click="onNodeClick"
+                                @check-change="onCheckChange"
+                                :filter-node-method="onFilterNode"
+                                style="background:transparent;"
+                                ref="tree">
+                            <span slot-scope="{ node, data }" style="width:100%;">
+                                <span v-if="data">
+                                    <i class="el-icon-c-scale-to-original" style="color:#0088cc;"></i> #{ node.label }#
+                                </span>
+                                <span v-else>
+                                    <i class="el-icon-folder" style="color:#ffa500;"></i> #{ node.label }#
+                                </span>
+                            </span>
+                        </el-tree>
+                    </el-main>
+                </el-container>`,
+    watch: {
+        filterText(val) {
+            if(_.isEmpty(val)){
+                this.initData();
+            } else {
+                this.$refs.tree.filter(val);
+            }
+        }
+    },
+    created(){
+        this.initData();
+    },
+    methods: {
+        initData(){
+            this.treeData = fsHandler.callFsJScript("/matrix/entity/entity_class.js",encodeURIComponent(this.root)).message;
+        },
+        onCheckChange(val){
+            this.$emit('update:selected', {data: this.$refs.tree.getCheckedKeys(),checked:checked});
+        },
+        onFilterNode:_.debounce(function(value, data) {
+            if (!value) return true;
+            try{
+                let rtn = fsHandler.callFsJScript("/matrix/graph/entity-search-by-term.js",encodeURIComponent(value)).message;
+                this.treeData = _.map(rtn,(v)=>{
+                    return _.extend(v,{ children:[], alias:_.last(v.class.split("/"))});
+                });
+            } catch(err){
+                this.treeData = [];
+            }
+        },1000),
+        onNodeClick(data){
+            try{
+
+                if(!data.isdir) {
+                    eventHub.$emit("FS-NODE-OPENIT-EVENT", data, data.parent);
+
+                } else {
+
+                    let childrenData = _.sortBy(fsHandler.fsList(data.fullname),'fullname');
+
+                    this.$set(data, 'children', childrenData);
+
+                    eventHub.$emit("FS-FORWARD-EVENT", data, data.fullname);
+                    
+                }
+
+            } catch(err){
+
             }
 
         }
@@ -2029,7 +2535,7 @@ Vue.component("mx-class-entity-select",{
                     v-model="entity.selected"
                     :data="entity.list"
                     :titles="['可选', '已选']"
-                    style="background:#f2f3f5;padding:20px;">
+                    style="background:#f2f2f2;padding:20px;">
                 </el-transfer>`,
     created(){
         this.$set(this.entity,'selected',this.value);
@@ -2460,7 +2966,7 @@ Vue.component("mx-entity-class-keys-cascader",{
                         </el-input>
                     </el-header>
                     
-                    <el-main style="width:60vw;height:40vh;padding:0px;margin:5px 0px;background: #f2f3f5;border-top:1px solid #dddddd;" 
+                    <el-main style="width:60vw;height:40vh;padding:0px;margin:5px 0px;background: #f2f2f2;border-top:1px solid #dddddd;" 
                         v-if="!_.isEmpty(search.result)"
                         ref="mainView">
                         <div class="div-hover-effect" style="display:flex;padding:10px;cursor:pointer;width:100%;" 

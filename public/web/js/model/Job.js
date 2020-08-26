@@ -675,7 +675,7 @@ class Job extends Matrix {
                                             </div>
                                             
                                             <el-container id="job-view-console">
-                                                <el-aside class="tree-view" style="background-color:#f2f3f5;" ref="leftView">
+                                                <el-aside class="tree-view" style="background-color:#f2f2f2;" ref="leftView">
                                                     <mx-tag-tree :model="{parent:'/job',name:'job_tree_data.js',domain:'job'}" :fun="onRefreshByTag" ref="tagTree"></mx-tag-tree>
                                                 </el-aside>
                                                 <el-main class="table-view" style="padding:5px;" ref="mainView">

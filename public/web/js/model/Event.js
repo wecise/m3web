@@ -1367,9 +1367,9 @@ class Event {
                         }
                     },
                     template: `<el-container :style="$root.control.view.mode | pickContainerStyle">
-                                    <el-aside style="width:300px;background: #f6f6f6;overflow:hidden;" class="split" ref="leftView">
+                                    <el-aside style="width:300px;background: #f2f2f2;overflow:hidden;" class="split" ref="leftView">
                                         <el-container style="overflow:hidden;height:100%;">
-                                            <el-header style="height:30px;line-height:30px;background: #f6f6f6;display:;">
+                                            <el-header style="height:30px;line-height:30px;background: #f2f2f2;display:;">
                                                 <el-tooltip content="刷新" placement="top" open-delay="500">
                                                     <el-button type="text" icon="el-icon-refresh"></el-button>
                                                 </el-tooltip>
@@ -1683,7 +1683,7 @@ class Event {
                         }
                     },
                     template:  `<el-container :style="$root.control.viewType | heightByMode">
-                                    <el-aside style="background: #f7f7f7;overflow:hidden;padding:0px 10px;" class="split" ref="leftView">
+                                    <el-aside style="background: #f2f2f2;overflow:hidden;padding:0px 10px;" class="split" ref="leftView">
                                         <el-container style="overflow:hidden;height:100%;">
                                             <el-header style="height: 30px;line-height: 30px;text-align: right;padding:0px;">
                                                 <el-switch
@@ -1793,7 +1793,7 @@ class Event {
                         }
                     },
                     template:  `<el-container :style="$root.control.viewType | heightByMode">
-                                    <el-aside  style="background: #f7f7f7;overflow:hidden;padding:10px;" ref="leftView">
+                                    <el-aside  style="background: #f2f2f2;overflow:hidden;padding:10px;" ref="leftView">
                                         <el-container style="overflow:hidden;height:100%;">
                                             <el-header style="text-align: right;line-height: 30px;height:30px;">
                                                 <el-tooltip content="刷新" open-delay="500">
@@ -1933,7 +1933,7 @@ class Event {
                         }
                     },
                     template:  ` <el-container :style="$root.control.viewType | heightByMode">
-                                    <el-aside style="width:300px;background: #f7f7f7;overflow:hidden;" ref="leftView">
+                                    <el-aside style="width:300px;background: #f2f2f2;overflow:hidden;" ref="leftView">
                                         <el-container style="overflow:hidden;height:100%;">
                                             <el-main style="padding:0px;overflow:auto;">
                                                 <el-table-component :model="dt" ref="script"></el-table-component>
@@ -2190,7 +2190,7 @@ class Event {
                         model:Object
                     },
                     template:   `<el-container class="view-manage animated fadeInLeft" style="height:100%;">
-                                    <el-aside style="width:270px;height:100%;background:#f7f7f7;">
+                                    <el-aside style="width:270px;height:100%;background:#f2f2f2;">
                                         <el-container  style="height:100%;">
                                             <el-header style="height:30px;line-height:30px;width:100%;text-align:right;">
                                                 <el-tooltip content="刷新视图">
@@ -2543,7 +2543,7 @@ class Event {
                                                                 </el-tooltip>
                                                             </div>
                                                             <el-container id="event-view-console">
-                                                                <el-aside class="tree-view" style="background-color:#f6f6f6;" ref="leftView">
+                                                                <el-aside class="tree-view animated fadeIn" style="background-color:#f2f2f2;" ref="leftView">
                                                                     <mx-tag-tree :model="{parent:'/event',name:'event_tree_data.js',domain:'event'}" :fun="onRefreshByTag" ref="tagTree"></mx-tag-tree>
                                                                 </el-aside>
                                                                 <el-main class="table-view" style="padding:5px;" ref="mainView">

@@ -353,8 +353,9 @@ class UserHandler{
             url: `/admin/perms/group`,
             dataType: 'json',
             type: 'PUT',
+            contentType: "application/json; charset=utf-8",
             async: false,
-            data: { name:  event.name, parent: "", member: event.ids },
+            data: JSON.stringify({name:event.name, parent:event.parent, member:event.member}),
             beforeSend:function(xhr){
             },
             complete: function(xhr, textStatus) {
@@ -410,7 +411,7 @@ class UserHandler{
         let rtn = null;
 
         jQuery.ajax({
-            url: `/admin/perms/group?parent=${event.id}`,
+            url: `/admin/perms/group/${event.id}`,
             dataType: 'json',
             type: 'GET',
             async: false,
@@ -440,47 +441,14 @@ class UserHandler{
 
         let form = new FormData();
         form.append("name", event.name);
-        _.forEach(event.paths, (v)=>{
+        _.forEach(event.pprefix, (v)=>{
             form.append("path", v);
         })
 
         jQuery.ajax({
             url: `/admin/perms/api`,
             dataType: 'json',
-            type: 'PUT',
-            processData: false,
-            contentType: false,
-            mimeType: "multipart/form-data",
-            async: false,
-            data: form,
-            beforeSend:function(xhr){
-            },
-            complete: function(xhr, textStatus) {
-            },
-            success: function (data, status) {
-
-                userHandler.ifSignIn(data);
-
-                if( _.lowerCase(data.status) == "ok"){
-                    rtn = data.message;
-                }
-
-            },
-            error: function(xhr, textStatus, errorThrown) {
-                rtn = xhr.responseText;
-            }
-        });
-        return rtn;
-    };
-
-    /* Delete api permissions */
-    deleteApiPermissions(event) {
-        let rtn = null;
-
-        jQuery.ajax({
-            url: `/admin/perms/api/${event.name}`,
-            dataType: 'json',
-            type: 'DELETE',
+            type: 'POST',
             processData: false,
             contentType: false,
             mimeType: "multipart/form-data",
@@ -506,13 +474,41 @@ class UserHandler{
         return rtn;
     };
 
+    /* Delete api permissions */
+    deleteApiPermissions(event) {
+        let rtn = null;
+
+        jQuery.ajax({
+            url: `/admin/perms/api/${event.name}`,
+            dataType: 'json',
+            type: 'DELETE',
+            async: false,
+            beforeSend:function(xhr){
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function (data, status) {
+
+                userHandler.ifSignIn(data);
+
+                if( _.lowerCase(data.status) == "ok"){
+                    rtn = 1;
+                }
+
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                rtn = xhr.responseText;
+            }
+        });
+        return rtn;
+    };
+
     /* Update api permissions */
     UpdateApiPermissions(event) {
         let rtn = null;
 
         let form = new FormData();
-        form.append("name", event.name);
-        _.forEach(event.paths, (v)=>{
+        _.forEach(event.pprefix, (v)=>{
             form.append("path", v);
         })
 
@@ -534,7 +530,7 @@ class UserHandler{
                 userHandler.ifSignIn(data);
 
                 if( _.lowerCase(data.status) == "ok"){
-                    rtn = data.message;
+                    rtn = 1;
                 }
 
             },
@@ -609,12 +605,12 @@ class UserHandler{
 
         let form = new FormData();
 
-        _.forEach(event.groups, (v)=>{
+        _.forEach(event.roleGroups, (v)=>{
             form.append("group", v);
         })
 
         jQuery.ajax({
-            url: `//admin/perms/api/${event.name}/group`,
+            url: `/admin/perms/api/${event.name}/group`,
             dataType: 'json',
             type: 'PUT',
             processData: false,
@@ -646,7 +642,7 @@ class UserHandler{
     deleteApiPermissionsGroups(event) {
         let rtn = null;
 
-        let groups = _.map(event.groups, (v)=>{
+        let groups = _.map(event._group._all, (v)=>{
             return `group=${v}`;
         }).join("&");
 

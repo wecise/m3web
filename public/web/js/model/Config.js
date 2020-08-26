@@ -552,7 +552,7 @@ class Config {
                     template: ` <el-container style="height:calc(100vh - 174px);">
                                     <el-main ref="mainView">
                                         <div class="config-value" ref="editorContainer" :model="model" style="border:none;border-top:1px solid #f5f5f5;border-bottom:1px solid #f5f5f5;height:100%"></div>
-                                        <div class="config-status-footer" :id="'statusBar-'+id" style="line-height: 30px;padding: 0px 15px;background: rgb(246, 246, 246);"></div>
+                                        <div class="config-status-footer" :id="'statusBar-'+id" style="line-height: 30px;padding: 0px 15px;background: #f2f2f2;"></div>
                                     </el-main>
                                     <el-footer style="padding:0px;height:200px;" ref="footerView">
                                         <el-tabs v-model="debug.tabs.activeIndex" type="border-card" closable @tab-remove="logClose" @tab-click="handleClick">
@@ -929,7 +929,7 @@ class Config {
     
                 let main = {
                     delimiters: ['#{', '}#'],
-                    template:   `<el-container style="height: calc(100vh - 85px);background-color:#f6f6f6;">
+                    template:   `<el-container style="height: calc(100vh - 85px);background-color:#f2f2f2;">
                                     <el-header style="height: 35px;line-height: 35px;background:transparent;border-bottom:1px solid #dddddd; padding: 0px 10px;">
                                         <el-dropdown placement="top-start" trigger="click">
                                             <el-tooltip content="文件" open-delay="500">

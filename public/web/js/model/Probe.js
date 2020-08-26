@@ -134,7 +134,7 @@ class Probe extends Matrix {
                                         </el-table-column>
                                         <el-table-column type="expand" width="0">
                                             <template slot-scope="scope">
-                                                <el-container style="width:90%;height:100%;min-height:40vh;background: #f2f3f5;">
+                                                <el-container style="width:90%;height:100%;min-height:40vh;background: #f2f2f2;">
                                                     <el-main style="height:100%;">
                                                         <el-button type="default" v-for="(item,key) in scope.row.depots" 
                                                                 style="position:relative;box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);max-width: 12em;width: 12em;height:110px;margin:5px;">
@@ -632,7 +632,7 @@ class Probe extends Matrix {
                                         <el-table-column type="expand" width="0">
                                             <template slot-scope="props">
                                                 <el-container style="width:90%;height:100%;min-height:40vh;background: #ffffff;">
-                                                    <el-aside style="width:250px;background: #f2f3f5;">
+                                                    <el-aside style="width:250px;background: #f2f2f2;">
                                                         <el-container style="height:100%;">
                                                             <el-header style="height:40px;line-height:40px;">
                                                                 <h4 style="margin:0px;">版本历史</h4>
@@ -1408,7 +1408,9 @@ class Probe extends Matrix {
     
                                 // 初始化命令编辑器
                                 _.delay(()=>{
+                                    
                                     let editor = ace.edit(self.$refs['commandRef'+row.id]);
+                                    
                                     editor.setOptions({
                                         // maxLines: 1000,
                                         minLines: 20,
@@ -1425,17 +1427,14 @@ class Probe extends Matrix {
                                     editor.getSession().setUseWrapMode(false);
                                     editor.renderer.setShowGutter(true);
                                     editor.setValue(row.command);
-                                },1000)
+                                },2000)
     
                             } catch(err){
                                 console.log(err)
                                 _.extend(row, { activeTab: 'script' } );
-                            } finally{
-                                console.log(_.now())
                             } 
                         };
                         
-
                         loadData();
 
                         if( !_.isUndefined(row.fileObj) ){
@@ -1959,7 +1958,7 @@ class Probe extends Matrix {
                     }
                 },
                 template: `<el-container style="height:calc(100vh - 145px);">
-                                <el-aside style="background:#f2f3f5;width:20%;margin: -10px 0px -10px -10px;" ref="leftView">
+                                <el-aside style="background:#f2f2f2;width:20%;margin: -10px 0px -10px -10px;" ref="leftView">
                                     <mx-tag-tree :model="{parent:'/probe',name:'probe_tree_data.js',domain:'probe'}" :fun="onRefreshByTag" ref="probeTagTree"></mx-tag-tree>
                                 </el-aside>
                                 <el-main style="padding:0px;width:80%;" ref="mainView">
@@ -2036,7 +2035,7 @@ class Probe extends Matrix {
                     }
                 },
                 template: `<el-container style="height:calc(100vh - 145px);width:100%;">
-                                <el-aside ref="leftView" style="background:#f2f3f5;margin: -10px 0px -10px -10px;">
+                                <el-aside ref="leftView" style="background:#f2f2f2;margin: -10px 0px -10px -10px;">
                                     <mx-tag-tree :model="{parent:'/depot',name:'script_tree_data.js',domain:'script'}" :fun="onRefreshByTag" ref="scriptTagTree"></mx-tag-tree>
                                 </el-aside>
                                 <el-main style="padding:0px;width:100%;overflow:hidden;" ref="mainView">

@@ -626,7 +626,8 @@
                                                 @click="onTriggerClick(item)"
                                                 v-for="item in fileList">
                                                 <div style="position: relative;right: -100px;">    
-                                                    <el-dropdown trigger="hover" placement="top-start" @command="$root.$refs.viewRef.$children[0].onMenuCommand">
+                                                    <el-dropdown trigger="hover" 
+                                                        placement="top-start" @command="$root.$refs.viewRef.$children[0].onMenuCommand">
                                                             <span class="el-dropdown-link">
                                                                 <i class="el-icon-arrow-down el-icon--right"></i>
                                                             </span>
@@ -766,7 +767,7 @@
                                                 :key="item.id"
                                                 v-for="item in fileList">
                                                 <div style="position: relative;right: -40px;">    
-                                                    <el-dropdown trigger="click" 
+                                                    <el-dropdown trigger="hover" 
                                                         placement="top-start" 
                                                         @command="$root.$refs.viewRef.$children[0].onMenuCommand"
                                                         :ref="item.id">
