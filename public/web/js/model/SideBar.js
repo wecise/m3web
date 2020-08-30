@@ -1008,17 +1008,25 @@ class SideBar {
 
     appUninstall(event){
 
-        
-        alertify.confirm(`确定要卸载该应用？<br><br>
-                        应用名称：${event.cnname}<br><br>
-                        地址：${event.url}<br><br>`, function (e) {
-            if (e) {
-                let rtn = fsHandler.callFsJScript("/matrix/apps/app_delete.js",encodeURIComponent(JSON.stringify(event)));
-                eventHub.$emit("APP-REFRESH-EVENT");
-            } else {
+        const h = this.$createElement;
+        this.$msgbox({
+                title: `确定要卸载该应用`, 
+                message: h('span', null, [
+                    h('p', null, `应用名称：${event.cnname}`),
+                    h('p', null, `地址：${event.url}`)
+                ]),
+                showCancelButton: true,
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+        }).then(() => {
+
+            let rtn = fsHandler.callFsJScript("/matrix/apps/app_delete.js",encodeURIComponent(JSON.stringify(event)));
+            eventHub.$emit("APP-REFRESH-EVENT");
+
+        }).catch(() => {
                 
-            }
-        });
+        }); 
 
     }
 

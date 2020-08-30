@@ -9,17 +9,19 @@
 	
 	/*----------  最外层element会自动增加组件同名 class="mx-tag-all-tree"  ----------*/
 	<template>		
-		<el-container>
+		<el-container style="background:#f2f2f2;">
 			<el-header style="height:30px;line-height:30px;display: none;">
 				<el-input placeholder="搜索"></el-input>
 			</el-header>
-			<el-main style="padding: 5px;height: calc(100vh - 155px);">
+			<el-main style="padding: 5px;height: 100%;">
 				<el-tree 
 					node-key="id"
 					show-checkbox
 					highlight-current="true"
 					:default-expand-all="false"
 					:default-expanded-keys="defaultExpandedKeys"
+					:default-checked-keys="selected"
+					:expand-on-click-node="false"
 					:data="nodes" 
 					:props="defaultProps" 
 					draggable
@@ -59,6 +61,7 @@
 	{
 		delimiters: ['#{', '}#'],
 		props: {
+			selected: Array,
 			model: Object,
 			fun: {
 				type: Function
@@ -81,12 +84,6 @@
 			this.loadNodes();
 
 			eventHub.$on("TAG-TREE-REFRESH",this.loadNodes);
-		},
-		mounted() {
-			this.$nextTick(()=> {
-				// 打开指定层级
-				// this.recursiveTraverse(this.nodes);
-			})
 		},
 		methods:{
 			loadNodes(){
@@ -114,8 +111,23 @@
 				this.fun(tNode.name);
 			},
 			onCheckChange(data, checked, indeterminate){
-				console.log(data, checked, indeterminate);
-				this.$emit('update:selected', {data: this.$refs.tree.getCheckedKeys(),checked:checked});
+				
+				let nodes = [];
+				
+				let getChildNodeName = function(data){
+					
+					nodes.push(data.id);
+					
+					if(data.nodes){
+						_.forEach(data.nodes,(v)=>{
+							getChildNodeName(v);
+						})
+					}
+				};
+
+				getChildNodeName(data);
+
+				this.$emit('update:selectedTag', { data: nodes, checked:checked });
 			},
 			onDragStart(node, ev) {
 				

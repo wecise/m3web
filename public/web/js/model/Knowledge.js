@@ -125,6 +125,7 @@ class Knowledge {
                                                 :default-expand-all="true"
                                                 @node-click="onNodeClick"
                                                 :filter-node-method="onFilterNode"
+                                                :expand-on-click-node="false"
                                                 style="background:transparent;"
                                                 ref="tree">
                                             <span slot-scope="{ node, data }" style="width:100%;height:30px;line-height: 30px;"  @mouseenter="onMouseEnter(data)" @mouseleave="onMouseLeave(data)">

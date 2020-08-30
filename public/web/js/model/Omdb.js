@@ -287,31 +287,6 @@ class Omdb{
                                         // 增加操作类型
                                         let action = _.last(key.split("_"));
                                         self.$root.action({list: [row], action:action});
-                                    } else if(_.includes(key,'ticket')){
-                                        alertify.confirm(`确定生成工单<br><br>
-                                                            告警ID：${row.id}<br><br>
-                                                            实体ID：${row.entity}<br><br>
-                                                            模板ID：b223c78b-3107-11e6-8487-446d577ed81c<br><br>
-                                                            告警摘要：${row.msg}<br><br>
-                                                            告警时间：${moment(row.vtime).format("LLL")}<br><br>`, function (e) {
-                                            if (e) {
-                                                try{
-                                                    let rtn = fsHandler.callFsJScript("/matrix/readysoft/eventToTicket.js", encodeURIComponent(JSON.stringify(row).replace(/%/g,'%25'))).message.data;
-                                                    if(rtn.data.success == 1){
-                                                        self.options.term = row.id;
-                                                        self.$refs.searchRef.search();
-                                                        alertify.success(`创建工单成功! <br><br>
-                                                                    工单单号：${rtn.data.ticket_number}`)
-                                                    }
-                                                }catch(err){
-                                                    alertify.error(`创建工单失败，请确认！ <br><br>
-                                                                    ${rtn}<br><br>
-                                                                    ${err}`)
-                                                }
-                                            } else {
-                                                
-                                            }
-                                        });
                                     }
                                 },
                                 items: self.model.contextMenu

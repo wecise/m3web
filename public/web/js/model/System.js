@@ -26,318 +26,6 @@ class System {
 
 			$(function() {
 				
-				Vue.component('tree-component',{
-					delimiters: ['${', '}'],
-					template: '<ul class="ztree" :id="zId" style="overflow:auto;"></ul>',
-					props: {
-						zNodes: Object,
-						zId: String,
-
-					},
-					data: function(){
-						return {
-							zTree: Object,
-							setting: {
-								check: {
-									enable: true
-								},
-								edit: {
-									enable: true
-								},
-								callback: {
-
-								},
-								data: {
-									simpleData: {
-										enable: true
-									}
-								}
-							},
-						}
-					},
-					mounted: function() {
-						this.$nextTick(function(){
-							const self = this;
-							self.setting.callback.onClick = self.zTreeOnClick;
-							self.setting.callback.onExpand = self.zTreeOnExpand;
-						})
-					},
-					watch: {
-						setting: function(val){
-							this.zTree = $.fn.zTree.init($(this.$el), val, this.zNodes);
-						},
-						zNodes: function(val){
-
-							$.fn.zTree.init($(this.$el), this.setting, val);
-							this.zTree = $.fn.zTree.getZTreeObj(this.zId);
-							var nodes = this.zTree.getNodes();
-							if (nodes.length > 0) {
-								this.zTree.expandNode(nodes[0], true, false, true);
-							}
-						}
-					},
-					methods: {
-						zTreeOnExpand: function (event, treeId, treeNode) {
-							if (treeNode.dir) {
-								treeNode.isParent = true;
-							} else {
-								treeNode.isParent = false;
-							}
-						},
-						zTreeOnClick: function (event, treeId, treeNode, clickFlisParentag) {
-							const self = this;
-						}
-					}
-				})
-
-				Vue.component('byobject-tree-component',{
-					delimiters: ['${', '}'],
-					template: '<ul class="ztree" id="byObjectTree" style="overflow:auto;"></ul>',
-					props: {
-						zNodes: Array,
-					},
-					data: function(){
-						return {
-							zTree: Object,
-							setting: {
-								edit: {
-									enable: false
-								},
-								callback: {
-
-								},
-								check: {
-									enable: true,
-									chkStyle: "checkbox",
-									chkboxType: { "Y": "s", "N": "s" }
-								},
-								data: {
-									simpleData: {
-										enable: true,
-										idKey: "cid",
-										pIdKey: "pid",
-									}
-								}
-							},
-						}
-					},
-					mounted: function() {
-						const self = this;
-
-						self.$nextTick(function(){
-							self.setting.callback.onClick = self.zTreeOnClick;
-							self.setting.callback.onCheck = self.zTreeOnCheck;
-						})
-					},
-					watch: {
-						setting: function(val){
-							const self = this;
-
-							self.zTree = $.fn.zTree.init($(this.$el), val, self.zNodes);
-						},
-						zNodes: function(val){
-							const self = this;
-
-							$.fn.zTree.init($(self.$el), self.setting, val);
-							$.fn.zTree.getZTreeObj("byObjectTree").expandAll(true);
-							$("#byObjectTable").bootstrapTable('removeAll');
-							$("#byPropertyTable").bootstrapTable('removeAll');
-						}
-					},
-					methods: {
-						zTreeOnExpand: function (event, treeId, treeNode) {
-							if (treeNode.dir) {
-								treeNode.isParent = true;
-							} else {
-								treeNode.isParent = false;
-							}
-						},
-						zTreeOnClick: function (event, treeId, treeNode, clickFlisParentag) {
-							const self = this;
-
-						},
-						zTreeOnCheck: function (event, treeId, treeNode) {
-							const self = this;
-
-							var zTree = $.fn.zTree.getZTreeObj("byObjectTree");
-							var nodes = zTree.getCheckedNodes(true);
-							if (nodes.length > 0) {
-								eventHub.$emit('byObjectTree-select', _.map(nodes,function(v){
-									return _.pick(v,['cid', 'pid', 'name','auth']);
-								}));
-							} else {
-								eventHub.$emit('byObjectTree-select', []);
-							}
-						}
-
-					}
-				})
-
-				Vue.component('byProperty-tree-component',{
-					delimiters: ['${', '}'],
-					template: '<ul class="ztree" id="byPropertyTree" style="overflow:auto;"></ul>',
-					props: {
-						zNodes: Array,
-					},
-					data: function(){
-						return {
-							zTree: Object,
-							setting: {
-								edit: {
-									enable: false
-								},
-								callback: {
-								},
-								data: {
-									simpleData: {
-										enable: true,
-										idKey: "cid",
-										pIdKey: "pid",
-									}
-								}
-							},
-						}
-					},
-					mounted: function() {
-						const self = this;
-
-						self.$nextTick(function(){
-							self.setting.callback.onClick = self.zTreeOnClick;
-						})
-					},
-					watch: {
-						setting: function(val){
-							const self = this;
-
-							self.zTree = $.fn.zTree.init($(self.$el), val, self.zNodes);
-						},
-						zNodes: function(val){
-							const self = this;
-
-							$.fn.zTree.init($(self.$el), self.setting, val);
-						}
-					},
-					methods: {
-						zTreeOnExpand: function (event, treeId, treeNode) {
-							if (treeNode.dir) {
-								treeNode.isParent = true;
-							} else {
-								treeNode.isParent = false;
-							}
-						},
-						zTreeOnClick: function (event, treeId, treeNode, clickFlisParentag) {
-							const self = this;
-
-							var zTree = $.fn.zTree.getZTreeObj("byPropertyTree");
-							var nodes = zTree.getSelectedNodes();
-							if (nodes.length > 0) {
-								eventHub.$emit('byPropertyTree-select', nodes);
-							} else {
-								eventHub.$emit('byPropertyTree-select', []);
-							}
-						}
-					}
-				})
-
-				Vue.component('user-trewe-component',{
-					delimiters: ['#{', '}#'],
-					template: '<ul class="ztree" id="userTree" style="overflow:auto;"></ul>',
-					props: {
-						zNodes: null,
-					},
-					data: function(){
-						return {
-							zTree: Object,
-							setting: {
-								edit: {
-									enable: false
-								},
-								callback: {
-
-								},
-								data: {
-									simpleData: {
-										enable: true,
-										idKey: "fullname",
-										pIdKey: "parent",
-									},
-									key: {
-										name: "username",
-									}
-								},
-								view: {
-
-								}
-							},
-						}
-					},
-					created: function() {
-						const self = this;
-
-						eventHub.$on("user-remove-node", self.removeNode);
-					},
-					mounted: function() {
-						const self = this;
-
-						self.$nextTick(function(){
-							
-							self.setting.callback.onClick = self.zTreeOnClick;
-							self.setting.view.addDiyDom = self.addDiyDom;
-						})
-					},
-					watch: {
-						setting: function(val){
-							const self = this;
-
-							$.fn.zTree.init($(self.$el), val, self.zNodes);
-						},
-						zNodes: function(val){
-							const self = this;
-
-							$.fn.zTree.init($(self.$el), self.setting, val);
-						}
-					},
-					methods: {
-						zTreeOnClick: function (event, treeId, treeNode, clickFlisParentag) {
-							const self = this;
-
-							if (treeNode.isParent) {
-								eventHub.$emit("user-tree-click-event",{parent:true,node:treeNode});
-							} else {
-								eventHub.$emit("user-tree-click-event",{parent:false,node:treeNode});
-							}
-						},
-						removeNode: function(event) {
-							const self = this;
-							var zTree = $.fn.zTree.getZTreeObj("userTree");
-							var nodes = zTree.getSelectedNodes();
-							
-							for (var i=0, l=nodes.length; i < l; i++) {
-								if(nodes[i].isParent){
-									for(var j=0;j<nodes[i].children.length;j++){
-										if(nodes[i].children[j].fullname === event){
-											zTree.removeNode(nodes[i].children[j]);
-										}        
-									}
-								} else {
-									if(nodes[i].fullname === event){
-										zTree.removeNode(nodes[i]);
-									}  
-								}
-							}
-						},
-						addDiyDom: function (treeId, treeNode) {
-							const self = this;
-							let aObj = $("#" + treeNode.tId + "_a");
-
-							if (treeNode.isParent){
-								let str = "<span> ["+treeNode.children.length+"]</span>";
-								aObj.append(str);
-							} 
-						}
-					}
-				})
-
 				// 通知管理-rule
 				Vue.component("notify-manage-rule",{
 					delimiters: ['#{', '}#'],
@@ -2315,7 +2003,7 @@ class System {
 				/* * * * * * * * * * * * * * *  用户、权限管理 * * * * * * * * * * * * * * * * * * * * * * * * * * * *  */
 
 				// ldap组织、人员管理
-				Vue.component('ldap-manage',{
+				Vue.component("ldap-manage",{
 					delimiters: ['#{', '}#'],
 					props:{
 						root:String
@@ -2335,7 +2023,9 @@ class System {
 											node-key="fullname"
 											default-expand-all
 											highlight-current
-											:data="nodes" :props="defaultProps" 
+											:data="nodes" 
+											:props="defaultProps" 
+											:expand-on-click-node="false"
 											@node-click="onNodeClick"
 											@node-expand="onNodeExpand"
 											style="background: transparent;"
@@ -2711,7 +2401,7 @@ class System {
 				})
 
 				// ldap组织、人员管理 选择使用
-				Vue.component('ldap-manage-select',{
+				Vue.component("ldap-manage-select",{
 					delimiters: ['#{', '}#'],
 					props:{
 						selected: Array,
@@ -2727,8 +2417,8 @@ class System {
 							selectedNodes: []
 						}
 					},
-					template: 	`<el-container style="height:100%;">
-									<el-main style="padding:0px;">
+					template: 	`<el-container style="height:100%;background:#f2f2f2;">
+									<el-main style="">
 										<el-tree 
 											node-key="fullname"
 											default-expand-all
@@ -2736,6 +2426,7 @@ class System {
 											:data="nodes" 
 											:props="defaultProps" 
 											:default-checked-keys="selectedNodes"
+											:expand-on-click-node="false"
 											@node-click="onNodeClick"
 											@node-expand="onNodeExpand"
 											@check-change="onCheckChange"
@@ -2791,7 +2482,7 @@ class System {
 
 						},
 						onNodeClick(node){
-							this.$emit('update:selectedNode', node);
+							this.$emit('update:selectedLdap', node);
 						},
 						onNodeExpand(node){
 							
@@ -3108,7 +2799,7 @@ class System {
 							new Vue(config).$mount("#ldap-newGroup-container");
 						},
 						onCheckChange(data, checked, indeterminate){
-							this.$emit('update:selectedNode', this.$refs.tree.getCheckedKeys());
+							this.$emit('update:selectedLdap', { data: this.$refs.tree.getCheckedKeys(), checked: checked});
 						}
 					}
 				})
@@ -3210,9 +2901,9 @@ class System {
 															<el-button type="primary" @click="onUpdateUser(scope.row, scope.$index)">更新用户</el-button>
 														</el-footer>
 													</el-container>
-													<el-container>
+													<el-container v-else>
 														<el-main>
-															<user-roleGroup-select :selected="scope.row.grpset" showView="grid" @update:selected="onUpdateRoleGroup(scope.row,$event)" ref="roleGroup"></user-roleGroup-select>
+															<user-roleGroup-select :selected="scope.row.grpset" showView="grid" @update:selectedRoleGroup="onUpdateRoleGroup(scope.row,$event)" ref="roleGroup"></user-roleGroup-select>
 														</el-main>
 													</el-container>
 												</template>
@@ -3251,9 +2942,9 @@ class System {
 														
 													</div>
 													<div v-else-if="scope.row.otype=='usr'">
-														<el-tooltip content="授权" open-delay="500" placement="top">
+														<!--el-tooltip content="授权" open-delay="500" placement="top">
 															<el-button type="text" icon="el-icon-s-check" @click="onToogleExpand(scope.row, scope.$index, 'userPermission')"></el-button>
-														</el-tooltip>
+														</el-tooltip-->
 														<el-tooltip content="编辑" open-delay="500" placement="top">
 															<el-button type="text" icon="el-icon-edit" @click="onToogleExpand(scope.row, scope.$index, 'userEdit')"></el-button>
 														</el-tooltip>
@@ -3262,20 +2953,20 @@ class System {
 														</el-tooltip>
 													</div>
 													<div v-else>
-														<el-tooltip content="授权" open-delay="500" placement="top">
+														<!--el-tooltip content="授权" open-delay="500" placement="top">
 															<el-button type="text" icon="el-icon-s-check" @click="onToogleExpand(scope.row, scope.$index, 'userPermission')"></el-button>
-														</el-tooltip>
+														</el-tooltip-->
 														<el-tooltip content="新建组织" open-delay="500" placement="top">
-															<el-button type="text" @click="$parent.$parent.$parent.$parent.$parent.$refs.ldapManage.newGroup(scope.row,$event)" icon="el-icon-folder-add"></el-button>
+															<el-button type="text" @click="tt();$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$refs.ldapManage.newGroup(scope.row,$event)" icon="el-icon-folder-add"></el-button>
 														</el-tooltip>
 														<el-tooltip content="新建用户" open-delay="500" placement="top">
-															<el-button type="text" @click="$parent.$parent.$parent.$parent.$parent.$refs.ldapManage.newUser(scope.row,$event)" icon="el-icon-plus"></el-button>
+															<el-button type="text" @click="$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$refs.ldapManage.newUser(scope.row,$event)" icon="el-icon-plus"></el-button>
 														</el-tooltip>
 														<el-tooltip content="编辑" open-delay="500" placement="top">
 															<el-button type="text" icon="el-icon-edit" @click="onToogleExpand(scope.row, scope.$index, 'userEdit')"></el-button>
 														</el-tooltip>
 														<el-tooltip content="删除" open-delay="500" placement="top">
-															<el-button type="text" @click="$parent.$parent.$parent.$parent.$parent.$refs.ldapManage.onDeleteUser(scope.row,$event)" icon="el-icon-delete" v-if="!_.includes(['/系统组','/'],scope.row.fullname)"></el-button>
+															<el-button type="text" @click="$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$refs.ldapManage.onDeleteUser(scope.row,$event)" icon="el-icon-delete" v-if="!_.includes(['/系统组','/'],scope.row.fullname)"></el-button>
 														</el-tooltip>
 													</div>
 												</template>
@@ -3315,6 +3006,9 @@ class System {
 						
 					},
 					methods: {
+						tt(){
+							console.log(this.$parent.$parent.$parent.$parent.$parent);
+						},
 						layout(){
 							let doLayout = ()=>{
 								if($(".el-table-column--selection",this.$el).is(':visible')){
@@ -3466,6 +3160,1235 @@ class System {
 					}
 				})
 
+				// App Permission Select
+				Vue.component("app-permission",{
+					delimiters: ['#{', '}#'],
+					props: {
+						selected: Array
+					},
+					data(){
+						return {
+							defaultProps: {
+								children: 'children',
+								label: 'name'
+							},
+							treeData: [],
+							selectedNode: null,
+							filterText: ""
+						}
+					},
+					template:   `<el-container style="height:100%;background:#f2f2f2;">
+									<el-aside :width="!_.isEmpty(selectedNode)?'60%':'100%'">
+										<el-header style="height:40px;line-height:40px;padding:0px 10px;">
+											<el-input v-model="filterText" 
+												placeholder="搜索" size="mini"
+												clearable></el-input>
+										</el-header>
+										<el-main style="padding:0px 10px; height: 100%;">
+											<el-tree :data="treeData" 
+													:props="defaultProps" 
+													:default-checked-keys="selected"
+													node-key="id"
+													highlight-current
+													default-expand-all
+													auto-expand-parent
+													@node-click="onNodeClick"
+													@check-change="onCheckChange"
+													:filter-node-method="onFilterNode"
+													:expand-on-click-node="false"
+													style="background:transparent;"
+													show-checkbox
+													ref="tree">
+												<span slot-scope="{ node, data }" style="width:100%;height:30px;line-height: 30px;"  @mouseenter="onMouseEnter(data)" @mouseleave="onMouseLeave(data)">
+													<span v-if="data.ftype=='dir'">
+														<i class="el-icon-folder" style="color:#FFC107;"></i>
+														<span>#{node.label}#</span>
+													</span>
+													<span v-else>
+														<i class="el-icon-c-scale-to-original" style="color:#0088cc;"></i>
+														<span>#{node.label}#</span>
+														<el-checkbox-group v-model="data.perms" style="float: right;padding-right: 10px;">
+															<el-checkbox label="add">添加</el-checkbox>
+															<el-checkbox label="delete">删除</el-checkbox>
+															<el-checkbox label="edit">编辑</el-checkbox>
+															<el-checkbox label="list">查询</el-checkbox>
+														</el-checkbox-group>
+													</span>
+												</span>  
+											</el-tree>
+										</el-main>
+									</el-aside>
+									<el-container v-if="!_.isEmpty(selectedNode)" style="width:40%;">
+										<el-header>
+											<h4>#{currentAppTitle}#</h4>
+										</el-header>
+										<el-main style="overflow: hidden;">
+											<el-checkbox-group v-model="selectedNode.tags" v-if="!_.isEmpty(selectedNode)">
+												<el-checkbox label="add">添加</el-checkbox>
+												<el-checkbox label="delete">删除</el-checkbox>
+												<el-checkbox label="edit">编辑</el-checkbox>
+												<el-checkbox label="list">查询</el-checkbox>
+											</el-checkbox-group>
+										</el-main>
+									</el-container>
+								</el-container>`,
+					watch: {
+						filterText(val) {
+							if(_.isEmpty(val)){
+								this.onInit();
+							} else {
+								this.$refs.tree.filter(val);
+							}
+						}
+					},
+					computed:{
+						currentAppTitle(){
+							return _.isEmpty(this.selectedNode) ? '页面权限': `${this.selectedNode.name} 页面权限`;
+						}
+					},
+					created(){
+						this.onInit();
+					},
+					methods: {
+						onMouseEnter(item){
+							this.$set(item, 'show', true)
+						},
+						onMouseLeave(item){
+							this.$set(item, 'show', false)
+						},
+						onRefresh(item,index){
+							let childrenData = fsHandler.fsList(item.fullname);
+
+							this.$set(data, 'children', childrenData);
+						},
+						onFilterNode:_.debounce(function(value, data) {
+							if (!value) return true;
+							try{
+								let rtn = fsHandler.callFsJScript("/matrix/fs/getFsByTerm.js", encodeURIComponent(value)).message;
+								this.treeData = rtn;
+							} catch(err){
+								this.treeData = [];
+							}
+						},1000),
+						onNodeClick(data){
+							try{
+
+								if(!data.isdir) {
+									eventHub.$emit("FS-NODE-OPENIT-EVENT", data, data.parent);
+
+								} else {
+
+									let rtn = _.map(fsHandler.fsList(data.fullname),(v)=>{
+										return _.extend(v,{show:false});
+									});
+
+									let childrenData = _.sortBy(rtn,'fullname');
+
+									this.$set(data, 'children', childrenData);
+
+									eventHub.$emit("FS-FORWARD-EVENT", data, data.fullname);
+									
+								}
+
+								this.selectedNode = data;
+
+								window.FS_TREE_DATA = this.$refs.tree.data;
+
+							} catch(err){
+
+							}
+
+						},
+						onInit(){
+							this.treeData = fsHandler.callFsJScript("/matrix/system/getAppList.js").message;
+						},
+						onCheckChange(data, checked, indeterminate){
+								
+							let nodes = [];
+							
+							let getChildNodeName = function(data){
+								
+								nodes.push(data);
+								
+								if(data.nodes){
+									_.forEach(data.nodes,(v)=>{
+										getChildNodeName(v);
+									})
+								}
+							};
+
+							getChildNodeName(data);
+
+							this.$emit('update:selectedApp', { data: nodes, checked:checked });
+						}
+					}
+				})
+
+				// Data Permission Select
+				Vue.component("data-permission",{
+					delimiters: ['#{', '}#'],
+					props: {
+						selected: Array,
+						root: String
+					},
+					data(){
+						return {
+							treeData: [],
+							selectedNode: null,
+							defaultProps: {
+								children: 'children',
+								label: 'alias'
+							},
+							filterText: "",
+							dt: {
+								rows:[],
+								columns: [],
+								selected: []
+							}
+						}
+					},
+					template:   `<el-container style="height:100%;background:#f2f2f2;">
+									<el-header style="height:300px;">
+										<el-container style="height:100%;">
+											<el-header style="height:40px;line-height:40px;padding:0px 10px;">
+												<el-input v-model="filterText" 
+													placeholder="搜索" size="mini"
+													clearable></el-input>
+											</el-header>
+											<el-main style="padding:0px 10px; height: 100%;">
+												<el-tree :data="treeData" 
+														:props="defaultProps" 
+														:default-checked-keys="selected"
+														node-key="id"
+														show-checkbox
+														highlight-current
+														default-expand-all
+														auto-expand-parent
+														@node-click="onNodeClick"
+														@check-change="onCheckChange"
+														:filter-node-method="onFilterNode"
+														:expand-on-click-node="false"
+														style="background:transparent;"
+														ref="tree">
+													<span slot-scope="{ node, data }" style="width:100%;">
+														<span>
+															<i class="el-icon-c-scale-to-original" style="color:#0088cc;"></i>
+															#{ node.label }#
+															<el-checkbox-group v-model="data.cPerms" style="float: right;padding-right: 10px;">
+																<el-checkbox label="add">添加</el-checkbox>
+																<el-checkbox label="delete">删除</el-checkbox>
+																<el-checkbox label="edit">编辑</el-checkbox>
+																<el-checkbox label="list">查询</el-checkbox>
+															</el-checkbox-group>
+														</span>
+													</span>
+												</el-tree>
+											</el-main>
+										</el-container>
+									</el-header>
+									<el-main style="overflow:hidden;" v-if="!_.isEmpty(selectedNode)">
+										
+										<el-tabs type="border-card">
+											<el-tab-pane label="类记录授权">
+											
+												<el-container>
+													<el-main>
+														<el-checkbox-group v-model="selectedNode.rPerms">
+															<el-checkbox label="add">添加</el-checkbox>
+															<el-checkbox label="delete">删除</el-checkbox>
+															<el-checkbox label="edit">编辑</el-checkbox>
+															<el-checkbox label="list">查询</el-checkbox>
+														</el-checkbox-group>
+													</el-main>
+												</el-container>
+
+											</el-tab-pane>
+											<el-tab-pane label="类属性授权">
+											
+												<el-table
+													:data="dt.rows"
+													tooltip-effect="dark"
+													style="width: 100%;height:60%!important;"
+													@selection-change="onSelectionChange"
+													ref="propsTable">
+													<el-table-column type="selection" width="55"></el-table-column>
+													<el-table-column label="属性" width="120" align="center">
+														<template slot-scope="scope">#{ scope.row.name }#</template>
+													</el-table-column>
+													<el-table-column label="权限" align="center">
+														<template slot-scope="scope">
+															<el-checkbox-group v-model="scope.row.perms" style="float: right;padding-right: 10px;">
+																<el-checkbox label="add">添加</el-checkbox>
+																<el-checkbox label="delete">删除</el-checkbox>
+																<el-checkbox label="edit">编辑</el-checkbox>
+																<el-checkbox label="list">查询</el-checkbox>
+															</el-checkbox-group>
+														</template>
+													</el-table-column>
+												</el-table>
+											
+											</el-tab-pane>
+										</el-tabs>
+										
+									</el-main>
+								</el-container>`,
+					watch: {
+						filterText(val) {
+							if(_.isEmpty(val)){
+								this.initData();
+							} else {
+								this.$refs.tree.filter(val);
+							}
+						}
+					},
+					created(){
+						this.initData();
+					},
+					methods: {
+						initData(){
+							this.treeData = fsHandler.callFsJScript("/matrix/entity/entity_class.js",encodeURIComponent(this.root)).message;
+						},
+						onCheckChange(val){
+							this.$emit('update:selected', {data: this.$refs.tree.getCheckedKeys(),checked:checked});
+						},
+						onFilterNode:_.debounce(function(value, data) {
+							if (!value) return true;
+							try{
+								let rtn = fsHandler.callFsJScript("/matrix/graph/entity-search-by-term.js",encodeURIComponent(value)).message;
+								this.treeData = _.map(rtn,(v)=>{
+									return _.extend(v,{ children:[], alias:_.last(v.class.split("/"))});
+								});
+							} catch(err){
+								this.treeData = [];
+							}
+						},1000),
+						onNodeClick(data){
+							
+							try{
+
+								if(!data.isdir) {
+									eventHub.$emit("FS-NODE-OPENIT-EVENT", data, data.parent);
+
+								} else {
+
+									let childrenData = _.sortBy(fsHandler.fsList(data.fullname),'fullname');
+
+									this.$set(data, 'children', childrenData);
+
+									eventHub.$emit("FS-FORWARD-EVENT", data, data.fullname);
+									
+								}
+
+								// 当前class对应的属性
+								this.dt.rows = _.map(data.fields, (v)=>{
+									return {name: v, perms:['add','delete','edit','list']};
+								})
+
+								// 当前选择节点
+								this.selectedNode = data;
+								console.log(this.selectedNode, data)
+
+							} catch(err){
+
+							}
+
+						},
+						onSelectionChange(){
+
+						}
+					}
+				})
+
+				// Api permission List
+				Vue.component("api-permission",{
+					delimiters: ['#{', '}#'],
+					props: {
+						roleGroup: Object
+					},
+					data(){
+						return {
+							dt:{
+								rows:[],
+								columns: [
+									{ "field":"name", title:"名称", width:200 },
+									{ "field":"pprefix", title:"角色组" }
+								],
+								selected: []
+							},
+							info: [],
+							dialog: {
+								newApi: {
+									show: false,
+									name: "",
+									pprefix: []
+								}
+							},
+							expandedView: 'edit'
+						}
+					},
+					template:   `<el-container style="width:100%;height:100%;background:#f2f2f2;">
+									<el-header style="height:30px;line-height:30px;">
+										<el-tooltip content="刷新" open-delay="500" placement="top">
+											<el-button type="text" icon="el-icon-refresh" @click="initData"></el-button>
+										</el-tooltip>
+										<el-tooltip content="新建接口组" open-delay="500" placement="top">
+											<el-button type="text" icon="el-icon-plus" @click="dialog.newApi.show = true;"></el-button>
+										</el-tooltip>
+										<el-tooltip content="导出" delay-time="500">
+											<el-dropdown @command="onExport">
+												<span class="el-dropdown-link">
+													<i class="el-icon-download el-icon--right"></i>
+												</span>
+												<el-dropdown-menu slot="dropdown">
+													<el-dropdown-item command="csv">CSV</el-dropdown-item>
+													<el-dropdown-item command="json">JSON</el-dropdown-item>
+													<!--el-dropdown-item command="pdf">PDF</el-dropdown-item-->
+													<el-dropdown-item command="png">PNG</el-dropdown-item>
+													<!--el-dropdown-item command="sql">SQL</el-dropdown-item-->
+													<el-dropdown-item command="xls">XLS (Excel 2000 HTML format)</el-dropdown-item>
+												</el-dropdown-menu>
+											</el-dropdown>
+										</el-tooltip>
+										<el-dialog title="新建接口组" :visible.sync="dialog.newApi.show">
+											<el-container style="width:100%;">
+												<el-main>
+													<el-form label-position="top">
+														<el-form-item label="接口组名称">
+															<el-input v-model="dialog.newApi.name"></el-input>
+														</el-form-item>
+														<el-form-item label="选择接口">
+															<mx-fs-tree-select root="/script" @update:selected="onSetPprefix($event)"></mx-fs-tree-select>
+														</el-form-item>
+													</el-form>
+												</el-main>
+											</el-container>
+											<div slot="footer" class="dialog-footer">
+												<el-tooltip content="取消" open-delay="500" placement="top">
+													<el-button type="default" icon="el-icon-close" @click="dialog.newApi.show = false;">取消</el-button>
+												</el-tooltip>	
+												<el-tooltip content="确定" open-delay="500" placement="top">
+													<el-button type="primary" icon="el-icon-edit" @click="onSaveApi">确定</el-button>
+												</el-tooltip>	
+											</div>
+										</el-dialog>
+									</el-header>   
+									<el-main style="width:100%;padding:0px;">
+										<el-table
+											:data="dt.rows"
+											highlight-current-row="true"
+											style="width: 100%;"
+											:row-class-name="rowClassName"
+											:header-cell-style="headerRender"
+											@row-dblclick="onRowDblclick"
+											@row-contextmenu="onRowContextmenu"
+											@selection-change="onSelectionChange"
+											@current-change="onCurrentChange"
+											ref="table">
+											<el-table-column type="selection" align="center"></el-table-column> 
+											<el-table-column
+												sortable 
+												show-overflow-tooltip
+												v-for="(item,index) in dt.columns"
+												:key="index"
+												:prop="item.field"
+												:label="item ? item.title : ''"
+												:width="item.width"
+												v-if="item.visible">
+													<template slot-scope="scope">
+														<div v-html='item.render(scope.row, scope.column, scope.row[item.field], scope.$index)' 
+															v-if="typeof item.render === 'function'">
+														</div>
+														<div v-else-if="_.includes(['pprefix'],item.field)">
+															<el-select :value="_.first(scope.row[item.field])" v-if="!_.isEmpty(scope.row[item.field])" placeholder="Group">
+																<el-option
+																v-for="subItem in scope.row[item.field]"
+																:key="subItem"
+																:label="subItem"
+																:value="subItem">
+																</el-option>
+															</el-select>
+														</div>
+														<div v-else>
+															#{scope.row[item.field]}#
+														</div>
+													</template>
+											</el-table-column>
+											<el-table-column type="expand">
+												<template slot-scope="scope">
+													<el-container style="width:100%;" v-if="expandedView == 'edit'">
+														<el-main>
+															<mx-fs-tree-select root="/script" :selected="scope.row.pprefix" @update:selected="onUpdatePprefix(scope.row, $event) "></mx-fs-tree-select>
+														</el-main>
+														<el-footer style="text-align:right;">
+															<el-tooltip content="取消" open-delay="500" placement="top">
+																<el-button type="default" icon="el-icon-close" @click="onToogleExpand(scope.row, scope.$index, 'edit')">取消</el-button>
+															</el-tooltip>	
+															<el-tooltip content="确定" open-delay="500" placement="top">
+																<el-button type="primary" icon="el-icon-edit" @click="onUpdateApi(scope.row, scope.$index)">确定</el-button>
+															</el-tooltip>	
+														</el-footer>
+													</el-container>
+													<el-container style="width:100%;" v-else>
+														<el-main>
+															<user-roleGroup-select showView="grid" ref="roleGroup" @update:selectedRoleGroup="onSetRoleGroups(scope.row,$event)" :selected="scope.row._group._all" v-if="!_.isEmpty(scope.row._group)"></user-roleGroup-select>
+															<user-roleGroup-select showView="grid" ref="roleGroup" @update:selectedRoleGroup="onSetRoleGroups(scope.row,$event)" :selected="[]" v-else></user-roleGroup-select>
+														</el-main>
+														<el-footer style="text-align:right;">
+															<el-tooltip content="取消" open-delay="500" placement="top">
+																<el-button type="default" icon="el-icon-close" @click="onToogleExpand(scope.row, scope.$index, 'roleGroup')">取消</el-button>
+															</el-tooltip>	
+															<el-tooltip content="确定" open-delay="500" placement="top">
+																<el-button type="primary" icon="el-icon-edit" @click="onUpdateRoleGroup(scope.row, scope.$index)">确定</el-button>
+															</el-tooltip>	
+														</el-footer>
+													</el-container>
+												</template>
+											</el-table-column>
+											<el-table-column label="操作" width="160">
+												<template slot-scope="scope">
+													
+													<!--el-tooltip content="选择角色组" open-delay="500" placement="top">
+														<el-button type="text" icon="el-icon-s-check" @click="onToogleExpand(scope.row, scope.$index, 'roleGroup')"></el-button>
+													</el-tooltip-->
+													<el-tooltip content="编辑" open-delay="500" placement="top">
+														<el-button type="text" icon="el-icon-edit" @click="onToogleExpand(scope.row, scope.$index, 'edit')"></el-button>
+													</el-tooltip>
+													<el-tooltip content="删除" open-delay="500" placement="top">
+														<el-button type="text" icon="el-icon-delete" @click="onDeleteApi(scope.row, scope.$index)"></el-button>
+													</el-tooltip>
+													
+												</template>
+											</el-table-column>
+										</el-table>
+									</el-main>
+									<el-footer  style="height:30px;line-height:30px;">
+										#{ info.join(' &nbsp; | &nbsp;') }#
+									</el-footer>
+								</el-container>`,
+					filters:{
+						pickDatetime(item){
+							return moment(item).format(mx.global.register.format);      
+						}
+					},
+					watch: {
+						'dt.rows': {
+							handler(val,oldVal){
+								//this.initData();
+								this.layout();
+							},
+							deep:true,
+							immediate:true
+						},
+						dt: {
+							handler(val,oldVal){
+								this.info = [];
+								this.info.push(`共 ${this.dt.rows.length} 项`);
+								this.info.push(`已选择 ${this.dt.selected.length} 项`);
+								this.info.push(moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
+							},
+							deep:true,
+							immediate:true
+						}
+					},
+					mounted(){
+						this.initData();
+
+						// 当前角色组对应的接口
+						_.delay(()=>{
+							if(!_.isEmpty(this.roleGroup)){
+								_.forEach(this.dt.rows,(v)=>{
+									if(v._group && _.includes(v._group._all, this.roleGroup.fullname) ){
+										this.$refs.table.toggleRowSelection(v);
+									}
+								})
+							}
+						},1000)
+					},
+					methods: {
+						layout(){
+							let doLayout = ()=>{
+								if($(".el-table-column--selection",this.$el).is(':visible')){
+									_.delay(()=>{
+										//this.$refs.table.setCurrentRow(this.dt.rows[0]);
+										this.$refs.table.doLayout();
+									},1000)
+								} else {
+									setTimeout(doLayout,50);
+								}
+							}
+							doLayout();
+						},
+						initData(){
+							const self = this;
+							
+							let init = function(){
+								
+								try{
+
+									self.dt.rows = userHandler.getApiPermissions();
+
+									_.extend(self.dt, {columns: _.map(self.dt.columns, function(v){
+										
+										if(_.isUndefined(v.visible)){
+											_.extend(v, { visible: true });
+										}
+		
+										if(!v.render){
+											return v;
+										} else {
+											return _.extend(v, { render: eval(v.render) });
+										}
+										
+									})});
+		
+									_.extend(self.dt, {rows: self.dt.rows});
+
+									
+								} catch(err){
+									console.log(err);
+								}
+							};
+	
+							_.delay(()=>{
+								init();
+							},1000)
+							
+						},
+						rowClassName({row, rowIndex}){
+							return `row-${rowIndex}`;
+						},
+						headerRender({ row, column, rowIndex, columnIndex }){
+							if (rowIndex === 0) {
+								//return 'text-align:center;';
+							}
+						},
+						onSaveApi(){
+							
+							if(_.isEmpty(this.dialog.newApi.name)){
+								this.$message({
+									type: "warning",
+									message: "接口组名称不能为空！"
+								})
+
+								return false;
+							}
+
+							if(_.isEmpty(this.dialog.newApi.pprefix)){
+								this.$message({
+									type: "warning",
+									message: "接口组不能为空！"
+								})
+
+								return false;
+							}
+
+							let rtn = userHandler.addApiPermissions( this.dialog.newApi );
+
+							if(rtn === 1){
+								this.$message({
+									type: 'success',
+									message: `接口组 ${this.dialog.newApi.name} 添加成功！`
+								});
+								
+								this.dialog.newApi.show = false;
+								this.initData();
+
+							} else {
+								this.$message({
+									type: 'error',
+									message: `接口组 ${this.dialog.newApi.name} 添加失败！`
+								});
+							}
+
+						},
+						onUpdateApi(row,index){
+							
+							if(_.isEmpty(row.pprefix)){
+								this.$message({
+									type: "warning",
+									message: "接口组不能为空！"
+								})
+
+								return false;
+							}
+
+							let rtn = userHandler.UpdateApiPermissions( row );
+
+							if(rtn === 1){
+								this.$message({
+									type: 'success',
+									message: `接口组 ${row.name} 更新成功！`
+								});
+								
+								this.initData();
+
+							} else {
+								this.$message({
+									type: 'error',
+									message: `接口组 ${row.name} 更新失败！`
+								});
+							}
+						},
+						onSetPprefix(event){
+							this.dialog.newApi.pprefix = event.data;
+						},
+						onUpdatePprefix(row,event){
+							row.pprefix = event.data;
+						},
+						onDeleteApi(row,index){
+
+							this.$confirm(`确认要删除该接口组：${row.name}？`, '提示', {
+                                confirmButtonText: '确定',
+                                cancelButtonText: '取消',
+                                type: 'warning'
+                            }).then(() => {
+								
+								let rtn = userHandler.deleteApiPermissions(row);
+                                
+                                if(rtn==1){
+                                    this.$message({
+                                        type: 'success',
+                                        message: '删除接口组成功!'
+									});
+									
+									_.delay(()=>{
+										this.initData();
+									},500)
+
+                                }else {
+									this.$message({
+                                        type: 'error',
+                                        message: '删除接口组失败!'
+                                    });
+								}
+                            }).catch(() => {
+                                
+                            });
+						},
+						// 设置角色组
+						onSelectionChange(val) {
+							
+							if(_.isEmpty(val)){
+								_.forEach(this.dt.rows, (v,index)=>{
+									userHandler.deleteApiPermissionsGroups({name:v.name, roleGroups: _.map([this.roleGroup],'fullname') });
+								})	
+							} else {
+								_.forEach(val, (v,index)=>{
+									userHandler.setApiPermissionsGroups({name:v.name, roleGroups: _.map([this.roleGroup],'fullname') });
+								})
+							}
+							
+							this.dt.selected = val;
+						},
+						onCurrentChange(val){
+							this.dt.selected = [val];
+						},
+						onRowContextmenu(row, column, event){
+							
+						},
+						onRowDblclick(row, column, event){
+							
+						},
+						onToogleExpand(row,index,view){
+							
+							if(row.expand){
+								this.$refs.table.toggleRowExpansion(row,false);
+								this.$set(row, 'expand', !row.expand);
+								return false;
+							}
+
+							this.$refs.table.toggleRowExpansion(row);
+
+							this.expandedView = view;
+	
+						},
+						onExport(type){
+					
+							let options = {
+								csvEnclosure: '',
+								csvSeparator: ', ',
+								csvUseBOM: true,
+								ignoreColumn: [0,1],
+								fileName: `tableExport_${moment().format("YYYY-MM-DD HH:mm:ss")}`,
+								type: type,
+							};
+	
+							if(type === 'png'){
+								//$(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+								$(this.$refs.table.$el.querySelector("table.el-table__body")).tableExport(options);
+							} else if(type === 'pdf'){
+								_.extend(options, {
+									jspdf: {orientation: 'l',
+											format: 'a3',
+											margins: {left:10, right:10, top:20, bottom:20},
+											autotable: {styles: {fillColor: 'inherit', 
+																	textColor: 'inherit'},
+														tableWidth: 'auto'}
+									}
+								});
+								$(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+							} else {
+								$(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+							}
+							
+						},
+						onTogglePanel(){
+							// So bad
+							$(this.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$refs.leftView.$el).toggle();
+						},
+						onSetRoleGroups(row,roleGroups){
+							row.roleGroups = _.map(roleGroups,'fullname');
+						},
+						onUpdateRoleGroup(row,index){
+							
+							let rtn = userHandler.setApiPermissionsGroups(row);
+							if(rtn === 1){
+								
+								this.$message({
+									type: 'success',
+									message: `${row.name} 角色组设置成功！`
+								});
+
+								this.initData();
+
+							} else {
+								this.$message({
+									type: 'error',
+									message: `${row.name} 角色组设置失败！`
+								});
+							}
+						}
+					}
+				})
+
+				// 组管理 选择用
+				Vue.component("user-roleGroup-select",{
+					delimiters: ['#{', '}#'],
+					props: {
+						selected: Array,
+						showView: String
+					},
+					data(){
+						return {
+							dt:{
+								rows:[],
+								columns: [
+									{ "field":"name", title:"名称" },
+									{ "field":"fullname", title:"全名称", visible:false},
+									{ "field":"id", title:"ID", visible:false },
+									{ "field":"isldap", title:"LDAP" },
+									{ "field":"parent", title:"父节点" },
+									{ "field":"member", title:"成员", width:200 },
+									{ "field":"fields", title:"属性", width:200 },
+									{ "field":"readexps", title:"数据表达式", width:200 },
+									{ "field":"readonly", title:"读权限", width:200 },
+									{ "field":"writable", title:"写权限", width:200 },
+									{ "field":"selected", title:"选择", width:200, visible:false }
+								],
+								selected: []
+							},
+							info: [],
+							fullname: ["/"]
+						}
+					},
+					template:   `<el-container style="width:100%;height:100%;background:#f2f2f2;">
+									<el-header style="height:35px;line-height:35px;">
+										<el-row>
+											<el-col :span="12">
+												<el-breadcrumb separator=">">
+													<el-breadcrumb-item>
+														<el-button type="text" @click="onForward('')"><i class="el-icon-s-home"></i> 角色组</el-button>
+													</el-breadcrumb-item>
+													<el-breadcrumb-item  v-for="(item,index) in fullname" v-if="index > 0">
+														<el-button type="text" @click="onForward(fullname.slice(0,index+1).join('/'))">#{item}#</el-button>
+													</el-breadcrumb-item>
+												</el-breadcrumb>
+											</el-col>
+											<el-col :span="12" style="text-align:right;">
+												<el-tooltip content="格子视图" placement="top">
+													<el-button type="text" @click="showView='grid'" icon="el-icon-picture">
+													</el-button>
+												</el-tooltip>
+												<el-tooltip content="表格视图" placement="top">
+													<el-button type="text" @click="showView='table'" icon="el-icon-menu">
+													</el-button>
+												</el-tooltip>
+												<el-tooltip content="更新权限" open-delay="500" v-if="showView=='table'">
+													<el-button type="text" icon="el-icon-edit-outline" @click="$parent.$parent.$parent.$parent.$parent.onUpdateRoleGroup"></el-button>
+												</el-tooltip>	
+												<el-tooltip content="刷新" open-delay="500" placement="top">
+													<el-button type="text" icon="el-icon-refresh" @click="onRefresh"></el-button>
+												</el-tooltip>
+												<el-tooltip content="导出" delay-time="500">
+													<el-dropdown @command="onExport">
+														<span class="el-dropdown-link">
+															<i class="el-icon-download el-icon--right"></i>
+														</span>
+														<el-dropdown-menu slot="dropdown">
+															<el-dropdown-item command="csv">CSV</el-dropdown-item>
+															<el-dropdown-item command="json">JSON</el-dropdown-item>
+															<!--el-dropdown-item command="pdf">PDF</el-dropdown-item-->
+															<el-dropdown-item command="png">PNG</el-dropdown-item>
+															<!--el-dropdown-item command="sql">SQL</el-dropdown-item-->
+															<el-dropdown-item command="xls">XLS (Excel 2000 HTML format)</el-dropdown-item>
+														</el-dropdown-menu>
+													</el-dropdown>
+												</el-tooltip>
+											</el-col>
+										</el-row>
+									</el-header>   
+									<el-main style="width:100%;" v-if="showView=='table'">
+										<el-table
+											:data="dt.rows"
+											highlight-current-row="true"
+											style="width: 100%;"
+											:row-class-name="rowClassName"
+											:header-cell-style="headerRender"
+											@row-dblclick="onRowDblclick"
+											@row-contextmenu="onRowContextmenu"
+											@selection-change="onSelectionChange"
+											@current-change="onCurrentChange"
+											ref="table">
+											<el-table-column type="selection" align="center"></el-table-column> 
+											<el-table-column type="expand">
+												<template slot-scope="scope">
+													
+												</template>
+											</el-table-column>
+											<el-table-column
+												sortable 
+												show-overflow-tooltip
+												v-for="(item,index) in dt.columns"
+												:key="index"
+												:prop="item.field"
+												:label="item ? item.title : ''"
+												:width="item.width"
+												v-if="item.visible">
+													<template slot-scope="scope">
+														<div v-html='item.render(scope.row, scope.column, scope.row[item.field], scope.$index)' 
+															v-if="typeof item.render === 'function'">
+														</div>
+														<div v-else-if="_.includes(['name'],item.field)">
+															<el-link type="info" :underline="true" @dblclick.native.prevent="onForward(scope.row.fullname)">
+																#{scope.row.name}#
+															</el-link>
+														</div>
+														<div v-else-if="_.includes(['fields', 'member', 'writable', 'readexps', 'readonly'],item.field)">
+															<el-select :value="_.first(scope.row[item.field])" :placeholder="_.upperFirst(item.field)">
+																<el-option
+																v-for="subItem in scope.row[item.field]"
+																:key="subItem"
+																:label="subItem"
+																:value="subItem">
+																</el-option>
+															</el-select>
+														</div>
+														<div v-else>
+															#{ scope.row[item.field] }#
+														</div>
+													</template>
+											</el-table-column>
+											<el-table-column label="标签" prop="tags" width="200">
+												<template slot-scope="scope">
+													<mx-tag domain='script' :model.sync="scope.row.tags" :id="scope.row.id" limit="1"></mx-tag>
+												</template>
+											</el-table-column>
+										</el-table>
+									</el-main>
+									<el-main style="width:100%;" v-else>
+										<el-checkbox-group v-model="dt.selected" class="roleGroup-grid-node">
+											<el-button type="default" 
+													style="max-width: 12em;width: 12em;height:110px;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);"
+													@dblclick.native="onForward(item.fullname)"
+													@click="onTriggerClick(item)"
+													:key="item.id"
+													v-for="item in dt.rows">
+													<i class="el-icon-s-check" style="font-size:48px;margin:5px;color:#FF9800;"></i>
+													<p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:center;">
+														#{item.name}#
+													</p>
+													<el-checkbox :label="item" :ref="'checkBox_'+item.id"></el-checkbox>
+											</el-button>
+										</el-checkbox-group>
+									</el-main>
+									<el-footer  style="height:30px;line-height:30px;" v-if="showView=='table'">
+										#{ info.join(' &nbsp; | &nbsp;') }#
+									</el-footer>
+								</el-container>`,
+					filters:{
+						pickDatetime(item){
+							return moment(item).format(mx.global.register.format);      
+						}
+					},
+					watch: {
+						dt: {
+							handler(val,oldVal){
+								this.info = [];
+								this.info.push(`共 ${this.dt.rows.length} 项`);
+								this.info.push(`已选择 ${this.dt.selected.length} 项`);
+								this.info.push(moment().format("YYYY-MM-DD hh:mm:ss.SSS"));
+							},
+							deep:true,
+							immediate:true
+						},
+						'dt.selected'(val,oldVal){
+							this.$emit('update:selectedRoleGroup', val);
+						}
+					},
+					mounted(){
+						this.initData();
+					},
+					methods: {
+						layout(){
+							let doLayout = ()=>{
+								if($(".el-table-column--selection",this.$el).is(':visible')){
+									_.delay(()=>{
+										//this.$refs.table.setCurrentRow(this.dt.rows[0]);
+										this.$refs.table.doLayout();
+									},1000)
+								} else {
+									setTimeout(doLayout,50);
+								}
+							}
+							doLayout();
+						},
+						initData(){
+							const self = this;
+							
+							this.dt.rows = userHandler.getGroupPermissionsByParent({parent:""});
+
+							if(this.selected){
+								this.dt.selected = _.filter(this.dt.rows, (v)=>{
+									if(_.includes(this.selected,v.fullname)){
+										return v;
+									}
+								});
+							}
+
+							let init = function(){
+								
+								try{
+									_.extend(self.dt, {columns: _.map(self.dt.columns, function(v){
+										
+										if(_.isUndefined(v.visible)){
+											_.extend(v, { visible: true });
+										}
+		
+										if(!v.render){
+											return v;
+										} else {
+											return _.extend(v, { render: eval(v.render) });
+										}
+										
+									})});
+									
+								} catch(err){
+									console.log(err);
+								}
+							};
+	
+							_.delay(()=>{
+								init();
+							},1000)
+							
+						},
+						rowClassName({row, rowIndex}){
+							return `row-${rowIndex}`;
+						},
+						headerRender({ row, column, rowIndex, columnIndex }){
+							if (rowIndex === 0) {
+								//return 'text-align:center;';
+							}
+						},
+						onRefresh(){
+							this.initData();
+						},
+						onForward(fullname){
+							let rtn = userHandler.getGroupPermissionsByParent({parent: fullname});
+							
+							if(!_.isEmpty(rtn)){
+								this.dt.rows = rtn;
+
+								if(fullname){
+									this.fullname = fullname.split("/");
+								} else {
+									this.fullname = ["/"];
+								}
+							}
+						},
+						onSelectionChange(val) {
+							console.log(23,val)
+							this.dt.selected = val;
+						},
+						onCurrentChange(val){
+							this.dt.selected = [val];
+						},
+						onRowContextmenu(row, column, event){
+							
+						},
+						onRowDblclick(row, column, event){
+							
+						},
+						onToogleExpand(row,index){
+							this.$refs.table.toggleRowExpansion(row);
+						},
+						onExport(type){
+					
+							let options = {
+								csvEnclosure: '',
+								csvSeparator: ', ',
+								csvUseBOM: true,
+								ignoreColumn: [0,1],
+								fileName: `tableExport_${moment().format("YYYY-MM-DD HH:mm:ss")}`,
+								type: type,
+							};
+	
+							if(type === 'png'){
+								//$(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+								$(this.$refs.table.$el.querySelector("table.el-table__body")).tableExport(options);
+							} else if(type === 'pdf'){
+								_.extend(options, {
+									jspdf: {orientation: 'l',
+											format: 'a3',
+											margins: {left:10, right:10, top:20, bottom:20},
+											autotable: {styles: {fillColor: 'inherit', 
+																	textColor: 'inherit'},
+														tableWidth: 'auto'}
+									}
+								});
+								$(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+							} else {
+								$(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+							}
+							
+						},
+						onToggle(){
+							this.$root.$refs.probeView.onToggle();
+						},
+						onNewRole(row){
+							const self = this;
+
+							let wnd = null;
+
+							try{
+								if(jsPanel.activePanels.getPanel('jsPanel-user')){
+									jsPanel.activePanels.getPanel('jsPanel-user').close();
+								}
+							}catch(error){
+			
+							}
+							finally{
+								wnd = maxWindow.winUser("新建角色组",`<div id="ldap-newRoleGroup-container"></div>`,null,null); 
+							}
+
+							new Vue({
+								delimiters: ['#{', '}#'],
+								template: `<el-container>
+												<el-main>
+													<el-form ref="form" label-width="80px">
+
+														<el-form-item label="角色组名称">
+															<el-input v-model="role.name"></el-input>
+														</el-form-item>
+
+														<el-form-item label="父节点">
+															<el-input v-model="role.parent" autofocus></el-input>
+														</el-form-item>
+														
+													</form>
+												</el-main>
+												<el-footer style="text-align:right;">
+													<el-button type="primary" @click="onSave">创建角色组</el-button>
+												</el-footer>
+											</el-container>`,
+								data: {
+									role: {
+										name: "", 
+										parent: "",
+										member: []                  
+									}
+								},
+								created(){
+									if(!_.isEmpty(row)){
+										this.role.parent = row.fullname;
+									}
+								},
+								methods: {
+									onSave(){
+										
+										if (_.isEmpty(this.role.name)) {
+											this.$message({
+												type: 'warning',
+												message: '角色组名称不能为空！!'
+											});
+											return false;
+										}
+
+										let rtn = userHandler.addGroupPermissions(this.role);
+
+										if(rtn == 1){
+											this.$message({
+												type: 'success',
+												message: `角色组: ${this.role.name} 添加成功！`
+											});
+											
+											_.delay(()=>{
+												self.onRefresh();
+												wnd.close();
+											},500);
+
+										}
+
+									}
+								}
+							}).$mount("#ldap-newRoleGroup-container");
+						},
+						onDeleteRole(row){
+							const self = this;
+
+							if( row.isldap ){
+								this.$message({
+									type: "warning",
+									message: "系统角色组，禁止删除！"
+								})
+								return false;
+							}
+
+							this.$confirm(`确认要删除该角色组：${row.fullname}？`, '提示', {
+                                confirmButtonText: '确定',
+                                cancelButtonText: '取消',
+                                type: 'warning'
+                            }).then(() => {
+								
+								let _csrf = window.CsrfToken;
+								let rtn = userHandler.deleteGroupPermissions(row,_csrf);
+                                
+                                if(rtn == 1){
+                                    this.$message({
+                                        type: 'success',
+                                        message: '删除成功!'
+									});
+									
+									_.delay(()=>{
+										self.onRefresh();
+									},500)
+									
+                                } else {
+									this.$message({
+                                        type: 'error',
+                                        message: '删除失败: ' + rtn
+                                    });
+								}
+                            }).catch(() => {
+                                
+                            });
+						},
+						onTriggerClick(item){
+                            this.$refs['checkBox_'+item.id][0].$el.click();
+                        }
+					}
+				})
+
 				// 组管理 管理用
 				Vue.component("user-roleGroup",{
 					delimiters: ['#{', '}#'],
@@ -3501,7 +4424,11 @@ class System {
 							expandedView: 'roleGroupEdit',
 							dialog: {
 								permission:{
-									row: null,
+									row: {},
+									show: false
+								},
+								ldap:{
+									row: {},
 									show: false
 								}
 							}
@@ -3587,14 +4514,23 @@ class System {
 															</el-main>
 														</el-container>
 														<el-container style="height:100%;" v-else>
-															<el-aside style="width:260px;height:100%;background:#f2f2f2;" ref="leftView">
-																<ldap-manage-select root="/" :selected="scope.row.member" @update:selectedNode="onUpdateRoleGroup(scope.row,$event)" ref="ldapManage"></ldap-manage-select>
-															</el-aside>
-															<el-container style="height: 100%;" ref="mainView">
-																<el-main style="padding:0px;overflow:hidden;">
-																	
-																</el-main>
-															</el-container>
+															<el-main style="overflow:hidden;">
+																<el-row :gutter="20">
+																	<el-col :span="24">
+																		<ldap-manage-select root="/" :selected="scope.row.member" @update:selectedLdap="onUpdateRoleGroupByLdap(scope.row,$event)" ref="ldapManageSelect"></ldap-manage-select>
+																	</el-col>
+																</el-row>
+																<el-row :gutter="20">
+																	<el-col :span="24">
+																		<user-roleGroup-select showView="grid" @update:selectedRoleGroup="onUpdateRoleGroupByRoleGroup(scope.row,$event)" ref="roleGroup" :selected="_.map(scope.row.member,(v)=>{ return v.replace(/['G','U']/g,''); })"></user-roleGroup-select>
+																	</el-col>
+																</el-row>
+															</el-main>
+															<el-footer style="text-align:right;">
+																<el-tooltip content="取消" open-delay="500" placement="top">
+																	<el-button type="default" icon="el-icon-close" @click="onToogleExpand(scope.row,scope.$index,'selectUsers')">取消</el-button>
+																</el-tooltip>
+															</el-footer>
 														</el-container>
 													</template>
 												</el-table-column>
@@ -3638,19 +4574,23 @@ class System {
 												</el-table-column>
 												<el-table-column label="操作" width="160" fixed="right">
 													<template slot-scope="scope">
-														<div>
+													
+														<div v-if="_.includes(['/','system','admin'],scope.row.name)">
+															
+														</div>
+														<div v-else>
 															<el-tooltip content="权限设置" open-delay="500" placement="top">
-																<el-button type="text" icon="el-icon-check" @click="dialog.permission.show = true;dialog.permission.row = scope.row;"></el-button>
+																<el-button type="text" icon="el-icon-s-check" @click="onSetPermission(scope.row);"></el-button>
 															</el-tooltip>
 															<el-tooltip content="授权用户" open-delay="500" placement="top">
-																<el-button type="text" icon="el-icon-user" @click="onToogleExpand(scope.row,scope.$index,'selectUsers')"></el-button>
+																<el-button type="text" icon="el-icon-user" @click="onSetLdap(scope.row)"></el-button>
 															</el-tooltip>
 															<el-tooltip content="新建角色组" open-delay="500" placement="top">
 																<el-button type="text" icon="el-icon-plus" @click="onNewRole(scope.row)"></el-button>
 															</el-tooltip>
-															<el-tooltip content="编辑" open-delay="500" placement="top">
+															<!--el-tooltip content="编辑" open-delay="500" placement="top">
 																<el-button type="text" icon="el-icon-edit" @click="onToogleExpand(scope.row,scope.$index,'roleGroupEdit')"></el-button>
-															</el-tooltip>
+															</el-tooltip-->
 															<el-tooltip content="删除" open-delay="500" placement="top">
 																<el-button type="text" icon="el-icon-delete" @click="onDeleteRole(scope.row)"></el-button>
 															</el-tooltip>
@@ -3658,21 +4598,34 @@ class System {
 													</template>
 												</el-table-column>
 											</el-table>
-											<el-dialog :title="permissionTitle" :visible.sync="dialog.permission.show" width="80vw" style="height:calc(100% - 180px);">
+											<el-dialog :title="permissionTitle" :visible.sync="dialog.permission.show" v-if="dialog.permission.show" width="80vw">
 												<el-container style="width:100%;">
 													<el-main style="padding:0px;overflow:hidden;">
 														<el-tabs value="tagdir">
-															<el-tab-pane label="应用权限" name="app">
-																<app-permission></app-permission>
+															<el-tab-pane name="app" lazy>
+																<span slot="label"><i class="el-icon-files"></i> 应用权限</span>
+																<app-permission  :selected="[]" ref="appTree" @update:selectedApp="onUpdateRoleGroupByApp($event)" v-if="!_.isEmpty(dialog.permission._group)"></app-permission>
+																<app-permission  :selected="[]" ref="appTree" @update:selectedApp="onUpdateRoleGroupByApp($event)" v-else></app-permission>
 															</el-tab-pane>	
-															<el-tab-pane label="数据权限" name="data">
-																<data-permission></data-permission>
+															<el-tab-pane name="data" lazy>
+																<span slot="label"><i class="el-icon-bank-card"></i> 数据权限</span>
+																<data-permission root="/" ref="classTree"></data-permission>
 															</el-tab-pane>
-															<el-tab-pane label="接口权限" name="api">
-																<api-permission></api-permission>
+															<el-tab-pane name="api" lazy>
+																<span slot="label"><i class="el-icon-tickets"></i> 接口权限</span>
+																<api-permission :roleGroup="dialog.permission.row"></api-permission>
 															</el-tab-pane>
-															<el-tab-pane label="标签权限" name="tagdir">
-																<tagdir-permission></tagdir-permission>
+															<el-tab-pane name="tagdir">
+																<span slot="label"><i class="el-icon-collection-tag"></i> 标签权限</span>
+																<mx-tag-all-tree :model="{parent:'/system',name:'tagdir_tree_data.js',domain:'*'}" 
+																	:selected="dialog.permission.row.tags" 
+																	@update:selectedTag="onUpdateRoleGroupByTag($event)" 
+																	ref="tagdirTree"
+																	v-if="!_.isEmpty(dialog.permission.row)"></mx-tag-all-tree>
+																<mx-tag-all-tree :model="{parent:'/system',name:'tagdir_tree_data.js',domain:'*'}" 
+																	@update:selectedTag="onUpdateRoleGroupByTag($event)" 
+																	ref="tagdirTree"
+																	v-else></mx-tag-all-tree>
 															</el-tab-pane>
 														</el-tabs>
 													</el-main>
@@ -3680,10 +4633,30 @@ class System {
 												<div slot="footer" class="dialog-footer">
 													<el-tooltip content="取消" open-delay="500" placement="top">
 														<el-button type="default" icon="el-icon-close" @click="dialog.permission.show = false;">取消</el-button>
-													</el-tooltip>	
-													<el-tooltip content="确定" open-delay="500" placement="top">
-														<el-button type="primary" icon="el-icon-edit">确定</el-button>
-													</el-tooltip>	
+													</el-tooltip>
+												</div>
+											</el-dialog>
+											<el-dialog :title="selectLdapTitle" :visible.sync="dialog.ldap.show" v-if="dialog.ldap.show" width="80vw">
+												<el-container style="height:100%;">
+													<el-main style="overflow:hidden;padding:0px 10px;">
+														<el-row :gutter="20">
+															<el-col :span="24">
+																<h4>关联用户</h4>
+																<ldap-manage-select root="/" :selected="dialog.ldap.row.member" @update:selectedLdap="onUpdateRoleGroupByLdap(dialog.ldap.row,$event)"></ldap-manage-select>
+															</el-col>
+														</el-row>
+														<el-row :gutter="20">
+															<el-col :span="24">
+																<h4>关联角色组</h4>
+																<user-roleGroup-select showView="grid" @update:selectedRoleGroup="onUpdateRoleGroupByRoleGroup(dialog.ldap.row,$event)" ref="roleGroup" :selected="_.map(dialog.ldap.row.member,(v)=>{ return v.replace(/['G','U']/g,''); })"></user-roleGroup-select>
+															</el-col>
+														</el-row>
+													</el-main>
+												</el-container>
+												<div slot="footer" class="dialog-footer">
+													<el-tooltip content="取消" open-delay="500" placement="top">
+														<el-button type="default" icon="el-icon-close" @click="dialog.ldap.show = false;">取消</el-button>
+													</el-tooltip>
 												</div>
 											</el-dialog>
 										</el-main>
@@ -3702,6 +4675,11 @@ class System {
 							try{
 								return `权限设置 ${this.dialog.permission.row.fullname}`;
 							} catch(err){}
+						},
+						selectLdapTitle(){
+							try{
+								return `当前角色组 ${this.dialog.ldap.row.fullname}`;
+							} catch(err){}
 						}
 					},
 					watch: {
@@ -3718,11 +4696,11 @@ class System {
 					},
 					mounted(){
 						// 获取角色组树
-						this.initNodes();
+						//this.initNodes();
 						// 获取角色组列表
 						this.initData();
 						// 初始化分隔栏
-						this.initSplit();
+						//this.initSplit();
 
 					},
 					methods: {
@@ -3753,7 +4731,7 @@ class System {
 						initData(){
 							const self = this;
 							
-							this.dt.rows = userHandler.getGroupPermissionsByParent({parent:""});
+							this.dt.rows = _.orderBy(userHandler.getGroupPermissionsByParent({parent:""}),'fullname');
 
 							let init = function(){
 								
@@ -3996,1004 +4974,55 @@ class System {
 						onMouseLeave(data){
 							this.$set(data, 'show', false)
 						},
-						onUpdateRoleGroup(row,event){
-							let member = _.map(event,(v)=>{
-								return 'U'+v;
+						// 更新角色组的用户
+						onUpdateRoleGroupByLdap(row,event){
+							row.member = [];
+							_.forEach(event.data,(v)=>{
+								row.member.push( 'U'+v );
 							});
-							row.member = _.filter(_.uniq(_.concat(row.memeber, member)),null);
-							console.log(row.member)
+							row.member = _.filter(_.uniq(row.member),null);
 							userHandler.updateGroupPermissions(row);
-						}
-					}
-				})
-
-				// 组管理 选择用
-				Vue.component("user-roleGroup-select",{
-					delimiters: ['#{', '}#'],
-					props: {
-						selected: Array,
-						showView: String
-					},
-					data(){
-						return {
-							dt:{
-								rows:[],
-								columns: [
-									{ "field":"name", title:"名称" },
-									{ "field":"fullname", title:"全名称", visible:false},
-									{ "field":"id", title:"ID", visible:false },
-									{ "field":"isldap", title:"LDAP" },
-									{ "field":"parent", title:"父节点" },
-									{ "field":"member", title:"成员", width:200 },
-									{ "field":"fields", title:"属性", width:200 },
-									{ "field":"readexps", title:"数据表达式", width:200 },
-									{ "field":"readonly", title:"读权限", width:200 },
-									{ "field":"writable", title:"写权限", width:200 },
-									{ "field":"selected", title:"选择", width:200, visible:false }
-								],
-								selected: []
-							},
-							info: [],
-							fullname: ["/"]
-						}
-					},
-					template:   `<el-container style="width:100%;height:100%;">
-									<el-header style="height:35px;line-height:35px;">
-										<el-row>
-											<el-col :span="12">
-												<el-breadcrumb separator=">">
-													<el-breadcrumb-item>
-														<el-button type="text" @click="onForward('')"><i class="el-icon-s-home"></i> 角色组</el-button>
-													</el-breadcrumb-item>
-													<el-breadcrumb-item  v-for="(item,index) in fullname" v-if="index > 0">
-														<el-button type="text" @click="onForward(fullname.slice(0,index+1).join('/'))">#{item}#</el-button>
-													</el-breadcrumb-item>
-												</el-breadcrumb>
-											</el-col>
-											<el-col :span="12" style="text-align:right;">
-												<el-tooltip content="格子视图" placement="top">
-													<el-button type="text" @click="showView='grid'" icon="el-icon-picture">
-													</el-button>
-												</el-tooltip>
-												<el-tooltip content="表格视图" placement="top">
-													<el-button type="text" @click="showView='table'" icon="el-icon-menu">
-													</el-button>
-												</el-tooltip>
-												<el-tooltip content="更新权限" open-delay="500" v-if="showView=='table'">
-													<el-button type="text" icon="el-icon-edit-outline" @click="$parent.$parent.$parent.$parent.$parent.onUpdateRoleGroup"></el-button>
-												</el-tooltip>	
-												<el-tooltip content="刷新" open-delay="500" placement="top">
-													<el-button type="text" icon="el-icon-refresh" @click="onRefresh"></el-button>
-												</el-tooltip>
-												<el-tooltip content="导出" delay-time="500">
-													<el-dropdown @command="onExport">
-														<span class="el-dropdown-link">
-															<i class="el-icon-download el-icon--right"></i>
-														</span>
-														<el-dropdown-menu slot="dropdown">
-															<el-dropdown-item command="csv">CSV</el-dropdown-item>
-															<el-dropdown-item command="json">JSON</el-dropdown-item>
-															<!--el-dropdown-item command="pdf">PDF</el-dropdown-item-->
-															<el-dropdown-item command="png">PNG</el-dropdown-item>
-															<!--el-dropdown-item command="sql">SQL</el-dropdown-item-->
-															<el-dropdown-item command="xls">XLS (Excel 2000 HTML format)</el-dropdown-item>
-														</el-dropdown-menu>
-													</el-dropdown>
-												</el-tooltip>
-											</el-col>
-										</el-row>
-									</el-header>   
-									<el-main style="width:100%;padding:0px;" v-if="showView=='table'">
-										<el-table
-											:data="dt.rows"
-											highlight-current-row="true"
-											style="width: 100%;"
-											:row-class-name="rowClassName"
-											:header-cell-style="headerRender"
-											@row-dblclick="onRowDblclick"
-											@row-contextmenu="onRowContextmenu"
-											@selection-change="onSelectionChange"
-											@current-change="onCurrentChange"
-											ref="table">
-											<el-table-column type="selection" align="center"></el-table-column> 
-											<el-table-column type="expand">
-												<template slot-scope="scope">
-													
-												</template>
-											</el-table-column>
-											<el-table-column
-												sortable 
-												show-overflow-tooltip
-												v-for="(item,index) in dt.columns"
-												:key="index"
-												:prop="item.field"
-												:label="item ? item.title : ''"
-												:width="item.width"
-												v-if="item.visible">
-													<template slot-scope="scope">
-														<div v-html='item.render(scope.row, scope.column, scope.row[item.field], scope.$index)' 
-															v-if="typeof item.render === 'function'">
-														</div>
-														<div v-else-if="_.includes(['name'],item.field)">
-															<el-link type="info" :underline="true" @dblclick.native.prevent="onForward(scope.row.fullname)">
-																#{scope.row.name}#
-															</el-link>
-														</div>
-														<div v-else-if="_.includes(['fields', 'member', 'writable', 'readexps', 'readonly'],item.field)">
-															<el-select :value="_.first(scope.row[item.field])" :placeholder="_.upperFirst(item.field)">
-																<el-option
-																v-for="subItem in scope.row[item.field]"
-																:key="subItem"
-																:label="subItem"
-																:value="subItem">
-																</el-option>
-															</el-select>
-														</div>
-														<div v-else>
-															#{ scope.row[item.field] }#
-														</div>
-													</template>
-											</el-table-column>
-											<el-table-column label="标签" prop="tags" width="200">
-												<template slot-scope="scope">
-													<mx-tag domain='script' :model.sync="scope.row.tags" :id="scope.row.id" limit="1"></mx-tag>
-												</template>
-											</el-table-column>
-										</el-table>
-									</el-main>
-									<el-main style="width:100%;padding:0px;" v-else>
-										<el-checkbox-group v-model="dt.selected" class="roleGroup-grid-node">
-											<el-button type="default" 
-													style="max-width: 12em;width: 12em;height:110px;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);"
-													@dblclick.native="onForward(item.fullname)"
-													@click="onTriggerClick(item)"
-													:key="item.id"
-													v-for="item in dt.rows">
-													<i class="el-icon-s-check" style="font-size:48px;margin:5px;color:#FF9800;"></i>
-													<p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:center;">
-														#{item.name}#
-													</p>
-													<el-checkbox :label="item" :ref="'checkBox_'+item.id"></el-checkbox>
-											</el-button>
-										</el-checkbox-group>
-									</el-main>
-									<el-footer  style="height:30px;line-height:30px;" v-if="showView=='table'">
-										#{ info.join(' &nbsp; | &nbsp;') }#
-									</el-footer>
-								</el-container>`,
-					filters:{
-						pickDatetime(item){
-							return moment(item).format(mx.global.register.format);      
-						}
-					},
-					watch: {
-						dt: {
-							handler(val,oldVal){
-								this.info = [];
-								this.info.push(`共 ${this.dt.rows.length} 项`);
-								this.info.push(`已选择 ${this.dt.selected.length} 项`);
-								this.info.push(moment().format("YYYY-MM-DD hh:mm:ss.SSS"));
-							},
-							deep:true,
-							immediate:true
 						},
-						'dt.selected'(val,oldVal){
-							this.$emit('update:selectedRoleGroup', val);
-						}
-					},
-					mounted(){
-						this.initData();
-					},
-					methods: {
-						layout(){
-							let doLayout = ()=>{
-								if($(".el-table-column--selection",this.$el).is(':visible')){
-									_.delay(()=>{
-										//this.$refs.table.setCurrentRow(this.dt.rows[0]);
-										this.$refs.table.doLayout();
-									},1000)
-								} else {
-									setTimeout(doLayout,50);
-								}
-							}
-							doLayout();
-						},
-						initData(){
-							const self = this;
+						// 更新角色组的子角色组
+						onUpdateRoleGroupByRoleGroup(row,event){
+							let roleGroups = _.map(event,'fullname');
 							
-							this.dt.rows = userHandler.getGroupPermissionsByParent({parent:""});
-
-							if(this.selected){
-								this.dt.selected = _.filter(this.dt.rows, (v)=>{
-									if(_.includes(this.selected,v.fullname)){
-										console.log(11,v.fullname)
-										return v;
-									}
-								});
-								console.log(this.selected, this.dt.selected)
-							}
-
-							let init = function(){
-								
-								try{
-									_.extend(self.dt, {columns: _.map(self.dt.columns, function(v){
-										
-										if(_.isUndefined(v.visible)){
-											_.extend(v, { visible: true });
-										}
-		
-										if(!v.render){
-											return v;
-										} else {
-											return _.extend(v, { render: eval(v.render) });
-										}
-										
-									})});
-									
-								} catch(err){
-									console.log(err);
-								}
-							};
-	
-							_.delay(()=>{
-								init();
-							},1000)
+							row.member = [];
+							_.forEach(roleGroups,(v)=>{
+								row.member.push( 'G'+v );
+							});
+							row.member = _.filter(_.uniq(row.member),null);
+							userHandler.updateGroupPermissions(row);
+						},
+						// 当前角色组授权
+						onSetPermission(row){
+							this.$set(this.dialog.permission, 'row',row);
+							this.dialog.permission.show = true;
+						},
+						// 当前角色组关联ldap
+						onSetLdap(row){
+							this.$set(this.dialog.ldap, 'row',row);
+							this.dialog.ldap.show = true;
+						},
+						// 应用授权
+						onUpdateRoleGroupByApp(event){
+							let term = encodeURIComponent( JSON.stringify( { action: event.checked, roleGroup: [this.dialog.permission.row], data:event.data } ) );
+							fsHandler.callFsJScript("/matrix/system/updateGroupByApp.js", term);
+						},
+						// 接口授权
+						onUpdateRoleGroupByApi(event){
 							
 						},
-						rowClassName({row, rowIndex}){
-							return `row-${rowIndex}`;
+						// 数据授权
+						onUpdateRoleGroupByData(event){
+							
 						},
-						headerRender({ row, column, rowIndex, columnIndex }){
-							if (rowIndex === 0) {
-								//return 'text-align:center;';
-							}
-						},
-						onRefresh(){
+						// 标签授权
+						onUpdateRoleGroupByTag(event){
+							// 更新角色组到_group
+							let term = encodeURIComponent( JSON.stringify( { action: event.checked, roleGroup: [this.dialog.permission.row], tags:event.data } ) );
+							fsHandler.callFsJScript("/matrix/system/updateGroupByTagdir.js", term);
 							this.initData();
-						},
-						onForward(fullname){
-							let rtn = userHandler.getGroupPermissionsByParent({parent: fullname});
-							
-							if(!_.isEmpty(rtn)){
-								this.dt.rows = rtn;
-
-								if(fullname){
-									this.fullname = fullname.split("/");
-								} else {
-									this.fullname = ["/"];
-								}
-							}
-						},
-						onSelectionChange(val) {
-							console.log(23,val)
-							this.dt.selected = val;
-						},
-						onCurrentChange(val){
-							this.dt.selected = [val];
-						},
-						onRowContextmenu(row, column, event){
-							
-						},
-						onRowDblclick(row, column, event){
-							
-						},
-						onToogleExpand(row,index){
-							this.$refs.table.toggleRowExpansion(row);
-						},
-						onExport(type){
-					
-							let options = {
-								csvEnclosure: '',
-								csvSeparator: ', ',
-								csvUseBOM: true,
-								ignoreColumn: [0,1],
-								fileName: `tableExport_${moment().format("YYYY-MM-DD HH:mm:ss")}`,
-								type: type,
-							};
-	
-							if(type === 'png'){
-								//$(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
-								$(this.$refs.table.$el.querySelector("table.el-table__body")).tableExport(options);
-							} else if(type === 'pdf'){
-								_.extend(options, {
-									jspdf: {orientation: 'l',
-											format: 'a3',
-											margins: {left:10, right:10, top:20, bottom:20},
-											autotable: {styles: {fillColor: 'inherit', 
-																	textColor: 'inherit'},
-														tableWidth: 'auto'}
-									}
-								});
-								$(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
-							} else {
-								$(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
-							}
-							
-						},
-						onToggle(){
-							this.$root.$refs.probeView.onToggle();
-						},
-						onNewRole(row){
-							const self = this;
-
-							let wnd = null;
-
-							try{
-								if(jsPanel.activePanels.getPanel('jsPanel-user')){
-									jsPanel.activePanels.getPanel('jsPanel-user').close();
-								}
-							}catch(error){
-			
-							}
-							finally{
-								wnd = maxWindow.winUser("新建角色组",`<div id="ldap-newRoleGroup-container"></div>`,null,null); 
-							}
-
-							new Vue({
-								delimiters: ['#{', '}#'],
-								template: `<el-container>
-												<el-main>
-													<el-form ref="form" label-width="80px">
-
-														<el-form-item label="角色组名称">
-															<el-input v-model="role.name"></el-input>
-														</el-form-item>
-
-														<el-form-item label="父节点">
-															<el-input v-model="role.parent" autofocus></el-input>
-														</el-form-item>
-														
-													</form>
-												</el-main>
-												<el-footer style="text-align:right;">
-													<el-button type="primary" @click="onSave">创建角色组</el-button>
-												</el-footer>
-											</el-container>`,
-								data: {
-									role: {
-										name: "", 
-										parent: "",
-										member: []                  
-									}
-								},
-								created(){
-									if(!_.isEmpty(row)){
-										this.role.parent = row.fullname;
-									}
-								},
-								methods: {
-									onSave(){
-										
-										if (_.isEmpty(this.role.name)) {
-											this.$message({
-												type: 'warning',
-												message: '角色组名称不能为空！!'
-											});
-											return false;
-										}
-
-										let rtn = userHandler.addGroupPermissions(this.role);
-
-										if(rtn == 1){
-											this.$message({
-												type: 'success',
-												message: `角色组: ${this.role.name} 添加成功！`
-											});
-											
-											_.delay(()=>{
-												self.onRefresh();
-												wnd.close();
-											},500);
-
-										}
-
-									}
-								}
-							}).$mount("#ldap-newRoleGroup-container");
-						},
-						onDeleteRole(row){
-							const self = this;
-
-							if( row.isldap ){
-								this.$message({
-									type: "warning",
-									message: "系统角色组，禁止删除！"
-								})
-								return false;
-							}
-
-							this.$confirm(`确认要删除该角色组：${row.fullname}？`, '提示', {
-                                confirmButtonText: '确定',
-                                cancelButtonText: '取消',
-                                type: 'warning'
-                            }).then(() => {
-								
-								let _csrf = window.CsrfToken;
-								let rtn = userHandler.deleteGroupPermissions(row,_csrf);
-                                
-                                if(rtn == 1){
-                                    this.$message({
-                                        type: 'success',
-                                        message: '删除成功!'
-									});
-									
-									_.delay(()=>{
-										self.onRefresh();
-									},500)
-									
-                                } else {
-									this.$message({
-                                        type: 'error',
-                                        message: '删除失败: ' + rtn
-                                    });
-								}
-                            }).catch(() => {
-                                
-                            });
-						},
-						onTriggerClick(item){
-                            this.$refs['checkBox_'+item.id][0].$el.click();
-                        }
-					}
-				})
-
-				// Api permission
-				Vue.component("api-permission",{
-					delimiters: ['#{', '}#'],
-					template: 	`<el-container style="height:100%;background:#ffffff;">
-									<!--el-aside style="background:#f2f2f2;border-left:1px solid #dddddd;" ref="leftView">
-										<mx-fs-tree-select root="/script"></mx-fs-tree-select>
-									</el-aside-->
-									<!--el-main style="padding:0px;width:100%;overflow:hidden;" ref="mainView">
-										
-									</el-main-->
-									<el-main style="padding:0px;width:100%;overflow:hidden;">
-										<api-permission-list></api-permission-list>
-									</el-main>
-								</el-container>`,
-					methods:{
-						onSetNodes(nodes){
-							console.log(nodes)
-						},
-						onRefreshByTag(){},
-						onUpdateRoleGroup(){
-							console.log(this.$refs.tagdirTree.$refs.tree.getCheckedKeys(), _.map(this.$refs.roleGroup.dt.selected,'fullname'))
-							_.forEach(this.$refs.tagdirTree.$refs.tree.getCheckedKeys(), (v)=>{
-								console.log(v)
-							})
-						}
-					}
-				})
-
-				
-				// Api permission List
-				Vue.component("api-permission-list",{
-					delimiters: ['#{', '}#'],
-					data(){
-						return {
-							dt:{
-								rows:[],
-								columns: [
-									{ "field":"name", title:"名称", width:200 },
-									{ "field":"pprefix", title:"角色组" }
-								],
-								selected: []
-							},
-							info: [],
-							dialog: {
-								newApi: {
-									show: false,
-									name: "",
-									pprefix: []
-								}
-							},
-							expandedView: 'edit'
-						}
-					},
-					template:   `<el-container style="width:100%;height:100%;">
-									<el-header style="height:30px;line-height:30px;">
-										<el-tooltip content="刷新" open-delay="500" placement="top">
-											<el-button type="text" icon="el-icon-refresh" @click="initData"></el-button>
-										</el-tooltip>
-										<el-tooltip content="新建接口组" open-delay="500" placement="top">
-											<el-button type="text" icon="el-icon-plus" @click="dialog.newApi.show = true;"></el-button>
-										</el-tooltip>
-										<el-tooltip content="导出" delay-time="500">
-											<el-dropdown @command="onExport">
-												<span class="el-dropdown-link">
-													<i class="el-icon-download el-icon--right"></i>
-												</span>
-												<el-dropdown-menu slot="dropdown">
-													<el-dropdown-item command="csv">CSV</el-dropdown-item>
-													<el-dropdown-item command="json">JSON</el-dropdown-item>
-													<!--el-dropdown-item command="pdf">PDF</el-dropdown-item-->
-													<el-dropdown-item command="png">PNG</el-dropdown-item>
-													<!--el-dropdown-item command="sql">SQL</el-dropdown-item-->
-													<el-dropdown-item command="xls">XLS (Excel 2000 HTML format)</el-dropdown-item>
-												</el-dropdown-menu>
-											</el-dropdown>
-										</el-tooltip>
-										<el-dialog title="新建接口组" :visible.sync="dialog.newApi.show">
-											<el-container style="width:100%;">
-												<el-main>
-													<el-form label-position="top">
-														<el-form-item label="接口组名称">
-															<el-input v-model="dialog.newApi.name"></el-input>
-														</el-form-item>
-														<el-form-item label="选择接口">
-															<mx-fs-tree-select root="/script" @update:selected="onSetPprefix($event)"></mx-fs-tree-select>
-														</el-form-item>
-													</el-form>
-												</el-main>
-											</el-container>
-											<div slot="footer" class="dialog-footer">
-												<el-tooltip content="取消" open-delay="500" placement="top">
-													<el-button type="default" icon="el-icon-close" @click="dialog.newApi.show = false;">取消</el-button>
-												</el-tooltip>	
-												<el-tooltip content="确定" open-delay="500" placement="top">
-													<el-button type="primary" icon="el-icon-edit" @click="onSaveApi">确定</el-button>
-												</el-tooltip>	
-											</div>
-										</el-dialog>
-									</el-header>   
-									<el-main style="width:100%;padding:0px;">
-										<el-table
-											:data="dt.rows"
-											highlight-current-row="true"
-											style="width: 100%;"
-											:row-class-name="rowClassName"
-											:header-cell-style="headerRender"
-											@row-dblclick="onRowDblclick"
-											@row-contextmenu="onRowContextmenu"
-											@selection-change="onSelectionChange"
-											@current-change="onCurrentChange"
-											ref="table">
-											<el-table-column type="selection" align="center"></el-table-column> 
-											<el-table-column
-												sortable 
-												show-overflow-tooltip
-												v-for="(item,index) in dt.columns"
-												:key="index"
-												:prop="item.field"
-												:label="item ? item.title : ''"
-												:width="item.width"
-												v-if="item.visible">
-													<template slot-scope="scope">
-														<div v-html='item.render(scope.row, scope.column, scope.row[item.field], scope.$index)' 
-															v-if="typeof item.render === 'function'">
-														</div>
-														<div v-else-if="_.includes(['pprefix'],item.field)">
-															<el-select :value="_.first(scope.row[item.field])" v-if="!_.isEmpty(scope.row[item.field])" placeholder="Group">
-																<el-option
-																v-for="subItem in scope.row[item.field]"
-																:key="subItem"
-																:label="subItem"
-																:value="subItem">
-																</el-option>
-															</el-select>
-														</div>
-														<div v-else>
-															#{scope.row[item.field]}#
-														</div>
-													</template>
-											</el-table-column>
-											<el-table-column type="expand">
-												<template slot-scope="scope">
-													<el-container style="width:100%;" v-if="expandedView == 'edit'">
-														<el-main>
-															<mx-fs-tree-select root="/script" :selected="scope.row.pprefix" @update:selected="onUpdatePprefix(scope.row, $event) "></mx-fs-tree-select>
-														</el-main>
-														<el-footer style="text-align:right;">
-															<el-tooltip content="取消" open-delay="500" placement="top">
-																<el-button type="default" icon="el-icon-close" @click="onToogleExpand(scope.row, scope.$index, 'edit')">取消</el-button>
-															</el-tooltip>	
-															<el-tooltip content="确定" open-delay="500" placement="top">
-																<el-button type="primary" icon="el-icon-edit" @click="onUpdateApi(scope.row, scope.$index)">确定</el-button>
-															</el-tooltip>	
-														</el-footer>
-													</el-container>
-													<el-container style="width:100%;" v-else>
-														<el-main>
-															<user-roleGroup-select showView="grid" ref="roleGroup" @update:selectedRoleGroup="onSetRoleGroups(scope.row,$event)" :selected="scope.row._group._all" v-if="!_.isEmpty(scope.row._group)"></user-roleGroup-select>
-															<user-roleGroup-select showView="grid" ref="roleGroup" @update:selectedRoleGroup="onSetRoleGroups(scope.row,$event)" :selected="[]" v-else></user-roleGroup-select>
-														</el-main>
-														<el-footer style="text-align:right;">
-															<el-tooltip content="取消" open-delay="500" placement="top">
-																<el-button type="default" icon="el-icon-close" @click="onToogleExpand(scope.row, scope.$index, 'roleGroup')">取消</el-button>
-															</el-tooltip>	
-															<el-tooltip content="确定" open-delay="500" placement="top">
-																<el-button type="primary" icon="el-icon-edit" @click="onUpdateRoleGroup(scope.row, scope.$index)">确定</el-button>
-															</el-tooltip>	
-														</el-footer>
-													</el-container>
-												</template>
-											</el-table-column>
-											<el-table-column label="操作" width="160">
-												<template slot-scope="scope">
-													
-													<el-tooltip content="选择角色组" open-delay="500" placement="top">
-														<el-button type="text" icon="el-icon-s-check" @click="onToogleExpand(scope.row, scope.$index, 'roleGroup')"></el-button>
-													</el-tooltip>
-													<el-tooltip content="编辑" open-delay="500" placement="top">
-														<el-button type="text" icon="el-icon-edit" @click="onToogleExpand(scope.row, scope.$index, 'edit')"></el-button>
-													</el-tooltip>
-													<el-tooltip content="删除" open-delay="500" placement="top">
-														<el-button type="text" icon="el-icon-delete" @click="onDeleteApi(scope.row, scope.$index)"></el-button>
-													</el-tooltip>
-													
-												</template>
-											</el-table-column>
-										</el-table>
-									</el-main>
-									<el-footer  style="height:30px;line-height:30px;">
-										#{ info.join(' &nbsp; | &nbsp;') }#
-									</el-footer>
-								</el-container>`,
-					filters:{
-						pickDatetime(item){
-							return moment(item).format(mx.global.register.format);      
-						}
-					},
-					watch: {
-						'dt.rows': {
-							handler(val,oldVal){
-								//this.initData();
-								this.layout();
-							},
-							deep:true,
-							immediate:true
-						},
-						dt: {
-							handler(val,oldVal){
-								this.info = [];
-								this.info.push(`共 ${this.dt.rows.length} 项`);
-								this.info.push(`已选择 ${this.dt.selected.length} 项`);
-								this.info.push(moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
-							},
-							deep:true,
-							immediate:true
-						}
-					},
-					mounted(){
-						this.initData();
-					},
-					methods: {
-						layout(){
-							let doLayout = ()=>{
-								if($(".el-table-column--selection",this.$el).is(':visible')){
-									_.delay(()=>{
-										//this.$refs.table.setCurrentRow(this.dt.rows[0]);
-										this.$refs.table.doLayout();
-									},1000)
-								} else {
-									setTimeout(doLayout,50);
-								}
-							}
-							doLayout();
-						},
-						initData(){
-							const self = this;
-							
-							let init = function(){
-								
-								try{
-
-									self.dt.rows = userHandler.getApiPermissions();
-
-									_.extend(self.dt, {columns: _.map(self.dt.columns, function(v){
-										
-										if(_.isUndefined(v.visible)){
-											_.extend(v, { visible: true });
-										}
-		
-										if(!v.render){
-											return v;
-										} else {
-											return _.extend(v, { render: eval(v.render) });
-										}
-										
-									})});
-		
-									_.extend(self.dt, {rows: self.dt.rows});
-									
-								} catch(err){
-									console.log(err);
-								}
-							};
-	
-							_.delay(()=>{
-								init();
-							},1000)
-							
-						},
-						rowClassName({row, rowIndex}){
-							return `row-${rowIndex}`;
-						},
-						headerRender({ row, column, rowIndex, columnIndex }){
-							if (rowIndex === 0) {
-								//return 'text-align:center;';
-							}
-						},
-						onSaveApi(){
-							
-							if(_.isEmpty(this.dialog.newApi.name)){
-								this.$message({
-									type: "warning",
-									message: "接口组名称不能为空！"
-								})
-
-								return false;
-							}
-
-							if(_.isEmpty(this.dialog.newApi.pprefix)){
-								this.$message({
-									type: "warning",
-									message: "接口组不能为空！"
-								})
-
-								return false;
-							}
-
-							let rtn = userHandler.addApiPermissions( this.dialog.newApi );
-
-							if(rtn === 1){
-								this.$message({
-									type: 'success',
-									message: `接口组 ${this.dialog.newApi.name} 添加成功！`
-								});
-								
-								this.dialog.newApi.show = false;
-								this.initData();
-
-							} else {
-								this.$message({
-									type: 'error',
-									message: `接口组 ${this.dialog.newApi.name} 添加失败！`
-								});
-							}
-
-						},
-						onUpdateApi(row,index){
-							
-							if(_.isEmpty(row.pprefix)){
-								this.$message({
-									type: "warning",
-									message: "接口组不能为空！"
-								})
-
-								return false;
-							}
-
-							let rtn = userHandler.UpdateApiPermissions( row );
-
-							if(rtn === 1){
-								this.$message({
-									type: 'success',
-									message: `接口组 ${row.name} 更新成功！`
-								});
-								
-								this.initData();
-
-							} else {
-								this.$message({
-									type: 'error',
-									message: `接口组 ${row.name} 更新失败！`
-								});
-							}
-						},
-						onSetPprefix(event){
-							this.dialog.newApi.pprefix = event.data;
-						},
-						onUpdatePprefix(row,event){
-							row.pprefix = event.data;
-						},
-						onDeleteApi(row,index){
-
-							this.$confirm(`确认要删除该接口组：${row.name}？`, '提示', {
-                                confirmButtonText: '确定',
-                                cancelButtonText: '取消',
-                                type: 'warning'
-                            }).then(() => {
-								
-								let rtn = userHandler.deleteApiPermissions(row);
-                                
-                                if(rtn==1){
-                                    this.$message({
-                                        type: 'success',
-                                        message: '删除接口组成功!'
-									});
-									
-									_.delay(()=>{
-										this.initData();
-									},500)
-
-                                }else {
-									this.$message({
-                                        type: 'error',
-                                        message: '删除接口组失败!'
-                                    });
-								}
-                            }).catch(() => {
-                                
-                            });
-						},
-						onSelectionChange(val) {
-							this.dt.selected = [val];
-						},
-						onCurrentChange(val){
-							this.dt.selected = [val];
-						},
-						onRowContextmenu(row, column, event){
-							
-						},
-						onRowDblclick(row, column, event){
-							
-						},
-						onToogleExpand(row,index,view){
-							
-							if(row.expand){
-								this.$refs.table.toggleRowExpansion(row,false);
-								this.$set(row, 'expand', !row.expand);
-								return false;
-							}
-
-							this.$refs.table.toggleRowExpansion(row);
-
-							this.expandedView = view;
-	
-						},
-						onExport(type){
-					
-							let options = {
-								csvEnclosure: '',
-								csvSeparator: ', ',
-								csvUseBOM: true,
-								ignoreColumn: [0,1],
-								fileName: `tableExport_${moment().format("YYYY-MM-DD HH:mm:ss")}`,
-								type: type,
-							};
-	
-							if(type === 'png'){
-								//$(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
-								$(this.$refs.table.$el.querySelector("table.el-table__body")).tableExport(options);
-							} else if(type === 'pdf'){
-								_.extend(options, {
-									jspdf: {orientation: 'l',
-											format: 'a3',
-											margins: {left:10, right:10, top:20, bottom:20},
-											autotable: {styles: {fillColor: 'inherit', 
-																	textColor: 'inherit'},
-														tableWidth: 'auto'}
-									}
-								});
-								$(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
-							} else {
-								$(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
-							}
-							
-						},
-						onTogglePanel(){
-							// So bad
-							$(this.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$refs.leftView.$el).toggle();
-						},
-						onSetRoleGroups(row,roleGroups){
-							row.roleGroups = _.map(roleGroups,'fullname');
-						},
-						onUpdateRoleGroup(row,index){
-							
-							console.log(row,row.roleGroups, row._group)
-							if(userHandler.deleteApiPermissionsGroups(row) == 1){
-								let rtn = userHandler.setApiPermissionsGroups(row);
-								if(rtn === 1){
-									
-									this.$message({
-										type: 'success',
-										message: `${row.name} 角色组设置成功！`
-									});
-
-									this.initData();
-
-								} else {
-									this.$message({
-										type: 'error',
-										message: `${row.name} 角色组设置失败！`
-									});
-								}
-							}
-						}
-					}
-				})
-
-				// App permission
-				Vue.component("app-permission",{
-					delimiters: ['#{', '}#'],
-					template: 	`<el-container style="height:100%;background:#ffffff;">
-									<el-aside style="background:#f2f2f2;border-left:1px solid #dddddd;" ref="leftView">
-										<mx-app-tree-select  ref="appTree"></mx-tag-all-tree>
-									</el-aside>
-									<el-main style="padding:0px;width:100%;overflow:hidden;" ref="mainView">
-										<el-container style="height:100%;">
-											<el-main style="padding:0px;width:100%;overflow:hidden;">
-												<user-roleGroup-select showView="grid" ref="roleGroup"></user-roleGroup-select>
-											</el-main>
-										</el-container>
-									</el-main>
-								</el-container>`,
-					methods:{
-						onSetNodes(nodes){
-							console.log(nodes)
-						},
-						onRefreshByTag(){},
-						onUpdateRoleGroup(){
-							console.log(this.$refs.appTree.$refs.tree.getCheckedKeys(), _.map(this.$refs.roleGroup.dt.selected,'fullname'))
-							_.forEach(this.$refs.appTree.$refs.tree.getCheckedKeys(), (v)=>{
-								console.log(v)
-							})
-						}
-					}
-				})
-
-				// Data permission
-				Vue.component("data-permission",{
-					delimiters: ['#{', '}#'],
-					data(){
-						return{
-							classes:[],
-							roleGroups:[]
-						}
-					},
-					template: 	`<el-container style="height:100%;background:#ffffff;">
-									<el-aside style="background:#f2f2f2;border-left:1px solid #dddddd;" ref="leftView">
-										<mx-class-tree-select root="/" ref="tagdirTree" @update:selected="onSetClass($event)"></mx-class-tree-select>
-									</el-aside>
-									<el-main style="padding:0px;width:100%;overflow:hidden;" ref="mainView">
-										<el-container style="height:100%;">
-											<el-main style="padding:0px;width:100%;overflow:hidden;">
-												<user-roleGroup-select showView="grid" ref="roleGroup"></user-roleGroup-select>
-											</el-main>
-										</el-container>
-									</el-main>
-								</el-container>`,
-					methods:{
-						onSetClass(event){
-							this.classes = event.data;
-						},
-						onUpdateRoleGroup(){
-							console.log(this.$refs.tagdirTree.$refs.tree.getCheckedKeys(), _.map(this.$refs.roleGroup.dt.selected,'fullname'))
-							_.forEach(this.$refs.tagdirTree.$refs.tree.getCheckedKeys(), (v)=>{
-								console.log(v)
-							})
-						}
-					}
-				})
-
-				// Tag permission
-				Vue.component("tagdir-permission",{
-					delimiters: ['#{', '}#'],
-					template: 	`<el-container style="height:100%;background:#ffffff;">
-									<el-aside style="background:#f2f2f2;border-left:1px solid #dddddd;" ref="leftView">
-										<mx-tag-all-tree :model="{parent:'/system',name:'tagdir_tree_data.js',domain:'*'}" 
-											:fun="onRefreshByTag"
-											ref="tagdirTree"></mx-tag-all-tree>
-									</el-aside>
-									<el-main style="padding:0px;width:100%;overflow:hidden;" ref="mainView">
-										<el-container style="height:100%;">
-											<el-main style="padding:0px;width:100%;overflow:hidden;">
-												<user-roleGroup-select showView="grid" @update:selectedRoleGroup="onUpdateRoleGroup" ref="roleGroup"></user-roleGroup-select>
-											</el-main>
-										</el-container>
-									</el-main>
-								</el-container>`,
-					methods:{
-						onRefreshByTag(){},
-						onUpdateRoleGroup(event){
-							let roleGroups = this.$refs.roleGroup.dt.selected;
-							let tagdirs = this.$refs.tagdirTree.$refs.tree.getCheckedKeys();
-							_.forEach(tagdirs, (v)=>{
-								// 更新角色组到_group
-								let term = encodeURIComponent( JSON.stringify( { action: event.checked?'+':'-', roleGroups: roleGroups, id:v } ) );
-								fsHandler.callFsJScript("/matrix/system/updateGroupByTagdir.js", term);
-							})
 						}
 					}
 				})
@@ -5004,10 +5033,6 @@ class System {
 					data(){
 						return {
 							selectedNode: null,
-							permission: {
-								tabs: [],
-								activeIndex:'byObject'
-							},
 							model:{
 								rows: [],
 								columns: [
@@ -5020,18 +5045,6 @@ class System {
 											};eval(s);`},
 											{"field":"fullname", title:"操作", visible:false}]
 							},
-							byObjectTreeModel: {
-								data: [],
-								columns: [],
-								options: {},  
-							},
-							byPropertyTreeModel: {
-								data: [],
-								columns: [],
-								options: {},  
-							},
-							byObjectTreeNodes: [],
-							byPropertyTreeNodes: [],
 							tabs: {
 								main: {
 									activeName: 'users'
@@ -5051,7 +5064,6 @@ class System {
 													<el-container style="height: 100%;" ref="mainView">
 														<el-main style="padding:0px;overflow:hidden;">
 															<user-list :model="model" ref="userList"></user-lis>
-															<el-divider>权限管理</el-divider>
 														</el-main>
 													</el-container>
 												</el-container>
@@ -5063,26 +5075,6 @@ class System {
 													</el-main>
 												</el-container>
 											</el-tab-pane>
-											<!--el-tab-pane label="权限管理" name="permission" lazy>
-												<el-container style="height:calc(100% - 40px);background:#f2f2f2;">
-													<el-main style="padding:0px;overflow:hidden;">
-														<el-tabs value="tagdir" tab-position="left">
-															<el-tab-pane label="应用权限" name="app">
-																<app-permission></app-permission>
-															</el-tab-pane>	
-															<el-tab-pane label="数据权限" name="data">
-																<data-permission></data-permission>
-															</el-tab-pane>
-															<el-tab-pane label="接口权限" name="api">
-																<api-permission></api-permission>
-															</el-tab-pane>
-															<el-tab-pane label="标签权限" name="tagdir">
-																<tagdir-permission></tagdir-permission>
-															</el-tab-pane>
-														</el-tabs>
-													</el-main>
-												</el-container>
-											</el-tab-pane-->
 										</el-tabs>
 									</el-main>
 								</el-container>`,
@@ -5111,132 +5103,6 @@ class System {
 							this.model.rows = _.map(userHandler.userList(event.fullname).message, (v)=>{
 								return _.extend( {grpset:[]},  v);
 							});
-						},
-						saveUserData(){
-							const self = this;
-							var action = ["add","delete","update","view"];
-							var auth = {
-										Fields:{
-											add: [],
-											delete: [],
-											update: [],
-											view: []
-										},
-										Conds:{
-											add: [],
-											delete: [],
-											update: [],
-											view: []
-										},
-										Rels:{
-											add: [],
-											delete: [],
-											update: [],
-											view: []
-										}
-									};
-							auth.Fields.view = [];
-							//auth.Conds.view = [{"type":"match","field":"class","value":"/matrix/devops/"}];
-
-							var userData = $("#userTable").bootstrapTable('getSelections');
-							var userByObjectData = $("#byObjectTable").bootstrapTable('getData');
-							
-							if(_.isEmpty(userData)) {
-								alertify.log(`请选择用户！`);
-								return false;
-							}
-
-							_.forEach(action,function(v,k){
-								var tmp = { "type": "contains", "field": "class", "values": []};
-								tmp.values = _.map(userByObjectData,function(d){
-									return d.name;
-								});
-								auth.Conds[v].push(tmp);
-							})
-							
-							var sql = [];
-							sql[0] = "insert";
-							sql[1] = "into";
-							sql[2] = "/matrix/ldap";
-							sql[3] = "fullname='" + userData[0].fullname + "'";
-							sql[4] = "auth='" + JSON.stringify(auth) + "'";
-							
-							jQuery.ajax({
-								url: "/mxobject/mql",
-								dataType: 'json',
-								type: 'POST',
-								data: {
-									mql:sql.join(" ")
-								},
-								beforeSend: function(xhr) {
-								},
-								complete: function(xhr, textStatus) {
-								},
-								success: function(data, textStatus, xhr) {
-									
-									if(data.status!="ok"){
-										console.log(data.message);
-									} else {
-										
-									}
-								},
-								error: function(xhr, textStatus, errorThrown) {
-									console.log(errorThrown)
-								}
-							})
-							var byObjectTableData = $("#byObjectTable").bootstrapTable('getData');
-						},
-						removeUserData: function(event) {
-							const self = this;
-							
-							let user = event;
-
-							alertify.confirm(`确定要删除该用户? <br><br> ${user.fullname}`, function (e) {
-								if (e) {
-									let rtn = userHandler.userDelete(user.id);
-									if(rtn == 1){
-										eventHub.$emit('user-remove-node',user.fullname);    
-									}
-								} else {
-									
-								}
-							});
-						},
-						loadByClassTreeNodes: function(event){
-							const self = this;
-							
-							self.getObjectTreeNode(event);
-						},
-						getObjectTreeNode: function(event) {
-							const self = this;
-							let auth = _.attempt(JSON.parse.bind(null, event.auth));
-							let rtn = omdbHandler.classTree("/");
-							
-							self.byObjectTreeNodes = _.map(rtn, function(v){
-																return _.pick(v,['cid', 'pid', 'name']);
-															});
-
-							if(!_.isEmpty(auth)) {
-								_.forEach(auth.conds.add[0].values, function(v,k){
-									self.byObjectTreeNodes = _.map(self.byObjectTreeNodes, function(d){
-																if(d.name == v){
-																	return _.assign(d, {checked: true, open:true});
-																} else {
-																	return d;
-																}
-															})
-								});
-							}
-							
-							self.setByObjectTreeModel(_.filter(self.byObjectTreeNodes,function(d){
-													return d.checked;
-												}));
-
-							self.byPropertyTreeNodes =  _.map(rtn, function(v){
-															return _.pick(v,['cid', 'pid', 'name', 'fields']);
-														});
-
-														
 						}
 					}
 				})

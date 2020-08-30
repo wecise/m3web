@@ -642,12 +642,12 @@ class UserHandler{
     deleteApiPermissionsGroups(event) {
         let rtn = null;
 
-        let groups = _.map(event._group._all, (v)=>{
+        let groups = _.map(event.roleGroups, (v)=>{
             return `group=${v}`;
         }).join("&");
 
         jQuery.ajax({
-            url: `/admin/perms/api/TestAPIPerm/group?${groups}`,
+            url: `/admin/perms/api/${event.name}/group?${groups}`,
             dataType: 'json',
             type: 'DELETE',
             async: false,

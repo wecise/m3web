@@ -200,6 +200,7 @@ class Entity extends Matrix {
                             this.dt.selected = val;
                         },
                         onAction(evt){
+                            
                             if(_.isEmpty(this.dt.selected)){
                                 this.$message({
                                     type: "info",
@@ -207,8 +208,9 @@ class Entity extends Matrix {
                                 });
                                 return false;
                             }
-
-                            this.$root.action( {list: this.dt.selected, action:evt});
+                            if(evt.action == 'entity-delete'){
+                                this.$root.entityDelete( {list: this.dt.selected, action:evt});
+                            }
                         },
                         onToggle(){
                             this.$root.toggleModel(_.without(['view-normal','view-tags'],window.EVENT_VIEW).join(""));
@@ -1061,6 +1063,7 @@ class Entity extends Matrix {
                             window: { name:"所有", value: ""},
                             // 输入
                             term: "top 20",
+                            autoSearch: true,
                             // 指定类
                             class: "#/matrix/entity/:",
                             // 指定api
@@ -1368,7 +1371,7 @@ class Entity extends Matrix {
                                 delay: 5,
                                 hideOnSecondTrigger: true,
                                 className: `animated slideIn ${tId} context-menu-list`,
-                                build: function($trigger, e) {
+                                build: ($trigger, e) => {
                     
                                     return {
                                         callback: (key, opt)=> {
@@ -1380,7 +1383,7 @@ class Entity extends Matrix {
                                                 let action = _.last(key.split("_"));
                                                 if(action == 'update'){
                                                     this.entityEdit(inst.mouseOverSelectedRows);
-                                                } else if(action == 'delete'){
+                                                } else if(action == 'entity-delete'){
                                                     this.entityDelete({list: [inst.mouseOverSelectedRows], action:action});
                                                 }
                                                 
@@ -1418,33 +1421,39 @@ class Entity extends Matrix {
                                                                             .css("min-height","-=" + evsH + "px");
                         },
                         entityDelete(item){
-                            const self = this;
-                            let ids = _.map(item.list,'id').join("<br><br>");
                             
-                            alertify.confirm(`确认要删除以下实体，请确认！<br><br>
-                                                删除实体数量：${item.list.length}<br><br>
-                                                实体ID：<br><br>${ids}`, function (e) {
+                            const h = this.$createElement;
+
+                            let tips = _.map(item.list,(v)=>{
+                                return  h('p', null, `实体ID：${v.id}`);
+                            });
+
+                            this.$msgbox({
+                                    title: `确认要删除以下实体`, 
+                                    message: h('div', {style: { height:'300px', overflow:'auto'}}, _.concat(h('p', null, `删除实体数量：${item.list.length}`), tips)),
+                                    showCancelButton: true,
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                    type: 'warning'
+                            }).then(() => {
+
+                                _.extend(item, {list:_.map(item.list,'id')});
+                                    
+                                let rtn = fsHandler.callFsJScript("/matrix/entity/action.js",encodeURIComponent(JSON.stringify(item))).status;
                                 
-                                if (e) {
-                                    _.extend(item, {list:_.map(item.list,'id')});
-                                    
-                                    let rtn = fsHandler.callFsJScript("/matrix/entity/action.js",encodeURIComponent(JSON.stringify(item))).status;
-                                    
-                                    if(rtn == 'ok'){
-                                        alertify.success(`实体${ids}删除成功！`);
-                                        // 更新页面
-                                        self.$refs.searchRef.search();
-                                    }
-                                } else {
-                                    
+                                if(rtn == 'ok'){
+                                    this.$message({
+                                        type: "success",
+                                        message: `实体删除成功！`
+                                    })
+                                    // 更新页面
+                                    this.$refs.searchRef.search();
                                 }
 
-                            });
-
-                            $(".alertify-confirm .alertify-header i").addClass("fas fa-sync-alt fa-spin").css({
-                                "color":"#ffffff",
-                                "fontSize": "14px"
-                            });
+                            }).catch(() => {
+                                    
+                            }); 
+                        
                             
                         },
                         entityDataImport(){
