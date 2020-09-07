@@ -1231,7 +1231,23 @@ class Omdb{
                                                 </el-container>
                                                 <el-button type="text" slot="reference">#{ _.truncate(scope.row[item['field']], {'length': 24}) }# <i class="el-icon-more-outline"></i></el-button>
                                             </el-popover>
-                                            <div v-else-if="_.includes(['map','set','list'],pickFtype(item['field']))">#{JSON.stringify(scope.row[item['field']],null,4)}#</div>
+                                            <el-popover
+                                                placement="top"
+                                                width="550"
+                                                trigger="click"
+                                                popper-class="dataTablePopper"
+                                                v-else-if="_.includes(['map','set','list'],pickFtype(item['field'])) && !_.isEmpty(scope.row[item['field']])">
+                                                <el-container>
+                                                    <el-header style="height:30px;line-height:30px;padding:0px;">
+                                                        <el-button type="text" icon="el-icon-copy-document" class="el-button-copy" @click="onCopy(item['field'],scope.$index)"></el-button>
+                                                    </el-header>
+                                                    <el-main style="padding:0px;">
+                                                        <textarea rows="10" style="width:98%;white-space:nowrap;" :id="'textarea_'+scope.$index">#{ scope.row[item['field']] }#</textarea>
+                                                    </el-main>
+                                                </el-container>
+                                                <el-button type="text" slot="reference">#{ _.truncate(JSON.stringify(scope.row[item['field']]), {'length': 24}) }# <i class="el-icon-more-outline"></i></el-button>
+                                            </el-popover>
+                                            <!--div v-else-if="_.includes(['map','set','list'],pickFtype(item['field']))">#{JSON.stringify(scope.row[item['field']],null,4)}#</div-->
                                             <div v-else>#{scope.row[item['field']]}#</div>
                                         </template>
                                     </el-table-column>
@@ -1662,7 +1678,7 @@ class Omdb{
                     } else if(self.model.pattern === 'create-edge-type') {  // edge  new edge type
                         mql = `CREATE EDGE TYPE IF NOT EXISTS type_name 'type_remedy';`;
                     } else if(self.model.pattern === 'drop-edge-type') {  // edge drop edge type
-                        mql = `DROP EDGE TYPE IF EXISTS ${self.model.node.title};`;
+                        mql = `DROP EDGE TYPE ${self.model.node.title};`;
                     } else if(self.model.pattern === 'edge-insert') {  // edge  create
                         mql = `INSERT INTO class_name id="",${self.model.node.title}=[""];`;
                     } else if(self.model.pattern === 'edge-update') {  // edge  update

@@ -37,11 +37,14 @@ class VueHub {
 
     // 当前用户权限 
     auth(){
+        let rtn = {};
         try {
-
+            _.extend( rtn, {isAdmin: window.SignedUser_UserName === 'admin'} );
         } catch(err) {
 
         }
+
+        return rtn;
     }
 
     // extented

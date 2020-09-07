@@ -2,8 +2,6 @@
 
 	<style scoped>
 		/*----------  style  ----------*/
-		
-
 	</style>
 
 	
@@ -41,14 +39,21 @@
 						<span class="el-icon-price-tag" style="color: #f8a502;font-size: 14px;"></span>
 						<span v-if="_.isEmpty(data.name)">
 							<span>#{data.domain}#</span>
-							<!--el-button v-show="data.show" type="text" @click="addTagDir(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-plus"></el-button-->
-							<!--el-button v-show="data.show" type="text" @click.stop="loadNodes" style="float:right;width:14px;margin:0 5px;" icon="el-icon-refresh"></el-button-->
+							<el-checkbox-group v-model="data._group.tags" style="float: right;padding-right: 10px;">
+								<el-checkbox label="add">添加</el-checkbox>
+								<el-checkbox label="delete">删除</el-checkbox>
+								<el-checkbox label="edit">编辑</el-checkbox>
+								<el-checkbox label="list">查询</el-checkbox>
+							</el-checkbox-group>
 						</span>
 						<span v-else>
 							<span>#{node.label}#</span>
-							<!--el-button v-show="data.show" type="text" @click="delTagDir(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-delete"></el-button-->
-							<!--el-button v-show="data.show" type="text" @click="editTagDir(data,$event)" style="float:right;width:14px;margin-left:5px;" icon="el-icon-edit"></el-button-->
-							<!--el-button v-show="data.show" type="text" @click="addTagDir(data,$event)" style="float:right;width:14px;" icon="el-icon-plus"></el-button-->
+							<el-checkbox-group v-model="data._group.tags" style="float: right;padding-right: 10px;">
+								<el-checkbox label="add">添加</el-checkbox>
+								<el-checkbox label="delete">删除</el-checkbox>
+								<el-checkbox label="edit">编辑</el-checkbox>
+								<el-checkbox label="list">查询</el-checkbox>
+							</el-checkbox-group>
 						</span>
 					</span>                  
 				</el-tree>
@@ -61,7 +66,7 @@
 	{
 		delimiters: ['#{', '}#'],
 		props: {
-			selected: Array,
+			selected: Object,
 			model: Object,
 			fun: {
 				type: Function
@@ -81,6 +86,8 @@
 			}
 		},
 		created(){
+
+			console.log(1,JSON.stringify(this.selected))
 			this.loadNodes();
 
 			eventHub.$on("TAG-TREE-REFRESH",this.loadNodes);
@@ -88,6 +95,8 @@
 		methods:{
 			loadNodes(){
 				this.nodes = fsHandler.callFsJScript(`${['/matrix'+this.model.parent,this.model.name].join("/")}`).message;
+				
+				console.log(2,JSON.stringify(this.nodes))
 			},
 			onMouseEnter(data){
 				this.$set(data, 'show', true)
@@ -126,7 +135,7 @@
 				};
 
 				getChildNodeName(data);
-
+				
 				this.$emit('update:selectedTag', { data: nodes, checked:checked });
 			},
 			onDragStart(node, ev) {

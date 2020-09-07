@@ -397,19 +397,19 @@ class SideBar {
                                                     <span slot="title">#{ $t('topBar.menu.userInfo') }#</span>
                                                 </template>
                                             </el-menu-item>
-                                            <el-menu-item index="system" divided>
+                                            <el-menu-item index="system" divided v-if="mxAuth.isAdmin">
                                                 <template slot="title">
                                                     <i class="el-icon-setting"></i>
                                                     <span slot="title">#{ $t('topBar.menu.systemMain') }#</span>
                                                 </template>
                                             </el-menu-item>
-                                            <el-menu-item index="files">
+                                            <el-menu-item index="files" v-if="mxAuth.isAdmin">
                                                 <template slot="title">
                                                     <i class="el-icon-folder-opened"></i>
                                                     <span slot="title">#{ $t('topBar.menu.myFiles') }#</span>
                                                 </template>
                                             </el-menu-item>
-                                            <el-menu-item index="home">
+                                            <el-menu-item index="home" v-if="mxAuth.isAdmin">
                                                 <template slot="title">
                                                     <i class="el-icon-s-home"></i>
                                                     <span slot="title">#{ $t('topBar.menu.defaultHome') }#</span>
@@ -426,9 +426,6 @@ class SideBar {
                                 </div>
                             </el-header>
                         </el-container>`,
-            created(){
-                
-            },
             mounted(){
                 this.defaultActive = window.location.pathname;
             },

@@ -447,6 +447,63 @@
                 </el-header>
                 <el-main style="padding:0 5px;overflow:hidden;" ref="contentRef">
                     <component v-bind:is="currentView" :model.sync="model" @dblclick.native="resetStatus"></component>
+                    <el-dialog title="应用发布" :visible.sync="dialog.appDeploy.show" v-if="dialog.appDeploy.show">
+                        <el-container>
+                            <el-main>
+                                <el-tabs v-model="dialog.appDeploy.activeName" ref="tabs">
+                                    <el-tab-pane label="应用发布" name="app">
+                                        <el-container style="height:100%;">
+                                            <el-main style="height:100%;overflow:auto;padding:10px 0px;">
+                                                <el-form ref="form" :model="dialog.appDeploy.app" label-width="80px">
+                                                    <el-form-item label="中文名">
+                                                        <el-input v-model="dialog.appDeploy.app.cnname"></el-input>
+                                                    </el-form-item>
+                                                    <el-form-item label="英文名称">
+                                                        <el-input v-model="dialog.appDeploy.app.enname"></el-input>
+                                                    </el-form-item>
+                                                    <el-form-item label="图标选择">
+                                                        <el-button type="text" @click="dialog.appDeploy.activeName='icon'">
+                                                            <el-avatar shape="square" fit="fill" size="64" :src="dialog.appDeploy.app.icon.value"></el-avatar>
+                                                        </el-button>
+                                                    </el-form-item>
+                                                    <el-form-item label="Target">
+                                                        <el-radio-group v-model="dialog.appDeploy.app.target">
+                                                            <el-radio label="_blank">打开新窗口</el-radio>
+                                                            <el-radio label="_parent">当前窗口打开</el-radio>
+                                                        </el-radio-group>
+                                                    </el-form-item>
+                                                    <el-form-item label="分组">
+                                                        <el-radio-group v-model="dialog.appDeploy.app.groups.group">
+                                                            #{dialog.appDeploy.app.groups.group}#
+                                                            <el-radio :label="item.name" v-for="item in dialog.appDeploy.model.groups">#{item.title}#</el-radio>
+                                                        </el-radio-group>
+                                                    </el-form-item>
+                                                </el-form> 
+                                            </el-main>
+                                            <el-footer style="height:40px;line-height:40px;text-align:right;">
+                                                <el-button type="defult" @click="dialog.appDeploy.show = false;">取消</el-button>
+                                                <el-button type="primary" @click="onDeployApp">发布应用</el-button>
+                                            </el-footer>
+                                        </el-container>
+                                    </el-tab-pane>
+                                    <el-tab-pane label="" name="icon">
+                                        <el-container style="height:100%;">
+                                            <el-main style="height:100%;overflow:auto;padding:10px 0px;">
+                                                <el-radio-group v-model="dialog.appDeploy.app.icon.value">
+                                                    <el-radio :label="'/fs'+icon.parent+'/'+icon.name+'?type=download&issys=${window.SignedUser_IsAdmin}'" v-model="dialog.appDeploy.app.icon.value"  v-for="icon in dialog.appDeploy.app.icon.list">
+                                                        <el-avatar shape="square" fit="contain" size="64" :src="icon | pickIcon"></el-avatar>    
+                                                    </el-radio>
+                                                </el-radio-group>
+                                            </el-main>
+                                            <el-footer style="height:30px;line-height:30px;text-align:center;">
+                                                <el-button type="text" @click="dialog.appDeploy.activeName='app'">返回</el-button>  
+                                            </el-footer>
+                                        </el-container>
+                                    </el-tab-pane>
+                                </el-tabs>
+                            </el-main>
+                        </el-container>
+                      </el-dialog>
                 </el-main>
                 <el-footer style="padding:0 10px;height:30px;line-height:30px;">
                     <small>数量：${model.length}  | 已选中：${selectedItem.length} </small>
@@ -1169,6 +1226,21 @@
                         id: String,
                         item: Object
                     },
+                    data() {
+                        return{
+                            model: {
+                                oldInput: "",
+                                newInput: "",
+                                mode: "javascript",
+                                theme: "tomorrow",
+                                printMargin: false,
+                                readOnly: false,
+                                fs: {
+                                    output:{}
+                                }
+                            }
+                        }
+                    },
                     template: `<el-container style="height:100%;min-height:300px;">
                                     <el-main style="padding:1px 0px 0px 0px;overflow:hidden;" ref="mainView">
                                         <fs-editor-component :id="'editor-'+id" :bid="'output-'+id"
@@ -1188,21 +1260,6 @@
                                         </el-tabs>
                                     </el-footer>
                                 </el-container>`,
-                    data() {
-                        return{
-                            model: {
-                                oldInput: "",
-                                newInput: "",
-                                mode: "javascript",
-                                theme: "tomorrow",
-                                printMargin: false,
-                                readOnly: false,
-                                fs: {
-                                    output:{}
-                                }
-                            }
-                        }
-                    },
                     watch: {
                         item: {
                             handler:function(val,oldVal){
@@ -1279,7 +1336,12 @@
                         to: null
                     },
                     signedUserName: '',
-                    currentView: ''
+                    currentView: '',
+                    dialog: {
+                        appDeploy: {
+                            show: false
+                        }
+                    }
                 }
             },
             created(){

@@ -20,8 +20,7 @@ class System {
 
 		VueLoader.onloaded(["ai-robot-component",
 							"mx-tag",
-							"mx-tag-tree",
-							"mx-tag-all-tree"
+							"mx-tag-tree"
 							],function() {
 
 			$(function() {
@@ -2014,7 +2013,33 @@ class System {
 								children: 'children',
 								label: 'username'
 							},
-							nodes: []
+							nodes: [],
+							selectedNode: null,
+							dialog: {
+								group: {
+									show: false,
+									parent: "", 
+									username: "",
+									passwd: "",
+									isactive: true,
+									isadmin: false,
+									otype: 'org' 
+								},
+								user: {
+									show: false,
+									ldap: {
+										parent: "", 
+										username: "",
+										passwd: "",
+										isactive: true,
+										isadmin: false,
+										otype: 'usr'                     
+									},
+									email: "",
+									checkPass: "",
+									loading: false
+								}
+							}
 						}
 					},
 					template: 	`<el-container style="height:100%;">
@@ -2034,9 +2059,9 @@ class System {
 												<span v-if="data.otype=='org'">
 													<span class="el-icon-school" style="color:#FF9800;"></span>
 													<span>#{node.label}#</span>
-													<el-button v-show="data.show" type="text" @click="onDeleteUser(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-delete" v-if="!_.includes(['/系统组','/'],data.fullname)"></el-button>
-													<el-button v-show="data.show" type="text" @click="newUser(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-plus"></el-button>
-													<el-button v-show="data.show" type="text" @click="newGroup(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-folder-add"></el-button>
+													<el-button v-show="data.show" type="text" @click="onDeleteUser(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-delete" v-if="!_.includes(['/system','/'],data.fullname)"></el-button>
+													<el-button v-show="data.show" type="text" @click="onNewUser(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-plus"></el-button>
+													<el-button v-show="data.show" type="text" @click="onNewGroup(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-folder-add"></el-button>
 													<el-button v-show="data.show" type="text" @click="onRefresh(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-refresh"></el-button>
 												</span>
 												<span v-else>
@@ -2046,6 +2071,68 @@ class System {
 												</span>
 											</span>                  
 										</el-tree>
+										<el-dialog title="新建组织" :visible.sync="dialog.group.show" v-if="dialog.group.show">
+											<el-container>
+												<el-main>
+													<el-form ref="form" label-width="80px" size="mini">
+
+														<el-form-item label="父组织名称">
+															<el-input v-model="dialog.group.parent" disabled="true"></el-input>
+														</el-form-item>
+
+														<el-form-item label="组织名称">
+															<el-input v-model="dialog.group.username" autofocus></el-input>
+														</el-form-item>
+														
+													</form>
+												</el-main>
+											</el-container>
+											<div slot="footer" class="dialog-footer">
+												<el-button type="default" @click="dialog.group.show = false;">关闭</el-button>
+												<el-button type="primary" icon="el-icon-" @click="onSaveGroup">创建组</el-button>
+											</div>
+										</el-dialog>
+										<el-dialog title="新建用户" :visible.sync="dialog.user.show" v-if="dialog.user.show">
+											<el-container>
+												<el-main>
+													<el-form ref="newUserForm" label-width="80px">
+
+														<el-form-item label="组织名称">
+															<el-input v-model="dialog.user.ldap.parent" autofocus disabled="true"></el-input>
+														</el-form-item>
+
+														<el-form-item label="用户名">
+															<el-input v-model="dialog.user.ldap.username" autofocus autocomplete="off"></el-input>
+														</el-form-item>
+
+														<el-form-item label="邮箱"
+																	:rules="[
+																	{ type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }
+																	]">
+															<el-input v-model="dialog.user.email"></el-input>
+														</el-form-item>
+
+														<el-form-item label="密码">
+															<el-input type="password" v-model="dialog.user.ldap.passwd" autocomplete="off" show-password></el-input>
+														</el-form-item>
+														
+														<el-form-item label="确认密码">
+															<el-input type="password" v-model="dialog.user.checkPass" autocomplete="off" show-password></el-input>
+														</el-form-item>
+
+														<el-form-item label="激活">
+															<el-switch v-model="dialog.user.ldap.isactive" true-value="true" false-value="false"></el-switch>
+														</el-form-item>
+														
+													</form>
+												</el-main>
+											</el-container>
+											<div slot="footer" class="dialog-footer">
+												<el-button type="default" @click="dialog.user.show = false;">关闭</el-button>
+												<el-button type="warning" v-if="dialog.user.loading"><i class="el-icon-loading"></i> 创建用户、同步文件系统，请稍后。。。</el-button>
+												<el-button type="primary" @click="onSaveUser" v-else>创建用户</el-button>
+											</div>
+										</el-dialog>
 									</el-main>
 								</el-container>`,
 					created(){
@@ -2053,7 +2140,7 @@ class System {
 					},
 					methods:{
 						onRefresh(data,event){
-							event.stopPropagation();
+							//event.stopPropagation();
 							this.initNodes();
 						},
 						initNodes() {
@@ -2077,7 +2164,7 @@ class System {
 							};
 
 							this.nodes = [];
-							this.nodes.push( {id:0, parent:null, fullname: this.root, name: '/', username: '组织', otype:'org', children: users(this.root), show:false } );
+							this.nodes.push( {id:0, parent:null, fullname: this.root, name: '/', username: window.COMPANY_FULLNAME, otype:'org', children: users(this.root), show:false } );
 
 						},
 						onNodeClick(node){
@@ -2091,159 +2178,6 @@ class System {
 						},
 						onMouseLeave(data){
 							this.$set(data, 'show', false)
-						},
-						newUser(data,event){
-							
-							event.stopPropagation();
-
-							const self = this;
-
-							let wnd = null;
-
-							try{
-								if(jsPanel.activePanels.getPanel('jsPanel-user')){
-									jsPanel.activePanels.getPanel('jsPanel-user').close();
-								}
-							}catch(error){
-			
-							}
-							finally{
-								wnd = maxWindow.winUser("新建用户",`<div id="ldap-newUser-container"></div>`,null,null); 
-							}
-
-							let config = {
-								delimiters: ['#{', '}#'],
-								template: `<el-container>
-												<el-main>
-													<el-form ref="form" label-width="80px">
-
-														<el-form-item label="组名称">
-															<el-input v-model="ldap.parent" autofocus disabled="true"></el-input>
-														</el-form-item>
-
-														<el-form-item label="用户名">
-															<el-input v-model="ldap.username" autofocus autocomplete="off"></el-input>
-														</el-form-item>
-
-														<el-form-item label="邮箱"
-																	:rules="[
-																	{ type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }
-																	]">
-															<el-input v-model="email"></el-input>
-														</el-form-item>
-
-														<el-form-item label="密码">
-															<el-input type="password" v-model="ldap.passwd" autocomplete="off" show-password></el-input>
-														</el-form-item>
-														
-														<el-form-item label="确认密码">
-															<el-input type="password" v-model="checkPass" autocomplete="off" show-password></el-input>
-														</el-form-item>
-
-														<el-form-item label="激活">
-															<el-switch v-model="ldap.isactive" true-value="true" false-value="false"></el-switch>
-														</el-form-item>
-														
-														<el-form-item label="管理员">
-															<el-switch v-model="ldap.isadmin" true-value="true" false-value="false"></el-switch>
-														</el-form-item>
-														
-													</form>
-												</el-main>
-												<el-footer style="text-align:right;">
-													<el-button type="warning" v-if="loading"><i class="el-icon-loading"></i> 创建用户、同步文件系统，请稍后。。。</el-button>
-													<el-button type="primary" @click="onSave" v-else>创建用户</el-button>
-												</el-footer>
-											</el-container>`,
-								data: {
-									ldap: {
-										parent: data.fullname, 
-										username: "",
-										passwd: "",
-										isactive: true,
-										isadmin: false,
-										otype: 'usr'                     
-									},
-									email: "",
-									checkPass: "",
-									loading: false
-								},
-								created(){
-									//this.ldap.parent = !_.isEmpty(this.selectedNode.fullname)?self.selectedNode.fullname:'/';
-								},
-								methods: {
-									onSave(){
-										
-										if (_.isEmpty(this.ldap.username)) {
-											
-											this.$message({
-												type: "warning",
-												message: `名称不能为空！`
-											})
-											return false;
-										}
-
-										if (_.isEmpty(this.email)) {
-											this.$message({
-												type: "warning",
-												message: `邮件不能为空！`
-											})
-											return false;
-										}
-
-										if (_.isEmpty(this.ldap.passwd)) {
-											this.$message({
-												type: "warning",
-												message: `密码不能为空！`
-											})
-											return false;
-										}
-
-										if (_.isEmpty(this.checkPass)) {
-											this.$message({
-												type: "warning",
-												message: `确认密码不能为空！`
-											})
-											return false;
-										}
-
-										if ( this.ldap.passwd !== this.checkPass) {
-											this.$message({
-												type: "warning",
-												message: `确认密码不一致！`
-											})
-											return false;
-										}
-
-										this.loading = true;
-
-										_.delay(()=>{
-											
-											let _csrf = window.CsrfToken.replace(/'/g,"");
-											let rtn = userHandler.userAdd(this.ldap, _csrf);
-	
-											if(rtn == 1){
-												this.$message({
-													type: "success",
-													message: `用户: ${this.ldap.username} ${this.email} 添加成功！`
-												})
-												
-												this.loading = false;
-	
-												_.delay(()=>{
-													self.initNodes;
-													self.onRefresh(data,event);
-													wnd.close();
-												},500);
-	
-											}
-										},500)
-
-									}
-								}
-							};
-							
-							new Vue(config).$mount("#ldap-newUser-container");
 						},
 						onDeleteUser(data,event){
 
@@ -2277,7 +2211,11 @@ class System {
 									});
 									
 									_.delay(()=>{
+										// 更新Ldap树
 										this.initNodes();
+										// 更新Ldap列表
+										this.$parent.$parent.onLoadUser("");
+
 									},1000)
 									
                                 } else {
@@ -2291,111 +2229,139 @@ class System {
                             });
 							
 						},
-						newGroup(node,event){
+						onNewUser(row,event){
+							this.selectedNode = row;
+							this.dialog.user.show = true;
+							this.dialog.user.ldap.parent = !_.isEmpty(row.fullname) ? row.fullname : '/';
+							this.$nextTick(() => {
+								this.dialog.user.ldap.username = "";
+								this.dialog.user.ldap.passwd = "";
+								this.dialog.user.ldap.isactive = true;
+								this.dialog.user.ldap.isadmin = false;
+								this.dialog.user.ldap.otype = 'usr';
+								this.dialog.user.email = "";
+								this.dialog.user.checkPass = "";
+							})
+						},
+						onNewGroup(row,event){
+							this.selectedNode = row;
+							this.dialog.group.show = true;
+							this.dialog.group.parent = !_.isEmpty(row.fullname) ? row.fullname : '/';
+						},
+						onSaveGroup(){
 							
-							event.stopPropagation();
-
-							const self = this;
-
-							let wnd = null;
-
-							try{
-								if(jsPanel.activePanels.getPanel('jsPanel-user')){
-									jsPanel.activePanels.getPanel('jsPanel-user').close();
-								}
-							}catch(error){
-			
-							}
-							finally{
-								wnd = maxWindow.winUser("新建组",`<div id="ldap-newGroup-container"></div>`,null,null); 
+							if (_.isEmpty(this.dialog.group.parent)) {
+								this.$message({
+									type: 'warning',
+									message: '所属组名称不能为空！!'
+								});
+								return false;
 							}
 
-							let config  = {
-								delimiters: ['#{', '}#'],
-								template: `<el-container>
-												<el-main>
-													<el-form ref="form" label-width="80px" size="mini">
+							if (_.isEmpty(this.dialog.group.username)) {
+								this.$message({
+									type: 'warning',
+									message: '组名称不能为空！'
+								});
+								return false;
+							}
 
-														<el-form-item label="组名称">
-															<el-input v-model="ldap.parent" disabled="true"></el-input>
-														</el-form-item>
+							let _csrf = window.CsrfToken.replace(/'/g,"");
+							let rtn = userHandler.userAdd(this.dialog.group, _csrf);
 
-														<el-form-item label="名称">
-															<el-input v-model="ldap.username" autofocus></el-input>
-														</el-form-item>
-														
-													</form>
-												</el-main>
-												<el-footer style="text-align:right;">
-													<el-button type="primary" @click="save">创建组</el-button>
-												</el-footer>
-											</el-container>`,
-								data: {
-									ldap: {
-										parent: node.fullname, 
-										username: "",
-										passwd: "",
-										isactive: true,
-										isadmin: false,
-										otype: 'org'                     
-									}
-								},
-								created(){
-									this.ldap.parent = !_.isEmpty(self.selectedNode.fullname)?self.selectedNode.fullname:'/';
-								},
-								mounted:function(){
-									let me = this;
+							if(rtn==1){
+								this.$message({
+									type: 'success',
+									message: `组: ${this.dialog.group.parent} 添加成功！`
+								});
+								
+								_.delay(()=>{
+									this.onRefresh(this.selectedNode,event);
+									eventHub.$emit('user-tree-refresh-event', null);
+									this.dialog.group.show = false;
+								},500);
 
-									me.$nextTick(function() {
-										me.init();
+							}
+
+							
+						},
+						onSaveUser(){
+										
+							if (_.isEmpty(this.dialog.user.ldap.username)) {
+								
+								this.$message({
+									type: "warning",
+									message: `名称不能为空！`
+								})
+								return false;
+							}
+
+							if (_.isEmpty(this.dialog.user.email)) {
+								this.$message({
+									type: "warning",
+									message: `邮件不能为空！`
+								})
+								return false;
+							}
+
+							if (_.isEmpty(this.dialog.user.ldap.passwd)) {
+								this.$message({
+									type: "warning",
+									message: `密码不能为空！`
+								})
+								return false;
+							}
+
+							if (_.isEmpty(this.dialog.user.checkPass)) {
+								this.$message({
+									type: "warning",
+									message: `确认密码不能为空！`
+								})
+								return false;
+							}
+
+							if ( this.dialog.user.ldap.passwd !== this.dialog.user.checkPass) {
+								this.$message({
+									type: "warning",
+									message: `确认密码不一致！`
+								})
+								return false;
+							}
+
+							this.$set(this.dialog.user.ldap,'email',this.dialog.user.email.split(","));
+
+							this.dialog.user.loading = true;
+
+							_.delay(()=>{
+								
+								let _csrf = window.CsrfToken.replace(/'/g,"");
+								let rtn = userHandler.userAdd(this.dialog.user.ldap, _csrf);
+
+								if(rtn == 1){
+									
+									this.$message({
+										type: "success",
+										message: `用户: ${this.dialog.user.ldap.username} ${this.dialog.user.email} 添加成功！`
 									})
-								},
-								methods: {
-									init: function(){
-										let me = this;
+									
+									this.dialog.user.loading = false;
 
-									},
-									save: function(){
-										let me = this;
+									_.delay(()=>{
+										this.initNodes;
+										this.onRefresh(this.selectedNode,event);
+										this.dialog.user.show = false;
+									},500);
 
-										if (_.isEmpty(me.ldap.parent)) {
-											this.$message({
-												type: 'warning',
-												message: '所属组名称不能为空！!'
-											});
-											return false;
-										}
-
-										if (_.isEmpty(me.ldap.username)) {
-											this.$message({
-												type: 'warning',
-												message: '组名称不能为空！'
-											});
-											return false;
-										}
-
-										let _csrf = window.CsrfToken.replace(/'/g,"");
-										let rtn = userHandler.userAdd(me.ldap, _csrf);
-
-										if(rtn==1){
-											this.$message({
-												type: 'success',
-												message: `组: ${me.ldap.parent} 添加成功！`
-											});
-											
-											_.delay(function(){
-												self.onRefresh(node,event);
-												eventHub.$emit('user-tree-refresh-event', null);
-												wnd.close();
-											},500);
-
-										}
-
-									}
+								} else {
+									this.$message({
+										type: "error",
+										message: `用户: ${this.dialog.user.ldap.username} ${this.dialog.user.email} 添加失败 ` + rtn
+									})
+									
+									this.dialog.user.loading = false;
 								}
-							};
+							},500)
 
-							new Vue(config).$mount("#ldap-newGroup-container");
 						}
 					}
 				})
@@ -2404,7 +2370,7 @@ class System {
 				Vue.component("ldap-manage-select",{
 					delimiters: ['#{', '}#'],
 					props:{
-						selected: Array,
+						rowData: Object,
 						root:String
 					},
 					data(){
@@ -2427,13 +2393,12 @@ class System {
 											:props="defaultProps" 
 											:default-checked-keys="selectedNodes"
 											:expand-on-click-node="false"
-											@node-click="onNodeClick"
-											@node-expand="onNodeExpand"
+											:check-on-click-node="false"
 											@check-change="onCheckChange"
 											show-checkbox
 											style="background: transparent;"
 											ref="tree">
-											<span slot-scope="{ node, data }" style="width:100%;height:30px;line-height: 30px;"  @mouseenter="onMouseEnter(data)" @mouseleave="onMouseLeave(data)">
+											<span slot-scope="{ node, data }" style="width:100%;height:30px;line-height: 30px;">
 												<span v-if="data.otype=='org'">
 													<span class="el-icon-school" style="color:#FF9800;"></span>
 													<span>#{node.label}#</span>
@@ -2448,15 +2413,8 @@ class System {
 								</el-container>`,
 					created(){
 						this.initNodes();
-						this.selectedNodes = _.map(this.selected,(v)=>{
-							return v.replace(/['U','G']/g,'');
-						})
 					},
 					methods:{
-						onRefresh(data,event){
-							event.stopPropagation();
-							this.initNodes();
-						},
 						initNodes() {
 							const self = this;
 
@@ -2468,7 +2426,24 @@ class System {
 								_.forEach(data,(v)=>{
 									if(v.parent){
 										if( parent === v.parent ) {
-											itemArr.push( _.extend(v,{children: users(v.fullname), show:false }) );
+											let disabled = false;
+
+											// 禁止admin权限操作
+											if(v.fullname == '/admin'){
+												disabled = true;
+											}
+
+											// LDAP 当前组织不能删除
+											if(self.rowData.isldap && (v.fullname == self.rowData.fullname)){
+												disabled = true;
+											}
+
+											// 同步组织 且 O 类型 不能选择操作
+											if( self.rowData.isldap && _.startsWith(v.fullname, self.rowData.fullname+"/") ) {
+												disabled = true;
+											}
+
+											itemArr.push( _.extend(v,{children: users(v.fullname), show:false, disabled:disabled }) );
 										}
 									}
 									
@@ -2478,14 +2453,152 @@ class System {
 							};
 
 							this.nodes = [];
-							this.nodes.push( {id:0, parent:null, fullname: this.root, name: '/', username: '组织', otype:'org', children: users(this.root), show:false } );
+							this.nodes.push( {id:0, parent:null, fullname: this.root, name: '/', username: window.COMPANY_FULLNAME, otype:'org', children: users(this.root), show:false } );
+
+							// 设置已选择项
+							this.selectedNodes = _.map(this.rowData.member,(v)=>{
+								return v.replace(/['U','G','O']/g,'');
+							})
 
 						},
-						onNodeClick(node){
-							this.$emit('update:selectedLdap', node);
-						},
-						onNodeExpand(node){
+						onCheckChange(data, checked, indeterminate){
 							
+							try{
+								// 设置复选框状态
+								let selectedNodes = [];
+
+								if(checked){
+									if(!_.isEmpty(data.fullname)){
+										this.$set(data, 'checked', true);
+									}
+								} else {
+									this.$set(data, 'checked', false);
+								}
+
+								// 更新
+								if(_.isEmpty(data.fullname)) {
+									return false;
+								}
+
+								selectedNodes.push(data);
+								
+								this.$emit('update:selectedLdap', selectedNodes);
+							} catch(err){
+								console.log(err)
+							}
+						}
+					}
+				})
+
+				// tagdir选择树
+				Vue.component("tagdir-select",{
+					delimiters: ['#{', '}#'],
+					props: {
+						model: Object,
+						rowData: Object
+					},
+					data(){
+						return {
+							defaultProps: {
+								children: 'nodes',
+								label: 'name'
+							},
+							nodes: [],
+							defaultExpandedKeys: [""],
+							selectedKeys: [],
+							selectedNodes: []
+						}
+					},
+					template: `<el-container>
+									<el-main style="height: 100%;background:#f2f2f2;">
+										<el-tree 
+											node-key="id"
+											show-checkbox
+											highlight-current="true"
+											:default-expand-all="false"
+											:default-expanded-keys="defaultExpandedKeys"
+											:default-checked-keys="selectedKeys"
+											:expand-on-click-node="false"
+											:check-on-click-node="false"
+											@node-click="onNodeClick"
+											:data="nodes" 
+											:props="defaultProps" 
+											@check-change="onCheckChange"
+											style="background: transparent;"
+											ref="tree">
+											<span slot-scope="{ node, data }" style="width:100%;height:30px;line-height: 30px;"  @mouseenter="onMouseEnter(data)" @mouseleave="onMouseLeave(data)">
+												<span class="el-icon-price-tag" style="color: #f8a502;font-size: 14px;"></span>
+												<span v-if="_.isEmpty(data.name)">
+													<span>#{data.domain}#</span>
+													<el-checkbox-group v-model="data.perms" style="float: right;padding-right: 10px;" v-if="data.checked">
+														<el-checkbox label="add">添加</el-checkbox>
+														<el-checkbox label="delete">删除</el-checkbox>
+														<el-checkbox label="edit">编辑</el-checkbox>
+														<el-checkbox label="list">查询</el-checkbox>
+													</el-checkbox-group>
+												</span>
+												<span v-else>
+													<span>#{node.label}#</span>
+													<el-checkbox-group v-model="data.perms" style="float: right;padding-right: 10px;" v-if="data.checked">
+														<el-checkbox label="add">添加</el-checkbox>
+														<el-checkbox label="delete">删除</el-checkbox>
+														<el-checkbox label="edit">编辑</el-checkbox>
+														<el-checkbox label="list">查询</el-checkbox>
+													</el-checkbox-group>
+												</span>
+											</span>                  
+										</el-tree>
+									</el-main>
+									<el-footer style="text-align:right;line-height:60px;">
+										<el-button type="default" @click="rowData.show = false;">取消</el-button>
+										<el-button type="primary" @click="onUpdateRoleGroupByTag">更新标签权限</el-button>
+									</el-footer>
+								</el-container>`,
+					created(){
+						this.loadNodes();
+					},
+					methods:{
+						loadNodes(){
+							this.nodes = fsHandler.callFsJScript(`${['/matrix'+this.model.parent,this.model.name].join("/")}`).message;
+							_.delay(()=>{
+								this.onSetSelected();
+							},50)
+						},
+						onSetSelected(){
+							
+							try{
+								let stags = fsHandler.callFsJScript("/matrix/system/getStagsById.js", this.rowData.row.id).message;
+								console.log(22,stags)
+								_.forEach(stags,(v,k)=>{
+									let perms = JSON.parse(v);
+									_.extend( this.findNodeById(k), { perms: v, checked:true } );
+								});
+								this.selectedKeys = _.keys(stags);
+
+
+							} catch(err){
+								console.log(err)
+							}
+						},
+						findNodeById(id){
+							let rtn = null;
+
+							let find = function(nodes){
+								_.forEach(nodes,(v)=>{
+									
+									if(v.id == id){
+										rtn = v;
+									}
+
+									if(v.nodes){
+										find(v.nodes)
+									}
+								})	
+							} 
+
+							find(this.nodes);
+
+							return rtn;
 						},
 						onMouseEnter(data){
 							this.$set(data, 'show', true)
@@ -2493,313 +2606,46 @@ class System {
 						onMouseLeave(data){
 							this.$set(data, 'show', false)
 						},
-						newUser(data,event){
-							
-							event.stopPropagation();
-
-							const self = this;
-
-							let wnd = null;
-
-							try{
-								if(jsPanel.activePanels.getPanel('jsPanel-user')){
-									jsPanel.activePanels.getPanel('jsPanel-user').close();
-								}
-							}catch(error){
-			
-							}
-							finally{
-								wnd = maxWindow.winUser("新建用户",`<div id="ldap-newUser-container"></div>`,null,null); 
-							}
-
-							let config = {
-								delimiters: ['#{', '}#'],
-								template: `<el-container>
-												<el-main>
-													<el-form ref="form" label-width="80px">
-
-														<el-form-item label="组名称">
-															<el-input v-model="ldap.parent" autofocus disabled="true"></el-input>
-														</el-form-item>
-
-														<el-form-item label="用户名">
-															<el-input v-model="ldap.username" autofocus autocomplete="off"></el-input>
-														</el-form-item>
-
-														<el-form-item label="邮箱"
-																	:rules="[
-																	{ type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }
-																	]">
-															<el-input v-model="email"></el-input>
-														</el-form-item>
-
-														<el-form-item label="密码">
-															<el-input type="password" v-model="ldap.passwd" autocomplete="off" show-password></el-input>
-														</el-form-item>
-														
-														<el-form-item label="确认密码">
-															<el-input type="password" v-model="checkPass" autocomplete="off" show-password></el-input>
-														</el-form-item>
-
-														<el-form-item label="激活">
-															<el-switch v-model="ldap.isactive" true-value="true" false-value="false"></el-switch>
-														</el-form-item>
-														
-														<el-form-item label="管理员">
-															<el-switch v-model="ldap.isadmin" true-value="true" false-value="false"></el-switch>
-														</el-form-item>
-														
-													</form>
-												</el-main>
-												<el-footer style="text-align:right;">
-													<el-button type="warning" v-if="loading"><i class="el-icon-loading"></i> 创建用户、同步文件系统，请稍后。。。</el-button>
-													<el-button type="primary" @click="onSave" v-else>创建用户</el-button>
-												</el-footer>
-											</el-container>`,
-								data: {
-									ldap: {
-										parent: data.fullname, 
-										username: "",
-										passwd: "",
-										isactive: true,
-										isadmin: false,
-										otype: 'usr'                     
-									},
-									email: "",
-									checkPass: "",
-									loading: false
-								},
-								created(){
-									this.ldap.parent = !_.isEmpty(self.selectedNode.fullname)?self.selectedNode.fullname:'/';
-								},
-								methods: {
-									onSave(){
-										
-										if (_.isEmpty(this.ldap.username)) {
-											
-											this.$message({
-												type: "warning",
-												message: `名称不能为空！`
-											})
-											return false;
-										}
-
-										if (_.isEmpty(this.email)) {
-											this.$message({
-												type: "warning",
-												message: `邮件不能为空！`
-											})
-											return false;
-										}
-
-										if (_.isEmpty(this.ldap.passwd)) {
-											this.$message({
-												type: "warning",
-												message: `密码不能为空！`
-											})
-											return false;
-										}
-
-										if (_.isEmpty(this.checkPass)) {
-											this.$message({
-												type: "warning",
-												message: `确认密码不能为空！`
-											})
-											return false;
-										}
-
-										if ( this.ldap.passwd !== this.checkPass) {
-											this.$message({
-												type: "warning",
-												message: `确认密码不一致！`
-											})
-											return false;
-										}
-
-										this.loading = true;
-
-										_.delay(()=>{
-											
-											let _csrf = window.CsrfToken.replace(/'/g,"");
-											let rtn = userHandler.userAdd(this.ldap, _csrf);
-	
-											if(rtn == 1){
-												this.$message({
-													type: "success",
-													message: `用户: ${this.ldap.username} ${this.email} 添加成功！`
-												})
-												
-												this.loading = false;
-	
-												_.delay(()=>{
-													self.initNodes;
-													self.onRefresh(data,event);
-													wnd.close();
-												},500);
-	
-											}
-										},500)
-
-									}
-								}
-							};
-							
-							new Vue(config).$mount("#ldap-newUser-container");
-						},
-						onDeleteUser(data,event){
-
-							if(data.fullname === '/system'){
-								this.$message({
-									type: "warning",
-									message: "系统组，禁止删除！"
-								})
-								return false;
-							}
-							if(data.fullname === '/system/admin'){
-								this.$message({
-									type: "warning",
-									message: "系统管理员，禁止删除！"
-								})
-								return false;
-							}
-
-							this.$confirm(`确认要删除该用户：${data.fullname}？`, '提示', {
-                                confirmButtonText: '确定',
-                                cancelButtonText: '取消',
-                                type: 'warning'
-                            }).then(() => {
-                                
-                                let rtn = userHandler.userDelete(data.id);
-                                
-                                if(rtn == 1){
-                                    this.$message({
-                                        type: 'success',
-                                        message: '删除成功!'
-									});
-									
-									_.delay(()=>{
-										this.initNodes();
-									},1000)
-									
-                                } else {
-									this.$message({
-                                        type: 'error',
-                                        message: '删除失败: ' + rtn
-                                    });
-								}
-                            }).catch(() => {
-                                
-                            });
-							
-						},
-						newGroup(node,event){
-							
-							event.stopPropagation();
-
-							const self = this;
-
-							let wnd = null;
-
-							try{
-								if(jsPanel.activePanels.getPanel('jsPanel-user')){
-									jsPanel.activePanels.getPanel('jsPanel-user').close();
-								}
-							}catch(error){
-			
-							}
-							finally{
-								wnd = maxWindow.winUser("新建组",`<div id="ldap-newGroup-container"></div>`,null,null); 
-							}
-
-							let config  = {
-								delimiters: ['#{', '}#'],
-								template: `<el-container>
-												<el-main>
-													<el-form ref="form" label-width="80px" size="mini">
-
-														<el-form-item label="组名称">
-															<el-input v-model="ldap.parent" disabled="true"></el-input>
-														</el-form-item>
-
-														<el-form-item label="名称">
-															<el-input v-model="ldap.username" autofocus></el-input>
-														</el-form-item>
-														
-													</form>
-												</el-main>
-												<el-footer style="text-align:right;">
-													<el-button type="primary" @click="save">创建组</el-button>
-												</el-footer>
-											</el-container>`,
-								data: {
-									ldap: {
-										parent: node.fullname, 
-										username: "",
-										passwd: "",
-										isactive: true,
-										isadmin: false,
-										otype: 'org'                     
-									}
-								},
-								created(){
-									this.ldap.parent = !_.isEmpty(self.selectedNode.fullname)?self.selectedNode.fullname:'/';
-								},
-								mounted:function(){
-									let me = this;
-
-									me.$nextTick(function() {
-										me.init();
-									})
-								},
-								methods: {
-									init: function(){
-										let me = this;
-
-									},
-									save: function(){
-										let me = this;
-
-										if (_.isEmpty(me.ldap.parent)) {
-											this.$message({
-												type: 'warning',
-												message: '所属组名称不能为空！!'
-											});
-											return false;
-										}
-
-										if (_.isEmpty(me.ldap.username)) {
-											this.$message({
-												type: 'warning',
-												message: '组名称不能为空！'
-											});
-											return false;
-										}
-
-										let _csrf = window.CsrfToken.replace(/'/g,"");
-										let rtn = userHandler.userAdd(me.ldap, _csrf);
-
-										if(rtn==1){
-											this.$message({
-												type: 'success',
-												message: `组: ${me.ldap.parent} 添加成功！`
-											});
-											
-											_.delay(function(){
-												self.onRefresh(node,event);
-												eventHub.$emit('user-tree-refresh-event', null);
-												wnd.close();
-											},500);
-
-										}
-
-									}
-								}
-							};
-
-							new Vue(config).$mount("#ldap-newGroup-container");
+						onNodeClick(data){
+							console.log(data)
 						},
 						onCheckChange(data, checked, indeterminate){
-							this.$emit('update:selectedLdap', { data: this.$refs.tree.getCheckedKeys(), checked: checked});
+							
+							// 设置复选框状态
+							let perms = ['add','delete','edit','list'];
+
+							if(checked){
+								if(!_.isEmpty(data.name)){
+									this.$set( data, 'checked', true);
+									this.$set( data, 'perms', perms );
+								}
+							} else {
+								this.$set( data, 'checked', false);
+								//this.$set(data, 'perms', []);
+							}
+
+							// 更新
+							if(_.isEmpty(data.name)) {
+								//return false;
+							}
+
+							this.selectedNodes.push( data );
+
+						},
+						// 标签授权
+						onUpdateRoleGroupByTag(){
+							
+							// 更新
+							let term = encodeURIComponent( JSON.stringify( { roleGroup: [this.rowData.row], data: this.selectedNodes } ) );
+							console.log(JSON.stringify( { roleGroup: [this.rowData.row], data: this.selectedNodes } ))
+							let rtn = fsHandler.callFsJScript("/matrix/system/updateGroupByTagdir.js", term);
+							_.delay(()=>{
+								this.$emit('update:selectedTag');
+								this.$message({
+									type: "success",
+									message: "更新标签权限成功！"
+								})
+							},500)
 						}
 					}
 				})
@@ -2815,10 +2661,19 @@ class System {
 							dt:{
 								rows:[],
 								columns: [],
-								selected: []
+								selected: [],
+								pagination:{
+                                    pageSize: 10,
+                                    currentPage: 1
+                                }
 							},
 							info: [],
-							expandedView: 'userEdit'
+							dialog: {
+								user: {
+									show: false,
+									row: null
+								}
+							}
 						}
 					},
 					template:   `<el-container style="width:100%;height:100%;">
@@ -2847,8 +2702,9 @@ class System {
 									</el-header>   
 									<el-main style="width:100%;padding:0px;">
 										<el-table
-											:data="dt.rows"
+											:data="dt.rows.slice((dt.pagination.currentPage - 1) * dt.pagination.pageSize,dt.pagination.currentPage * dt.pagination.pageSize)"
 											highlight-current-row="true"
+											stripe
 											style="width: 100%;"
 											:row-class-name="rowClassName"
 											:header-cell-style="headerRender"
@@ -2864,50 +2720,6 @@ class System {
 													<i class="el-icon-user el-avatar el-avatar--48 el-avatar--circle" style="font-size:32px;color:#03a9f4;" v-else></i>
 												</template>
 											</el-table-column> 
-											<el-table-column type="expand">
-												<template slot-scope="scope">
-													<el-container v-if="expandedView == 'userEdit'">
-														<el-main>
-															<el-form label-width="80px">
-
-																<el-form-item label="组名称">
-																	<el-input v-model="scope.row.parent" autofocus disabled="true"></el-input>
-																</el-form-item>
-
-																<el-form-item label="用户名">
-																	<el-input v-model="scope.row.username" autofocus disabled="true"></el-input>
-																</el-form-item>
-
-																<el-form-item label="邮箱">
-																	<el-input v-model="scope.row.email"></el-input>
-																</el-form-item>
-
-																<el-form-item label="密码">
-																	<el-input type="password" v-model="scope.row.passwd" autocomplete="off" disabled="true" show-password></el-input>
-																</el-form-item>
-																
-																<el-form-item label="激活">
-																	<el-switch v-model="scope.row.isactive" true-value="true" false-value="false"></el-switch>
-																</el-form-item>
-																
-																<el-form-item label="管理员">
-																	<el-switch v-model="scope.row.isadmin" true-value="true" false-value="false"></el-switch>
-																</el-form-item>
-																
-															</form>
-														</el-main>
-														<el-footer style="text-align:right;">
-															<el-button type="default" @click="onToogleExpand(scope.row, scope.$index)">取消</el-button>
-															<el-button type="primary" @click="onUpdateUser(scope.row, scope.$index)">更新用户</el-button>
-														</el-footer>
-													</el-container>
-													<el-container v-else>
-														<el-main>
-															<user-roleGroup-select :selected="scope.row.grpset" showView="grid" @update:selectedRoleGroup="onUpdateRoleGroup(scope.row,$event)" ref="roleGroup"></user-roleGroup-select>
-														</el-main>
-													</el-container>
-												</template>
-											</el-table-column>
 											<el-table-column
 												sortable 
 												show-overflow-tooltip
@@ -2946,10 +2758,10 @@ class System {
 															<el-button type="text" icon="el-icon-s-check" @click="onToogleExpand(scope.row, scope.$index, 'userPermission')"></el-button>
 														</el-tooltip-->
 														<el-tooltip content="编辑" open-delay="500" placement="top">
-															<el-button type="text" icon="el-icon-edit" @click="onToogleExpand(scope.row, scope.$index, 'userEdit')"></el-button>
+															<el-button type="text" icon="el-icon-edit" @click="onUpdateUser(scope.row,scope.$index)"></el-button>
 														</el-tooltip>
 														<el-tooltip content="删除" open-delay="500" placement="top">
-															<el-button type="text" icon="el-icon-delete"></el-button>
+															<el-button type="text" @click="$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$refs.ldapManage.onDeleteUser(scope.row,$event)" icon="el-icon-delete" v-if="!_.includes(['/系统组','/'],scope.row.fullname)"></el-button>
 														</el-tooltip>
 													</div>
 													<div v-else>
@@ -2957,13 +2769,13 @@ class System {
 															<el-button type="text" icon="el-icon-s-check" @click="onToogleExpand(scope.row, scope.$index, 'userPermission')"></el-button>
 														</el-tooltip-->
 														<el-tooltip content="新建组织" open-delay="500" placement="top">
-															<el-button type="text" @click="tt();$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$refs.ldapManage.newGroup(scope.row,$event)" icon="el-icon-folder-add"></el-button>
+															<el-button type="text" @click="$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$refs.ldapManage.onNewGroup(scope.row,$event)" icon="el-icon-folder-add"></el-button>
 														</el-tooltip>
 														<el-tooltip content="新建用户" open-delay="500" placement="top">
-															<el-button type="text" @click="$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$refs.ldapManage.newUser(scope.row,$event)" icon="el-icon-plus"></el-button>
+															<el-button type="text" @click="$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$refs.ldapManage.onNewUser(scope.row,$event)" icon="el-icon-plus"></el-button>
 														</el-tooltip>
 														<el-tooltip content="编辑" open-delay="500" placement="top">
-															<el-button type="text" icon="el-icon-edit" @click="onToogleExpand(scope.row, scope.$index, 'userEdit')"></el-button>
+															<el-button type="text" icon="el-icon-edit"  @click="onUpdateUser(scope.row,scope.$index)"></el-button>
 														</el-tooltip>
 														<el-tooltip content="删除" open-delay="500" placement="top">
 															<el-button type="text" @click="$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$refs.ldapManage.onDeleteUser(scope.row,$event)" icon="el-icon-delete" v-if="!_.includes(['/系统组','/'],scope.row.fullname)"></el-button>
@@ -2972,9 +2784,50 @@ class System {
 												</template>
 											</el-table-column>
 										</el-table>
+										<el-dialog title="用户编辑" :visible.sync="dialog.user.show" v-if="dialog.user.show">
+											<el-container>
+												<el-main>
+													<el-form label-width="80px">
+
+														<el-form-item label="组名称">
+															<el-input v-model="dialog.user.row.parent" autofocus disabled="true"></el-input>
+														</el-form-item>
+
+														<el-form-item label="用户名">
+															<el-input v-model="dialog.user.row.username" autofocus disabled="true"></el-input>
+														</el-form-item>
+
+														<el-form-item label="邮箱">
+															<el-input v-model="dialog.user.row.email"></el-input>
+														</el-form-item>
+
+														<el-form-item label="密码">
+															<el-input type="password" v-model="dialog.user.row.passwd" autocomplete="off" disabled="true" show-password></el-input>
+														</el-form-item>
+														
+														<el-form-item label="激活">
+															<el-switch v-model="dialog.user.row.isactive" true-value="true" false-value="false"></el-switch>
+														</el-form-item>
+
+													</form>
+												</el-main>
+											</el-container>
+											<div slot="footer" class="dialog-footer">
+												<el-button type="default" @click="dialog.user.show = false;">关闭</el-button>
+												<el-button type="primary" @click="onSaveUser(dialog.user.row)">更新用户</el-button>	
+											</div>
+										</el-dialog>
 									</el-main>
 									<el-footer  style="height:30px;line-height:30px;">
-										#{ info.join(' &nbsp; | &nbsp;') }#
+										<!--#{ info.join(' &nbsp; | &nbsp;') }#-->
+										<el-pagination
+                                            @size-change="onPageSizeChange"
+                                            @current-change="onCurrentPageChange"
+                                            :page-sizes="[10, 15, 20]"
+                                            :page-size="dt.pagination.pageSize"
+                                            :total="dt.rows.length"
+                                            layout="total, sizes, prev, pager, next">
+                                        </el-pagination>
 									</el-footer>
 								</el-container>`,
 					filters:{
@@ -3002,13 +2855,15 @@ class System {
 							immediate:true
 						}
 					},
-					mounted(){
-						
-					},
 					methods: {
-						tt(){
-							console.log(this.$parent.$parent.$parent.$parent.$parent);
-						},
+						onPageSizeChange(val) {
+                            console.log(1,val)
+                            this.dt.pagination.pageSize = val;
+                        },
+                        onCurrentPageChange(val) {
+                            console.log(2,val)
+                            this.dt.pagination.currentPage = val;
+                        },
 						layout(){
 							let doLayout = ()=>{
 								if($(".el-table-column--selection",this.$el).is(':visible')){
@@ -3074,17 +2929,37 @@ class System {
 						onRowDblclick(row, column, event){
 							
 						},
-						onToogleExpand(row,index,view){
-							
-							if(row.expand){
-								this.$refs.table.toggleRowExpansion(row,false);
-								this.$set(row, 'expand', !row.expand);
-								return false;
-							}
+						onUpdateUser(row,index){
+							this.dialog.user.row = row;
+							this.dialog.user.show = true;
+						},
+						onSaveUser(row){
 
-							this.$refs.table.toggleRowExpansion(row);
-							this.expandedView = view;
-	
+							this.$confirm(`确认要更新该用户：${row.fullname}？`, '提示', {
+                                confirmButtonText: '确定',
+                                cancelButtonText: '取消',
+                                type: 'warning'
+                            }).then(() => {
+								
+								
+								let _csrf = window.CsrfToken.replace(/'/g,"");
+								let rtn = userHandler.userUpdate(row, _csrf);
+
+								if(rtn == 1){
+									this.$message({
+										type: "success",
+										message: `更新用户: ${row.username} 成功！`
+									})
+									this.dialog.user.show = false;
+								}
+
+								this.$set(row, 'email', row.email.split(","));
+								this.dt.rows[index] = row;
+                                
+                            }).catch(() => {
+                                
+                            });
+
 						},
 						onExport(type){
 					
@@ -3120,40 +2995,13 @@ class System {
 							// So bad
 							$(this.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$refs.leftView.$el).toggle();
 						},
-						onUpdateUser(row,index){
-
-							this.$confirm(`确认要更新该用户：${row.fullname}？`, '提示', {
-                                confirmButtonText: '确定',
-                                cancelButtonText: '取消',
-                                type: 'warning'
-                            }).then(() => {
-								
-								
-								let _csrf = window.CsrfToken.replace(/'/g,"");
-								let rtn = userHandler.userUpdate(row, _csrf);
-
-								if(rtn == 1){
-									this.$message({
-										type: "success",
-										message: `更新用户: ${row.username} 成功！`
-									})
-								}
-
-								this.$set(row,'email', row.email.split(","));
-								this.dt.rows[index] = row;
-                                
-                            }).catch(() => {
-                                
-                            });
-
-						},
 						onUpdateRoleGroup(row,roleGroups){
 							_.forEach(roleGroups, (v)=>{
 								let group = userHandler.getGroupPermissionsById({id:v});
-								console.log(row,group.member, typeof group.member)
+								
 								let fullname = group.isldap?`U${row.fullname}`:`G${row.fullname}`
 								group.member.push(fullname);
-								console.log(v,group,group.member)
+								
 								userHandler.updateGroupPermissions(group);
 							})
 						}
@@ -3164,7 +3012,7 @@ class System {
 				Vue.component("app-permission",{
 					delimiters: ['#{', '}#'],
 					props: {
-						selected: Array
+						rowData: Object
 					},
 					data(){
 						return {
@@ -3174,28 +3022,31 @@ class System {
 							},
 							treeData: [],
 							selectedNode: null,
+							selectedNodes: [],
+							selectedKeys: [],
 							filterText: ""
 						}
 					},
 					template:   `<el-container style="height:100%;background:#f2f2f2;">
 									<el-aside :width="!_.isEmpty(selectedNode)?'60%':'100%'">
-										<el-header style="height:40px;line-height:40px;padding:0px 10px;">
-											<el-input v-model="filterText" 
+										<el-header style="height:30px;;padding:0px 10px;">
+											<!--el-input v-model="filterText" 
 												placeholder="搜索" size="mini"
-												clearable></el-input>
+												clearable></el-input-->
+											<h4>应用权限</h4>
 										</el-header>
 										<el-main style="padding:0px 10px; height: 100%;">
 											<el-tree :data="treeData" 
 													:props="defaultProps" 
-													:default-checked-keys="selected"
+													:default-checked-keys="selectedKeys"
 													node-key="id"
 													highlight-current
 													default-expand-all
 													auto-expand-parent
 													@node-click="onNodeClick"
 													@check-change="onCheckChange"
-													:filter-node-method="onFilterNode"
 													:expand-on-click-node="false"
+													:check-on-click-node="false"
 													style="background:transparent;"
 													show-checkbox
 													ref="tree">
@@ -3207,7 +3058,7 @@ class System {
 													<span v-else>
 														<i class="el-icon-c-scale-to-original" style="color:#0088cc;"></i>
 														<span>#{node.label}#</span>
-														<el-checkbox-group v-model="data.perms" style="float: right;padding-right: 10px;">
+														<el-checkbox-group v-model="data.perms" style="float: right;padding-right: 10px;" v-if="data.checked">
 															<el-checkbox label="add">添加</el-checkbox>
 															<el-checkbox label="delete">删除</el-checkbox>
 															<el-checkbox label="edit">编辑</el-checkbox>
@@ -3217,6 +3068,10 @@ class System {
 												</span>  
 											</el-tree>
 										</el-main>
+										<el-footer style="text-align:right;line-height:60px;">
+											<el-button type="default" @click="rowData.show = false;">取消</el-button>
+											<el-button type="primary" @click="onUpdateRoleGroupByApp">更新应用权限</el-button>
+										</el-footer>
 									</el-aside>
 									<el-container v-if="!_.isEmpty(selectedNode)" style="width:40%;">
 										<el-header>
@@ -3250,6 +3105,47 @@ class System {
 						this.onInit();
 					},
 					methods: {
+						onInit(){
+							this.treeData = fsHandler.callFsJScript("/matrix/system/getAppList.js").message;
+							_.delay(()=>{
+								this.onSetSelected();
+							},50)
+						},
+						onSetSelected(){
+							try{
+								let sapp = fsHandler.callFsJScript("/matrix/system/getSappById.js", this.rowData.row.id).message;
+								console.log(22,sapp)
+								_.forEach(sapp,(v,k)=>{
+									let cPerms = JSON.parse(v);
+									_.extend( this.findNodeById(k), { perms: cPerms, checked:true } );
+								});
+								this.selectedKeys = _.keys(sapp);
+
+							} catch(err){
+								console.log(err)
+							}
+						},
+						findNodeById(id){
+							let rtn = null;
+
+							let find = function(nodes){
+								_.forEach(nodes,(v)=>{
+									
+									if(v.id == id){
+										rtn = v;
+										return;
+									}
+
+									if(v.nodes){
+										find(v.nodes)
+									}
+								})	
+							} 
+
+							find(this.treeData);
+
+							return rtn;
+						},
 						onMouseEnter(item){
 							this.$set(item, 'show', true)
 						},
@@ -3299,27 +3195,45 @@ class System {
 							}
 
 						},
-						onInit(){
-							this.treeData = fsHandler.callFsJScript("/matrix/system/getAppList.js").message;
-						},
 						onCheckChange(data, checked, indeterminate){
 								
-							let nodes = [];
-							
-							let getChildNodeName = function(data){
-								
-								nodes.push(data);
-								
-								if(data.nodes){
-									_.forEach(data.nodes,(v)=>{
-										getChildNodeName(v);
-									})
+							// 设置复选框状态
+							let perms = ['add','delete','edit','list'];
+
+							if(checked){
+								if(!_.isEmpty(data.name)){
+									this.$set(data, 'checked', true);
+									this.$set(data, 'perms', perms);
 								}
-							};
+							} else {
+								this.$set(data, 'checked', false);
+								//this.$set(data, 'perms', []);
+							}
 
-							getChildNodeName(data);
+							// 更新
+							if(_.isEmpty(data.name)) {
+								return false;
+							}
 
-							this.$emit('update:selectedApp', { data: nodes, checked:checked });
+							this.selectedNodes.push(data);
+
+						},
+						// 应用授权
+						onUpdateRoleGroupByApp(event){
+							
+							// 更新
+							let term = encodeURIComponent( JSON.stringify( { roleGroup: [this.rowData.row], data: this.selectedNodes } ) );
+							console.log(JSON.stringify( { roleGroup: [this.rowData.row], data: this.selectedNodes } ))
+							let rtn = fsHandler.callFsJScript("/matrix/system/updateGroupByApp.js", term);
+							_.delay(()=>{
+								this.$emit('update:selectedApp');
+								this.$message({
+									type: "success",
+									message: "更新应用权限成功！"
+								})
+								// 刷新应用缓存，针对应用权限过滤
+								userHandler.refreshAppCache();
+							},500)
 						}
 					}
 				})
@@ -3328,13 +3242,15 @@ class System {
 				Vue.component("data-permission",{
 					delimiters: ['#{', '}#'],
 					props: {
-						selected: Array,
+						rowData: Object,
 						root: String
 					},
 					data(){
 						return {
 							treeData: [],
 							selectedNode: null,
+							selectedNodes: [],
+							selectedKeys: [],
 							defaultProps: {
 								children: 'children',
 								label: 'alias'
@@ -3350,7 +3266,7 @@ class System {
 					template:   `<el-container style="height:100%;background:#f2f2f2;">
 									<el-header style="height:300px;">
 										<el-container style="height:100%;">
-											<el-header style="height:40px;line-height:40px;padding:0px 10px;">
+											<el-header style="height:40px;line-height:40px;padding:0px 10px;display:none;">
 												<el-input v-model="filterText" 
 													placeholder="搜索" size="mini"
 													clearable></el-input>
@@ -3358,7 +3274,7 @@ class System {
 											<el-main style="padding:0px 10px; height: 100%;">
 												<el-tree :data="treeData" 
 														:props="defaultProps" 
-														:default-checked-keys="selected"
+														:default-checked-keys="selectedKeys"
 														node-key="id"
 														show-checkbox
 														highlight-current
@@ -3367,6 +3283,7 @@ class System {
 														@node-click="onNodeClick"
 														@check-change="onCheckChange"
 														:filter-node-method="onFilterNode"
+														:check-on-click-node="false"
 														:expand-on-click-node="false"
 														style="background:transparent;"
 														ref="tree">
@@ -3374,7 +3291,7 @@ class System {
 														<span>
 															<i class="el-icon-c-scale-to-original" style="color:#0088cc;"></i>
 															#{ node.label }#
-															<el-checkbox-group v-model="data.cPerms" style="float: right;padding-right: 10px;">
+															<el-checkbox-group v-model="data.cPerms" style="float: right;padding-right: 10px;" v-if="data.checked">
 																<el-checkbox label="add">添加</el-checkbox>
 																<el-checkbox label="delete">删除</el-checkbox>
 																<el-checkbox label="edit">编辑</el-checkbox>
@@ -3384,6 +3301,10 @@ class System {
 													</span>
 												</el-tree>
 											</el-main>
+											<el-footer style="text-align:right;line-height:60px;">
+												<el-button type="default" @click="rowData.show = false;">取消</el-button>
+												<el-button type="primary" @click="onUpdateRoleGroupByData">更新类权限</el-button>
+											</el-footer>
 										</el-container>
 									</el-header>
 									<el-main style="overflow:hidden;" v-if="!_.isEmpty(selectedNode)">
@@ -3447,9 +3368,43 @@ class System {
 					methods: {
 						initData(){
 							this.treeData = fsHandler.callFsJScript("/matrix/entity/entity_class.js",encodeURIComponent(this.root)).message;
+							_.delay(()=>{
+								this.onSetSelected();
+							},50)
 						},
-						onCheckChange(val){
-							this.$emit('update:selected', {data: this.$refs.tree.getCheckedKeys(),checked:checked});
+						onSetSelected(){
+							try{
+								let sdata = fsHandler.callFsJScript("/matrix/system/getSdataById.js", this.rowData.row.id).message;
+								_.forEach(sdata,(v,k)=>{
+									let dcPerms = v;
+									_.extend( this.findNodeById(k), { cPerms: dcPerms, checked:true } );
+								});
+								this.selectedKeys = _.keys(sdata);
+
+							} catch(err){
+								console.log(err)
+							}
+						},
+						findNodeById(id){
+							let rtn = null;
+
+							let find = function(nodes){
+								_.forEach(nodes,(v)=>{
+									
+									if(v.id == id){
+										rtn = v;
+										return;
+									}
+
+									if(v.nodes){
+										find(v.nodes)
+									}
+								})	
+							} 
+
+							find(this.treeData);
+
+							return rtn;
 						},
 						onFilterNode:_.debounce(function(value, data) {
 							if (!value) return true;
@@ -3495,6 +3450,42 @@ class System {
 						},
 						onSelectionChange(){
 
+						},
+						onCheckChange(data, checked, indeterminate){
+							
+							// 设置复选框状态
+							let perms = ['add','delete','edit','list'];
+							
+							if(checked){
+								if(!_.isEmpty(data.class)){
+									this.$set(data, 'checked', true);
+									this.$set(data, 'cPerms', perms);
+								}
+							} else {
+								this.$set(data, 'checked', false);
+								//this.$set(data, 'cPerms', []);
+							}
+
+							// 更新
+							if(_.isEmpty(data.class)) {
+								return false;
+							}
+
+							this.selectedNodes.push( {id:data.id, cPerms:data.cPerms, checked:data.checked, class:data.class, fields: data.fields} );
+						},
+						// 数据类授权
+						onUpdateRoleGroupByData(){
+							// 更新
+							let term = encodeURIComponent( JSON.stringify( { roleGroup: [this.rowData.row], data: this.selectedNodes } ) );
+							console.log(JSON.stringify( { roleGroup: [this.rowData.row], data: this.selectedNodes } ))
+							let rtn = fsHandler.callFsJScript("/matrix/system/updateGroupByData.js", term);
+							_.delay(()=>{
+								this.$emit('update:selectedData');
+								this.$message({
+									type: "success",
+									message: "更新类权限成功！"
+								})
+							},500)
 						}
 					}
 				})
@@ -3564,7 +3555,7 @@ class System {
 											</el-container>
 											<div slot="footer" class="dialog-footer">
 												<el-tooltip content="取消" open-delay="500" placement="top">
-													<el-button type="default" icon="el-icon-close" @click="dialog.newApi.show = false;">取消</el-button>
+													<el-button type="default" icon="el-icon-close" @click="dialog.newApi.show = false;">关闭</el-button>
 												</el-tooltip>	
 												<el-tooltip content="确定" open-delay="500" placement="top">
 													<el-button type="primary" icon="el-icon-edit" @click="onSaveApi">确定</el-button>
@@ -3628,28 +3619,11 @@ class System {
 															</el-tooltip>	
 														</el-footer>
 													</el-container>
-													<el-container style="width:100%;" v-else>
-														<el-main>
-															<user-roleGroup-select showView="grid" ref="roleGroup" @update:selectedRoleGroup="onSetRoleGroups(scope.row,$event)" :selected="scope.row._group._all" v-if="!_.isEmpty(scope.row._group)"></user-roleGroup-select>
-															<user-roleGroup-select showView="grid" ref="roleGroup" @update:selectedRoleGroup="onSetRoleGroups(scope.row,$event)" :selected="[]" v-else></user-roleGroup-select>
-														</el-main>
-														<el-footer style="text-align:right;">
-															<el-tooltip content="取消" open-delay="500" placement="top">
-																<el-button type="default" icon="el-icon-close" @click="onToogleExpand(scope.row, scope.$index, 'roleGroup')">取消</el-button>
-															</el-tooltip>	
-															<el-tooltip content="确定" open-delay="500" placement="top">
-																<el-button type="primary" icon="el-icon-edit" @click="onUpdateRoleGroup(scope.row, scope.$index)">确定</el-button>
-															</el-tooltip>	
-														</el-footer>
-													</el-container>
 												</template>
 											</el-table-column>
 											<el-table-column label="操作" width="160">
 												<template slot-scope="scope">
 													
-													<!--el-tooltip content="选择角色组" open-delay="500" placement="top">
-														<el-button type="text" icon="el-icon-s-check" @click="onToogleExpand(scope.row, scope.$index, 'roleGroup')"></el-button>
-													</el-tooltip-->
 													<el-tooltip content="编辑" open-delay="500" placement="top">
 														<el-button type="text" icon="el-icon-edit" @click="onToogleExpand(scope.row, scope.$index, 'edit')"></el-button>
 													</el-tooltip>
@@ -3871,10 +3845,19 @@ class System {
 							if(_.isEmpty(val)){
 								_.forEach(this.dt.rows, (v,index)=>{
 									userHandler.deleteApiPermissionsGroups({name:v.name, roleGroups: _.map([this.roleGroup],'fullname') });
+
+									// 删除角色组
+									let term = encodeURIComponent( JSON.stringify( { roleGroup: [this.roleGroup], data: [ _.extend(v, {checked:false} )] } ) );
+									fsHandler.callFsJScript("/matrix/system/updateGroupByApi.js", term);
+									
 								})	
 							} else {
 								_.forEach(val, (v,index)=>{
 									userHandler.setApiPermissionsGroups({name:v.name, roleGroups: _.map([this.roleGroup],'fullname') });
+
+									// 更新角色组
+									let term = encodeURIComponent( JSON.stringify( { roleGroup: [this.roleGroup], data: [ _.extend(v, {checked:true} )] } ) );
+									fsHandler.callFsJScript("/matrix/system/updateGroupByApi.js", term);
 								})
 							}
 							
@@ -3965,7 +3948,7 @@ class System {
 				Vue.component("user-roleGroup-select",{
 					delimiters: ['#{', '}#'],
 					props: {
-						selected: Array,
+						rowData: Object,
 						showView: String
 					},
 					data(){
@@ -4013,9 +3996,9 @@ class System {
 													<el-button type="text" @click="showView='table'" icon="el-icon-menu">
 													</el-button>
 												</el-tooltip>
-												<el-tooltip content="更新权限" open-delay="500" v-if="showView=='table'">
+												<!--el-tooltip content="更新权限" open-delay="500" v-if="showView=='table'">
 													<el-button type="text" icon="el-icon-edit-outline" @click="$parent.$parent.$parent.$parent.$parent.onUpdateRoleGroup"></el-button>
-												</el-tooltip>	
+												</el-tooltip-->	
 												<el-tooltip content="刷新" open-delay="500" placement="top">
 													<el-button type="text" icon="el-icon-refresh" @click="onRefresh"></el-button>
 												</el-tooltip>
@@ -4155,11 +4138,19 @@ class System {
 						initData(){
 							const self = this;
 							
-							this.dt.rows = userHandler.getGroupPermissionsByParent({parent:""});
+							// 过滤系统组、当前角色组、同步的组织
+							this.dt.rows = _.filter(userHandler.getGroupPermissionsByParent({parent:""}),(v)=>{
+								
+								if(!_.includes(['/','system','admin'],v.name) && v.fullname != this.rowData.fullname && !v.isldap){
+									return v;
+								};
 
-							if(this.selected){
+							});
+
+							let selected = _.map(this.rowData.member,(v)=>{ return v.replace(/['G','U','O']/g,''); });
+							if(selected){
 								this.dt.selected = _.filter(this.dt.rows, (v)=>{
-									if(_.includes(this.selected,v.fullname)){
+									if(_.includes(selected,v.fullname)){
 										return v;
 									}
 								});
@@ -4217,7 +4208,6 @@ class System {
 							}
 						},
 						onSelectionChange(val) {
-							console.log(23,val)
 							this.dt.selected = val;
 						},
 						onCurrentChange(val){
@@ -4397,19 +4387,23 @@ class System {
 							dt:{
 								rows:[],
 								columns: [
-									{ "field":"name", title:"名称" },
-									{ "field":"fullname", title:"全名称", visible:false},
-									{ "field":"id", title:"ID", visible:false },
-									{ "field":"isldap", title:"LDAP" },
-									{ "field":"parent", title:"父节点" },
-									{ "field":"member", title:"成员", width:200 },
-									{ "field":"fields", title:"属性", width:200 },
-									{ "field":"readexps", title:"数据表达式", width:200 },
-									{ "field":"readonly", title:"读权限", width:200 },
-									{ "field":"writable", title:"写权限", width:200 },
+									{ "field":"name", title:"角色名称", width:200 },
+									{ "field":"fullname", title:"全名称", width:200, visible:false},
+									{ "field":"id", title:"ID", width:200, visible:false },
+									{ "field":"isldap", title:"同步组织" , width:200 },
+									{ "field":"parent", title:"父角色组" , width:200 },
+									{ "field":"member", title:"成员" },
+									{ "field":"fields", title:"属性", width:200 , visible:false },
+									{ "field":"readexps", title:"数据表达式", width:200 , visible:false },
+									{ "field":"readonly", title:"读权限", width:200 , visible:false },
+									{ "field":"writable", title:"写权限", width:200 , visible:false },
 									{ "field":"selected", title:"选择", width:200, visible:false }
 								],
-								selected:[]
+								selected:[],
+								pagination:{
+                                    pageSize: 10,
+                                    currentPage: 1
+                                }
 							},
 							info: [],
 							tree: {
@@ -4421,7 +4415,6 @@ class System {
 							},
 							fullname: ["/"],
 							splitInst: null,
-							expandedView: 'roleGroupEdit',
 							dialog: {
 								permission:{
 									row: {},
@@ -4466,9 +4459,9 @@ class System {
 													</el-breadcrumb>
 												</el-col>
 												<el-col :span="12" style="text-align:right;">
-													<el-tooltip content="切换视图" open-delay="500" placement="top">
+													<!--el-tooltip content="切换视图" open-delay="500" placement="top">
 														<el-button type="text" icon="el-icon-s-fold" @click="onTogglePanel"></el-button>
-													</el-tooltip>
+													</el-tooltip-->
 													<el-tooltip content="新建角色组" open-delay="500" placement="top">
 														<el-button type="text" icon="el-icon-plus" @click="onNewRole" style="padding-left:5px;"></el-button>
 													</el-tooltip>
@@ -4495,7 +4488,8 @@ class System {
 										</el-header>   
 										<el-main style="width:100%;padding:0px;">
 											<el-table
-												:data="dt.rows"
+												stripe
+												:data="dt.rows.slice((dt.pagination.currentPage - 1) * dt.pagination.pageSize,dt.pagination.currentPage * dt.pagination.pageSize)"
 												highlight-current-row="true"
 												style="width: 100%;"
 												:row-class-name="rowClassName"
@@ -4506,34 +4500,6 @@ class System {
 												@current-change="onCurrentChange"
 												ref="table">
 												<el-table-column type="selection" align="center"></el-table-column> 
-												<el-table-column type="expand">
-													<template slot-scope="scope">
-														<el-container v-if="expandedView === 'roleGroupEdit'">
-															<el-main>
-
-															</el-main>
-														</el-container>
-														<el-container style="height:100%;" v-else>
-															<el-main style="overflow:hidden;">
-																<el-row :gutter="20">
-																	<el-col :span="24">
-																		<ldap-manage-select root="/" :selected="scope.row.member" @update:selectedLdap="onUpdateRoleGroupByLdap(scope.row,$event)" ref="ldapManageSelect"></ldap-manage-select>
-																	</el-col>
-																</el-row>
-																<el-row :gutter="20">
-																	<el-col :span="24">
-																		<user-roleGroup-select showView="grid" @update:selectedRoleGroup="onUpdateRoleGroupByRoleGroup(scope.row,$event)" ref="roleGroup" :selected="_.map(scope.row.member,(v)=>{ return v.replace(/['G','U']/g,''); })"></user-roleGroup-select>
-																	</el-col>
-																</el-row>
-															</el-main>
-															<el-footer style="text-align:right;">
-																<el-tooltip content="取消" open-delay="500" placement="top">
-																	<el-button type="default" icon="el-icon-close" @click="onToogleExpand(scope.row,scope.$index,'selectUsers')">取消</el-button>
-																</el-tooltip>
-															</el-footer>
-														</el-container>
-													</template>
-												</el-table-column>
 												<el-table-column
 													sortable 
 													show-overflow-tooltip
@@ -4567,20 +4533,25 @@ class System {
 															</div>
 														</template>
 												</el-table-column>
-												<el-table-column label="标签" prop="tags" width="200">
+												<!--el-table-column label="标签" prop="tags" width="200">
 													<template slot-scope="scope">
 														<mx-tag domain='script' :model.sync="scope.row.tags" :id="scope.row.id" limit="1"></mx-tag>
 													</template>
-												</el-table-column>
-												<el-table-column label="操作" width="160" fixed="right">
+												</el-table-column-->
+												<el-table-column label="操作" width="160">
 													<template slot-scope="scope">
 													
-														<div v-if="_.includes(['/','system','admin'],scope.row.name)">
+														<div v-if="_.includes(['/','system'],scope.row.name)">
 															
+														</div>
+														<div v-else-if="_.includes(['admin'],scope.row.name) && window.SignedUser_UserName == 'admin'">
+															<el-tooltip content="授权用户" open-delay="500" placement="top">
+																<el-button type="text" icon="el-icon-user" @click="onSetLdap(scope.row)"></el-button>
+															</el-tooltip>
 														</div>
 														<div v-else>
 															<el-tooltip content="权限设置" open-delay="500" placement="top">
-																<el-button type="text" icon="el-icon-s-check" @click="onSetPermission(scope.row);"></el-button>
+																<el-button type="text" icon="el-icon-lock" @click="onSetPermission(scope.row);"></el-button>
 															</el-tooltip>
 															<el-tooltip content="授权用户" open-delay="500" placement="top">
 																<el-button type="text" icon="el-icon-user" @click="onSetLdap(scope.row)"></el-button>
@@ -4604,12 +4575,14 @@ class System {
 														<el-tabs value="tagdir">
 															<el-tab-pane name="app" lazy>
 																<span slot="label"><i class="el-icon-files"></i> 应用权限</span>
-																<app-permission  :selected="[]" ref="appTree" @update:selectedApp="onUpdateRoleGroupByApp($event)" v-if="!_.isEmpty(dialog.permission._group)"></app-permission>
-																<app-permission  :selected="[]" ref="appTree" @update:selectedApp="onUpdateRoleGroupByApp($event)" v-else></app-permission>
+																<app-permission  :rowData="dialog.permission" ref="appTree" 
+																	@update:selectedApp="()=>{ this.initData(); }" v-if="!_.isEmpty(dialog.permission.row)"></app-permission>
 															</el-tab-pane>	
 															<el-tab-pane name="data" lazy>
 																<span slot="label"><i class="el-icon-bank-card"></i> 数据权限</span>
-																<data-permission root="/" ref="classTree"></data-permission>
+																<data-permission root="/" :rowData="dialog.permission"
+																	@update:selectedData="()=>{ this.initData(); }"
+																	ref="classTree"></data-permission>
 															</el-tab-pane>
 															<el-tab-pane name="api" lazy>
 																<span slot="label"><i class="el-icon-tickets"></i> 接口权限</span>
@@ -4617,51 +4590,56 @@ class System {
 															</el-tab-pane>
 															<el-tab-pane name="tagdir">
 																<span slot="label"><i class="el-icon-collection-tag"></i> 标签权限</span>
-																<mx-tag-all-tree :model="{parent:'/system',name:'tagdir_tree_data.js',domain:'*'}" 
-																	:selected="dialog.permission.row.tags" 
-																	@update:selectedTag="onUpdateRoleGroupByTag($event)" 
+																<tagdir-select :model="{parent:'/system',name:'tagdir_tree_data.js',domain:'*'}" 
+																	:rowData="dialog.permission"
+																	@update:selectedTag="()=>{ this.initData(); }"
 																	ref="tagdirTree"
-																	v-if="!_.isEmpty(dialog.permission.row)"></mx-tag-all-tree>
-																<mx-tag-all-tree :model="{parent:'/system',name:'tagdir_tree_data.js',domain:'*'}" 
-																	@update:selectedTag="onUpdateRoleGroupByTag($event)" 
-																	ref="tagdirTree"
-																	v-else></mx-tag-all-tree>
+																	v-if="!_.isEmpty(dialog.permission.row)"></tagdir-select>
 															</el-tab-pane>
 														</el-tabs>
 													</el-main>
 												</el-container>
-												<div slot="footer" class="dialog-footer">
-													<el-tooltip content="取消" open-delay="500" placement="top">
-														<el-button type="default" icon="el-icon-close" @click="dialog.permission.show = false;">取消</el-button>
-													</el-tooltip>
-												</div>
 											</el-dialog>
 											<el-dialog :title="selectLdapTitle" :visible.sync="dialog.ldap.show" v-if="dialog.ldap.show" width="80vw">
 												<el-container style="height:100%;">
 													<el-main style="overflow:hidden;padding:0px 10px;">
 														<el-row :gutter="20">
 															<el-col :span="24">
-																<h4>关联用户</h4>
-																<ldap-manage-select root="/" :selected="dialog.ldap.row.member" @update:selectedLdap="onUpdateRoleGroupByLdap(dialog.ldap.row,$event)"></ldap-manage-select>
+																<h4>用户成员</h4>
+																<ldap-manage-select root="/" 
+																	:rowData="dialog.ldap.row" 
+																	@update:selectedLdap="onSetRoleGroupByLdap(dialog.ldap.row,$event)">
+																</ldap-manage-select>
 															</el-col>
 														</el-row>
 														<el-row :gutter="20">
 															<el-col :span="24">
-																<h4>关联角色组</h4>
-																<user-roleGroup-select showView="grid" @update:selectedRoleGroup="onUpdateRoleGroupByRoleGroup(dialog.ldap.row,$event)" ref="roleGroup" :selected="_.map(dialog.ldap.row.member,(v)=>{ return v.replace(/['G','U']/g,''); })"></user-roleGroup-select>
+																<h4>角色成员</h4>
+																<user-roleGroup-select showView="grid" 
+																	:rowData="dialog.ldap.row"
+																	@update:selectedRoleGroup="onSetRoleGroupByRoleGroup(dialog.ldap.row,$event)" 
+																	ref="roleGroup">
+																</user-roleGroup-select>
 															</el-col>
 														</el-row>
 													</el-main>
 												</el-container>
 												<div slot="footer" class="dialog-footer">
-													<el-tooltip content="取消" open-delay="500" placement="top">
-														<el-button type="default" icon="el-icon-close" @click="dialog.ldap.show = false;">取消</el-button>
-													</el-tooltip>
+													<el-button type="default" @click="dialog.ldap.show = false;">关闭</el-button>
+													<el-button type="primary" @click="onUpdatePermission(dialog.ldap.row)">更新成员</el-button>
 												</div>
 											</el-dialog>
 										</el-main>
 										<el-footer  style="height:30px;line-height:30px;">
-											#{ info.join(' &nbsp; | &nbsp;') }#
+											<!--#{ info.join(' &nbsp; | &nbsp;') }#-->
+											<el-pagination
+												@size-change="onPageSizeChange"
+												@current-change="onCurrentPageChange"
+												:page-sizes="[10, 15, 20]"
+												:page-size="dt.pagination.pageSize"
+												:total="dt.rows.length"
+												layout="total, sizes, prev, pager, next">
+											</el-pagination>
 										</el-footer>
 									</el-container>
 								</el-container>`,
@@ -4689,6 +4667,7 @@ class System {
 								this.info.push(`共 ${this.dt.rows.length} 项`);
 								this.info.push(`已选择 ${this.dt.selected.length} 项`);
 								this.info.push(moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
+								this.$refs.table.doLayout();
 							},
 							deep:true,
 							immediate:true
@@ -4700,10 +4679,18 @@ class System {
 						// 获取角色组列表
 						this.initData();
 						// 初始化分隔栏
-						//this.initSplit();
+						this.initSplit();
 
 					},
-					methods: {
+					methods: {	
+						onPageSizeChange(val) {
+                            console.log(1,val)
+                            this.dt.pagination.pageSize = val;
+                        },
+                        onCurrentPageChange(val) {
+                            console.log(2,val)
+                            this.dt.pagination.currentPage = val;
+                        },				
 						initSplit(){
 							
 							this.splitInst = Split([this.$refs.leftView.$el, this.$refs.mainView.$el], {
@@ -4731,7 +4718,8 @@ class System {
 						initData(){
 							const self = this;
 							
-							this.dt.rows = _.orderBy(userHandler.getGroupPermissionsByParent({parent:""}),'fullname');
+							// 过滤 "/" 角色组
+							this.dt.rows = _.orderBy(_.filter(userHandler.getGroupPermissionsByParent({parent:""}),(v)=>{ return v.fullname != '/'; }),'fullname');
 
 							let init = function(){
 								
@@ -4805,7 +4793,6 @@ class System {
 							}
 
 							this.$refs.table.toggleRowExpansion(row);
-							this.expandedView = view;
 	
 						},
 						onExport(type){
@@ -4974,56 +4961,60 @@ class System {
 						onMouseLeave(data){
 							this.$set(data, 'show', false)
 						},
+						// 更新角色组合用户关联
+						onUpdatePermission(row){
+							
+							let rtn = userHandler.updateGroupPermissions(row);
+							if(rtn == 1){
+								this.$message({
+									type: "success",
+									message: "更新成功！"
+								})
+								this.dialog.ldap.show = false;
+							} else {
+								this.$message({
+									type: "error",
+									message: "更新失败！"
+								})
+							}
+						},
 						// 更新角色组的用户
-						onUpdateRoleGroupByLdap(row,event){
-							row.member = [];
-							_.forEach(event.data,(v)=>{
-								row.member.push( 'U'+v );
+						onSetRoleGroupByLdap(row,event){
+							
+							_.forEach(event,(v)=>{
+								if(v.checked){
+									row.member.push( 'U'+v.fullname );
+								} else {
+									_.pull(row.member, 'U'+v.fullname);
+								}
 							});
-							row.member = _.filter(_.uniq(row.member),null);
-							userHandler.updateGroupPermissions(row);
+
 						},
 						// 更新角色组的子角色组
-						onUpdateRoleGroupByRoleGroup(row,event){
-							let roleGroups = _.map(event,'fullname');
+						onSetRoleGroupByRoleGroup(row,event){
 							
-							row.member = [];
-							_.forEach(roleGroups,(v)=>{
-								row.member.push( 'G'+v );
+							let roleGroups = _.map(event,(v)=>{ return 'G'+ v.fullname; });
+							
+							row.member = _.filter(row.member,(v)=>{
+								if(!_.startsWith(v,'G')){
+									return v;
+								}
 							});
-							row.member = _.filter(_.uniq(row.member),null);
-							userHandler.updateGroupPermissions(row);
+							
+							row.member = _.filter(_.uniq( _.concat( row.member, roleGroups ) ), null);
+							
 						},
 						// 当前角色组授权
 						onSetPermission(row){
-							this.$set(this.dialog.permission, 'row',row);
+							this.$set(this.dialog.permission, 'row', row);
 							this.dialog.permission.show = true;
 						},
 						// 当前角色组关联ldap
 						onSetLdap(row){
 							this.$set(this.dialog.ldap, 'row',row);
 							this.dialog.ldap.show = true;
-						},
-						// 应用授权
-						onUpdateRoleGroupByApp(event){
-							let term = encodeURIComponent( JSON.stringify( { action: event.checked, roleGroup: [this.dialog.permission.row], data:event.data } ) );
-							fsHandler.callFsJScript("/matrix/system/updateGroupByApp.js", term);
-						},
-						// 接口授权
-						onUpdateRoleGroupByApi(event){
-							
-						},
-						// 数据授权
-						onUpdateRoleGroupByData(event){
-							
-						},
-						// 标签授权
-						onUpdateRoleGroupByTag(event){
-							// 更新角色组到_group
-							let term = encodeURIComponent( JSON.stringify( { action: event.checked, roleGroup: [this.dialog.permission.row], tags:event.data } ) );
-							fsHandler.callFsJScript("/matrix/system/updateGroupByTagdir.js", term);
-							this.initData();
 						}
+
 					}
 				})
 
@@ -5401,6 +5392,9 @@ class System {
 								},8000)
 
 								self.resetForm();
+
+								// 刷新应用缓存，针对应用权限过滤
+								userHandler.refreshAppCache();
 							}
 
 						},
@@ -5429,6 +5423,9 @@ class System {
 
 								self.hide(item.name);
 								self.resetForm();
+
+								// 刷新应用缓存，针对应用权限过滤
+								userHandler.refreshAppCache();
 							}
 						},
 						remove(event) {
@@ -5439,6 +5436,9 @@ class System {
 									let rtn = omdbHandler.fetchDataByMql(_mql);
 									if(rtn.status === 'ok'){
 										this.init();
+
+										// 刷新应用缓存，针对应用权限过滤
+										userHandler.refreshAppCache();
 									} else {
 										this.$message({
 											type: "error",

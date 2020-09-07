@@ -110,9 +110,7 @@ class UserHandler{
 
         let form = new FormData();
         form.append("email", event.email);
-        form.append("isactive", event.isactive);
-        form.append("isadmin", event.isadmin);
-        
+        form.append("active", event.isactive);
 
         jQuery.ajax({
             url: `/admin/users/${event.id}`,
@@ -669,6 +667,26 @@ class UserHandler{
             }
         });
         return rtn;
+    };
+
+    /* Refresh App Cache When CURD for /matrix/portal/tools */
+    refreshAppCache() {
+        
+        jQuery.ajax({
+            url: 'admin/perms/app/refresh',
+            dataType: 'json',
+            type: 'GET',
+            beforeSend:function(xhr){
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function (data, status) {
+                userHandler.ifSignIn(data);
+            },
+            error: function(xhr, textStatus, errorThrown) {
+            }
+        });
+        
     };
 
     
