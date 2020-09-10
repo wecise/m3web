@@ -3030,7 +3030,7 @@ class System {
 											node-key="id"
 											show-checkbox
 											highlight-current="true"
-											:default-expand-all="false"
+											:default-expand-all="true"
 											:default-expanded-keys="defaultExpandedKeys"
 											:default-checked-keys="selectedKeys"
 											:expand-on-click-node="false"
