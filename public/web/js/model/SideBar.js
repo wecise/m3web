@@ -246,7 +246,7 @@ class SideBar {
                     } else if(item.cmd === "running"){
                         sideBar.appRunningPlus(item.data);
                     } else if(item.cmd === "uninstall"){
-                        sideBar.appUninstall(item.data);
+                        sideBar.appUninstall(this,item.data);
                     } else if(item.cmd === "home"){
                         sideBar.appAsHome(item.data);
                     } else if(item.cmd === "share"){
@@ -307,7 +307,7 @@ class SideBar {
                                         } else if(_.includes(key,"running")){
                                             inst.appRunningPlus(item);
                                         } else if(_.includes(key,"uninstall")){
-                                            inst.appUninstall(item);
+                                            inst.appUninstall(self,item);
                                         } else if(_.includes(key,"home")){
                                             inst.appAsHome(item);
                                         } else if(_.includes(key,"share")){
@@ -1003,27 +1003,33 @@ class SideBar {
 
     }
 
-    appUninstall(event){
+    appUninstall(el,event){
+        const self = el;
+        
+        try{
+            const h = self.$createElement;
 
-        const h = this.$createElement;
-        this.$msgbox({
-                title: `确定要卸载该应用`, 
-                message: h('span', null, [
-                    h('p', null, `应用名称：${event.cnname}`),
-                    h('p', null, `地址：${event.url}`)
-                ]),
-                showCancelButton: true,
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
-                type: 'warning'
-        }).then(() => {
+            self.$msgbox({
+                    title: `确定要卸载该应用`, 
+                    message: h('span', null, [
+                        h('p', null, `应用名称：${event.cnname}`),
+                        h('p', null, `地址：${event.url}`)
+                    ]),
+                    showCancelButton: true,
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+            }).then(() => {
 
-            let rtn = fsHandler.callFsJScript("/matrix/apps/app_delete.js",encodeURIComponent(JSON.stringify(event)));
-            eventHub.$emit("APP-REFRESH-EVENT");
+                let rtn = fsHandler.callFsJScript("/matrix/apps/app_delete.js",encodeURIComponent(JSON.stringify(event)));
+                eventHub.$emit("APP-REFRESH-EVENT");
 
-        }).catch(() => {
-                
-        }); 
+            }).catch(() => {
+                    
+            }); 
+        } catch(err){
+
+        }
 
     }
 

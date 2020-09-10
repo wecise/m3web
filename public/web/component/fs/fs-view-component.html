@@ -327,6 +327,11 @@
             .fs-view-component .el-select-tags .el-input__inner{
                 border:unset;
             }
+
+            /* 自定义msgbox */
+            .fs-custom-msgbox{
+                width: 30vw;
+            }
             
             .el-tabs--border-card>.el-tabs__header {
                 background-color: #f6f6f6;
@@ -447,63 +452,9 @@
                 </el-header>
                 <el-main style="padding:0 5px;overflow:hidden;" ref="contentRef">
                     <component v-bind:is="currentView" :model.sync="model" @dblclick.native="resetStatus"></component>
-                    <el-dialog title="应用发布" :visible.sync="dialog.appDeploy.show" v-if="dialog.appDeploy.show">
-                        <el-container>
-                            <el-main>
-                                <el-tabs v-model="dialog.appDeploy.activeName" ref="tabs">
-                                    <el-tab-pane label="应用发布" name="app">
-                                        <el-container style="height:100%;">
-                                            <el-main style="height:100%;overflow:auto;padding:10px 0px;">
-                                                <el-form ref="form" :model="dialog.appDeploy.app" label-width="80px">
-                                                    <el-form-item label="中文名">
-                                                        <el-input v-model="dialog.appDeploy.app.cnname"></el-input>
-                                                    </el-form-item>
-                                                    <el-form-item label="英文名称">
-                                                        <el-input v-model="dialog.appDeploy.app.enname"></el-input>
-                                                    </el-form-item>
-                                                    <el-form-item label="图标选择">
-                                                        <el-button type="text" @click="dialog.appDeploy.activeName='icon'">
-                                                            <el-avatar shape="square" fit="fill" size="64" :src="dialog.appDeploy.app.icon.value"></el-avatar>
-                                                        </el-button>
-                                                    </el-form-item>
-                                                    <el-form-item label="Target">
-                                                        <el-radio-group v-model="dialog.appDeploy.app.target">
-                                                            <el-radio label="_blank">打开新窗口</el-radio>
-                                                            <el-radio label="_parent">当前窗口打开</el-radio>
-                                                        </el-radio-group>
-                                                    </el-form-item>
-                                                    <el-form-item label="分组">
-                                                        <el-radio-group v-model="dialog.appDeploy.app.groups.group">
-                                                            #{dialog.appDeploy.app.groups.group}#
-                                                            <el-radio :label="item.name" v-for="item in dialog.appDeploy.model.groups">#{item.title}#</el-radio>
-                                                        </el-radio-group>
-                                                    </el-form-item>
-                                                </el-form> 
-                                            </el-main>
-                                            <el-footer style="height:40px;line-height:40px;text-align:right;">
-                                                <el-button type="defult" @click="dialog.appDeploy.show = false;">取消</el-button>
-                                                <el-button type="primary" @click="onDeployApp">发布应用</el-button>
-                                            </el-footer>
-                                        </el-container>
-                                    </el-tab-pane>
-                                    <el-tab-pane label="" name="icon">
-                                        <el-container style="height:100%;">
-                                            <el-main style="height:100%;overflow:auto;padding:10px 0px;">
-                                                <el-radio-group v-model="dialog.appDeploy.app.icon.value">
-                                                    <el-radio :label="'/fs'+icon.parent+'/'+icon.name+'?type=download&issys=${window.SignedUser_IsAdmin}'" v-model="dialog.appDeploy.app.icon.value"  v-for="icon in dialog.appDeploy.app.icon.list">
-                                                        <el-avatar shape="square" fit="contain" size="64" :src="icon | pickIcon"></el-avatar>    
-                                                    </el-radio>
-                                                </el-radio-group>
-                                            </el-main>
-                                            <el-footer style="height:30px;line-height:30px;text-align:center;">
-                                                <el-button type="text" @click="dialog.appDeploy.activeName='app'">返回</el-button>  
-                                            </el-footer>
-                                        </el-container>
-                                    </el-tab-pane>
-                                </el-tabs>
-                            </el-main>
-                        </el-container>
-                      </el-dialog>
+                    <el-dialog title="应用发布" :visible.sync="dialog.appDeploy.show" v-if="dialog.appDeploy.show" destroy-on-close="true">
+                        <mx-app-deploy :model="dialog.appDeploy"></mx-app-deploy>
+                    </el-dialog>
                 </el-main>
                 <el-footer style="padding:0 10px;height:30px;line-height:30px;">
                     <small>数量：${model.length}  | 已选中：${selectedItem.length} </small>
@@ -1339,9 +1290,15 @@
                     currentView: '',
                     dialog: {
                         appDeploy: {
-                            show: false
+                            show: false,
+                            item: null
                         }
                     }
+                }
+            },
+            filters:{
+                pickIcon: function(icon) {
+                    return `/fs${icon.parent}/${icon.name}?type=download&issys=${window.SignedUser_IsAdmin}`;
                 }
             },
             created(){
@@ -1417,7 +1374,7 @@
                             { name: "属性", icon: "fas fa-info", fun: "info", divided:true }
                         ],
                         "html": [
-                            { name: "发布应用", icon: "fab fa-codepen", fun: "deployIt" },
+                            { name: "发布应用", icon: "fab fa-codepen", fun: "onNewAppDeploy" },
                             { name: "下载", icon: "fas fa-download", fun: "downloadIt", type: true },
                             { name: "编辑", icon: "fas fa-edit", fun: "editIt" },
                             { name: "运行", icon: "fas fa-play", fun: "runHtml" },
@@ -1427,7 +1384,7 @@
                             { name: "属性", icon: "fas fa-info", fun: "info", divided:true }
                         ],
                         "htm": [
-                            { name: "发布应用", icon: "fab fa-codepen", fun: "deployIt" },
+                            { name: "发布应用", icon: "fab fa-codepen", fun: "onNewAppDeploy" },
                             { name: "下载", icon: "fas fa-download", fun: "downloadIt", type: true },
                             { name: "编辑", icon: "fas fa-edit", fun: "editIt" },
                             { name: "运行", icon: "fas fa-play", fun: "runHtml" },
@@ -2132,161 +2089,9 @@
                     }, "admin;");
                     $(".alertify-prompt .alertify-message").css('height','5vh');
                 },
-                deployIt(item){
-                    const self = this
-    
-                    let wnd = maxWindow.winDeployApp( `<i class="fab fa-codepen"></i> 应用发布`, `<div id="fs-app-deploy"></div>`, null, 'content');
-    
-                    let form = {
-                        delimiters: ['#{', '}#'],
-                        template:   `<el-container><el-main><el-tabs v-model="activeName" ref="tabs">
-                                        <el-tab-pane label="应用发布" name="app">
-                                            <el-container style="height:100%;">
-                                                <el-main style="height:100%;overflow:auto;padding:10px 0px;">
-                                                    <el-form ref="form" :model="app" label-width="80px">
-                                                        <el-form-item label="中文名">
-                                                            <el-input v-model="app.cnname"></el-input>
-                                                        </el-form-item>
-                                                        <el-form-item label="英文名称">
-                                                            <el-input v-model="app.enname"></el-input>
-                                                        </el-form-item>
-                                                        <el-form-item label="图标选择">
-                                                            <el-button type="text" @click="activeName='icon'">
-                                                                <el-avatar shape="square" fit="fill" size="64" :src="app.icon.value"></el-avatar>
-                                                            </el-button>
-                                                        </el-form-item>
-                                                        <el-form-item label="Target">
-                                                            <el-radio-group v-model="app.target">
-                                                                <el-radio label="_blank">打开新窗口</el-radio>
-                                                                <el-radio label="_parent">当前窗口打开</el-radio>
-                                                            </el-radio-group>
-                                                        </el-form-item>
-                                                        <el-form-item label="分组">
-                                                            <el-radio-group v-model="app.groups.group">
-                                                                #{app.groups.group}#
-                                                                <el-radio :label="item.name" v-for="item in model.groups">#{item.title}#</el-radio>
-                                                            </el-radio-group>
-                                                        </el-form-item>
-                                                    </el-form> 
-                                                </el-main>
-                                                <el-footer style="height:40px;line-height:40px;text-align:right;">
-                                                    <el-button type="primary" @click="deploy">发布</el-button>
-                                                    <el-button type="defult" @click="cancel">取消</el-button>
-                                                </el-footer>
-                                            </el-container>
-                                        </el-tab-pane>
-                                        <el-tab-pane label="" name="icon">
-                                            <el-container style="height:100%;">
-                                                <el-main style="height:100%;overflow:auto;padding:10px 0px;">
-                                                    <el-radio-group v-model="app.icon.value">
-                                                        <el-radio :label="'/fs'+icon.parent+'/'+icon.name+'?type=download&issys=${window.SignedUser_IsAdmin}'" v-model="app.icon.value"  v-for="icon in app.icon.list">
-                                                            <el-avatar shape="square" fit="contain" size="64" :src="icon | pickIcon"></el-avatar>    
-                                                        </el-radio>
-                                                    </el-radio-group>
-                                                </el-main>
-                                                <el-footer style="height:30px;line-height:30px;text-align:center;">
-                                                    <el-button type="text" @click="activeName='app'">返回</el-button>  
-                                                </el-footer>
-                                            </el-container>
-                                        </el-tab-pane>
-                                    </el-tabs></el-main></el-container>`,
-                        data: {
-                            activeName: "app",
-                            model: null,
-                            app: {
-                                cnname: _.head(item.name.split(".")),
-								enname: _.head(item.name.split(".")),
-                                seat: _.random(100, 10000),
-                                url: "",
-								icon: "",
-								target: "_blank",
-								selected: 1,
-                                groups: {"group":"application"},
-                                url: `/fs${[item.parent, item.name].join("/")}?issys=true&type=open&issys=${window.SignedUser_IsAdmin}`,
-                                icon: {
-                                    value: '',
-                                    list: []
-                                }                                
-                            }
-                        },
-                        filters:{
-                            pickIcon: function(icon) {
-                                return `/fs${icon.parent}/${icon.name}?type=download&issys=${window.SignedUser_IsAdmin}`;
-                            }
-                        },
-                        mounted: function() {
-                            const me = this;
-    
-                            me.$nextTick(function() {
-                                me.app.icon.value = `${window.ASSETS_ICON}/apps/png/creative.png?type=download&issys=${window.SignedUser_IsAdmin}`;
-    
-                                me.init();
-
-                                _.delay(()=>{
-                                    me.hideHeader();
-                                },500)
-                                
-                            })
-                        },
-                        methods: {
-                            init: function(){
-                                const me = this;
-                                me.model = fsHandler.callFsJScript("/matrix/apps/appList.js",null).message;
-                                me.app.icon.list = fsHandler.fsList(`${window.ASSETS_ICON}/apps/png`);
-    
-                            },
-                            hideHeader(){
-                                const me = this;
-                                me.$refs.tabs.$children[0].$el.style.display = 'none';
-                            },
-                            deploy: function(){
-                                const me = this;
-    
-                                let check = fsHandler.callFsJScript("/matrix/apps/app_exist_check.js",encodeURIComponent(JSON.stringify(me.app.cnname))).message;;
-    
-                                if(check==1){
-                                    me.$message({
-                                        message:"应用已经发布，请确认。",
-                                        type: "info"
-                                    });
-                                    return false;
-                                }
-
-                                _.extend(me.app,{
-                                                    icon: me.app.icon.value.replace(/\/fs\/assets\/images\/apps\/png\//,'').replace(/\?type=download&issys=true/,'')
-                                                });
-
-                                let rtn = fsHandler.callFsJScript("/matrix/apps/app.js",encodeURIComponent(JSON.stringify(me.app)));
-                                if( _.lowerCase(rtn.status) == "ok"){
-                                    self.$message({
-                                        type: "info",
-                                        message: "应用发布成功"
-                                    });
-                                    
-                                    eventHub.$emit("APP-REFRESH-EVENT");
-
-                                    $("ul.nav").find("li>a[title='应用']").popover({
-                                        container: "body",
-                                        title: "",
-                                        content: `${me.app.cnname} 应用发布成功！`
-                                    }).popover('show');
-
-                                    _.delay(function(){
-                                        $("ul.nav").find("li>a[data-original-title='应用']").popover('destroy');
-                                    },8000)
-
-                                    wnd.close();
-
-                                }
-    
-                            },
-                            cancel:function(){
-                                wnd.close();
-                            }
-                        }
-                    };
-                    new Vue(form).$mount("#fs-app-deploy");
-    
+                onNewAppDeploy(item){
+                    this.dialog.appDeploy.show = true;
+                    this.dialog.appDeploy.item = item;
                 },
                 editIt(node){
                     
@@ -2427,7 +2232,8 @@
                             showCancelButton: true,
                             confirmButtonText: '确定',
                             cancelButtonText: '取消',
-                            type: 'warning'
+                            type: 'warning',
+                            customClass: "fs-custom-msgbox"
                     }).then(() => {
 
                         let rtn = fsHandler.fsUnZip(self.rootPath, file);

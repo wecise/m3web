@@ -46,7 +46,7 @@ class Home extends Matrix {
                                                             <el-image :src="folder.icon | pickIcon" style="margin:3px;width:14px;height:14px;" v-for="(folder,index) in item.groups" v-if="index<8"></el-image>
                                                         </p>
                                                         <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                                                            #{ $t('home.group')[item.name] }#（ #{item.groups.length}# ） 
+                                                            #{ _.isEmpty($t('home.group')[item.name])?item.title:$t('home.group')[item.name] }#（ #{item.groups.length}# ） 
                                                         </p>
                                                         <el-dropdown @command="onGroupCommand" trigger="hover" placement="top-start"  style="position: absolute;right: 5px;top: 5px;">
                                                             <span class="el-dropdown-link">
@@ -134,16 +134,32 @@ class Home extends Matrix {
                                                     </el-dropdown>
                                                 </el-button>
                                                 
-                                                <el-dialog :visible.sync="group.dialogVisible" width="30%" destroy-on-close="true" modal="false">
-                                                    <el-form :model="group.form" style="width:100%;">
+                                                <el-dialog :title="$t('home.group.application')" :visible.sync="group.dialogVisible" width="30%" destroy-on-close="true" modal="false">
+                                                    <el-form :model="group.form" style="width:100%;" label-position="top">
                                                         <el-form-item :label="$t('home.group.groupName')" label-width="80">
                                                             <el-input v-model="group.form.title" autofocus></el-input>
+                                                        </el-form-item>
+                                                        <el-form-item :label="$t('home.group.groupIcon')" label-width="80" style="display:none;">
+                                                            <el-radio-group v-model="group.form.icon" style="display:flex;flex-wrap:wrap;align-content:flex-start;height:200px;overflow:auto;">
+                                                                <el-button type="default" 
+                                                                    style="width:8em;max-width:8em;height:90px;height:auto;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);" 
+                                                                    v-for="icon in group.iconList" :key="icon.id">
+                                                                    <el-radio :label="icon.icon | pickIcon">
+                                                                        <el-image :src="icon.icon | pickIcon" style="max-width: 55px;min-width: 55px;" fit="contain"></el-image>
+                                                                        <span slot="label">#{icon.id}#</span>
+                                                                    </el-radio>
+                                                                </el-button>
+                                                            </el-radio-group>
                                                         </el-form-item>
                                                     </el-form>
                                                     <div slot="footer" class="dialog-footer">
                                                         <el-button @click="group.dialogVisible = false">#{ $t('home.actions.cancel') }#</el-button>
                                                         <el-button type="primary" @click="groupAdd" @keyup.enter.native.prevent="groupAdd">#{ $t('home.actions.apply') }#</el-button>
                                                     </div>
+                                                </el-dialog>
+
+                                                <el-dialog title="应用发布" :visible.sync="dialog.appDeploy.show" v-if="dialog.appDeploy.show" destroy-on-close="true">
+                                                    <mx-app-deploy :model="dialog.appDeploy"></mx-app-deploy>
                                                 </el-dialog>
                                                 
                                             </el-col>
@@ -195,13 +211,22 @@ class Home extends Matrix {
                                 name: _.now()+"",
                                 title: "new_"+_.now(),
                                 status: "",
-                                icon: "app.png"
+                                icon: "app.png",
+                            },
+                            iconList: []
+                        },
+                        dialog: {
+                            appDeploy: {
+                                show: false,
+                                item: null
                             }
                         }
                     },
                     filters:{
                         pickIcon:function(icon){
-                            return `${window.ASSETS_ICON}/apps/png/${icon}?type=open&issys=${window.SignedUser_IsAdmin}`;
+                            if(!_.isEmpty(icon)){
+                                return `${window.ASSETS_ICON}/apps/png/${icon}?type=download&issys=${window.SignedUser_IsAdmin}`;
+                            }
                         }
                     },
                     created(){
@@ -229,10 +254,10 @@ class Home extends Matrix {
                                 group: 'shared', 
                                 animation: 150,
                                 onAdd: function (evt) {
-                                    console.log(3,evt)
+                                    
                                 },
                                 onChange(evt) {
-                                    console.log(33,evt)  
+                                    
                                 }
                             });
                         })
@@ -263,10 +288,13 @@ class Home extends Matrix {
                         onPlusCommand(cmd){
                             
                             if(cmd.type === 'newGroup'){
+                                this.group.iconList = fsHandler.fsList('/assets/images/apps/png');
                                 this.group.dialogVisible = true;
+                                this.group.form.icon = _.sample(this.group.iconList).name;
                             } else {
-                                let preset = encodeURIComponent(JSON.stringify({view:'tools-manage'}));
-                                window.open(cmd.url+'?preset='+preset,'_blank');    
+                                this.dialog.appDeploy.show = true;
+                                //let preset = encodeURIComponent(JSON.stringify({view:'tools-manage'}));
+                                //window.open(cmd.url+'?preset='+preset,'_blank');    
                             }
                         },  
                         onCommand(item){
@@ -278,12 +306,13 @@ class Home extends Matrix {
                             } else if(item.cmd === "running"){
                                 sideBar.appRunningPlus(item.data);
                             } else if(item.cmd === "uninstall"){
-                                sideBar.appUninstall(item.data);
+                                sideBar.appUninstall(this,item.data);
                             } else if(item.cmd === "home"){
                                 sideBar.appAsHome(item.data);
                             } else if(item.cmd === "share"){
                                 sideBar.appShare(item.data);
                             } else if(item.cmd === "groupAction"){
+                                console.log(item)
                                 _.extend(item.data.groups,{group: item.targetGroup });
                                 this.toggleGroup(item.data);
                             }
@@ -316,8 +345,6 @@ class Home extends Matrix {
                                         },
                                         animation: 150,
                                         onMove: function (evt, originalEvent) {
-                                            console.log(2,evt)
-                                            console.log(22,originalEvent)
                                         }
                                     });
 
@@ -329,8 +356,6 @@ class Home extends Matrix {
                                         },
                                         animation: 150,
                                         onMove: function (evt, originalEvent) {
-                                            console.log(1,evt)
-                                            console.log(11,originalEvent)
                                         }
                                     });
                                 })

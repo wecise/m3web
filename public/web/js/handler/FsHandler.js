@@ -318,7 +318,7 @@ class FsHandler {
 
             },
             error: function(xhr, textStatus, errorThrown) {
-                rtn = xhr.responseJSON;
+                rtn = xhr.responseText;
             }
         })
 
@@ -340,10 +340,6 @@ class FsHandler {
         // Root
         srcpath = srcpath.replace(/\/\//g,'/');
         dstpath = dstpath.replace(/\/\//g,'/');
-
-        /*if(_.startsWith(dstpath,'/extend') || _.startsWith(dstpath,'/script') || _.startsWith(dstpath,'/app') || _.isEqual(dstpath,'/')){
-            _issys = true;
-        }*/
 
         if(window.SignedUser_IsAdmin){
             _issys = true;
@@ -369,17 +365,13 @@ class FsHandler {
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
-                    alertify.success("复制成功" + " " + srcpath);
                 }
 
             },
             error: function(xhr, textStatus, errorThrown) {
-                rtn = 0;
-                alertify.error("复制失败" + " " + xhr.responseJSON);
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+                rtn = xhr.responseText;
             }
         })
-
         return rtn;
     };
 
@@ -792,6 +784,7 @@ class FsHandler {
 
         return rtn;
     };
+    
 
     /*
     *   Server端脚本调用

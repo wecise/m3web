@@ -687,11 +687,11 @@ class Job extends Matrix {
                                             <el-tabs v-model="layout.main.detail.activeIndex" style="background:#ffffff;" class="el-tabs-bottom-line">
                                                 <el-tab-pane v-for="it in item.child" :key="it.name" :label="it.title" :name="it.name">
                                                     
-                                                    <job-diagnosis-detail :id="it.name+ '-detail'" :model="it.model.detail" v-if="it.type==='detail'"></job-diagnosis-detail>
+                                                    <job-diagnosis-detail :id="it.name+ '-detail'" :model="it.model.detail" v-if="it.type==='detail' && !_.isEmpty(it.model)"></job-diagnosis-detail>
                                                 
-                                                    <job-diagnosis-journal :model="it.model" v-if="it.type==='journal'"></job-diagnosis-journal>
+                                                    <job-diagnosis-journal :model="it.model" v-if="it.type==='journal' && !_.isEmpty(it.model)"></job-diagnosis-journal>
                                                 
-                                                    <job-diagnosis-cmd :id="it.name+ '-cmd'" :model="it.model" v-if="it.type==='cmd'"></job-diagnosis-cmd>
+                                                    <job-diagnosis-cmd :id="it.name+ '-cmd'" :model="it.model" v-if="it.type==='cmd' && !_.isEmpty(it.model)"></job-diagnosis-cmd>
                                                     
                                                 </el-tab-pane>
                                             </el-tabs>

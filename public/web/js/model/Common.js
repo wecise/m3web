@@ -19,6 +19,165 @@ Vue.directive('focus', {
     }
 });
 
+/* Common App Deploy */
+Vue.component("mx-app-deploy",{
+    delimiters: ['#{', '}#'],
+    props:{
+        model: Object
+    },
+    data(){
+        return {
+            app: {
+                activeTab: "app",
+                cnname: "",
+                enname: "",
+                seat: 0,
+                url: "",
+                icon: "",
+                target: "_blank",
+                selected: 1,
+                groups: {
+                    list: [],
+                    default: null
+                },
+                url: "",
+                icon: {
+                    value: '',
+                    list: []
+                }                                
+            }
+        }
+    },
+    template:  `<el-container>
+                    <el-main>
+                        <el-tabs v-model="app.activeTab" ref="tabs">
+                            <el-tab-pane name="app">
+                                <span slot="label">
+                                    <i class="el-icon-s-platform"></i> 应用信息
+                                </span>
+                                <el-container style="height:100%;">
+                                    <el-main style="height:100%;overflow:auto;padding:10px 0px;">
+                                        <el-form ref="form" :model="app" label-width="80px">
+                                            <el-form-item label="中文名">
+                                                <el-input v-model="app.cnname"></el-input>
+                                            </el-form-item>
+                                            <el-form-item label="英文名称">
+                                                <el-input v-model="app.enname"></el-input>
+                                            </el-form-item>
+                                            <el-form-item label="应用地址" v-if="_.isEmpty(model.item)">
+                                                <el-input v-model="app.url" placeholder="应用地址:http://www.baidu.com"></el-input>
+                                            </el-form-item>
+                                            <el-form-item label="图标选择">
+                                                <el-button type="text" @click="app.activeTab='icon'">
+                                                    <el-avatar shape="square" fit="fill" size="100" :src="app.icon.value"></el-avatar>
+                                                </el-button>
+                                            </el-form-item>
+                                            <el-form-item label="打开方式"">
+                                                <el-radio-group v-model="app.target">
+                                                    <el-radio label="_blank" style="margin-left: 20px;">打开新窗口</el-radio>
+                                                    <el-radio label="_parent" style="margin-left: 20px;">当前窗口打开</el-radio>
+                                                </el-radio-group>
+                                            </el-form-item>
+                                            <el-form-item label="应用分组">
+                                                <el-radio-group v-model="app.groups.default">
+                                                    #{app.groups.default.group}#
+                                                    <el-radio :label="item" v-for="item in app.groups.list" style="margin-left: 20px;">#{item.title}#</el-radio>
+                                                </el-radio-group>
+                                            </el-form-item>
+                                        </el-form> 
+                                    </el-main>
+                                    <el-footer style="height:40px;line-height:40px;text-align:right;">
+                                        <el-button type="defult" @click="model.show = false;">关闭</el-button>
+                                        <el-button type="primary" @click="onSaveAppDeploy">发布应用</el-button>
+                                    </el-footer>
+                                </el-container>
+                            </el-tab-pane>
+                            <el-tab-pane name="icon">
+                                <span slot="label">
+                                    <i class="el-icon-picture"></i> 选择图标
+                                </span>
+                                <el-container style="height:100%;">
+                                    <el-main style="height:300px;overflow:auto;padding:10px 0px;">
+                                        <el-radio-group v-model="app.icon.value">
+                                            <el-radio :label="'/fs'+icon.parent+'/'+icon.name+'?type=download&issys='+window.SignedUser_IsAdmin" 
+                                                v-model="app.icon.value"  
+                                                v-for="icon in app.icon.list"
+                                                :ref="'radio_'+icon.id"
+                                                style="margin-left: 20px;">
+                                                <el-button type="default" style="border: unset;width:100px;height:120px;margin:5px;padding:0px;cursor:pointer;" @click="onTriggerRadioClick(icon)"> 
+                                                    <el-image :src="icon | pickIcon" fit="fill" 
+                                                    style="width:48px;filter:grayscale(100%) brightness(45%) sepia(100%) hue-rotate(-180deg) saturate(700%) contrast(0.8);">
+                                                    </el-image> 
+                                                </el-button>
+                                            </el-radio>
+                                        </el-radio-group>
+                                    </el-main>
+                                    <el-footer style="height:30px;line-height:30px;text-align:center;">
+                                        <el-button type="text" @click="app.activeTab='app'">返回</el-button>  
+                                    </el-footer>
+                                </el-container>
+                            </el-tab-pane>
+                        </el-tabs>
+                    </el-main>
+                </el-container>`,
+    filters:{
+        pickIcon(icon) {
+            return `/fs${icon.parent}/${icon.name}?type=download&issys=${window.SignedUser_IsAdmin}`;
+        }
+    },
+    mounted(){
+        this.$nextTick().then(()=> {
+            if(this.model.item){
+                this.app.cnname = _.head(this.model.item.name.split("."));
+                this.app.enname = _.head(this.model.item.name.split("."));
+                this.app.url = `/fs${[this.model.item.parent, this.model.item.name].join("/")}?issys=true&type=open&issys=${window.SignedUser_IsAdmin}`;
+            }
+            this.app.seat = _.random(100, 10000);
+
+            this.app.groups.list = fsHandler.callFsJScript("/matrix/apps/appList.js",null).message.groups;
+            this.app.groups.default = _.first(this.app.groups.list);
+
+            this.app.icon.list = fsHandler.fsList(`${window.ASSETS_ICON}/apps/png`);
+            this.app.icon.value = `${window.ASSETS_ICON}/apps/png/creative.png?type=download&issys=${window.SignedUser_IsAdmin}`;
+            
+        })
+    },
+    methods: {
+        onTriggerRadioClick(item){
+            this.$refs['radio_'+item.id][0].$el.click();
+        },
+        onSaveAppDeploy(){
+                    
+            let check = fsHandler.callFsJScript("/matrix/apps/app_exist_check.js",encodeURIComponent(JSON.stringify(this.app.cnname))).message;;
+
+            if(check==1){
+                this.$message({
+                    type: "info",
+                    message:"应用已经发布，请确认!"
+                });
+                return false;
+            }
+
+            _.extend(this.app,{ icon: this.app.icon.value.replace(/\/fs\/assets\/images\/apps\/png\//,'').replace(/\?type=download&issys=true/,'') } );
+            _.extend(this.app.groups, { group: this.app.groups.default.name} );
+            let rtn = fsHandler.callFsJScript("/matrix/apps/app.js",encodeURIComponent(JSON.stringify(this.app)));
+
+            if( _.lowerCase(rtn.status) == "ok"){
+                
+                this.$notify({
+                    title: this.app.groups.default.name,
+                    message: '应用发布成功',
+                    position: 'top-left'
+                });
+                
+                eventHub.$emit("APP-REFRESH-EVENT");
+
+                this.model.show = false;   
+
+            }
+        }
+    }
+})
 
 /* Common editor */
 Vue.component("mx-editor",{
@@ -208,9 +367,8 @@ Vue.component("mx-fs-editor",{
                             </el-tabs>
                         </el-main>
                     </el-container>
-                    <el-footer style="height:30px;line-height:30px;background:#f6f6f6;"> 
+                    <el-footer style="height:30px;line-height:30px;background:#f6f6f6;" class="draggable"> 
                         <span>#{moment().format(mx.global.register.format)}#</span>
-
                     </el-footer>
                 </el-container>`,
     created() {
@@ -761,8 +919,7 @@ Vue.component("mx-fs-info",{
                                             <span slot="label">#{icon.id}#</span>
                                         </el-radio>
                                     </el-button>
-                                </el-radio-group>
-                                </div>    
+                                </el-radio-group> 
                             </el-tab-pane>
                         </el-tabs>    
                     </el-main>

@@ -37,7 +37,6 @@ class UserHandler{
                 fullname: event || "/"
             },
             beforeSend: function (xhr) {
-                // Pace.restart();
             },
             complete: function (xhr, textStatus) {
             },
@@ -673,7 +672,7 @@ class UserHandler{
     refreshAppCache() {
         
         jQuery.ajax({
-            url: 'admin/perms/app/refresh',
+            url: '/admin/perms/app/refresh',
             dataType: 'json',
             type: 'GET',
             beforeSend:function(xhr){

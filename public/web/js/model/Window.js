@@ -242,13 +242,17 @@ class Window {
         let win = $.jsPanel({
             id: id,
             theme:          maxWindow.theme.dark,
-            headerTitle:   `<img src="${window.ASSETS_ICON}/apps/png/matrix.png?type=download&issys=${window.SignedUser_IsAdmin}" style="width:12px;"></img> ${title}`,
+            headerTitle:   `<img src="${window.COMPANY_LOGO}" style="width:12px;"></img> ${title}`,
             contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
             position: "center 0 0",
             container: 'body',
             headerControls: { controls: '' },
             headerRemove:  false,
             content:        template,
+            draggable: {
+                handle:  "div.jsPanel-hdr, div.jsPanel-ftr,header.jsPanel-control,.el-header,.el-footer.draggable",
+                opacity: 0.8
+            },
             onresized: function(){
                 eventHub.$emit("WINDOW-STATUS-CHANGE-EVENT");
             },
