@@ -134,6 +134,7 @@ class SideBar {
                                                         <el-dropdown-item :command="{cmd:'walking',data:item}" divided>#{ $t('sideBar.actions.open') }#</el-dropdown-item>
                                                         <el-dropdown-item :command="{cmd:'running',data:item}">#{ $t('sideBar.actions.openNew') }#</el-dropdown-item>
                                                         <el-dropdown-item :command="{cmd:'home',data:item}" divided>#{ $t('sideBar.actions.setHome') }#</el-dropdown-item>
+                                                        <el-dropdown-item :command="{cmd:'allUserHome',data:item}">#{ $t('sideBar.actions.seAllUsertHome') }#</el-dropdown-item>
                                                         <el-dropdown-item divided disabled>#{ $t('sideBar.menu.groupTitle') }#</el-dropdown-item>
                                                         <el-dropdown-item :command="{cmd:'groupAction', targetGroup: groupItem.name, data:item}" v-for="groupItem in _.xor(apps.template,[item])">
                                                             <template v-if="groupItem.title">
@@ -249,6 +250,8 @@ class SideBar {
                         sideBar.appUninstall(this,item.data);
                     } else if(item.cmd === "home"){
                         sideBar.appAsHome(item.data);
+                    } else if(item.cmd === "allUserHome"){
+                        sideBar.appAsHomeForAllUser(item.data);
                     } else if(item.cmd === "share"){
                         sideBar.appShare(item.data);
                     } else if(item.cmd === "groupAction"){
@@ -310,6 +313,8 @@ class SideBar {
                                             inst.appUninstall(self,item);
                                         } else if(_.includes(key,"home")){
                                             inst.appAsHome(item);
+                                        } else if(_.includes(key,"allUserHome")){ 
+                                            sideBar.appAsHomeForAllUser(item.data);
                                         } else if(_.includes(key,"share")){
                                             inst.appShare(item);
                                         }
@@ -409,7 +414,7 @@ class SideBar {
                                                     <span slot="title">#{ $t('topBar.menu.myFiles') }#</span>
                                                 </template>
                                             </el-menu-item>
-                                            <el-menu-item index="home" v-if="mxAuth.isAdmin">
+                                            <el-menu-item index="home">
                                                 <template slot="title">
                                                     <i class="el-icon-s-home"></i>
                                                     <span slot="title">#{ $t('topBar.menu.defaultHome') }#</span>
@@ -877,19 +882,55 @@ class SideBar {
                 home: item.url.split("").slice(1,item.url.length).join(""),
                 _csrf: window.CsrfToken
             },
-            beforeSend: function(xhr) {
+            beforeSend(xhr) {
             },
-            complete: function(xhr, textStatus) {
+            complete(xhr, textStatus) {
             },
-            success: function(data, textStatus, xhr) {
+            success(data, textStatus, xhr) {
 
                 userHandler.ifSignIn(data);
 
-                sideBar.app.$message("首页已设置为：" + item.url);
+                sideBar.app.$message({
+                    type: "info",
+                    message: "首页已设置为：" + item.url
+                });
 
                 rtn = data;
             },
-            error: function(xhr, textStatus, errorThrown) {
+            error(xhr, textStatus, errorThrown) {
+                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+            }
+        })
+        return rtn;
+    }
+
+    appAsHomeForAllUser(item){
+        let rtn = null;
+        console.log(item)
+        jQuery.ajax({
+            url: "/admin/users/home",
+            type: "POST",
+            dataType: "json",
+            data: {
+                home: item.url.split("").slice(1,item.url.length).join(""),
+                _csrf: window.CsrfToken
+            },
+            beforeSend(xhr) {
+            },
+            complete(xhr, textStatus) {
+            },
+            success(data, textStatus, xhr) {
+
+                userHandler.ifSignIn(data);
+
+                sideBar.app.$message({
+                    type: "info",
+                    message: "首页已设置为：" + item.url
+                });
+
+                rtn = data;
+            },
+            error(xhr, textStatus, errorThrown) {
                 console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
             }
         })

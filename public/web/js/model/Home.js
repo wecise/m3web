@@ -79,6 +79,7 @@ class Home extends Matrix {
                                                                                 <el-dropdown-item :command="{cmd:'walking',data:subItem}" divided>#{ $t('home.actions.open') }#</el-dropdown-item>
                                                                                 <el-dropdown-item :command="{cmd:'running',data:subItem}">#{ $t('home.actions.openNew') }#</el-dropdown-item>
                                                                                 <el-dropdown-item :command="{cmd:'home',data:subItem}" divided>#{ $t('home.actions.setHome') }#</el-dropdown-item>
+                                                                                <el-dropdown-item :command="{cmd:'allUserHome',data:item}">#{ $t('home.actions.seAllUsertHome') }#</el-dropdown-item>
                                                                                 <el-dropdown-item divided disabled>#{ $t('home.group.groupTitle') }#</el-dropdown-item>
                                                                                 <el-dropdown-item :command="{cmd:'groupAction', targetGroup: groupItem.name, data:subItem}" v-for="groupItem in _.xor(apps.template,[item])">#{ $t('home.actions.moveTo') }#【#{groupItem.title}#】</el-dropdown-item>
                                                                                 <el-dropdown-item :command="{cmd:'groupAction', targetGroup: '', data:subItem}">#{ $t('home.actions.moveToDesktop') }#</el-dropdown-item>
@@ -114,6 +115,7 @@ class Home extends Matrix {
                                                             <el-dropdown-item :command="{cmd:'walking',data:item}" divided>#{ $t('home.actions.open') }#</el-dropdown-item>
                                                             <el-dropdown-item :command="{cmd:'running',data:item}">#{ $t('home.actions.openNew') }#</el-dropdown-item>
                                                             <el-dropdown-item :command="{cmd:'home',data:item}" divided>#{ $t('home.actions.setHome') }#</el-dropdown-item>
+                                                            <el-dropdown-item :command="{cmd:'allUserHome',data:item}">#{ $t('home.actions.seAllUsertHome') }#</el-dropdown-item>
                                                             <el-dropdown-item divided disabled>#{ $t('home.group.groupTitle') }#</el-dropdown-item>
                                                             <el-dropdown-item :command="{cmd:'groupAction', targetGroup: groupItem.name, data:item}" v-for="groupItem in apps.template">#{ $t('home.actions.moveTo') }#【#{groupItem.title}#】组</el-dropdown-item>
                                                             <el-dropdown-item :command="{cmd:'uninstall',data:item}" divided>#{ $t('home.actions.uninstall') }#</el-dropdown-item>
@@ -209,7 +211,7 @@ class Home extends Matrix {
                             dialogVisible: false,
                             form: {
                                 name: _.now()+"",
-                                title: "new_"+_.now(),
+                                title: "",
                                 status: "",
                                 icon: "app.png",
                             },
@@ -309,6 +311,8 @@ class Home extends Matrix {
                                 sideBar.appUninstall(this,item.data);
                             } else if(item.cmd === "home"){
                                 sideBar.appAsHome(item.data);
+                            } else if(item.cmd === "allUserHome"){
+                                sideBar.appAsHomeForAllUser(item.data);
                             } else if(item.cmd === "share"){
                                 sideBar.appShare(item.data);
                             } else if(item.cmd === "groupAction"){
@@ -369,6 +373,15 @@ class Home extends Matrix {
 							}
                         },
                         groupAdd(){
+                            
+                            if(_.isEmpty(this.group.form.title)){
+                                this.$message({
+                                    type: "warning",
+                                    message: "应用组名称不能为空！"
+                                })
+                                return false;
+                            }
+
                             let data = {
                                 user: window.SignedUser_UserName,
                                 action:"add",
@@ -376,7 +389,7 @@ class Home extends Matrix {
                             };
                             let rtn = fsHandler.callFsJScript("/matrix/apps/group.js",encodeURIComponent(JSON.stringify(data))).message;
                             if(rtn === 1){
-                                this.group.form.title = "new_"+_.now();
+                                this.group.form.title = "";
                                 this.loadApps();
                             } else{
                                 this.$message({

@@ -47,6 +47,15 @@ class VueHub {
         return rtn;
     }
 
+    // Tags
+    tags(){
+        try{
+            return fsHandler.callFsJScript("/matrix/tags/getAllTags.js").message;
+        } catch(err){
+            return [];
+        }
+    }
+
     // extented
     extend(){
         setInterval(()=>{
@@ -83,6 +92,8 @@ let eventHub = vue.hub();
 let i18n = vue.lang();
 
 let mxAuth = vue.auth();
+
+let mxAllTags = vue.tags();
 
 vue.extend();
 

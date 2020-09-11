@@ -2449,11 +2449,11 @@ class System {
 									<el-main style="">
 										<el-tree 
 											node-key="fullname"
-											default-expand-all
 											highlight-current
 											:data="nodes" 
 											:props="defaultProps" 
 											:default-checked-keys="selectedNodes"
+											:default-expanded-keys="selectedNodes"
 											:expand-on-click-node="false"
 											:check-on-click-node="false"
 											@check-change="onCheckChange"
@@ -3019,9 +3019,13 @@ class System {
 								label: 'name'
 							},
 							nodes: [],
-							defaultExpandedKeys: [""],
 							selectedKeys: [],
 							selectedNodes: []
+						}
+					},
+					watch: {
+						selectedKeys(val){
+							this.$emit("count:selectedTag",val.length);
 						}
 					},
 					template: `<el-container>
@@ -3030,8 +3034,7 @@ class System {
 											node-key="id"
 											show-checkbox
 											highlight-current="true"
-											:default-expand-all="true"
-											:default-expanded-keys="defaultExpandedKeys"
+											:default-expanded-keys="selectedKeys"
 											:default-checked-keys="selectedKeys"
 											:expand-on-click-node="false"
 											:check-on-click-node="false"
@@ -3301,6 +3304,9 @@ class System {
 							} else {
 								this.$refs.tree.filter(val);
 							}
+						},
+						selectedNodes(val){
+							this.$emit("count:selectedApp",val.length);
 						}
 					},
 					computed:{
@@ -3481,6 +3487,7 @@ class System {
 											<el-main style="padding:0px 10px; height: 100%;">
 												<el-tree :data="treeData" 
 														:props="defaultProps" 
+														:default-expanded-keys="selectedKeys"
 														:default-checked-keys="selectedKeys"
 														node-key="id"
 														show-checkbox
@@ -3568,6 +3575,9 @@ class System {
 							} else {
 								this.$refs.tree.filter(val);
 							}
+						},
+						selectedNodes(val){
+							this.$emit("count:selectedData",val.length);
 						}
 					},
 					created(){
@@ -3873,6 +3883,11 @@ class System {
 							},
 							deep:true,
 							immediate:true
+						},
+						'dt.selected':{
+							handler(val){
+								this.$emit("count:selectedApi",val.length);
+							}
 						}
 					},
 					mounted(){
@@ -4635,6 +4650,13 @@ class System {
 									row: {},
 									show: false
 								}
+							},
+							count: {
+								app: 0,
+								data: 0,
+								api: 0,
+								tag: 0
+
 							}
 						}
 					},
@@ -4788,24 +4810,29 @@ class System {
 													<el-main style="padding:0px;overflow:hidden;">
 														<el-tabs value="tagdir">
 															<el-tab-pane name="app" lazy>
-																<span slot="label"><i class="el-icon-files"></i> 应用权限</span>
+																<span slot="label"><i class="el-icon-files"></i> 应用权限 (#{ count.app }#)</span>
 																<app-permission  :rowData="dialog.permission" ref="appTree" 
+																	@count:selectedApp="(count)=>{ this.count.app = count;}"
 																	@update:selectedApp="()=>{ this.initData(); }" v-if="!_.isEmpty(dialog.permission.row)"></app-permission>
 															</el-tab-pane>	
 															<el-tab-pane name="data" lazy>
-																<span slot="label"><i class="el-icon-bank-card"></i> 数据权限</span>
+																<span slot="label"><i class="el-icon-bank-card"></i> 数据权限 (#{ count.data }#)</span>
 																<data-permission root="/" :rowData="dialog.permission"
+																	@count:selectedData="(count)=>{ this.count.data = count;}"
 																	@update:selectedData="()=>{ this.initData(); }"
 																	ref="classTree"></data-permission>
 															</el-tab-pane>
 															<el-tab-pane name="api" lazy>
-																<span slot="label"><i class="el-icon-tickets"></i> 接口权限</span>
-																<api-permission :roleGroup="dialog.permission.row"></api-permission>
+																<span slot="label"><i class="el-icon-tickets"></i> 接口权限 (#{ count.api }#)</span>
+																<api-permission 
+																	@count:selectedApi="(count)=>{ this.count.api = count;}"
+																	:roleGroup="dialog.permission.row"></api-permission>
 															</el-tab-pane>
 															<el-tab-pane name="tagdir">
-																<span slot="label"><i class="el-icon-collection-tag"></i> 标签权限</span>
+																<span slot="label"><i class="el-icon-collection-tag"></i> 标签权限 (#{ count.tag }#)</span>
 																<tagdir-select :model="{parent:'/system',name:'tagdir_tree_data.js',domain:'*'}" 
 																	:rowData="dialog.permission"
+																	@count:selectedTag="(count)=>{ this.count.tag = count;}"
 																	@update:selectedTag="()=>{ this.initData(); }"
 																	ref="tagdirTree"
 																	v-if="!_.isEmpty(dialog.permission.row)"></tagdir-select>

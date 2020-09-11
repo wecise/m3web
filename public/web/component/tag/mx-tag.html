@@ -31,7 +31,7 @@
 	
 	/*----------  最外层element会自动增加组件同名 class="mx-tag"  ----------*/
 	<template>		
-		<el-container>
+		<el-container v-if="mxAuth.isAdmin">
 			<el-main style="padding:0px;overflow: hidden;" v-if="model.length > limit">
 				<el-dropdown>
 					<span class="el-dropdown-link">
@@ -40,7 +40,7 @@
 					<el-dropdown-menu slot="dropdown">
 						<el-dropdown-item :key="tag" v-for="tag in model">
 							<el-tag
-								closable
+								:closable="mxAuth.isAdmin"
 								:disable-transitions="false"
 								@close="onTagClose(tag)">
 								#{tag}#
@@ -63,7 +63,7 @@
 				<el-tag
 					:key="tag"
 					v-for="tag in model"
-					closable
+					:closable="mxAuth.isAdmin"
 					:disable-transitions="false"
 					@close="onTagClose(tag)">
 					#{tag}#
@@ -76,6 +76,40 @@
 					size="small"
 					@keyup.enter.native="handleInputConfirm"
 					@blur="handleInputConfirm"></el-input>
+				<el-button type="text" icon="el-icon-plus" v-else class="button-new-tag" size="small" @click.stop="showInput"></el-button>
+			</el-main>
+		</el-container>
+		<el-container v-else>
+			<el-main style="padding:0px;overflow: hidden;" v-if="model.length > limit">
+				<el-dropdown>
+					<span class="el-dropdown-link">
+						<i class="el-icon-price-tag el-icon--right"></i>
+					</span>
+					<el-dropdown-menu slot="dropdown">
+						<el-dropdown-item :key="tag" v-for="tag in model">
+							<el-tag
+								:closable="mxAuth.isAdmin"
+								:disable-transitions="false"
+								@close="onTagClose(tag)">
+								#{tag}#
+							</el-tag>
+						</el-dropdown-item>
+					</el-dropdown-menu>
+				</el-dropdown>
+				<el-select v-model="inputValue" 
+					filterable 
+					placeholder="请选择标签" 
+					@change="handleInputConfirm"
+					ref="saveTagInput"
+					 v-if="inputVisible">
+					<el-option
+					  v-for="item in allTags"
+					  :key="item.id"
+					  :value="item.name">
+					  	<span style="float: left;">#{ item.name }#</span>
+      					<span style="float: right; color: #8492a6; font-size: 13px">#{ item.domain }#</span>
+					</el-option>
+				</el-select>
 				<el-button type="text" icon="el-icon-plus" v-else class="button-new-tag" size="small" @click.stop="showInput"></el-button>
 			</el-main>
 		</el-container>
@@ -97,7 +131,8 @@
 		data() {
 			return {
 				inputVisible: false,
-				inputValue: ''
+				inputValue: "",
+				allTags: mxAllTags
 			};
 		},
 		methods: {
@@ -118,14 +153,23 @@
 				}
 				
 			},
+			onChangeValue(value){
+				console.log(value)
+				this.inputValue = value;
+			},
 			showInput() {
 				this.inputVisible = true;
 				this.$nextTick(_ => {
-				this.$refs.saveTagInput.$refs.input.focus();
+					if(mxAuth.isAdmin){
+						this.$refs.saveTagInput.$refs.input.focus();
+					} else {
+						this.$refs.saveTagInput.focus();
+					}
 				});
 			},
 			handleInputConfirm() {
 				let inputValue = this.inputValue;
+				console.log(_.now(),this.inputValue)
 				if (inputValue) {
 					this.model.push(inputValue);
 
