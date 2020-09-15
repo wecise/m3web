@@ -2030,12 +2030,18 @@ class System {
 									ldap: {
 										parent: "", 
 										username: "",
+										firstname: "",
+										lastname: "",
 										passwd: "",
 										isactive: true,
 										isadmin: false,
-										otype: 'usr'                     
+										otype: 'usr',
+										address: "",
+										wechat: ""            
 									},
 									email: "",
+									mobile: "",
+									telephone: "",
 									checkPass: "",
 									loading: false
 								}
@@ -2098,27 +2104,48 @@ class System {
 												<el-main>
 													<el-form ref="newUserForm" label-width="80px">
 
-														<el-form-item label="组织名称">
+														<el-form-item label="组织名称" required>
 															<el-input v-model="dialog.user.ldap.parent" autofocus disabled="true"></el-input>
 														</el-form-item>
 
-														<el-form-item label="用户名">
-															<el-input v-model="dialog.user.ldap.username" autofocus autocomplete="off"></el-input>
+														<el-form-item label="登录名称" required>
+															<el-input v-model="dialog.user.ldap.username" autocomplete="off"></el-input>
+														</el-form-item>
+
+														<el-form-item label="登录密码" required>
+															<el-input type="password" v-model="dialog.user.ldap.passwd" autocomplete="off" show-password></el-input>
+														</el-form-item>
+														
+														<el-form-item label="确认密码" required>
+															<el-input type="password" v-model="dialog.user.checkPass" autocomplete="off" show-password></el-input>
+														</el-form-item>
+
+														<el-form-item label="姓名">
+															<el-input v-model="dialog.user.ldap.firstname" placeholder="姓" style="width:30%;"></el-input>
+															<el-input v-model="dialog.user.ldap.lastname" placeholder="名" style="width:30%;"></el-input>
 														</el-form-item>
 
 														<el-form-item label="邮箱"
 																	:rules="[
 																	{ type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }
-																	]">
+																	]" required>
 															<el-input v-model="dialog.user.email"></el-input>
 														</el-form-item>
 
-														<el-form-item label="密码">
-															<el-input type="password" v-model="dialog.user.ldap.passwd" autocomplete="off" show-password></el-input>
+														<el-form-item label="手机">
+															<el-input v-model="dialog.user.mobile" autocomplete="off"></el-input>
 														</el-form-item>
-														
-														<el-form-item label="确认密码">
-															<el-input type="password" v-model="dialog.user.checkPass" autocomplete="off" show-password></el-input>
+
+														<el-form-item label="微信">
+															<el-input v-model="dialog.user.ldap.wechat" autocomplete="off"></el-input>
+														</el-form-item>
+
+														<el-form-item label="座机">
+															<el-input v-model="dialog.user.telephone" autocomplete="off"></el-input>
+														</el-form-item>
+
+														<el-form-item label="地址">
+															<el-input type="textarea" v-model="dialog.user.ldap.address" autocomplete="off"></el-input>
 														</el-form-item>
 
 														<el-form-item label="激活">
@@ -2170,29 +2197,6 @@ class System {
 							
 							try{
 
-								// var users = function(parent) {
-
-								// 	var data = userHandler.userList(parent).message;
-								// 	var itemArr = [];
-
-								// 	_.forEach(data,(v)=>{
-								// 		if(v.parent){
-								// 			if( parent === v.parent ) {
-								// 				if(v.otype == 'org'){
-								// 					itemArr.push( _.extend(v,{children: users(v.fullname), show:false }) );
-								// 				}
-								// 			}
-								// 		}
-								// 	})
-									
-								// 	return _.sortBy(itemArr,'fullname');
-								// };
-
-								//this.nodes = [];
-								//this.nodes.push( {id:0, parent:null, fullname: this.root, name: '/', username: window.COMPANY_FULLNAME, otype:'org', children: users(this.root), show:false } );
-								
-								
-
 								this.nodes = [userHandler.userList("/").message];
 
 							} catch(err){
@@ -2241,7 +2245,7 @@ class System {
                                 type: 'warning'
                             }).then(() => {
                                 
-                                let rtn = userHandler.userDelete(data.id);
+                                let rtn = userHandler.userDelete(data);
                                 
                                 if(rtn == 1){
                                     this.$message({
@@ -2281,7 +2285,13 @@ class System {
 								this.dialog.user.ldap.isactive = true;
 								this.dialog.user.ldap.isadmin = false;
 								this.dialog.user.ldap.otype = 'usr';
+								this.dialog.user.ldap.firstname = "";
+								this.dialog.user.ldap.lastname = "";
+								this.dialog.user.ldap.address = "";
+								this.dialog.user.ldap.wechat = "";
 								this.dialog.user.email = "";
+								this.dialog.user.mobile = "";
+								this.dialog.user.telephone = "";
 								this.dialog.user.checkPass = "";
 							})
 						},
@@ -2333,7 +2343,7 @@ class System {
 								
 								this.$message({
 									type: "warning",
-									message: `名称不能为空！`
+									message: `登录名称不能为空！`
 								})
 								return false;
 							}
@@ -2341,35 +2351,35 @@ class System {
 							if (_.isEmpty(this.dialog.user.email)) {
 								this.$message({
 									type: "warning",
-									message: `邮件不能为空！`
+									message: `用户邮件不能为空！`
 								})
 								return false;
 							}
 
 							
-							let checkEmail = function(email){
+							/* let checkEmail = function(email){
 								let regEmail = /^([a-zA-Z]|[0-9])(\w|\-)+@[a-zA-Z0-9]+\.([a-zA-Z]{2,4})$/;
 								let emails = email.split(",");
-								let rtn = true;
+								let rtn = [];
+
 								_.forEach(emails,(v)=>{
-									rtn = regEmail.test(v);
+									rtn.push(regEmail.test(v));
 								})
-								return rtn;
+								return _.includes(rtn,false);
 							}
 							
-							if( !checkEmail(this.dialog.user.email) ){
+							if( checkEmail(this.dialog.user.email) ){
 								this.$message({
 									type: "warning",
-									message: `邮件格式不正确！`
+									message: `用户邮件格式不正确！`
 								})
 								return false;
-							}
-							
+							} */
 
 							if (_.isEmpty(this.dialog.user.ldap.passwd)) {
 								this.$message({
 									type: "warning",
-									message: `密码不能为空！`
+									message: `登录密码不能为空！`
 								})
 								return false;
 							}
@@ -2390,7 +2400,10 @@ class System {
 								return false;
 							}
 
+							// emial
 							this.$set(this.dialog.user.ldap,'email',this.dialog.user.email.split(","));
+							// mobile
+							this.$set(this.dialog.user.ldap,'mobile',this.dialog.user.mobile.split(","));
 
 							this.dialog.user.loading = true;
 
@@ -2647,8 +2660,8 @@ class System {
 														<div v-html='item.render(scope.row, scope.column, scope.row[item.field], scope.$index)' 
 															v-if="typeof item.render === 'function'">
 														</div>
-														<div v-else-if="_.includes(['email'],item.field)">
-															<el-select :value="_.first(scope.row[item.field]).split(',')" v-if="!_.isEmpty(scope.row[item.field])" placeholder="Email">
+														<div v-else-if="_.includes(['email','mobile'],item.field)">
+															<el-select :value="_.first(scope.row[item.field]).split(',')" v-if="!_.isEmpty(scope.row[item.field])" :placeholder="item.field">
 																<el-option
 																v-for="subItem in scope.row[item.field][0].split(',')"
 																:key="subItem"
@@ -2703,20 +2716,41 @@ class System {
 												<el-main>
 													<el-form label-width="80px">
 
-														<el-form-item label="组名称">
-															<el-input v-model="dialog.user.row.parent" autofocus disabled="true"></el-input>
+														<el-form-item label="组名称" required>
+															<el-input v-model="dialog.user.row.parent" disabled="true"></el-input>
 														</el-form-item>
 
-														<el-form-item label="用户名">
-															<el-input v-model="dialog.user.row.username" autofocus disabled="true"></el-input>
+														<el-form-item label="登录名称" required>
+															<el-input v-model="dialog.user.row.username" disabled="true"></el-input>
 														</el-form-item>
 
-														<el-form-item label="邮箱">
+														<el-form-item label="登录密码" required>
+															<el-input type="password" v-model="dialog.user.row.passwd" autocomplete="off" disabled="true" show-password></el-input>
+														</el-form-item>
+
+														<el-form-item label="姓名">
+															<el-input v-model="dialog.user.row.firstname" autofocus placeholder="姓" style="width:30%;"></el-input>
+															<el-input v-model="dialog.user.row.lastname" placeholder="名" style="width:30%;"></el-input>
+														</el-form-item>
+														
+														<el-form-item label="邮箱" required>
 															<el-input v-model="dialog.user.row.email"></el-input>
 														</el-form-item>
 
-														<el-form-item label="密码">
-															<el-input type="password" v-model="dialog.user.row.passwd" autocomplete="off" disabled="true" show-password></el-input>
+														<el-form-item label="手机">
+															<el-input v-model="dialog.user.row.mobile"></el-input>
+														</el-form-item>
+
+														<el-form-item label="座机">
+															<el-input v-model="dialog.user.row.telephone"></el-input>
+														</el-form-item>
+
+														<el-form-item label="微信">
+															<el-input v-model="dialog.user.row.wechat"></el-input>
+														</el-form-item>
+
+														<el-form-item label="地址">
+															<el-input type="textarea" v-model="dialog.user.row.address"></el-input>
 														</el-form-item>
 														
 														<el-form-item label="激活">
@@ -2863,13 +2897,20 @@ class System {
 								return false;
 							}
 
-							this.$confirm(`确认要删除该用户：${data.fullname}？`, '提示', {
-                                confirmButtonText: '确定',
-                                cancelButtonText: '取消',
-                                type: 'warning'
-                            }).then(() => {
-                                
-                                let rtn = userHandler.userDelete(data.id);
+							const h = this.$createElement;
+							this.$msgbox({
+									title: `确认要删除该用户`, 
+									message: h('span', null, [
+										h('p', null, `用户名称：${data.username}`),
+										h('p', null, `用户全称：${data.fullname}`)
+									]),
+									showCancelButton: true,
+									confirmButtonText: '确定',
+									cancelButtonText: '取消',
+									type: 'warning'
+							}).then(() => {
+
+								let rtn = userHandler.userDelete(data);
                                 
                                 if(rtn == 1){
                                     this.$message({
@@ -2893,9 +2934,11 @@ class System {
                                         message: '删除失败: ' + rtn
                                     });
 								}
-                            }).catch(() => {
-                                
-                            });
+
+							}).catch(() => {
+									
+							}); 
+
 						},
 						onUpdateUser(row,index){
 							this.dialog.user.row = row;
@@ -2903,8 +2946,7 @@ class System {
 						},
 						onSaveUser(row){
 
-
-							if (_.isEmpty(this.dialog.user.row.email)) {
+							if (_.isEmpty(row.email)) {
 								this.$message({
 									type: "warning",
 									message: `邮件不能为空！`
@@ -2912,32 +2954,37 @@ class System {
 								return false;
 							}
 
-
-							let checkEmail = function(email){
+							/* let checkEmail = function(email){
 								let regEmail = /^([a-zA-Z]|[0-9])(\w|\-)+@[a-zA-Z0-9]+\.([a-zA-Z]{2,4})$/;
-								let emails = email.split(",");
-								let rtn = true;
+								let emails = [];
+								let rtn = [];
+								if(typeof emails == 'object'){
+									emails = email;
+								} else {
+									emails = email.split(",");
+								}
 								_.forEach(emails,(v)=>{
-									rtn = regEmail.test(v);
+									rtn.push(regEmail.test(v));
 								})
-								return rtn;
+								
+								return _.includes(rtn,false);
 							}
 							
-							if( !checkEmail(this.dialog.user.row.email) ){
+							if( checkEmail(row.email) ){
 								this.$message({
 									type: "warning",
 									message: `邮件格式不正确！`
 								})
 								return false;
-							}
-							
+							} */ 
+
+
 							this.$confirm(`确认要更新该用户：${row.fullname}？`, '提示', {
-                                confirmButtonText: '确定',
-                                cancelButtonText: '取消',
-                                type: 'warning'
-                            }).then(() => {
-								
-								
+								confirmButtonText: '确定',
+								cancelButtonText: '取消',
+								type: 'warning'
+							}).then(() => {
+									
 								let _csrf = window.CsrfToken.replace(/'/g,"");
 								let rtn = userHandler.userUpdate(row, _csrf);
 
@@ -2947,15 +2994,18 @@ class System {
 										message: `更新用户: ${row.username} 成功！`
 									})
 
+									this.dialog.user.show = false;
+
 									this.$set(row, 'email', row.email.split(","));
+									this.$set(row, 'mobile', row.mobile.split(","));
+									this.$set(row, 'telephone', row.telephone.split(","));
 									this.dt.rows[index] = row;
 
-									this.dialog.user.show = false;
 								}
-                                
-                            }).catch(() => {
-                                
-                            });
+								
+							}).catch(() => {
+								
+							});
 
 						},
 						onExport(type){
@@ -3029,7 +3079,7 @@ class System {
 						}
 					},
 					template: `<el-container>
-									<el-main style="height: 100%;background:#f2f2f2;">
+									<el-main style="height:70vh;background:#f2f2f2;">
 										<el-tree 
 											node-key="id"
 											show-checkbox
@@ -3041,7 +3091,7 @@ class System {
 											@node-click="onNodeClick"
 											:data="nodes" 
 											:props="defaultProps" 
-											:check-strictly="true"
+											:check-strictly="false"
 											@check-change="onCheckChange"
 											style="background: transparent;"
 											ref="tree">
@@ -3134,8 +3184,10 @@ class System {
 
 							_.forEach(data.nodes,(v)=>{
 								this.$refs.tree.setChecked(v, true, true);
+								this.$set( v, 'checked', true);
 								this.$set( v, 'perms', perms );
-
+								this.selectedNodes.push( _.extend( v, {_group: data._group} ));
+								
 								if(v.nodes){
 									this.childNodesCheckChange(v);
 								}
@@ -3165,10 +3217,8 @@ class System {
 							
 							// 选择子节点
 							if(checked){
-								this.$nextTick(()=>{
-									this.childNodesCheckChange(data);
-									this.parentNodesCheckChange(data);
-								})
+								this.childNodesCheckChange(data);
+								//this.parentNodesCheckChange(data);
 							}
 							
 							// 设置复选框状态
@@ -3186,7 +3236,7 @@ class System {
 
 							// 更新
 							if(_.isEmpty(data.name)) {
-								//return false;
+								return false;
 							}
 
 							this.selectedNodes.push( data );
@@ -3196,6 +3246,7 @@ class System {
 						onUpdateRoleGroupByTag(){
 							
 							// 更新
+							console.log(this.selectedNodes, this.selectedNodes.length)
 							let term = encodeURIComponent( JSON.stringify( { roleGroup: [this.rowData.row], data: this.selectedNodes } ) );
 							
 							let rtn = fsHandler.callFsJScript("/matrix/system/updateGroupByTagdir.js", term);
@@ -3237,7 +3288,7 @@ class System {
 							filterText: ""
 						}
 					},
-					template:   `<el-container style="height:100%;background:#f2f2f2;">
+					template:   `<el-container style="height:70vh;background:#f2f2f2;">
 									<el-aside :width="!_.isEmpty(selectedNode)?'60%':'100%'">
 										<el-header style="height:30px;;padding:0px 10px;">
 											<!--el-input v-model="filterText" 
@@ -3245,7 +3296,7 @@ class System {
 												clearable></el-input-->
 											<h4>应用权限</h4>
 										</el-header>
-										<el-main style="padding:0px 10px; height: 100%;">
+										<el-main style="padding:0px 10px; height: 100%;overflow:hidden;">
 											<el-tree :data="treeData" 
 													:props="defaultProps" 
 													:default-checked-keys="selectedKeys"
@@ -3476,8 +3527,8 @@ class System {
 							}
 						}
 					},
-					template:   `<el-container style="height:100%;background:#f2f2f2;">
-									<el-header style="height:300px;">
+					template:   `<el-container style="height:70vh;background:#f2f2f2;">
+									<el-header style="height:100%">
 										<el-container style="height:100%;">
 											<el-header style="height:40px;line-height:40px;padding:0px 10px;display:none;">
 												<el-input v-model="filterText" 
@@ -3742,7 +3793,7 @@ class System {
 							expandedView: 'edit'
 						}
 					},
-					template:   `<el-container style="width:100%;height:100%;background:#f2f2f2;">
+					template:   `<el-container style="width:100%;height:70vh;background:#f2f2f2;">
 									<el-header style="height:30px;line-height:30px;">
 										<el-tooltip content="刷新" open-delay="500" placement="top">
 											<el-button type="text" icon="el-icon-refresh" @click="initData"></el-button>
@@ -4806,7 +4857,7 @@ class System {
 												</el-table-column>
 											</el-table>
 											<el-dialog :title="permissionTitle" :visible.sync="dialog.permission.show" v-if="dialog.permission.show" width="80vw">
-												<el-container style="width:100%;">
+												<el-container style="width:100%;height:100%">
 													<el-main style="padding:0px;overflow:hidden;">
 														<el-tabs value="tagdir">
 															<el-tab-pane name="app" lazy>
@@ -5287,6 +5338,7 @@ class System {
 								rows: [],
 								columns: [
 											{"field":"email",title:"邮件"},
+											{"field":"mobile",title:"手机"},
 											{"field":"username",title:"用户名"},
 											{"field":"passwd",title:"口令", visible:false},
 											{"field":"parent",title:"组"},

@@ -109,6 +109,12 @@ class UserHandler{
 
         let form = new FormData();
         form.append("email", event.email);
+        form.append("mobile", event.mobile);
+        form.append("telephone", event.telephone);
+        form.append("firstname", event.firstname);
+        form.append("lastname", event.lastname);
+        form.append("wechat", event.wechat);
+        form.append("address", event.address);
         form.append("active", event.isactive);
 
         jQuery.ajax({
@@ -156,7 +162,7 @@ class UserHandler{
         let rtn = null;
 
         jQuery.ajax({
-            url: `/admin/users/${event}`,
+            url: `/admin/users/${event.id}`,
             dataType: 'json',
             type: 'DELETE',
             async: false,
@@ -164,6 +170,10 @@ class UserHandler{
                 
             },
             complete: function (xhr, textStatus) {
+                // 删除用户文件系统
+                if(event.otype == 'usr'){
+                    userHandler.userFsDelete(event.username);
+                }
             },
             success: function (data, status) {
 
@@ -270,6 +280,31 @@ class UserHandler{
                     fsHandler.fsCopy("/home/admin/etc", [home,newUsername].join("/"));
                     fsHandler.fsCopy("/home/admin/Documents/template", [home,newUsername,'Documents'].join("/"));
                     fsHandler.fsCopy("/home/admin/Documents/history", [home,newUsername,'Documents'].join("/"));
+                }
+            }
+
+        } catch(err){
+            console.log(err)
+        } 
+    };
+
+    /* 用户文件系统初始化 */
+    userFsDelete(newUsername) {
+        
+        try{
+
+            if(newUsername == 'admin'){
+                
+                return;
+
+            } else {
+
+                // 检查当前用户FS是否存在
+                let home = ["","home"].join("/");
+                let check = fsHandler.fsCheck(home,newUsername);
+                // 如果不存在，进行删除
+                if(check){
+                    fsHandler.fsDelete("/home", newUsername);
                 }
             }
 

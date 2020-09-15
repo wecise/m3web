@@ -408,7 +408,7 @@ class SideBar {
                                                     <span slot="title">#{ $t('topBar.menu.systemMain') }#</span>
                                                 </template>
                                             </el-menu-item>
-                                            <el-menu-item index="files" v-if="mxAuth.isAdmin">
+                                            <el-menu-item index="files">
                                                 <template slot="title">
                                                     <i class="el-icon-folder-opened"></i>
                                                     <span slot="title">#{ $t('topBar.menu.myFiles') }#</span>
@@ -602,11 +602,11 @@ class SideBar {
                                 <el-submenu :index="item.name" v-for="item in model.template" v-show="sideBarStatus === 0">
                                     <template slot="title">
                                         <img :src="item.icon | pickIcon" style="width:16px;"></img>
-                                        <span style="padding-left:5px;font-size:12px;">#{ $t('home.group')[item.name] }#【#{item.groups.length}#】</span>
+                                        <span style="padding-left:5px;font-size:12px;">#{ _.isEmpty($t('home.group')[item.name])?item.title:$t('home.group')[item.name] }#【#{item.groups.length}#】</span>
                                     </template>
                                     
                                     <el-menu-item-group>
-                                        <span slot="title" style="font-size:12px;">#{ $t('home.group')[item.name] }#【#{item.groups.length}#】</span>
+                                        <span slot="title" style="font-size:12px;">#{ _.isEmpty($t('home.group')[item.name])?item.title:$t('home.group')[item.name] }#【#{item.groups.length}#】</span>
                                         <el-menu-item :class="subItem.status" :index="subItem.url" v-for="subItem in item.groups">
                                             <img :src="subItem.icon | pickIcon" style="width:16px;"></img>
                                             <span slot="title">

@@ -613,7 +613,7 @@ Vue.component("mx-fs-editor",{
             // $(".fas.fa-play").addClass("fa-spin");
 
             // 先保存
-            this.onSave();
+            // this.onSave();
 
             _.delay(()=>{
                 // 后运行 depend ftype: js/html
