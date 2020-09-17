@@ -448,28 +448,20 @@ class Omdb{
                     immediate:true
                 }
             },
-            created: function(){
-                
-            },
-            mounted: function () {
-                const self = this;
-
-                self.$nextTick(function () {
-                    self.init();
-                    self.initPlugin();
+            mounted() {
+                this.$nextTick( ()=> {
+                    this.init();
+                    this.initPlugin();
                 })
             },
             filters: {
-                format: function(value){
+                format(value){
                     return value.join('\n\n');
                 }
             },
             methods: {
                 init(){
-                    const self = this;
-
-                    self.theme = localStorage.getItem("LOG-CONSOLE-THEME");
-
+                    this.theme = localStorage.getItem("LOG-CONSOLE-THEME");
                 },
                 initPlugin(){
                     const self = this;
@@ -543,9 +535,7 @@ class Omdb{
                     });
                 },
                 refresh(){
-                    const self = this;
-
-                    self.debugIt(self.debug.mql);
+                    this.debugIt(self.debug.mql);
                 },
                 debugs(key){
                     const self = this;
@@ -1302,46 +1292,50 @@ class Omdb{
             },
             created(){
                 
-                if(!_.isEmpty(this.model)) {
-                    this.dt.rows = this.model.data;
-                    this.dt.columns = _.map(this.model.columns[_.keys(this.model.columns)[0]],(v)=>{
-                        
-                        //  msg
-                        if(_.includes(['msg'],v['field'])){
-                            return _.extend(v,{render: function(row, column, cellValue, index){
-                                        return  _.truncate(cellValue, {'length': 100});
-                                    }});
-                        }
+                try{
+                    if(!_.isEmpty(this.model)) {
+                        this.dt.rows = this.model.data;
+                        this.dt.columns = _.map(this.model.columns[_.keys(this.model.columns)[0]],(v)=>{
+                            
+                            //  msg
+                            if(_.includes(['msg'],v['field'])){
+                                return _.extend(v,{render: function(row, column, cellValue, index){
+                                            return  _.truncate(cellValue, {'length': 100});
+                                        }});
+                            }
 
-                        //  data & time render
-                        else if(_.includes(['day'],v['field'])){
-                            return _.extend(v,{render: function(row, column, cellValue, index){
-                                        return moment(cellValue).format("YYYY-MM-DD");
-                                    }});
-                        }
+                            //  data & time render
+                            else if(_.includes(['day'],v['field'])){
+                                return _.extend(v,{render: function(row, column, cellValue, index){
+                                            return moment(cellValue).format("YYYY-MM-DD");
+                                        }});
+                            }
 
-                        else if(_.includes(['vtime','mtime','ctime','stime','etime'],v['field'])){
-                            return _.extend(v,{render: function(row, column, cellValue, index){
-                                        return moment(cellValue).format("YYYY-MM-DD HH:mm:ss.SSS");
-                                    }});
-                        }
+                            else if(_.includes(['vtime','mtime','ctime','stime','etime'],v['field'])){
+                                return _.extend(v,{render: function(row, column, cellValue, index){
+                                            return moment(cellValue).format("YYYY-MM-DD HH:mm:ss.SSS");
+                                        }});
+                            }
 
-                        else if(_.includes(['map','set','list'],v.type) || typeof(data) === 'object'){
-                            return _.extend(v,{render: function(row, column, cellValue, index){
-                                        if(_.isNull(cellValue) || _.isEmpty(cellValue)) {
-                                            return '';
-                                        } else{
-                                            return JSON.stringify(cellValue,null,2);
-                                        }
-                                    }});
-                        }
-                        else {
+                            else if(_.includes(['map','set','list'],v.type) || typeof(data) === 'object'){
+                                return _.extend(v,{render: function(row, column, cellValue, index){
+                                            if(_.isNull(cellValue) || _.isEmpty(cellValue)) {
+                                                return '';
+                                            } else{
+                                                return JSON.stringify(cellValue,null,2);
+                                            }
+                                        }});
+                            }
+                            else {
+                                return v;
+                            }
+
                             return v;
-                        }
+                        });
 
-                        return v;
-                    });
-
+                    }
+                } catch(err){
+                    console.log(err)
                 }
             },
             mounted(){
@@ -1503,9 +1497,15 @@ class Omdb{
                                         :name="item.name"
                                         style="height:100%;">
                                         <span slot="label"><i class="fas fa-list-alt"></i> #{item.title}#</span>
+                                        <!--日志-->
                                         <omdb-log-console :id="id+'-log-'+item.name" :model="item.model" v-if="item.type=='omdb-log-console'" :ref="'omdbQueryLogRef-'+id"></omdb-log-console>
+                                        <!--表格-->
                                         <omdb-query-output-console :id="id+'-output-'+item.name" :model="item.model" v-if="item.type=='omdb-query-output-console'" :ref="'omdbQueryOutputRef-'+id"></omdb-query-output-console>
+                                        <!--文本输出提示-->
+                                        <!--图-->
                                         <omdb-graph-console :id="id+'-graph-'+item.name" :model="item.model" v-if="item.type=='omdb-query-graph-console'"  :ref="'omdbQueryGraphRef-'+id"></omdb-graph-console>
+                                        
+                                        <!--JSON-->
                                         <omdb-query-output-json-console :model="item.model" v-if="item.type=='omdb-query-output-json-console'"  :ref="'omdbQueryOutputJsonRef-'+id"></omdb-class-console>
                                     </el-tab-pane>
                                 </el-tabs>
@@ -1531,33 +1531,30 @@ class Omdb{
                     keys: []
                 }
             },
-            created: function(){
-                const self = this;
-
+            created(){
+                
                 let _diff = null;
                 
-                if(!_.isEmpty(self.model.pnode)){
-                    if(self.model.node.fieldsObj && self.model.pnode.fieldsObj) {
-                        _diff = _.differenceBy(self.model.node.fieldsObj, self.model.pnode.fieldsObj, 'name');
-                        self.model.node["fieldsObj"] = _.uniqBy(_diff,'name');
+                if(!_.isEmpty(this.model.pnode)){
+                    if(this.model.node.fieldsObj && this.model.pnode.fieldsObj) {
+                        _diff = _.differenceBy(this.model.node.fieldsObj, this.model.pnode.fieldsObj, 'name');
+                        this.model.node["fieldsObj"] = _.uniqBy(_diff,'name');
                     }
                 }
 
-                if(self.model.pattern === 'ddl') {
-                    self.editorModel.readOnly = true;
+                if(this.model.pattern === 'ddl') {
+                    this.editorModel.readOnly = true;
                 }
 
-                self.initKeys();
+                this.initKeys();
             },
-            mounted: function () {
-                const self = this;
-
-                self.$nextTick(function () {
-                    self.init();
+            mounted() {
+                this.$nextTick( ()=> {
+                    this.init();
                 })
             },
             methods: {
-                init: function(){
+                init(){
                     const self = this;
 
                     /* layout */

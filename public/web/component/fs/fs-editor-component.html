@@ -217,81 +217,59 @@
                 
             },
             setMode(){
-                const self = this;
-
-                if(_.isEmpty(self.model.mode)){
-                	self.editor.getSession().setMode("ace/mode/json");
+                if(_.isEmpty(this.model.mode)){
+                	this.editor.getSession().setMode("ace/mode/json");
                 } else {
-                	self.editor.getSession().setMode("ace/mode/"+ self.model.mode);
+                	this.editor.getSession().setMode("ace/mode/"+ this.model.mode);
                 }
-                
             },
             setValue(){
-                const self = this;
-
-                self.editor.setValue(self.model.oldInput);
+                this.editor.setValue(this.model.oldInput);
             },
             getSelected(){
-                const self = this;
-                var temp = self.editor.getSelectedText();
+                let temp = this.editor.getSelectedText();
 
                 if(_.isEmpty(temp)){
-                    self.inputText = self.editor.getValue();
+                    this.inputText = this.editor.getValue();
                 } else {
-                    self.inputText = temp;
+                    this.inputText = temp;
                 }
             },
             toggleToolsBar(){
-                const self = this;
-
-                if(self.showToolsBar){
+                if(this.showToolsBar){
                     $(".editorToolBar").show();
                 } else {
                     $(".editorToolBar").hide();
                 }
             },
 	        toggleStatusBar(){
-                const self = this;
-
-                if(self.showStatusBar) {
+                if(this.showStatusBar) {
                     let StatusBar = ace.require("ace/ext/statusbar").StatusBar;
-                    let statusBar = new StatusBar(self.editor, document.getElementById("statusBar"));
+                    let statusBar = new StatusBar(this.editor, document.getElementById("statusBar"));
                 }
 	        },
 	        copyIt(){
-		        const self = this;
-
                 new Clipboard(".copy", {
-                    text: function(trigger) {
-                        alertify.log("已复制");
-                        return self.editor.getValue();
+                    text: (trigger) => {
+                        this.$message("已复制");
+                        return this.editor.getValue();
                     }
                 });
-
 	        },
             pasteIt(){
-                const self = this;
-
                 document.execCommand("paste");
-                alertify.log("已粘贴");
+                this.$message("已粘贴");
             },
 	        selectAll(){
-                const self = this;
-
-                self.editor.selection.selectAll();
+                this.editor.selection.selectAll();
             },
             clearIt(){
-                const self = this;
-
-                self.editor.setValue();
-                alertify.log("已清空");
+                this.editor.setValue();
+                this.$message("已清空");
             },
             reload(){
-				const self = this;
-
-                let rtn = fsHandler.fsContent(self.model.fs.parent,self.model.fs.name);
-
-                self.editor.setValue(rtn);
+				let rtn = fsHandler.fsContent(this.model.fs.parent,this.model.fs.name);
+                this.editor.setValue(rtn);
             },
 	        deployIt(item){
                 const self = this;

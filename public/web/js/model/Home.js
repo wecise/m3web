@@ -29,13 +29,14 @@ class Home extends Matrix {
                     delimiters: ['#{', '}#'],
                     template:   `<el-container style="padding:30px 0;">
                                     <el-main style="padding:0px;">
+                                        <!--搜索框-->
                                         <el-row type="flex" justify="center" style="padding:40px 0px;">
                                             <el-col :span="18">
                                                 <search-base-component :options="options" ref="searchRef" class="grid-content"></search-base-component>
                                                 <div id="search-result-content" v-if="model.message"></div>
                                             </el-col>
                                         </el-row>
-                                        
+                                        <!--应用组图标-->
                                         <el-row type="flex" justify="center">
                                             <el-col :span="14" style="display:flex;flex-wrap:wrap;align-content: flex-start;" class="drag-content"> 
                                                 <el-dropdown v-for="(item,index) in apps.template" :key="item.name" @command="onCommand" trigger="click" placement="top-end"  :hide-on-click="false">
@@ -53,11 +54,13 @@ class Home extends Matrix {
                                                                 <i class="el-icon-arrow-down el-icon--right" style="color:rgba(255,255,255,0.5)"></i>
                                                             </span>
                                                             <el-dropdown-menu slot="dropdown">
-                                                                <el-dropdown-item :command="{cmd:'remove',data:item}">#{ $t('home.actions.deleteGroup') }#</el-dropdown-item>
+                                                                <el-dropdown-item :command="{cmd:'update',data:item}">#{ $t('home.actions.updateGroup') }#</el-dropdown-item>
+                                                                <el-dropdown-item :command="{cmd:'remove',data:item}" divided>#{ $t('home.actions.deleteGroup') }#</el-dropdown-item>
                                                             </el-dropdown-menu>
                                                         </el-dropdown>
                                                     </el-button>
-                                                    <el-dropdown-menu slot="dropdown" :class="'menu-dropdown drag-content-' + index">
+                                                    <!--应用图标-->
+                                                    <el-dropdown-menu slot="dropdown" :class="'menu-dropdown drag-content-' + index" v-if="!_.isEmpty(item.groups)">
                                                         <el-dropdown-item :command="subItem" v-for="(subItem,index) in item.groups" :key="subItem.id">
                                                             <template scope="scope">
                                                                 <el-button type="primary" 
@@ -135,14 +138,14 @@ class Home extends Matrix {
                                                         </el-dropdown-menu>
                                                     </el-dropdown>
                                                 </el-button>
-                                                
-                                                <el-dialog :title="$t('home.group.application')" :visible.sync="group.dialogVisible" width="30%" destroy-on-close="true" modal="false">
-                                                    <el-form :model="group.form" style="width:100%;" label-position="top">
+                                                <!--新建组-->
+                                                <el-dialog :title="$t('home.group.application')" :visible.sync="group.newDialog.show" width="30%" destroy-on-close="true" modal="false" v-if="group.newDialog.show">
+                                                    <el-form :model="group.newDialog.form" style="width:100%;" label-position="top">
                                                         <el-form-item :label="$t('home.group.groupName')" label-width="80">
-                                                            <el-input v-model="group.form.title" autofocus></el-input>
+                                                            <el-input v-model="group.newDialog.form.title" v-focus clearable></el-input>
                                                         </el-form-item>
                                                         <el-form-item :label="$t('home.group.groupIcon')" label-width="80" style="display:none;">
-                                                            <el-radio-group v-model="group.form.icon" style="display:flex;flex-wrap:wrap;align-content:flex-start;height:200px;overflow:auto;">
+                                                            <el-radio-group v-model="group.newDialog.form.icon" style="display:flex;flex-wrap:wrap;align-content:flex-start;height:200px;overflow:auto;">
                                                                 <el-button type="default" 
                                                                     style="width:8em;max-width:8em;height:90px;height:auto;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);" 
                                                                     v-for="icon in group.iconList" :key="icon.id">
@@ -160,6 +163,31 @@ class Home extends Matrix {
                                                     </div>
                                                 </el-dialog>
 
+                                                <!--编辑组-->
+                                                <el-dialog :title="$t('home.group.application')" :visible.sync="group.editDialog.show" width="30%" destroy-on-close="true" modal="false" v-if="group.editDialog.show">
+                                                    <el-form :model="group.editDialog.form" style="width:100%;" label-position="top">
+                                                        <el-form-item :label="$t('home.group.groupName')" label-width="80">
+                                                            <el-input v-model="group.editDialog.form.title" v-focus clearable></el-input>
+                                                        </el-form-item>
+                                                        <el-form-item :label="$t('home.group.groupIcon')" label-width="80" style="display:none;">
+                                                            <el-radio-group v-model="group.editDialog.form.icon" style="display:flex;flex-wrap:wrap;align-content:flex-start;height:200px;overflow:auto;">
+                                                                <el-button type="default" 
+                                                                    style="width:8em;max-width:8em;height:90px;height:auto;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);" 
+                                                                    v-for="icon in group.iconList" :key="icon.id">
+                                                                    <el-radio :label="icon.icon | pickIcon">
+                                                                        <el-image :src="icon.icon | pickIcon" style="max-width: 55px;min-width: 55px;" fit="contain"></el-image>
+                                                                        <span slot="label">#{icon.id}#</span>
+                                                                    </el-radio>
+                                                                </el-button>
+                                                            </el-radio-group>
+                                                        </el-form-item>
+                                                    </el-form>
+                                                    <div slot="footer" class="dialog-footer">
+                                                        <el-button @click="group.dialogVisible = false">#{ $t('home.actions.cancel') }#</el-button>
+                                                        <el-button type="primary" @click="groupUpdate" @keyup.enter.native.prevent="groupAdd">#{ $t('home.actions.apply') }#</el-button>
+                                                    </div>
+                                                </el-dialog>
+
                                                 <el-dialog title="应用发布" :visible.sync="dialog.appDeploy.show" v-if="dialog.appDeploy.show" destroy-on-close="true">
                                                     <mx-app-deploy :model="dialog.appDeploy"></mx-app-deploy>
                                                 </el-dialog>
@@ -170,6 +198,14 @@ class Home extends Matrix {
                                     </el-main>
                             
                                 </el-container>`,
+                    // 使用directives注册v-focus全局指令
+                    directives: {
+                        focus: {
+                            inserted(el) {
+                                el.querySelector('input').focus()
+                            }
+                        }
+                    },
                     data: {
                         // 搜索组件结构
                         model: {
@@ -208,12 +244,23 @@ class Home extends Matrix {
                             _csrf: "{{.CsrfToken}}"
                         },
                         group: {
-                            dialogVisible: false,
-                            form: {
-                                name: _.now()+"",
-                                title: "",
-                                status: "",
-                                icon: "app.png",
+                            newDialog: {
+                                show: false,
+                                form: {
+                                    name: _.now()+"",
+                                    title: "",
+                                    status: "",
+                                    icon: "app.png",
+                                },
+                            },
+                            editDialog: {
+                                show: false,
+                                form: {
+                                    name: "",
+                                    title: "",
+                                    status: "",
+                                    icon: "",
+                                },
                             },
                             iconList: []
                         },
@@ -291,12 +338,16 @@ class Home extends Matrix {
                             
                             if(cmd.type === 'newGroup'){
                                 this.group.iconList = fsHandler.fsList('/assets/images/apps/png');
-                                this.group.dialogVisible = true;
-                                this.group.form.icon = _.sample(this.group.iconList).name;
+                                this.group.newDialog.show = true;
+                                this.group.newDialog.form.title = "";
+                                this.group.newDialog.form.icon = _.sample(this.group.iconList).name;
+                            } else if(cmd.type === 'editGroup'){
+                                this.group.iconList = fsHandler.fsList('/assets/images/apps/png');
+                                this.group.editDialog.show = true;
+                                this.group.editDialog.form.title = "";
+                                this.group.editDialog.form.icon = _.sample(this.group.iconList).name;
                             } else {
                                 this.dialog.appDeploy.show = true;
-                                //let preset = encodeURIComponent(JSON.stringify({view:'tools-manage'}));
-                                //window.open(cmd.url+'?preset='+preset,'_blank');    
                             }
                         },  
                         onCommand(item){
@@ -374,7 +425,7 @@ class Home extends Matrix {
                         },
                         groupAdd(){
                             
-                            if(_.isEmpty(this.group.form.title)){
+                            if(_.isEmpty(this.group.newDialog.form.title)){
                                 this.$message({
                                     type: "warning",
                                     message: "应用组名称不能为空！"
@@ -385,11 +436,11 @@ class Home extends Matrix {
                             let data = {
                                 user: window.SignedUser_UserName,
                                 action:"add",
-                                data: this.group.form   
+                                data: this.group.newDialog.form   
                             };
                             let rtn = fsHandler.callFsJScript("/matrix/apps/group.js",encodeURIComponent(JSON.stringify(data))).message;
                             if(rtn === 1){
-                                this.group.form.title = "";
+                                this.group.newDialog.form.title = "";
                                 this.loadApps();
                             } else{
                                 this.$message({
@@ -397,7 +448,10 @@ class Home extends Matrix {
                                     message: this.$t('home.tip.newGroupFail')
                                 });
                             }
-                            this.group.dialogVisible = false;
+                            this.group.newDialog.show = false;
+                        },
+                        groupUpdate(){
+
                         },
                         groupRemove(item){
                             let data = {
@@ -407,7 +461,7 @@ class Home extends Matrix {
                             };
                             
                             this.$confirm(this.$t('home.tip.deleteGroupConfirm'), this.$t('home.tip.label'), {
-                                confirmButtonText: this.$t('home.actions.apply'),
+                                confirmButtonText: this.$t('home.actions.deleteGroup'),
                                 cancelButtonText: this.$t('home.actions.cancel'),
                                 type: 'warning'
                               }).then(() => {

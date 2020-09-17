@@ -107,25 +107,30 @@ class UserHandler{
     userUpdate(event,token) {
         let rtn = 0;
 
-        let form = new FormData();
-        form.append("email", event.email);
-        form.append("mobile", event.mobile);
-        form.append("telephone", event.telephone);
-        form.append("firstname", event.firstname);
-        form.append("lastname", event.lastname);
-        form.append("wechat", event.wechat);
-        form.append("address", event.address);
-        form.append("active", event.isactive);
+        let data = {
+            email: event.email, 
+            mobile: event.mobile,
+            telephone: event.telephone,
+            firstname: event.firstname,
+            lastname: event.lastname,
+            wechat: event.wechat,
+            address: event.address,
+            isactive: event.isactive
+        };
 
+        if(event.resetPasswd){
+            _.extend(data, {passwd: event.passwd});
+        }
+        
         jQuery.ajax({
             url: `/admin/users/${event.id}`,
             dataType: 'json',
             type: 'POST',
             processData: false,
             contentType: false,
-            mimeType: "multipart/form-data",
+            contentType: 'application/json; charset=utf-8',
             async: false,
-            data: form,
+            data: JSON.stringify(data),
             beforeSend: function (xhr) {
                 xhr.setRequestHeader("X-Csrf-Token", token);
                 // Pace.restart();

@@ -2481,7 +2481,7 @@ class System {
 												</span>
 												<span v-else>
 													<span class="el-icon-user" style="color:#67c23a;"></span>
-													<span>#{node.label}# #{data.checked}#</span>
+													<span>#{node.label}#</span>
 												</span>
 											</span>                  
 										</el-tree>
@@ -2514,7 +2514,7 @@ class System {
 												disabled = true;
 
 												// 设置已选择项 需要勾选子节点  111111
-												this.selectedNodes.push(v.fullname);
+												// this.selectedNodes.push(v.fullname);
 											}
 
 											// 设置已选择项 需要勾选子节点   111111
@@ -2598,7 +2598,10 @@ class System {
 							dialog: {
 								user: {
 									show: false,
-									row: null
+									row: null,
+									passwd: "",
+									checkPasswd: "",
+									resetPasswd: false
 								}
 							}
 						}
@@ -2660,10 +2663,10 @@ class System {
 														<div v-html='item.render(scope.row, scope.column, scope.row[item.field], scope.$index)' 
 															v-if="typeof item.render === 'function'">
 														</div>
-														<div v-else-if="_.includes(['email','mobile'],item.field)">
-															<el-select :value="_.first(scope.row[item.field]).split(',')" v-if="!_.isEmpty(scope.row[item.field])" :placeholder="item.field">
+														<div v-else-if="_.includes(['email','mobile','telephone'],item.field)">
+															<el-select :value="_.first(scope.row[item.field])" v-if="!_.isEmpty(scope.row[item.field])" :placeholder="item.field">
 																<el-option
-																v-for="subItem in scope.row[item.field][0].split(',')"
+																v-for="subItem in scope.row[item.field]"
 																:key="subItem"
 																:label="subItem"
 																:value="subItem">
@@ -2724,8 +2727,16 @@ class System {
 															<el-input v-model="dialog.user.row.username" disabled="true"></el-input>
 														</el-form-item>
 
-														<el-form-item label="登录密码" required>
-															<el-input type="password" v-model="dialog.user.row.passwd" autocomplete="off" disabled="true" show-password></el-input>
+														<el-form-item label="重置密码">
+															<el-switch v-model="dialog.user.resetPasswd"></el-switch>
+														</el-form-item>
+
+														<el-form-item label="登录密码" required v-if="dialog.user.resetPasswd">
+															<el-input type="password" v-model="dialog.user.passwd" autocomplete="off" show-password></el-input>
+														</el-form-item>
+
+														<el-form-item label="确认密码" required v-if="dialog.user.resetPasswd">
+															<el-input type="password" v-model="dialog.user.checkPasswd" autocomplete="off" show-password></el-input>
 														</el-form-item>
 
 														<el-form-item label="姓名">
@@ -2801,6 +2812,9 @@ class System {
 							},
 							deep:true,
 							immediate:true
+						},
+						'dialog.user.resetPasswd'(val){
+
 						}
 					},
 					methods: {
@@ -2942,16 +2956,62 @@ class System {
 						},
 						onUpdateUser(row,index){
 							this.dialog.user.row = row;
+							this.dialog.user.resetPasswd = false;
+							this.dialog.user.passwd = "";
+							this.dialog.user.checkPasswd = "";
 							this.dialog.user.show = true;
 						},
 						onSaveUser(row){
 
+							if(this.dialog.user.resetPasswd){
+
+								if (_.isEmpty(this.dialog.user.passwd)) {
+									this.$message({
+										type: "warning",
+										message: `登录密码不能为空！`
+									})
+									return false;
+								}
+	
+								if (_.isEmpty(this.dialog.user.checkPasswd)) {
+									this.$message({
+										type: "warning",
+										message: `确认密码不能为空！`
+									})
+									return false;
+								}
+	
+								if ( this.dialog.user.passwd !== this.dialog.user.checkPasswd) {
+									this.$message({
+										type: "warning",
+										message: `确认密码不一致！`
+									})
+									return false;
+								}
+
+								this.$set(row, 'resetPasswd', this.dialog.user.resetPasswd);
+								this.$set(row, 'passwd', this.dialog.user.passwd);
+							}
+							
+							
 							if (_.isEmpty(row.email)) {
 								this.$message({
 									type: "warning",
 									message: `邮件不能为空！`
 								})
 								return false;
+							}
+
+							if(typeof row.email == 'string'){
+								this.$set(row, 'email', row.email.split(","));
+							}
+
+							if(typeof row.mobile == 'string'){
+								this.$set(row, 'mobile', row.mobile.split(","));
+							}
+
+							if(typeof row.telephone == 'string'){
+								this.$set(row, 'telephone', row.telephone.split(","));
 							}
 
 							/* let checkEmail = function(email){
@@ -2996,9 +3056,6 @@ class System {
 
 									this.dialog.user.show = false;
 
-									this.$set(row, 'email', row.email.split(","));
-									this.$set(row, 'mobile', row.mobile.split(","));
-									this.$set(row, 'telephone', row.telephone.split(","));
 									this.dt.rows[index] = row;
 
 								}
@@ -5352,7 +5409,8 @@ class System {
 									activeName: 'users'
 								}
 							},
-							splitInst: null
+							splitInst: null,
+							ldap: []
 						}
 					},
 					template: 	`<el-container style="height:100%;" class="user-manage-container">
@@ -5399,13 +5457,23 @@ class System {
 						},
 						onLoadUser(event) {
 							this.selectedNode = event;
-
+							this.ldap = [];
 							// 只加载用户
-							this.model.rows = _.orderBy(_.filter(_.map(userHandler.userList(event.fullname).message.nodes,(v)=>{
-													if(v.otype=='usr'){
-														return _.extend( {grpset:[]}, v);
-													}
-												}),null),'fullname');
+							this.travelChildUser(userHandler.userList(event.fullname).message.nodes);
+							console.log(this.ldap)
+							this.model.rows = _.orderBy(this.ldap,'fullname');
+						},
+						travelChildUser(nodes){
+							
+							_.forEach(nodes,(v)=>{
+								if(v.otype=='usr'){
+									this.ldap.push( _.extend( {grpset:[]}, v) );
+								}
+								if(v.nodes){
+									this.travelChildUser(v.nodes);
+								}
+							});
+
 						}
 					}
 				})
@@ -5970,7 +6038,7 @@ class System {
 						
 						this.$nextTick(()=>{
 							var name = `{{.SignedUser.IsAdmin}}`;
-							var ospace = `{{.SignedUser.Company.OSpace}}`;
+							var ospace = window.COMPANY_OSPACE;
 
 							if(name && ospace=='matrix'){
 								this.loadTreeData('/','configTreeNodes');

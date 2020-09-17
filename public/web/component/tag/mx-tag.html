@@ -80,8 +80,8 @@
 			</el-main>
 		</el-container>
 		<el-container v-else>
-			<el-main style="padding:0px;overflow: hidden;" v-if="model.length > limit">
-				<el-dropdown>
+			<el-main style="padding:0px;overflow: hidden;">
+				<el-dropdown v-if="model.length > limit">
 					<span class="el-dropdown-link">
 						<i class="el-icon-price-tag el-icon--right"></i>
 					</span>
@@ -96,6 +96,15 @@
 						</el-dropdown-item>
 					</el-dropdown-menu>
 				</el-dropdown>
+				<el-tag
+					:key="tag"
+					v-for="tag in model"
+					:closable="mxAuth.isAdmin"
+					:disable-transitions="false"
+					@close="onTagClose(tag)"
+					v-else>
+					#{tag}#
+					</el-tag>
 				<el-select v-model="inputValue" 
 					filterable 
 					placeholder="请选择标签" 
@@ -132,8 +141,11 @@
 			return {
 				inputVisible: false,
 				inputValue: "",
-				allTags: mxAllTags
+				allTags: []
 			};
+		},
+		created(){
+			this.allTags = _.filter(mxAllTags, {domain: this.domain});
 		},
 		methods: {
 			onTagClose(tag) {
@@ -154,7 +166,6 @@
 				
 			},
 			onChangeValue(value){
-				console.log(value)
 				this.inputValue = value;
 			},
 			showInput() {
@@ -169,7 +180,7 @@
 			},
 			handleInputConfirm() {
 				let inputValue = this.inputValue;
-				console.log(_.now(),this.inputValue)
+				
 				if (inputValue) {
 					this.model.push(inputValue);
 

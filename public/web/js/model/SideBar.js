@@ -988,16 +988,13 @@ class SideBar {
                                 <el-form-item label="分享地址" style="margin-bottom:10px;">
                                     <el-input type="textarea" v-model="form.url" :rows="4"></el-input>
                                 </el-form-item>
-                                <el-form-item>
-                                    <el-tooltip content="创建">
-                                        <a href="javascript:void(0);" class="btn btn-xs btn-success" @click="genShareUrl"><i class="fas fa-save fa-fw"></i> 创建</a>
-                                    </el-tooltip>
-                                    <el-tooltip content="取消">
-                                        <a href="javascript:void(0);" class="btn btn-xs btn-default" @click="closeMe" ><i class="fas fa-plus fa-fw"></i> 取消</a>
-                                    </el-tooltip>
-                                </el-form-item>
+                                
                             </el-form>
                         </el-main>
+                        <el-footer style="text-align:right;">
+                            <el-button type="default" @click="closeMe">取消</el-button>
+                            <el-button type="primary" @click="genShareUrl">创建</el-button>
+                        </el-footer>
                     </el-container>`,
             data: {
                 form: {

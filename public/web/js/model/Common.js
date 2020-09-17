@@ -327,7 +327,7 @@ Vue.component("mx-fs-editor",{
                         </el-aside>
                         <el-main style="padding:0px;overflow:hidden;" ref="mainView">
                             <el-card v-if="_.isEmpty(tabs.list)">
-                                <h1>欢迎使用 M³ 在线编辑器</h1>
+                                <h1>欢迎使用${MATRIX_TITLE} 在线编辑器</h1>
                                 <el-button type="default" @click="onNewProject">新建文件夹</el-button>
                                 <el-button type="default" @click="onNewFile">新建文件</el-button>
                             </el-card>
@@ -610,8 +610,6 @@ Vue.component("mx-fs-editor",{
         },
         onSaveAndPlay(){
             
-            // $(".fas.fa-play").addClass("fa-spin");
-
             // 先保存
             // this.onSave();
 
@@ -627,7 +625,7 @@ Vue.component("mx-fs-editor",{
                 } else {
 
                     try {
-                        console.log(232323,[this.tabs.activeNode.parent, this.tabs.activeNode.name].join("/").replace(/\/script\//g, "/") )
+                        
                         let rtn = fsHandler.callFsJScript([this.tabs.activeNode.parent, this.tabs.activeNode.name].join("/").replace(/\/script\//g, "/"), '');
                         
                         _.forEach(this.tabs.list,(v)=>{

@@ -489,12 +489,12 @@
                     <p>
                         <el-link type="default" icon="el-icon-location" href="http://{{.website}}" target="_blank" :underline="false">{{.i18n.Tr "company_web"}} </el-link>
                     </p>
-                    {{if .SignedUser.IsAdmin}}
-                    <p style="display:flex;"  v-if="mxAuth.isAdmin">
-                        <el-button type="success" icon="el-icon-edit" @click="toggleView('company-update')">{{.i18n.Tr "company_update"}}</el-button>
-                        <el-button type="success" icon="el-icon-user" @click="toggleView('user-update')">{{.i18n.Tr "userinfo_update"}}</el-button>
+                    
+                    <p style="display:flex;">
+                        <el-button type="success" icon="el-icon-edit" @click="toggleView('company-update')" v-if="mxAuth.isAdmin">{{.i18n.Tr "company_update"}}</el-button>
+                        <el-button type="success" icon="el-icon-user" @click="toggleView('user-update')" v-if="mxAuth.isAdmin">{{.i18n.Tr "userinfo_update"}}</el-button>
                     </p>
-                    {{end}}
+                    
                 </el-main>
             </el-container>
         </el-aside>
