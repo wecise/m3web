@@ -2088,7 +2088,7 @@ class System {
 														</el-form-item>
 
 														<el-form-item label="组织名称">
-															<el-input v-model="dialog.group.username" autofocus></el-input>
+															<el-input v-model="dialog.group.username" autofocus clearable></el-input>
 														</el-form-item>
 														
 													</form>
@@ -2335,6 +2335,12 @@ class System {
 									this.dialog.group.show = false;
 								},500);
 
+							} else {
+								this.$message({
+									type: 'error',
+									message: '添加失败 ' + rtn
+								});
+								return false;
 							}
 						},
 						onSaveUser(){
@@ -2819,11 +2825,9 @@ class System {
 					},
 					methods: {
 						onPageSizeChange(val) {
-                            console.log(1,val)
                             this.dt.pagination.pageSize = val;
                         },
                         onCurrentPageChange(val) {
-                            console.log(2,val)
                             this.dt.pagination.currentPage = val;
                         },
 						layout(){
@@ -2869,9 +2873,11 @@ class System {
 								}
 							};
 	
-							_.delay(()=>{
-								init();
-							},1000)
+							if($("table",this.$el).is(':visible')){
+                                init();
+                            } else {
+                                setTimeout(init,50);
+                            }
 							
 						},
 						rowClassName({row, rowIndex}){
@@ -3197,7 +3203,7 @@ class System {
 								
 								_.forEach(stags,(v,k)=>{
 									let perms = JSON.parse(v);
-									_.extend( this.findNodeById(k), { perms: v, checked:true } );
+									_.extend( this.findNodeById(k), { perms: JSON.parse(v), checked:true } );
 								});
 								this.selectedKeys = _.keys(stags);
 
@@ -6037,7 +6043,7 @@ class System {
 					mounted(){
 						
 						this.$nextTick(()=>{
-							var name = `{{.SignedUser.IsAdmin}}`;
+							var name = window.SignedUser_IsAdmin;
 							var ospace = window.COMPANY_OSPACE;
 
 							if(name && ospace=='matrix'){

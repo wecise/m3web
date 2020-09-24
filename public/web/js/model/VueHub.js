@@ -39,7 +39,8 @@ class VueHub {
     auth(){
         let rtn = {};
         try {
-            _.extend( rtn, {isAdmin: window.SignedUser_UserName === 'admin'} );
+            let signedUser = fsHandler.callFsJScript("/matrix/user/signedUser.js").message;
+            _.extend( rtn, {isAdmin: window.SignedUser_UserName === 'admin', signedUser: signedUser} );
         } catch(err) {
 
         }

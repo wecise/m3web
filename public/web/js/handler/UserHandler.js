@@ -39,6 +39,8 @@ class UserHandler{
             beforeSend: function (xhr) {
             },
             complete: function (xhr, textStatus) {
+                // Audit
+                auditLogHandler.writeLog("User", "User Query: " + event, 1);
             },
             success: function (data, status) {
 
@@ -49,6 +51,9 @@ class UserHandler{
             },
             error: function (xhr, textStatus, errorThrown) {
                 rtn = xhr.responseText;
+
+                // Audit
+                auditLogHandler.writeLog("User", "User Query: " + event, 0);
             }
 
         })
@@ -81,6 +86,9 @@ class UserHandler{
                 if(event.otype == 'usr'){
                     userHandler.userFsInit(event.username);
                 }
+                
+                // Audit
+                auditLogHandler.writeLog("User", "User Add: " + event.username, 1);
             },
             success: function (data, status) {
 
@@ -93,6 +101,9 @@ class UserHandler{
             },
             error: function (xhr, textStatus, errorThrown) {
                 rtn = xhr.responseText;
+
+                // Audit
+                auditLogHandler.writeLog("User", "User Add: " + event.username, 0);
             }
 
         })
@@ -140,6 +151,9 @@ class UserHandler{
                 if(event.otype == 'usr'){
                     userHandler.userFsInit(event.username);
                 }
+
+                // Audit
+                auditLogHandler.writeLog("User", "User Update: " + event.username, 1);
             },
             success: function (data, status) {
 
@@ -152,6 +166,9 @@ class UserHandler{
             },
             error: function (xhr, textStatus, errorThrown) {
                 rtn = xhr.responseText;
+
+                // Audit
+                auditLogHandler.writeLog("User", "User Update: " + event.username, 0);
             }
 
         })
@@ -179,6 +196,9 @@ class UserHandler{
                 if(event.otype == 'usr'){
                     userHandler.userFsDelete(event.username);
                 }
+
+                // Audit
+                auditLogHandler.writeLog("User", "User Delete: " + event.username, 1);
             },
             success: function (data, status) {
 
@@ -191,6 +211,9 @@ class UserHandler{
             },
             error: function (xhr, textStatus, errorThrown) {
                 rtn = xhr.responseText;
+
+                // Audit
+                auditLogHandler.writeLog("User", "User Delete: " + event.username, 0);
             }
 
         })
@@ -230,41 +253,6 @@ class UserHandler{
         return rtn;
     };
 
-    /*
-    *  用户管理
-    *
-    */
-    ldapMaintain(event) {
-        let rtn = 1;
-
-        jQuery.ajax({
-            url: "/mxobject/search",
-            dataType: 'json',
-            type: 'POST',
-            async: false,
-            data: {
-                cond: `call user ` + JSON.stringify(event),
-                meta: true
-            },
-            beforeSend:function(xhr){
-            },
-            complete: function(xhr, textStatus) {
-            },
-            success: function (data, status) {
-
-                userHandler.ifSignIn(data);
-
-                if( _.lowerCase(data.status) == "ok"){
-                    rtn = 1;
-                }
-
-            },
-            error: function(xhr, textStatus, errorThrown) {
-                rtn = xhr.responseText;
-            }
-        });
-        return rtn;
-    };
 
     /* 用户文件系统初始化 */
     userFsInit(newUsername) {
@@ -288,12 +276,18 @@ class UserHandler{
                 }
             }
 
+            // Audit
+                auditLogHandler.writeLog("User", "User DFS Init: " + newUsername, 1);
+
         } catch(err){
             console.log(err)
+
+            // Audit
+                auditLogHandler.writeLog("User", "User DFS Init: " + newUsername, 0);
         } 
     };
 
-    /* 用户文件系统初始化 */
+    /* 用户文件系统删除 */
     userFsDelete(newUsername) {
         
         try{
@@ -313,8 +307,14 @@ class UserHandler{
                 }
             }
 
+            // Audit
+                auditLogHandler.writeLog("User", "User DFS Delete: " + newUsername, 1);
+
         } catch(err){
             console.log(err)
+
+            // Audit
+                auditLogHandler.writeLog("User", "User DFS Delete: " + newUsername, 0);
         } 
     };
 
@@ -332,6 +332,8 @@ class UserHandler{
             beforeSend:function(xhr){
             },
             complete: function(xhr, textStatus) {
+                // Audit
+                auditLogHandler.writeLog("User", "User Group permissions Add: " + event.name + " 【" +  event.member + "】", 1);
             },
             success: function (data, status) {
                 
@@ -344,6 +346,9 @@ class UserHandler{
             },
             error: function(xhr, textStatus, errorThrown) {
                 rtn = xhr.responseText;
+
+                // Audit
+                auditLogHandler.writeLog("User", "User Group permissions Add: " + event.name + " 【" +  event.member + "】", 0);
             }
         });
         return rtn;
@@ -364,6 +369,8 @@ class UserHandler{
                 xhr.setRequestHeader("X-Csrf-Token", token);
             },
             complete: function(xhr, textStatus) {
+                // Audit
+                auditLogHandler.writeLog("User", "User Group permissions Delete: " + event.id, 1);
             },
             success: function (data, status) {
                 
@@ -376,6 +383,9 @@ class UserHandler{
             },
             error: function(xhr, textStatus, errorThrown) {
                 rtn = xhr.responseText;
+
+                // Audit
+                auditLogHandler.writeLog("User", "User Group permissions Delete: " + event.id, 0);
             }
         });
         return rtn;
@@ -396,6 +406,8 @@ class UserHandler{
             beforeSend:function(xhr){
             },
             complete: function(xhr, textStatus) {
+                // Audit
+                auditLogHandler.writeLog("User", "User Group permissions Update: " + event.name + " 【" +  event.member + "】", 1);
             },
             success: function (data, status) {
 
@@ -408,6 +420,9 @@ class UserHandler{
             },
             error: function(xhr, textStatus, errorThrown) {
                 rtn = xhr.responseText;
+
+                // Audit
+                auditLogHandler.writeLog("User", "User Group permissions Update: " + event.name + " 【" +  event.member + "】", 0);
             }
         });
         return rtn;
@@ -426,6 +441,8 @@ class UserHandler{
             beforeSend:function(xhr){
             },
             complete: function(xhr, textStatus) {
+                // Audit
+                auditLogHandler.writeLog("User", "User Group permissions Query: " + event.parent, 1);
             },
             success: function (data, status) {
 
@@ -438,6 +455,9 @@ class UserHandler{
             },
             error: function(xhr, textStatus, errorThrown) {
                 rtn = xhr.responseText;
+
+                // Audit
+                auditLogHandler.writeLog("User", "User Group permissions Query: " + event.parent, 0);
             }
         });
         return rtn;
@@ -455,6 +475,8 @@ class UserHandler{
             beforeSend:function(xhr){
             },
             complete: function(xhr, textStatus) {
+                // Audit
+                auditLogHandler.writeLog("User", "User Group permissions Query: " + event.id, 1);
             },
             success: function (data, status) {
 
@@ -467,6 +489,8 @@ class UserHandler{
             },
             error: function(xhr, textStatus, errorThrown) {
                 rtn = xhr.responseText;
+                // Audit
+                auditLogHandler.writeLog("User", "User Group permissions Query: " + event.id, 0);
             }
         });
         return rtn;
@@ -494,6 +518,8 @@ class UserHandler{
             beforeSend:function(xhr){
             },
             complete: function(xhr, textStatus) {
+                // Audit
+                auditLogHandler.writeLog("User", "User Api permissions Add: " + event.name, 1);
             },
             success: function (data, status) {
 
@@ -506,6 +532,9 @@ class UserHandler{
             },
             error: function(xhr, textStatus, errorThrown) {
                 rtn = xhr.responseText;
+
+                // Audit
+                auditLogHandler.writeLog("User", "User Api permissions Add: " + event.name, 0);
             }
         });
         return rtn;
@@ -523,6 +552,8 @@ class UserHandler{
             beforeSend:function(xhr){
             },
             complete: function(xhr, textStatus) {
+                // Audit
+                auditLogHandler.writeLog("User", "User Api permissions Delete: " + event.name, 1);
             },
             success: function (data, status) {
 
@@ -535,6 +566,9 @@ class UserHandler{
             },
             error: function(xhr, textStatus, errorThrown) {
                 rtn = xhr.responseText;
+
+                // Audit
+                auditLogHandler.writeLog("User", "User Api permissions Delete: " + event.name, 0);
             }
         });
         return rtn;
@@ -561,6 +595,8 @@ class UserHandler{
             beforeSend:function(xhr){
             },
             complete: function(xhr, textStatus) {
+                // Audit
+                auditLogHandler.writeLog("User", "User Api permissions Update: " + event.name, 1);
             },
             success: function (data, status) {
 
@@ -573,6 +609,9 @@ class UserHandler{
             },
             error: function(xhr, textStatus, errorThrown) {
                 rtn = xhr.responseText;
+
+                // Audit
+                auditLogHandler.writeLog("User", "User Api permissions Update: " + event.name, 0);
             }
         });
         return rtn;
@@ -590,6 +629,8 @@ class UserHandler{
             beforeSend:function(xhr){
             },
             complete: function(xhr, textStatus) {
+                // Audit
+                auditLogHandler.writeLog("User", "User Api permissions Query", 1);
             },
             success: function (data, status) {
 
@@ -602,6 +643,9 @@ class UserHandler{
             },
             error: function(xhr, textStatus, errorThrown) {
                 rtn = xhr.responseText;
+
+                // Audit
+                auditLogHandler.writeLog("User", "User Api permissions Query", 0);
             }
         });
         return rtn;
@@ -619,6 +663,8 @@ class UserHandler{
             beforeSend:function(xhr){
             },
             complete: function(xhr, textStatus) {
+                // Audit
+                auditLogHandler.writeLog("User", "User Api permissions Query: " + event.name, 1);
             },
             success: function (data, status) {
 
@@ -631,6 +677,9 @@ class UserHandler{
             },
             error: function(xhr, textStatus, errorThrown) {
                 rtn = xhr.responseText;
+
+                // Audit
+                auditLogHandler.writeLog("User", "User Api permissions Query: " + event.name, 0);
             }
         });
         return rtn;
@@ -658,6 +707,8 @@ class UserHandler{
             beforeSend:function(xhr){
             },
             complete: function(xhr, textStatus) {
+                // Audit
+                auditLogHandler.writeLog("User", "User Api permissions Group Add: " + event.name, 1);
             },
             success: function (data, status) {
 
@@ -670,6 +721,9 @@ class UserHandler{
             },
             error: function(xhr, textStatus, errorThrown) {
                 rtn = xhr.responseText;
+
+                // Audit
+                auditLogHandler.writeLog("User", "User Api permissions Group Add: " + event.name, 0);
             }
         });
         return rtn;
@@ -691,6 +745,8 @@ class UserHandler{
             beforeSend:function(xhr){
             },
             complete: function(xhr, textStatus) {
+                // Audit
+                auditLogHandler.writeLog("User", "User Api permissions Group Delete: " + event.name, 1);
             },
             success: function (data, status) {
 
@@ -703,6 +759,9 @@ class UserHandler{
             },
             error: function(xhr, textStatus, errorThrown) {
                 rtn = xhr.responseText;
+
+                // Audit
+                auditLogHandler.writeLog("User", "User Api permissions Group Delete: " + event.name, 0);
             }
         });
         return rtn;
@@ -718,11 +777,15 @@ class UserHandler{
             beforeSend:function(xhr){
             },
             complete: function(xhr, textStatus) {
+                // Audit
+                auditLogHandler.writeLog("User", "User App Cache Refresh", 1);
             },
             success: function (data, status) {
                 userHandler.ifSignIn(data);
             },
             error: function(xhr, textStatus, errorThrown) {
+                // Audit
+                auditLogHandler.writeLog("User", "User App Cache Refresh", 0);
             }
         });
         

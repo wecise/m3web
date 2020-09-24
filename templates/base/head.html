@@ -107,7 +107,10 @@
 			moment.locale(window.MATRIX_LANG);
 			window.SignedUser_Remark = "{{.SignedUser.Remark}}";
 			window.SignedUser_UserName = "{{.SignedUser.UserName}}";
+			window.SignedUser_Password = "{{.SignedUser.Passwd}}";
 			window.SignedUser_FullName = "{{.SignedUser.FullName}}";
+			window.SignedUser_EMAIL = "{{.SignedUser.Email}}";
+			window.SignedUser_Mobile = "{{.SignedUser.Mobile}}";
 			window.SignedUser_Id = "{{.SignedUser.Id}}";
 			window.SignedUser_IsAdmin = true;//"{{.SignedUser.IsAdmin}}" || false;
 			window.COMPANY_NAME = "{{.company}}";
@@ -117,6 +120,7 @@
 			window.COMPANY_FAVICON = "{{.icon}}";
 			window.COMPANY_TITLE = "{{.SignedUser.Company.Fullname}}";
 			window.COMPANY_WEBSITE = "{{.website}}";
+			window.COMPANY_LICENSE = "{{.license}}";
 			window.ASSETS_ICON = '/fs/assets/images';
 			window.CsrfToken = "{{.CsrfToken}}";
 			window.APP_VERSION = "{{.AppVer}}";
@@ -142,6 +146,7 @@
 	<script src="{{AppSubUrl}}/web/js/model/SideBar.js" type="text/javascript"></script>
 	<script src="{{AppSubUrl}}/web/js/model/Window.js" type="text/javascript"></script>
 
+	<script src="{{AppSubUrl}}/web/js/handler/AuditLogHandler.js" type="text/javascript"></script>
 	<script src="{{AppSubUrl}}/web/js/handler/AppContextHandler.js" type="text/javascript"></script>
 	<script src="{{AppSubUrl}}/web/js/handler/JobHandler.js" type="text/javascript"></script>
 	<script src="{{AppSubUrl}}/web/js/handler/LicenseHandler.js" type="text/javascript"></script>

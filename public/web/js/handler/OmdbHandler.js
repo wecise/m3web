@@ -8,7 +8,8 @@
         ####### ######   #####  #######  #####     #       ######  #     #    #    #     #
  */
 
-class OmdbHandler {
+class OmdbHandler  {
+
     constructor(){
 
     }
@@ -34,7 +35,7 @@ class OmdbHandler {
             },
             async: false,
             beforeSend:function(xhr){
-                // // Pace.restart();
+                
             },
             complete: function(xhr, textStatus) {
             },
@@ -171,7 +172,7 @@ class OmdbHandler {
                 classinfo: JSON.stringify(event)
             },
             beforeSend:function(xhr){
-                // // Pace.restart();
+                
             },
             success: function (data, status) {
 
@@ -456,9 +457,10 @@ class OmdbHandler {
                 meta: true
             },
             beforeSend:function(xhr){
-                // // Pace.restart();
+                
             },
             complete: function(xhr, textStatus) {
+                auditLogHandler.writeLog("omdb", "Execute Mql: " + param, 1);
             },
             success: function (data, status) {
 
@@ -471,12 +473,15 @@ class OmdbHandler {
 
             },
             error: function(xhr, textStatus, errorThrown){
+                
                 if(xhr.status){
                     rtn = xhr.responseJSON;
                 } else{
                     $("body").css("opacity",'.3');
                     alert("Internal Server Error（500)");
                 }
+
+                auditLogHandler.writeLog("omdb", "Execute Mql: " + param, 0);
             }
         });
 
@@ -502,6 +507,7 @@ class OmdbHandler {
             // Pace.restart();
         },
         complete: function(xhr, textStatus) {
+            auditLogHandler.writeLog("omdb", "Export DDL: " + param, 1);
         },
         success: function (data, status) {
 
@@ -514,6 +520,7 @@ class OmdbHandler {
         },
         error: function(xhr, textStatus, errorThrown){
             rtn = xhr.responseText;
+            auditLogHandler.writeLog("omdb", "Export DDL: " + param, 0);
         }
     });
 
@@ -531,8 +538,6 @@ class OmdbHandler {
 
         let fileName = `${window.location.host}_${window.COMPANY_OSPACE}_${_.last(event.class.split("/"))}_${moment().format("YYYY-MM-DD HH:mm:SS")}.${event.filetype}`;
 
-        // Pace.restart();
-
         try {
             var xhr = new XMLHttpRequest();
             xhr.open("GET", `/mxobject/export?recursive=true&relation_defined=${event.ifRelation}&filetype=${event.filetype}&template=${event.template}&class=${encodeURIComponent(event.class)}&ignoreclass=${encodeURIComponent(event.ignoreClass)}&limit=${event.limit}`, true);
@@ -543,12 +548,14 @@ class OmdbHandler {
                     var blob = new Blob([xhr.response], event.filetype=='mql'?{type: "octet/stream"}:{type: "application/vnd.ms-excel"});
                     saveAs(blob, fileName);
                     alertify.success("导出成功" + " " + fileName);
+                    auditLogHandler.writeLog("omdb", "Export Class Data: " + event.class, 1);
                 }
             }
             xhr.responseType = "arraybuffer";
             xhr.send();
         } catch(err){
             rtn = 0;
+            auditLogHandler.writeLog("omdb", "Export Class Data: " + event.class, 0);
         }
         return rtn;
     };
@@ -576,6 +583,7 @@ class OmdbHandler {
                 // // Pace.restart();
             },
             complete: function(xhr, textStatus) {
+                auditLogHandler.writeLog("omdb", "Import Class Data: " + file.name, 1);
             },
             success: function(data, textStatus, xhr) {
 
@@ -590,46 +598,11 @@ class OmdbHandler {
             error: function(xhr, textStatus, errorThrown) {
                 rtn = xhr.responseText;
                 alertify.error("导入失败");
+                auditLogHandler.writeLog("omdb", "Import Class Data: " + file.name, 0);
             }
         })
         return rtn;
     };
-
-
-    /*
-    *   类数据导出为excel
-    *
-    * */
-    classTemplateExportToExcel(event){
-        let rtn = null;
-
-        let fileName = `${window.location.host}_${window.COMPANY_OSPACE}_实体模板_${moment().format("YYYY-MM-DD HH:mm:SS")}.xlsx`;
-
-        // Pace.restart();
-
-        try {
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", `/mxobject/export?recursive=${event.recursive}&filetype=${event.filetype}&template=${event.template}&class=${event.class}&ignoreclass=${encodeURIComponent(event.ignoreClass)}&limit=${event.limit}`, true);
-            xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded; charset=UTF-8");
-            xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
-            xhr.setRequestHeader("Accept", "*/*");
-            xhr.setRequestHeader("Cache-Control", "no-cache");
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState == 4) {
-                    var blob = new Blob([xhr.response], {type: "application/vnd.ms-excel"});
-                    saveAs(blob, fileName);
-                    alertify.success("导出成功" + " " + fileName);
-                    rtn = 1;
-                }
-            }
-            xhr.responseType = "arraybuffer";
-            xhr.send();
-        } catch(err){
-            
-        }
-        return rtn;
-
-    }
 
 }
 

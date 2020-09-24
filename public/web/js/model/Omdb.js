@@ -1108,7 +1108,7 @@ class Omdb{
                 model: Object
             },
             template:   `<el-container style="height:calc(100% - 30px);">
-                            <el-header style="height:30px;line-height:30px;">
+                            <el-header style="height:30px;line-height:30px;" v-if="!_.isEmpty(model.data)">
                                 <el-tooltip content="删除" delay-time="500">
                                     <el-button type="text" @click="onDelete" icon="el-icon-delete"></el-button>
                                 </el-tooltip>
@@ -1128,7 +1128,7 @@ class Omdb{
                                 </el-tooltip>
 
                             </el-header>
-                            <el-main style="height:100%;padding:0px;">
+                            <el-main style="height:100%;padding:0px;" v-if="!_.isEmpty(model.data)">
                                 <el-table :data="dt.rows" 
                                     stripe
                                     border
@@ -1243,11 +1243,35 @@ class Omdb{
                                     </el-table-column>
                                 </el-table>
                                 <div style="padding:20px;" v-else>
-                                    <h4>很抱歉，没有找到相关的记录。</h4>
+                                    <h3>很抱歉，没有找到相关的记录。</h3>
                                     <p>温馨提示：  
                                     请检查您的输入是否正确
                                     如有任何意见或建议，请及时反馈给我们。
                                     </p>
+                                </div>
+                            </el-main>
+                            <!-- 异常信息提示 -->
+                            <el-main style="height:100%;padding:0px;" v-else>
+                                <div style="padding:20px;" v-if="model.type=='create-class'">
+                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 创建类成功。</h3>
+                                </div>
+                                <div style="padding:20px;" v-if="model.type=='drop-class'">
+                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 删除类成功。</h3>
+                                </div>
+                                <div style="padding:20px;" v-if="model.type=='delete'">
+                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 删除数据成功。</h3>
+                                </div>
+                                <div style="padding:20px;" v-if="model.type=='create-edge-type'">
+                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 创建关系成功。</h3>
+                                </div>
+                                <div style="padding:20px;" v-if="model.type=='drop-edge-type'">
+                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 删除关系成功。</h3>
+                                </div>
+                                <div style="padding:20px;" v-if="model.type=='alter-class'">
+                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 更新类成功。</h3>
+                                </div>
+                                <div style="padding:20px;" v-if="model.type=='insert-class'">
+                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 插入成功。</h3>
                                 </div>
                             </el-main>
                             <el-footer  style="height:30px;line-height:30px;">
@@ -1293,7 +1317,7 @@ class Omdb{
             created(){
                 
                 try{
-                    if(!_.isEmpty(this.model)) {
+                    if( !_.isEmpty(this.model) ) {
                         this.dt.rows = this.model.data;
                         this.dt.columns = _.map(this.model.columns[_.keys(this.model.columns)[0]],(v)=>{
                             

@@ -215,10 +215,8 @@
             }
         },
         mounted(){
-            var self = this;
-
-            self.$nextTick(function(){
-                self.init();
+            this.$nextTick(()=>{
+                this.init();
             })
         },
         watch: {
@@ -476,14 +474,14 @@
                         showClose: true
                     })
                     
-                    self.result = { id:self.id, bid: self.bid, type: 'table-update', data: [], columns: [], rootclass:""};
+                    // self.result = { id:self.id, bid: self.bid, type: 'table-update', data: [], columns: [], rootclass:""};
                     // 更新当前实例
-                    self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
+                    /* self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
                                                                         type: 'omdb-query-output-console',
                                                                         name: self.id+'-output-table',
                                                                         title: `结果_TABLE_${moment().format("LT")}`,
                                                                         model: self.result
-                                                                    });
+                                                                    }); */
 
                     // 输出日志
                     self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].logAppend('error',_list);
@@ -502,54 +500,126 @@
                 if(_.includes(['create'],_list.meta.type)){
                     this.$message({
                         type: "success",
-                        message: "创建成功"
+                        message: "创建类成功"
                     });
                     eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'create-class', node: null});
+                    
+                    self.result = { id:self.id, bid: self.bid, type: 'create-class', data: [], columns: [], rootclass: null };
+
+                    self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
+                                                                        type: 'omdb-query-output-console',
+                                                                        name: self.id+'-output-table',
+                                                                        title: `结果_TABLE_${moment().format("LT")}`,
+                                                                        model: self.result
+                                                                    });
                     return false;
                 }
 
                 if(_.includes(['drop'],_list.meta.type)){
                     this.$message({
                         type: "success",
-                        message: "删除成功"
+                        message: "删除类成功"
                     });
                     eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'drop-class', node: null});
+                    
+                    self.result = { id:self.id, bid: self.bid, type: 'drop-class', data: [], columns: [], rootclass: null };
+
+                    self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
+                                                                        type: 'omdb-query-output-console',
+                                                                        name: self.id+'-output-table',
+                                                                        title: `结果_${moment().format("LT")}`,
+                                                                        model: self.result
+                                                                    });
                     return false;
                 }
 
-                if(_.includes(['create edge'],_list.meta.type)){
+                if(_.includes(['delete'],_list.meta.type)){
                     this.$message({
                         type: "success",
-                        message: "创建成功"
+                        message: "删除数据成功"
+                    });
+                    eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'delete', node: null});
+                    
+                    self.result = { id:self.id, bid: self.bid, type: 'delete', data: [], columns: [], rootclass: null };
+
+                    self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
+                                                                        type: 'omdb-query-output-console',
+                                                                        name: self.id+'-output-table',
+                                                                        title: `结果_${moment().format("LT")}`,
+                                                                        model: self.result
+                                                                    });
+                    return false;
+                }
+
+                if(_.includes(['create edgetype'],_list.meta.type)){
+                    this.$message({
+                        type: "success",
+                        message: "创建关系成功"
                     });
                     eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'create-edge-type', node: null});
+
+                    self.result = { id:self.id, bid: self.bid, type: 'create-edge-type', data: [], columns: [], rootclass: null };
+
+                    self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
+                                                                        type: 'omdb-query-output-console',
+                                                                        name: self.id+'-output-table',
+                                                                        title: `结果_${moment().format("LT")}`,
+                                                                        model: self.result
+                                                                    });
                     return false;
                 }
 
                 if(_.includes(['drop edge'],_list.meta.type)){
                     this.$message({
                         type: "success",
-                        message: "删除成功"
+                        message: "删除关系成功"
                     });
                     eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'drop-edge-type', node: null});
+
+                    self.result = { id:self.id, bid: self.bid, type: 'drop-edge-type', data: [], columns: [], rootclass: null };
+
+                    self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
+                                                                        type: 'omdb-query-output-console',
+                                                                        name: self.id+'-output-table',
+                                                                        title: `结果_${moment().format("LT")}`,
+                                                                        model: self.result
+                                                                    });
                     return false;
                 }
 
                 if(_list.meta.type === 'alter'){
                     this.$message({
                         type: "success",
-                        message: "修改成功"
+                        message: "修改类成功"
                     });
                     eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'alter-class', node: null});
+
+                    self.result = { id:self.id, bid: self.bid, type: 'alter-class', data: [], columns: [], rootclass: null };
+
+                    self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
+                                                                        type: 'omdb-query-output-console',
+                                                                        name: self.id+'-output-table',
+                                                                        title: `结果_${moment().format("LT")}`,
+                                                                        model: self.result
+                                                                    });
                     return false;
                 }
 
                 if(_list.meta.type === 'insert'){
                     this.$message({
                         type: "success",
-                        message: "插入成功"
+                        message: "插入类成功"
                     });
                     eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'insert-class', node: null});
+                    
+                    self.result = { id:self.id, bid: self.bid, type: 'insert-class', data: [], columns: [], rootclass: null };
+                    
+                    self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
+                                                                        type: 'omdb-query-output-console',
+                                                                        name: self.id+'-output-table',
+                                                                        title: `结果_${moment().format("LT")}`,
+                                                                        model: self.result
+                                                                    });
                     return false;
                 }
 

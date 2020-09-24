@@ -28,7 +28,7 @@ class Home extends Matrix {
                     i18n,
                     delimiters: ['#{', '}#'],
                     template:   `<el-container style="padding:30px 0;">
-                                    <el-main style="padding:0px;">
+                                    <el-main style="padding:0px;overflow:hidden;">
                                         <!--搜索框-->
                                         <el-row type="flex" justify="center" style="padding:40px 0px;">
                                             <el-col :span="18">
@@ -38,7 +38,7 @@ class Home extends Matrix {
                                         </el-row>
                                         <!--应用组图标-->
                                         <el-row type="flex" justify="center">
-                                            <el-col :span="14" style="display:flex;flex-wrap:wrap;align-content: flex-start;" class="drag-content"> 
+                                            <el-col :span="14" style="display:flex;flex-wrap:wrap;align-content: flex-start;max-height: 60vh;overflow:auto;" class="drag-content"> 
                                                 <el-dropdown v-for="(item,index) in apps.template" :key="item.name" @command="onCommand" trigger="click" placement="top-end"  :hide-on-click="false">
                                                     <el-button type="primary"
                                                         class="animated flipInX" 

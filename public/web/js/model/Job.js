@@ -115,6 +115,7 @@ class Job extends Matrix {
                                         <el-table
                                             :data="dt.rows.slice((dt.pagination.currentPage - 1) * dt.pagination.pageSize,dt.pagination.currentPage * dt.pagination.pageSize)"
                                             highlight-current-row="true"
+                                            stripe
                                             style="width: 100%"
                                             :row-class-name="rowClassName"
                                             :header-cell-style="headerRender"
@@ -217,11 +218,9 @@ class Job extends Matrix {
                     },
                     methods: {
                         onPageSizeChange(val) {
-                            console.log(1,val)
                             this.dt.pagination.pageSize = val;
                         },
                         onCurrentPageChange(val) {
-                            console.log(2,val)
                             this.dt.pagination.currentPage = val;
                         },
                         pickFtype(key){

@@ -1,0 +1,168 @@
+<code>
+
+	<style scoped>
+		/*----------  style  ----------*/
+		
+
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="pipe-list"  ----------*/
+	<template>		
+		<el-container style="height: calc(100% - 85px);background:#ffffff;">
+			<el-aside width="200px" style="background: #f2f2f2;" ref="leftView">
+				<mx-tag-tree :model="{parent:'/pipe',name:'pipe_tree_data.js',domain:'pipe'}" :fun="onRefreshByTag" ref="tagTree"></mx-tag-tree>
+			</el-aside>
+			<el-container ref="mainView">
+				<el-main>
+					<el-table
+						:data="dt.rows.slice((dt.pagination.currentPage - 1) * dt.pagination.pageSize,dt.pagination.currentPage * dt.pagination.pageSize)"
+						highlight-current-row="true"
+						stripe
+						style="width: 100%;"
+						:row-class-name="rowClassName"
+						:header-cell-style="headerRender"
+						ref="table">
+						<el-table-column type="selection" align="center"></el-table-column> 
+						<el-table-column
+							sortable 
+							show-overflow-tooltip
+							v-for="(item,index) in dt.columns"
+							:key="index"
+							:prop="item.field"
+							:label="item ? item.title : ''"
+							:width="item.width"
+							v-if="item.visible">
+								<template slot-scope="scope">
+									<div v-html='item.render(scope.row, scope.column, scope.row[item.field], scope.$index)' 
+										v-if="typeof item.render === 'function'">
+									</div>
+									<div v-else>
+										#{scope.row[item.field]}#
+									</div>
+								</template>
+						</el-table-column>
+						<el-table-column label="标签" width="200">
+							<template slot-scope="scope">
+								<mx-tag domain='pipe' :model.sync="scope.row.tags" :id="scope.row.id" limit="1"></mx-tag>
+							</template>
+						</el-table-column>
+						<el-table-column label="操作" width="160">
+							<template slot-scope="scope">
+								<el-tooltip content="新建" open-delay="500" placement="top">
+									<el-button type="text" @click="onNewRule(scope.row, scope.$index)" icon="el-icon-folder-add"></el-button>
+								</el-tooltip>
+								<el-tooltip content="编辑" open-delay="500" placement="top">
+									<el-button type="text" icon="el-icon-edit"  @click="onUpdateRule(scope.row,scope.$index)"></el-button>
+								</el-tooltip>
+								<el-tooltip content="删除" open-delay="500" placement="top">
+									<el-button type="text" @click="onDeleteRule(scope.row, scope.$index)" icon="el-icon-delete"></el-button>
+								</el-tooltip>
+							</template>
+						</el-table-column>
+					</el-table>
+				</el-main>
+				<el-footer  style="height:30px;line-height:30px;">
+					<!--#{ info.join(' &nbsp; | &nbsp;') }#-->
+					<el-pagination
+						@size-change="onPageSizeChange"
+						@current-change="onCurrentPageChange"
+						:page-sizes="[10, 15, 20]"
+						:page-size="dt.pagination.pageSize"
+						:total="dt.rows.length"
+						layout="total, sizes, prev, pager, next">
+					</el-pagination>
+				</el-footer>
+			</el-container>
+		</el-container>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="pipe-list">
+	{
+		delimiters: ['#{', '}#'],
+		props: {
+			
+		},
+		data() {
+			return {
+				dt:{
+					rows:[],
+					columns: [],
+					selected: [],
+					pagination:{
+						pageSize: 10,
+						currentPage: 1
+					}
+				}
+			}
+		},
+		created(){
+			this.initData();
+		},
+		mounted(){
+			// 初始化分隔栏
+			this.initSplit();
+		},
+		methods: {
+			rowClassName({row, rowIndex}){
+				return `row-${rowIndex}`;
+			},
+			headerRender({ row, column, rowIndex, columnIndex }){
+				if (rowIndex === 0) {
+					//return 'text-align:center;';
+				}
+			},
+			onPageSizeChange(val) {
+				this.dt.pagination.pageSize = val;
+			},
+			onCurrentPageChange(val) {
+				this.dt.pagination.currentPage = val;
+			},				
+			initSplit(){
+				
+				this.splitInst = Split([this.$refs.leftView.$el, this.$refs.mainView.$el], {
+					sizes: [20, 80],
+					minSize: [0, 0],
+					gutterSize: 5,
+					cursor: 'col-resize',
+					direction: 'horizontal'
+				});
+
+			},
+			onRefreshByTag(){
+
+			},
+			initData(){
+				let rtn = fsHandler.callFsJScript("/matrix/pipe/getPipeList.js").message;
+
+				this.dt.rows = rtn.rows;
+				
+				_.extend(this.dt, {columns: _.map(rtn.columns, (v)=>{
+										
+					if(_.isUndefined(v.visible)){
+						_.extend(v, { visible: true });
+					}
+
+					if(!v.render){
+						return v;
+					} else {
+						return _.extend(v, { render: eval(v.render) });
+					}
+					
+				})});
+			},
+			onNewRule(row,index){
+
+			},
+			onUpdateRule(row,index){
+				
+			},
+			onDeleteRule(row,index){
+				
+			}
+		}
+	}
+	</script>
+
+</code>

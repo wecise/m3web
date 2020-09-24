@@ -273,7 +273,7 @@ class SideBar {
                     ldap.id = window.SignedUser_Id;
                     ldap.remark = evt.join(",");
 
-                    let rtn = fsHandler.callFsJScript("/matrix/ldap/action.js", encodeURIComponent(JSON.stringify(ldap))).message;// omdbHandler.putDataToClass(ldap);
+                    let rtn = fsHandler.callFsJScript("/matrix/ldap/action.js", encodeURIComponent(JSON.stringify(ldap))).message;
 
                     if(rtn == 1){
                         this.init();
