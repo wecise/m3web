@@ -1,4 +1,6 @@
-## M3 Portal System  Version 0.9
+## M3 Portal System  
+
+Version 0.9
 
 ## Introduction
 
