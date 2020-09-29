@@ -28,6 +28,7 @@ class ScriptHandler {
         var fm = new FormData();
         fm.append("name", event.name);
         fm.append("version", event.version);
+        fm.append("command", event.command);
         fm.append("remark", event.remark);
         fm.append("uploadfile", event.uploadfile);
         _.forEach(event.tags,(v)=>{

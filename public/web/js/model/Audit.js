@@ -112,12 +112,12 @@ class Audit {
                                                 :width="item.width"
                                                 v-if="item.visible">
                                             </el-table-column>
-                                            <el-table-column label="标签" prop="tags" width="200">
+                                            <el-table-column label="标签" prop="tags" width="120">
                                                 <template slot-scope="scope">
                                                     <mx-tag domain='event' :model.sync="scope.row.tags" :id="scope.row.id" limit="1"></mx-tag>
                                                 </template>
                                             </el-table-column>
-                                            <el-table-column label="操作" width="160">
+                                            <el-table-column label="操作" width="60">
 												<template slot-scope="scope">
 													<el-tooltip content="删除" open-delay="500" placement="top">
                                                         <el-button type="text" @click="onDelete(scope.row,scope.$index)" icon="el-icon-delete"></el-button>
@@ -326,6 +326,9 @@ class Audit {
 
                 // 初始化分隔栏
                 this.initSplit();
+
+                // 默认收起Tag树
+                $(this.$refs.leftView.$el).toggle();
                 
             },
             methods: {

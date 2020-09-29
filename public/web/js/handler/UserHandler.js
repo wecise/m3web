@@ -126,7 +126,9 @@ class UserHandler{
             lastname: event.lastname,
             wechat: event.wechat,
             address: event.address,
-            isactive: event.isactive
+            isactive: event.isactive,
+            isadmin: event.isadmin,
+            status: event.status
         };
 
         if(event.resetPasswd){
@@ -144,7 +146,6 @@ class UserHandler{
             data: JSON.stringify(data),
             beforeSend: function (xhr) {
                 xhr.setRequestHeader("X-Csrf-Token", token);
-                // Pace.restart();
             },
             complete: function (xhr, textStatus) {
                 // 初始化新用户文件系统

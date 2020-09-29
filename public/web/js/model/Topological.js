@@ -755,7 +755,7 @@ class Topological {
             template:   `<div>
                             <el-header style="width:100%;display:flex;height:35px;line-height:35px;padding:0px 0px 0px 10px;">
                                 <el-button type="text" icon="el-icon-arrow-left" @click="$parent.$parent.control.show=false"></el-button>
-                                <el-input v-model="search.term" placeholder="搜索实体、活动关键字" style="width:100%;"
+                                <el-input v-model="search.term" placeholder="搜索实体、活动关键字" style="width:15em;"
                                     @blur="onSearchEntity"
                                     @clear="onClear"
                                     @focus="file.show=false"
@@ -2496,7 +2496,7 @@ class Topological {
                             </el-main>
                         </el-container>`,
             created(){
-                
+                console.log(this.model, this.entity)
             },
             watch: {
                 'kpi.time'(val,oldVal){

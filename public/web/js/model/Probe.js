@@ -525,6 +525,8 @@ class Probe extends Matrix {
                         },
                         servers: {
                             list: [],
+                            lTerm: "",
+                            rTerm: "",
                         },
                         versionTree:{
                             props: {
@@ -632,7 +634,7 @@ class Probe extends Matrix {
                                         <el-table-column type="expand" width="0">
                                             <template slot-scope="props">
                                                 <el-container style="width:90%;height:100%;min-height:40vh;background: #ffffff;">
-                                                    <el-aside style="width:250px;background: #f2f2f2;">
+                                                    <el-aside style="width:200px;background: #f2f2f2;">
                                                         <el-container style="height:100%;">
                                                             <el-header style="height:40px;line-height:40px;">
                                                                 <h4 style="margin:0px;">版本历史</h4>
@@ -780,17 +782,33 @@ class Probe extends Matrix {
                                                                     <el-form label-position="top" label-width="120px" style="background: #ffffff;padding: 10px 20px;">
                                                                         <el-form-item label="选择服务器">
                                                                             <el-transfer
-                                                                                filterable
                                                                                 style="text-align: left; display: inline-block"
                                                                                 :titles="['服务器列表', '已下发服务器']"
-                                                                                :button-texts="['取消下发', '下发']"
+                                                                                :button-texts="['取消下发', '开始下发']"
                                                                                 :data="servers.list"
                                                                                 v-model="props.row.fileObj[props.row.selectedVersion]['deployedServers']"
                                                                                 :props="{
                                                                                     key: 'host',
                                                                                     label: 'host'
                                                                                 }"
-                                                                                @change="((value, direction, movedKeys)=>{ onScriptDeployOrUndeploy(value, direction, movedKeys, props.row) })">
+                                                                                @change="((value, direction, movedKeys)=>{ onScriptDeployOrUndeploy(value, direction, movedKeys, props.row) })"
+                                                                                class="script-deploy-transfer">
+                                                                                <el-input slot="left-footer" style="border:unset;" placeholder="关键字"
+                                                                                    v-model="servers.lTerm"
+                                                                                    @blur="onLeftBlur"
+                                                                                    @keyup.enter.native="onLeftBlur" 
+                                                                                    clearable
+                                                                                    autofocus>
+                                                                                    <i class="el-icon-search el-input__icon" slot="suffix"></i>
+                                                                                </el-input>
+                                                                                <el-input slot="right-footer" style="border:unset;" placeholder="关键字"
+                                                                                    v-model="servers.rTerm"
+                                                                                    @clear="getServerList"
+                                                                                    @blur="onRightBlur" 
+                                                                                    @keyup.enter.native="onRightBlur"
+                                                                                    clearable>
+                                                                                    <i class="el-icon-search el-input__icon" slot="suffix"></i>
+                                                                                </el-input>
                                                                                 <div slot-scope="{ option }">
                                                                                     #{ option.host }# 
                                                                                     <span v-if="option.iszabbix == 1"> - #{ option.iszabbix | pickZabbix }# </span>
@@ -798,11 +816,13 @@ class Probe extends Matrix {
                                                                                     <el-popover
                                                                                         placement="top-start"
                                                                                         :title="option.host"
-                                                                                        width="300"
+                                                                                        width="30vw"
                                                                                         trigger="click"
                                                                                         popper-class="dataTablePopper">
-                                                                                        <el-form>
-                                                                                            <el-form-item :label="k" v-for="v,k in option.config">#{v}#</el-form-item>
+                                                                                        <el-form label-width="120px">
+                                                                                            <el-form-item :label="k" v-for="v,k in option.config">
+                                                                                                <el-input :value="v"></el-input>
+                                                                                            </el-form-item>
                                                                                         </el-form>
                                                                                         <el-button slot="reference" type="text" icon="el-icon-postcard"></el-button>
                                                                                     </el-popover>
@@ -1035,8 +1055,16 @@ class Probe extends Matrix {
                             //return 'text-align:center;';
                         }
                     },
+                    onLeftBlur(){
+                        let rtn = fsHandler.callFsJScript("/matrix/depot/getServerList.js", encodeURIComponent(this.servers.lTerm) ).message;
+                        this.$set(this.servers,'list', rtn);
+                    },
+                    onRightBlur(term){
+                        let rtn = fsHandler.callFsJScript("/matrix/depot/getServerList.js", encodeURIComponent(term) ).message;
+                        this.$set(this.servers,'list', rtn);
+                    },
                     getServerList(){
-                        let rtn = fsHandler.callFsJScript("/matrix/depot/getServerList.js",null).message;
+                        let rtn = fsHandler.callFsJScript("/matrix/depot/getServerList.js", null).message;
                         this.$set(this.servers,'list', rtn);
                     },
                     pickFiles(row){
@@ -1404,7 +1432,8 @@ class Probe extends Matrix {
                                 self.$set(row, 'versionObj', _.values(versionObj));
                                 self.$set(row, 'selectedVersion', row.version);
     
-                                console.log('row  ',row)
+                                console.table(row)
+                                console.table(rtn)
     
                                 // 初始化命令编辑器
                                 _.delay(()=>{
@@ -1430,7 +1459,7 @@ class Probe extends Matrix {
                                 },2000)
     
                             } catch(err){
-                                console.log(err)
+                                console.error(err)
                                 _.extend(row, { activeTab: 'script' } );
                             } 
                         };
@@ -1444,7 +1473,6 @@ class Probe extends Matrix {
                                 self.$set(row, 'expand', !row.expand);
                             },1000)
                         } else {
-                            console.log(123,_.now())
                             setTimeout( loadData, 50 );
                         }
 
@@ -1517,7 +1545,7 @@ class Probe extends Matrix {
 							eventHub.$emit("TAG-TREE-REFRESH");
 							
 						} catch(err){
-							console.log(err);
+							console.error(err);
 						}
                     },
                     tagDelete(tag, row){
@@ -1530,7 +1558,7 @@ class Probe extends Matrix {
 							eventHub.$emit("TAG-TREE-REFRESH");
 							
 						} catch(err){
-							console.log(err);
+							console.error(err);
 						}
                     },
                     // 脚本刷新
@@ -1606,7 +1634,6 @@ class Probe extends Matrix {
                         else {
                             
                             this.dialog.scriptDeploy.show = true;
-                            
                             let editor = ace.edit(this.$refs['commandRef'+row.id]);
                             this.$set(row,'command', _.trim(editor.getValue()));
 
@@ -1773,7 +1800,7 @@ class Probe extends Matrix {
                                                             </el-header>
                                                             <el-main style="height:100%;">
                                                                 <el-form label-position="left" label-width="120px" ref="form">
-                                                                    <el-form-item label-width="0px" style="border:1px dashed #dddddd;padding:10px;" prop="file">
+                                                                    <el-form-item label-width="0px" style="border:1px dashed #dddddd;padding:10px;" required>
                                                                         <el-upload
                                                                             :on-change="onFileChange"
                                                                             :before-remove="onBeforeRemove"
@@ -1785,19 +1812,19 @@ class Probe extends Matrix {
                                                                             <div slot="tip" class="el-upload__tip">支持上传单个脚本文件、支持zip格式脚本压缩包</div>
                                                                             </el-upload>
                                                                     </el-form-item>
-                                                                    <el-form-item label="脚本库名称" prop="name">
-                                                                        <el-input v-model="model.item.name" required="required" ></el-input>
+                                                                    <el-form-item label="脚本库名称" required>
+                                                                        <el-input v-model="model.item.name"></el-input>
                                                                     </el-form-item>
-                                                                    <el-form-item label="脚本库版本" prop="version">
-                                                                        <el-input v-model="model.item.version" required="required"></el-input>
+                                                                    <el-form-item label="脚本库版本" required>
+                                                                        <el-input v-model="model.item.version"></el-input>
                                                                     </el-form-item>
-                                                                    <!--el-form-item label="执行命令" prop="command">
-                                                                        <el-input v-model="model.item.command"></el-input>
-                                                                    </el-form-item-->
-                                                                    <el-form-item label="脚本库说明" prop="remark">
+                                                                    <el-form-item label="执行命令">
+                                                                        <el-input type="textarea" :row="6" v-model="model.item.command"></el-input>
+                                                                    </el-form-item>
+                                                                    <el-form-item label="脚本库说明" required>
                                                                         <el-input type="textarea" :row="6" v-model="model.item.remark"></el-input>
                                                                     </el-form-item>
-                                                                    <el-form-item label="添加标签" prop="tags">
+                                                                    <el-form-item label="添加标签">
                                                                         <mx-tag domain='script' :model.sync="model.item.tags" id="null" limit="8"></mx-tag>
                                                                     </el-form-item>
                                                                 </el-form>
@@ -2038,7 +2065,7 @@ class Probe extends Matrix {
                                 <el-aside ref="leftView" style="background:#f2f2f2;margin: -10px 0px -10px -10px;">
                                     <mx-tag-tree :model="{parent:'/depot',name:'script_tree_data.js',domain:'script'}" :fun="onRefreshByTag" ref="scriptTagTree"></mx-tag-tree>
                                 </el-aside>
-                                <el-main style="padding:0px;width:100%;overflow:hidden;" ref="mainView">
+                                <el-main style="padding:10px 10px 0px 10px;width:100%;overflow:hidden;" ref="mainView">
                                     <el-container style="height:100%;">
                                         <el-header class="job-view-header" style="height: 40px;line-height: 40px;padding: 0px;">
                                             <search-base-component :options="options"

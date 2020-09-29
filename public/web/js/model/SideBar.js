@@ -440,10 +440,6 @@ class SideBar {
                 }
             },
             methods: {
-                init(){
-                    
-
-                },
                 onSelect(key, keyPath) {
                     if(key==='home'){
                         sideBar.appAsHome({url:'/home'});
@@ -451,9 +447,8 @@ class SideBar {
                         window.open(`/user/logout/${window.COMPANY_NAME}`,'_parent');
                     } else if(key==='fullscreen'){
                         //mx.fullScreen();
-                    }
-                    else {
-                        window.open('/matrix/'+key,"_blank");
+                    } else {
+                        window.open('/matrix/'+key, '_blank');
                     }
                 }
             }
@@ -732,9 +727,7 @@ class SideBar {
                     this.init();
                 },
                 onToggle(){
-                    console.log(1,this.isCollapse)
                     this.isCollapse = !this.isCollapse;
-                    console.log(2,this.isCollapse)
                     
                     $(".sidebar-toggle-play").removeClass("toggle animated flash");
                     $("#sidebar").css('display','');

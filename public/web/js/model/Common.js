@@ -52,7 +52,7 @@ Vue.component("mx-app-deploy",{
                     <el-main>
                         <el-tabs v-model="app.activeTab" ref="tabs">
                             <el-tab-pane name="app">
-                                <span slot="label">
+                                <span slot="label" style="font-size:16px;">
                                     <i class="el-icon-s-platform"></i> 应用信息
                                 </span>
                                 <el-container style="height:100%;">
@@ -93,7 +93,7 @@ Vue.component("mx-app-deploy",{
                                 </el-container>
                             </el-tab-pane>
                             <el-tab-pane name="icon">
-                                <span slot="label">
+                                <span slot="label" style="font-size:16px;">
                                     <i class="el-icon-picture"></i> 选择图标
                                 </span>
                                 <el-container style="height:100%;">

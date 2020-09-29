@@ -4319,9 +4319,10 @@
                         }).then(() => {
                             
                             // entity action
-                            let sourceId = cell.getId().split("-")[0];
-                            let targetId = cell.getId().split("-")[1];
-                            let type = cell.getId().split("-")[2];//cell.getValue();
+                            let sourceId = cell.source.getId();//cell.getId().split("-")[0];
+                            let targetId = cell.target.getId();//cell.getId().split("-")[1];
+                            let type = _.find(this.entity.edges.list, {remedy:cell.getValue()}).name;//cell.getId().split("-")[2];//cell.getValue();
+                            
                             let edges = {
                                 id: sourceId, 
                                 type: type, 
@@ -4350,8 +4351,8 @@
                                 })
                             }
 
-                        }).catch(() => {
-                            
+                        }).catch((err) => {
+                            console.error(err);
                         });
                 }
             },
