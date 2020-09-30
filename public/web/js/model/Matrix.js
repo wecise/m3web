@@ -17,19 +17,9 @@ class Matrix {
         this.GLOBAL = null;
 
         this.name = 'M³ Platform';
-        this.version = '0.8';
+        this.version = '0.9';
         this.theme = 'DARK';
         this.env = "product";
-
-        this.username = window.SignedUser_UserName;
-        this.fullname = window.SignedUser_FullName;
-        this.isadmin = window.SignedUser_IsAdmin;
-        this.remark = window.SignedUser_Remark;
-
-        this.companyName = window.COMPANY_NAME;
-        this.companyLogo = window.COMPANY_LOGO;
-        this.companyFavicon = window.COMPANY_FAVICON;
-        this.companyTitle = window.COMPANY_TITLE;
 
         this.currentUserTemplate = null;
         this.searchJson = null;
@@ -58,10 +48,6 @@ class Matrix {
 
     init() {
         mx.global();
-        mx.setLogo();
-        mx.setFavIcon();
-        mx.setTheme();
-        
         document.addEventListener('DOMContentLoaded', function(){
             // 模式监控
             mx.viewListen();
@@ -69,8 +55,11 @@ class Matrix {
             mx.mxAlert();
             // 加载当前用户模板
             mx.setCurrentUserTemplate();
+            mx.setTheme();
             // 设置title
             mx.setTitle();
+            mx.setLogo();
+            mx.setFavIcon();
 
             document.addEventListener('click', function (event) {
 
@@ -104,21 +93,26 @@ class Matrix {
     // 设置Logo
     setLogo(){
         $("#company_logo").ready(function(){
-            $("#company_logo").attr("src", mx.companyLogo);
+            $("#company_logo").attr("src", mxAuth.signedUser.Company.logo);
         })
     }
 
     // 设置Fav
     setFavIcon(){
-        $("#favicon").attr("href", mx.companyFavicon);
+        $("#favicon").attr("href", mxAuth.signedUser.Company.icon);
     }
 
     // 设置Title
     setTitle(){
         try{
-            document.title = mx.companyTitle;
-
+            
             let pathName = window.location.pathname;
+            
+            if(_.isEmpty(pathName)){
+                document.title = mxAuth.signedUser.Company.title;
+                return false;
+            }
+            
             let name = fsHandler.callFsJScript("/matrix/system/getAppNameByUrl.js", encodeURIComponent(pathName)).message;
             
             if(!_.isEmpty(name)){
@@ -127,9 +121,12 @@ class Matrix {
                 } else {
                     document.title = name['enname'];
                 }
+            } else {
+                document.title = mxAuth.signedUser.Company.title;
             }
+            
         } catch(err){
-            document.title = mx.companyTitle;
+            document.title = mxAuth.signedUser.Company.title;
         }
     }
 
@@ -451,15 +448,15 @@ class Matrix {
             data: "/matrix/utils/global.js",
             dataType: 'json',
             contentType: false,
-            beforeSend: function(xhr) {
+            beforeSend(xhr) {
             },
-            complete: function(xhr, textStatus) {
+            complete(xhr, textStatus) {
             },
-            success: function(data, textStatus, xhr) {
+            success(data, textStatus, xhr) {
                 mx.global = data.message;
             },
-            error: function(xhr, textStatus, errorThrown) {
-                console.log(xhr.responseText);
+            error(xhr, textStatus, errorThrown) {
+                console.error(xhr.responseText);
             }
         })
         

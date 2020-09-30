@@ -1,8 +1,13 @@
-## M3 Portal System  
+## M³ Portal System  
 
 Version 0.9
 
 ## Introduction
+m3web is a portal system for M³.
+
+Doc
+
+please access the wecise.com.
 
 
 ## License

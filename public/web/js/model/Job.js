@@ -645,15 +645,13 @@ class Job extends Matrix {
                                     <el-tab-pane v-for="(item,index) in layout.main.tabs" :key="item.name" :label="item.title" :name="item.name">
                                         <div v-if="item.type==='main'">
                                             <div class="job-view-summary-control">
-                                                <el-tooltip :content="control.ifRefresh==1?'自动刷新启用中':'自动刷新关闭中'" placement="top" open-delay="500">
+                                                <el-tooltip :content="control.refresh.enable?'自动刷新启用中':'自动刷新关闭中'" placement="top" open-delay="500">
                                                     <div>
-                                                        #{control.ifRefresh==1?'自动刷新':'自动刷新'}#
+                                                        #{control.refresh.enable?'自动刷新':'自动刷新'}#
                                                         <el-switch
-                                                        v-model="control.ifRefresh"
+                                                        v-model="control.refresh.enable"
                                                         active-color="#13ce66"
                                                         inactive-color="#dddddd"
-                                                        active-value="1"
-                                                        inactive-value="0"
                                                         @change="toggleSummaryByRefresh">
                                                         </el-switch>
                                                     </div>
@@ -719,7 +717,11 @@ class Job extends Matrix {
                 },
                 control: {
                     ifSmart: '0',
-                    ifRefresh: '0'
+                    refresh: {
+                        enable: true,
+                        inst: null,
+                        interval: 5 * 1000
+                    }
                 },
                 // 搜索组件结构
                 model: {
@@ -766,7 +768,27 @@ class Job extends Matrix {
                         }
                     },
                     deep:true
-                }
+                },
+                'control.refresh.enable':{
+                    handler(val,oldVal){
+                        if(val) {
+                            this.control.refresh.inst = setInterval(()=>{
+                                this.$refs.searchRef.search();
+                            },this.control.refresh.interval);
+                            this.$message({
+                                type: "info",
+                                message: "自动刷新开启"
+                            })
+                        } else {
+                            clearInterval(this.control.refresh.inst);
+                            this.$message({
+                                type: "info",
+                                message: "自动刷新关闭"
+                            })
+                        }
+                    },
+                    immediate:true
+                },
             },
             filters: {
                 pickTitle(item,model,index){
@@ -795,6 +817,9 @@ class Job extends Matrix {
                 try {
                     // 列表容器高度
                     this.cHeight = cHeight;
+
+                    // 状态刷新标志
+                    this.control.refresh.enable = (localStorage.getItem("JOB-LIST-IFREFRESH") == 'true');
 
                     // 初始化term
                     let term = decodeURIComponent(window.atob(mx.urlParams['term']));
@@ -875,17 +900,9 @@ class Job extends Matrix {
                     window.EVENT_VIEW = event;
                 },
                 toggleSummaryByRefresh(evt){
-                    const self = this;
                     
-                    if(evt==1) {
-                        window.intervalListener = setInterval(function(){
-                            self.$refs.searchRef.search();
-                        },5000)
-                    } else {
-                        clearInterval(window.intervalListener);
-                    }
-
-                    this.control.ifRefresh = evt;
+                    this.control.refresh.enable = evt;
+                    localStorage.setItem("JOB-LIST-IFREFRESH", evt);
                     
                     // RESIZE Summary
                     eventHub.$emit("WINDOW-RESIZE-EVENT");

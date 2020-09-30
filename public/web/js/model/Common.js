@@ -254,72 +254,85 @@ Vue.component("mx-fs-editor",{
         }
     },
     template:  `<el-container style="height: 100%;">
-                    <el-header style="height:30px;line-height:30px;background-color:#f2f2f2;border-bottom:1px solid #ddd;">
-                        <el-dropdown style="padding-right: 10px;cursor:pointer;" trigger="click">
-                            <span class="el-dropdown-link">
-                                文件
-                            </span>
-                            <el-dropdown-menu slot="dropdown">
-                                
-                                <el-dropdown-item @click.native="onNewProject">新建项目</el-dropdown-item>
-                                <el-dropdown-item @click.native="onNewFile">新建文件</el-dropdown-item>
+                    <el-header style="background-color:#f2f2f2;border-bottom:1px solid #ddd;padding:5px 10px 0px 10px;height:55px;">
+                        <div>
+                            <el-dropdown style="padding-right: 10px;cursor:pointer;" trigger="click">
+                                <span class="el-dropdown-link">
+                                    文件
+                                </span>
+                                <el-dropdown-menu slot="dropdown">
+                                    
+                                    <el-dropdown-item @click.native="onNewProject">新建项目</el-dropdown-item>
+                                    <el-dropdown-item @click.native="onNewFile">新建文件</el-dropdown-item>
 
-                                <el-dropdown-item @click.native="onReload" divided>打开</el-dropdown-item>
-                                <el-dropdown-item @click.native="onReload">重打开</el-dropdown-item>
-                                
-                                <el-dropdown-item @click.native="onSave" divided>保存  ctrl+s</el-dropdown-item>
-                                <el-dropdown-item @click.native="file.dialogSaveAs.visible=true">另存为</el-dropdown-item>
+                                    <el-dropdown-item @click.native="onReload" divided>打开</el-dropdown-item>
+                                    <el-dropdown-item @click.native="onReload">重打开</el-dropdown-item>
+                                    
+                                    <el-dropdown-item @click.native="onSave" divided>保存  ctrl+s</el-dropdown-item>
+                                    <el-dropdown-item @click.native="file.dialogSaveAs.visible=true">另存为</el-dropdown-item>
 
-                                <el-dropdown-item @click.native="onCloseTab" divided>关闭当前页</el-dropdown-item>
-                                <el-dropdown-item @click.native="onCloseWin">关闭窗口</el-dropdown-item>
-                            </el-dropdown-menu>
-                        </el-dropdown>
-                        <el-dropdown style="padding-right: 10px;cursor:pointer;" trigger="click">
-                            <span class="el-dropdown-link">
-                                编辑
-                            </span>
-                            <el-dropdown-menu slot="dropdown">
-                                <el-dropdown-item @click.native="onUndo">撤销</el-dropdown-item>
-                                <el-dropdown-item @click.native="onUndo">重做</el-dropdown-item>
-                                <el-dropdown-item :class="'copy-'+tabs.activeIndex" @click="onCopy" divided>复制</el-dropdown-item>
-                                <el-dropdown-item @click.native="onPaste">粘贴</el-dropdown-item>
-                                <el-dropdown-item @click.native="onSelect">选择</el-dropdown-item>
-                                <el-dropdown-item @click.native="onRemove" divided>清除</el-dropdown-item>
-                            </el-dropdown-menu>
-                        </el-dropdown>
-                        
-                        <el-dropdown style="padding-right: 10px;cursor:pointer;" trigger="click">
-                            <span class="el-dropdown-link">
-                                运行
-                            </span>
-                            <el-dropdown-menu slot="dropdown">
-                                <el-dropdown-item @click.native="onSaveAndPlay">运行</el-dropdown-item>
-                                <el-dropdown-item @click.native="onSaveAndPlay" divided>预览</el-dropdown-item>
-                                <el-dropdown-item @click.native="onSaveAndPlay" divided>日志</el-dropdown-item>
-                            </el-dropdown-menu>
-                        </el-dropdown>   
+                                    <el-dropdown-item @click.native="onCloseTab" divided>关闭当前页</el-dropdown-item>
+                                    <el-dropdown-item @click.native="onCloseWin">关闭窗口</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </el-dropdown>
+                            <el-dropdown style="padding-right: 10px;cursor:pointer;" trigger="click">
+                                <span class="el-dropdown-link">
+                                    编辑
+                                </span>
+                                <el-dropdown-menu slot="dropdown">
+                                    <el-dropdown-item @click.native="onUndo">撤销</el-dropdown-item>
+                                    <el-dropdown-item @click.native="onUndo">重做</el-dropdown-item>
+                                    <el-dropdown-item :class="'copy-'+tabs.activeIndex" @click="onCopy" divided>复制</el-dropdown-item>
+                                    <el-dropdown-item @click.native="onPaste">粘贴</el-dropdown-item>
+                                    <el-dropdown-item @click.native="onSelect">选择</el-dropdown-item>
+                                    <el-dropdown-item @click.native="onRemove" divided>清除</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </el-dropdown>
+                            
+                            <el-dropdown style="padding-right: 10px;cursor:pointer;" trigger="click">
+                                <span class="el-dropdown-link">
+                                    运行
+                                </span>
+                                <el-dropdown-menu slot="dropdown">
+                                    <el-dropdown-item @click.native="onSaveAndPlay">运行</el-dropdown-item>
+                                    <el-dropdown-item @click.native="onSaveAndPlay" divided>预览</el-dropdown-item>
+                                    <el-dropdown-item @click.native="onSaveAndPlay" divided>日志</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </el-dropdown>   
 
-                        <!--el-dropdown style="padding-right: 10px;cursor:pointer;" trigger="click">
-                            <span class="el-dropdown-link">
-                                发布
-                            </span>
-                            <el-dropdown-menu slot="dropdown">
-                                <el-dropdown-item @click.native="onDeploy">发布为应用</el-dropdown-item>
-                            </el-dropdown-menu>
-                        </el-dropdown-->    
-                        
-                        <el-tooltip content="主题" open-delay="500">
-                            <el-button type="text" :class="'editor-select-theme-'+tabs.activeIndex" v-show="!_.isEmpty(tabs.list)" style="float:right;"><i class="fas fa-tshirt"></i> 主题</el-button>
-                        </el-tooltip>
+                            <!--el-dropdown style="padding-right: 10px;cursor:pointer;" trigger="click">
+                                <span class="el-dropdown-link">
+                                    发布
+                                </span>
+                                <el-dropdown-menu slot="dropdown">
+                                    <el-dropdown-item @click.native="onDeploy">发布为应用</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </el-dropdown-->    
+                            
+                            <el-tooltip content="主题" open-delay="500">
+                                <el-button type="text" :class="'editor-select-theme-'+tabs.activeIndex" v-show="!_.isEmpty(tabs.list)" style="float:right;"><i class="fas fa-tshirt"></i> 主题</el-button>
+                            </el-tooltip>
 
-                        <!-- 保存窗口 -->
-                        <el-dialog :title="file.dialogSaveAs.title" :visible.sync="file.dialogSaveAs.visible">
-                            <mx-fs-saveas :dfsRoot="tree.root" ftype="xml" ref="dfsSaveas"></mx-fs-saveas>
-                            <div slot="footer" class="dialog-footer">
-                                <el-button @click="file.dialogSaveAs.visible = false">取 消</el-button>
-                                <el-button type="primary" @click="onFileSaveAs">另存为</el-button>
-                            </div>
-                        </el-dialog>
+                            <!-- 保存窗口 -->
+                            <el-dialog :title="file.dialogSaveAs.title" :visible.sync="file.dialogSaveAs.visible">
+                                <mx-fs-saveas :dfsRoot="tree.root" ftype="xml" ref="dfsSaveas"></mx-fs-saveas>
+                                <div slot="footer" class="dialog-footer">
+                                    <el-button @click="file.dialogSaveAs.visible = false">取 消</el-button>
+                                    <el-button type="primary" @click="onFileSaveAs">另存为</el-button>
+                                </div>
+                            </el-dialog>
+                        </div>
+                        <div>  
+                            <el-tooltip content="保存" placement="bottom" open-delay="500">
+                                <el-button type="text" icon="el-icon-edit" @click="onSave"></el-button>
+                            </el-tooltip>
+                            <el-tooltip content="另存为" placement="bottom" open-delay="500">
+                                <el-button type="text" icon="el-icon-edit-outline" @click="file.dialogSaveAs.visible=true"></el-button>
+                            </el-tooltip>
+                            <el-tooltip content="运行" placement="bottom" open-delay="500">
+                                <el-button type="text" icon="el-icon-caret-right" @click="onSaveAndPlay"></el-button>
+                            </el-tooltip>
+                        </div>
                     </el-header>
                     <el-container style="height: 100%;min-height:300px;border-top:1px solid #fff;">
                         <el-aside style="background-color:#f2f2f2;width:200px;overflow:hidden;" ref="leftView">

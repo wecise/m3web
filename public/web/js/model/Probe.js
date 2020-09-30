@@ -1787,51 +1787,40 @@ class Probe extends Matrix {
                                 fileList: [],
                                 activeName: 'first'
                             },
-                            template:   `<el-container style="height:100%;">
-                                            <el-main style="height:100%;overflow:hidden;">
-                                                <el-tabs v-model="activeName" type="border-card">
-                                                    <el-tab-pane name="first" style="height:100%;">
-                                                        <div slot="label">
-                                                            <i class="header-icon el-icon-upload"></i> 选择脚本，上传到脚本库
-                                                        </div>
-                                                        <el-container style="height:calc(100% - 80px);">
-                                                            <el-header style="height:40px;line-height:40px;text-align:right;">
-                                                                <el-button type="success" icon="el-icon-upload2" @click="onSave">上传到脚本库</el-button>    
-                                                            </el-header>
-                                                            <el-main style="height:100%;">
-                                                                <el-form label-position="left" label-width="120px" ref="form">
-                                                                    <el-form-item label-width="0px" style="border:1px dashed #dddddd;padding:10px;" required>
-                                                                        <el-upload
-                                                                            :on-change="onFileChange"
-                                                                            :before-remove="onBeforeRemove"
-                                                                            :file-list="fileList"
-                                                                            :limit="1"
-                                                                            multiple="false"
-                                                                            :auto-upload="false">
-                                                                            <el-button icon="el-icon-plus" type="default">选择脚本</el-button>
-                                                                            <div slot="tip" class="el-upload__tip">支持上传单个脚本文件、支持zip格式脚本压缩包</div>
-                                                                            </el-upload>
-                                                                    </el-form-item>
-                                                                    <el-form-item label="脚本库名称" required>
-                                                                        <el-input v-model="model.item.name"></el-input>
-                                                                    </el-form-item>
-                                                                    <el-form-item label="脚本库版本" required>
-                                                                        <el-input v-model="model.item.version"></el-input>
-                                                                    </el-form-item>
-                                                                    <el-form-item label="执行命令">
-                                                                        <el-input type="textarea" :row="6" v-model="model.item.command"></el-input>
-                                                                    </el-form-item>
-                                                                    <el-form-item label="脚本库说明" required>
-                                                                        <el-input type="textarea" :row="6" v-model="model.item.remark"></el-input>
-                                                                    </el-form-item>
-                                                                    <el-form-item label="添加标签">
-                                                                        <mx-tag domain='script' :model.sync="model.item.tags" id="null" limit="8"></mx-tag>
-                                                                    </el-form-item>
-                                                                </el-form>
-                                                            </el-main>
-                                                        </el-container>
-                                                    </el-tab-pane>
-                                                </el-tabs>
+                            template:   `<el-container style="height:calc(100% - 80px);padding:20px;">
+                                            <el-header style="height:40px;line-height:40px;text-align:right;padding:0px;">
+                                                <el-button type="success" icon="el-icon-upload2" @click="onSave">上传到脚本库</el-button>    
+                                            </el-header>
+                                            <el-main style="height:100%;">
+                                                <el-form label-position="left" label-width="120px" ref="form">
+                                                    <el-form-item label-width="0px" style="border:1px dashed #dddddd;padding:10px;" required>
+                                                        <el-upload
+                                                            :on-change="onFileChange"
+                                                            :before-remove="onBeforeRemove"
+                                                            :file-list="fileList"
+                                                            :limit="1"
+                                                            multiple="false"
+                                                            :auto-upload="false">
+                                                            <el-button icon="el-icon-plus" type="default">选择脚本</el-button>
+                                                            <div slot="tip" class="el-upload__tip">支持上传单个脚本文件、支持zip格式脚本压缩包</div>
+                                                            </el-upload>
+                                                    </el-form-item>
+                                                    <el-form-item label="脚本库名称" required>
+                                                        <el-input v-model="model.item.name"></el-input>
+                                                    </el-form-item>
+                                                    <el-form-item label="脚本库版本" required>
+                                                        <el-input v-model="model.item.version"></el-input>
+                                                    </el-form-item>
+                                                    <el-form-item label="执行命令">
+                                                        <el-input type="textarea" :row="6" v-model="model.item.command"></el-input>
+                                                    </el-form-item>
+                                                    <el-form-item label="脚本库说明" required>
+                                                        <el-input type="textarea" :row="6" v-model="model.item.remark"></el-input>
+                                                    </el-form-item>
+                                                    <el-form-item label="添加标签">
+                                                        <mx-tag domain='script' :model.sync="model.item.tags" id="null" limit="8"></mx-tag>
+                                                    </el-form-item>
+                                                </el-form>
                                             </el-main>
                                         </el-container>`,
                             mounted(){
