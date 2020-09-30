@@ -27,8 +27,6 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/tag/mx-tag.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/tag/mx-tag-tree.html"></link>
 
-<link rel="vc" href="{{AppSubUrl}}/web/component/probe/probe-card-component.html"></link>
-
 <link rel="vc" href="{{AppSubUrl}}/web/component/search/search-base-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/search/search-preset-component_{{.Lang}}.html"></link>
 
@@ -44,6 +42,14 @@
 <script src="{{AppSubUrl}}/web/js/model/Script.js"></script>
 <script src="{{AppSubUrl}}/web/js/handler/ProbeHandler.js"></script>
 <script src="{{AppSubUrl}}/web/js/handler/ScriptHandler.js"></script>
+
+<script>
+	$(function(){
+		let probe = new Probe();
+		probe.init();
+		probe.mount("#app");
+	})
+</script>
 
 {{template "base/footer" .}}
 

@@ -250,11 +250,24 @@ Vue.component("mx-fs-editor",{
                     content: "",
                     visible: false
                 }
-            }
+            },
+            toolBar: {
+                left:{
+                    show: true
+                },
+                log: {
+                    show: true
+                },
+                preview: {
+                    show: true
+                }
+            },
+            splitInst: null
         }
     },
     template:  `<el-container style="height: 100%;">
                     <el-header style="background-color:#f2f2f2;border-bottom:1px solid #ddd;padding:5px 10px 0px 10px;height:55px;">
+                        <!-- 菜单栏 -->
                         <div>
                             <el-dropdown style="padding-right: 10px;cursor:pointer;" trigger="click">
                                 <span class="el-dropdown-link">
@@ -295,8 +308,8 @@ Vue.component("mx-fs-editor",{
                                 </span>
                                 <el-dropdown-menu slot="dropdown">
                                     <el-dropdown-item @click.native="onSaveAndPlay">运行</el-dropdown-item>
-                                    <el-dropdown-item @click.native="onSaveAndPlay" divided>预览</el-dropdown-item>
-                                    <el-dropdown-item @click.native="onSaveAndPlay" divided>日志</el-dropdown-item>
+                                    <el-dropdown-item @click.native="toolBar.log.show = !toolBar.log.show" divided>日志</el-dropdown-item>
+                                    <el-dropdown-item @click.native="toolBar.preview.show = !toolBar.preview.show" divided>预览</el-dropdown-item>
                                 </el-dropdown-menu>
                             </el-dropdown>   
 
@@ -309,10 +322,6 @@ Vue.component("mx-fs-editor",{
                                 </el-dropdown-menu>
                             </el-dropdown-->    
                             
-                            <el-tooltip content="主题" open-delay="500">
-                                <el-button type="text" :class="'editor-select-theme-'+tabs.activeIndex" v-show="!_.isEmpty(tabs.list)" style="float:right;"><i class="fas fa-tshirt"></i> 主题</el-button>
-                            </el-tooltip>
-
                             <!-- 保存窗口 -->
                             <el-dialog :title="file.dialogSaveAs.title" :visible.sync="file.dialogSaveAs.visible">
                                 <mx-fs-saveas :dfsRoot="tree.root" ftype="xml" ref="dfsSaveas"></mx-fs-saveas>
@@ -322,7 +331,14 @@ Vue.component("mx-fs-editor",{
                                 </div>
                             </el-dialog>
                         </div>
-                        <div>  
+                        <!-- 工具栏 -->
+                        <div v-if="!_.isEmpty(tabs.list)">  
+                            <el-tooltip content="左边栏" placement="bottom" open-delay="500">
+                                <el-button type="text" :icon="toolBar.left.show?'el-icon-s-fold':'el-icon-s-unfold'" @click="toolBar.left.show = !toolBar.left.show"></el-button>
+                            </el-tooltip>    
+                            <el-tooltip content="重打开" placement="bottom" open-delay="500">
+                                <el-button type="text" icon="el-icon-refresh" @click="onReload"></el-button>
+                            </el-tooltip>    
                             <el-tooltip content="保存" placement="bottom" open-delay="500">
                                 <el-button type="text" icon="el-icon-edit" @click="onSave"></el-button>
                             </el-tooltip>
@@ -332,53 +348,59 @@ Vue.component("mx-fs-editor",{
                             <el-tooltip content="运行" placement="bottom" open-delay="500">
                                 <el-button type="text" icon="el-icon-caret-right" @click="onSaveAndPlay"></el-button>
                             </el-tooltip>
+                            <el-tooltip content="主题" open-delay="500">
+                                <el-button type="text" :class="'M3-EDITOR-THEME-'+tabs.activeIndex" v-show="!_.isEmpty(tabs.list)" style="float:right;">
+                                    <i class="fas fa-tshirt"></i>
+                                </el-button>
+                            </el-tooltip>
                         </div>
                     </el-header>
                     <el-container style="height: 100%;min-height:300px;border-top:1px solid #fff;">
-                        <el-aside style="background-color:#f2f2f2;width:200px;overflow:hidden;" ref="leftView">
+                        <el-aside style="width:200px;background-color:#f2f2f2;overflow:hidden;" ref="leftView">
                             <mx-fs-tree :root="tree.root" v-if="!_.isEmpty(tabs.activeNode)"></mx-fs-tree>
                         </el-aside>
-                        <el-main style="padding:0px;overflow:hidden;" ref="mainView">
-                            <el-card v-if="_.isEmpty(tabs.list)">
-                                <h1>欢迎使用${MATRIX_TITLE} 在线编辑器</h1>
-                                <el-button type="default" @click="onNewProject">新建文件夹</el-button>
-                                <el-button type="default" @click="onNewFile">新建文件</el-button>
-                            </el-card>
-                            <el-tabs v-model="tabs.activeIndex" type="border-card" 
-                                    style="height:100%;" 
-                                    closable 
-                                    @tab-click="onTabClick"
-                                    @tab-remove="tabRemove" v-else>
-                                <el-tab-pane
-                                    :key="item.name"
-                                    v-for="(item, index) in tabs.list"
-                                    :label="item.title"
-                                    :name="item.name"
-                                    style="height:100%;">
-                                    <span slot="label">
-                                        <i class="fas fa-code" style="color:rgb(64, 158, 255);"></i> #{item.model.name}#
-                                        <el-dropdown trigger="click">
-                                            <span class="el-dropdown-link">
-                                                <i class="el-icon-arrow-down"></i>
-                                            </span>
-                                            <el-dropdown-menu slot="dropdown">
-                                                <el-dropdown-item @click.native="onFormat">格式化</el-dropdown-item>
-                                                <el-dropdown-item @click.native="tabClose(0,item)" divided>关闭</el-dropdown-item>
-                                                <el-dropdown-item @click.native="tabClose(1,item)">关闭其它标签页</el-dropdown-item>
-                                                <el-dropdown-item @click.native="tabClose(2,item)">关闭右侧标签页</el-dropdown-item>
-                                                <el-dropdown-item divided>
-                                                    <p style="margin:0px;">所在目录：#{item.model.parent}#</p>
-                                                    <p style="margin:0px;">文件类型：#{item.model.ftype}#</p>
-                                                    <p style="margin:0px;">文件大小：#{mx.bytesToSize(item.model.size)}#</p>
-                                                    <p style="margin:0px;">创建时间：#{moment(item.model.vtime).format("LLL")}#</p>
-                                                </el-dropdown-item>
-                                            </el-dropdown-menu>
-                                        </el-dropdown>
-                                    </span>
-                                    <fs-editor-view :id="item.name" :item="item.model" ref="editor"></fs-editor-view>
-                                </el-tab-pane>
-                            </el-tabs>
-                        </el-main>
+                        <el-container style="height: 100%;" ref="mainView">
+                            <el-main style="padding:0px;overflow:hidden;">
+                                <el-card v-if="_.isEmpty(tabs.list)">
+                                    <h1>欢迎使用${MATRIX_TITLE} 在线编辑器</h1>
+                                    <el-button type="default" @click="onNewProject">新建文件夹</el-button>
+                                    <el-button type="default" @click="onNewFile">新建文件</el-button>
+                                </el-card>
+                                <el-tabs v-model="tabs.activeIndex" type="border-card" 
+                                        style="height:100%;" 
+                                        closable 
+                                        @tab-remove="tabRemove" v-else>
+                                    <el-tab-pane
+                                        :key="item.name"
+                                        v-for="(item, index) in tabs.list"
+                                        :label="item.title"
+                                        :name="item.name"
+                                        style="height:100%;">
+                                        <span slot="label">
+                                            <i class="fas fa-code" style="color:rgb(64, 158, 255);"></i> #{item.model.name}#
+                                            <el-dropdown trigger="click">
+                                                <span class="el-dropdown-link">
+                                                    <i class="el-icon-arrow-down"></i>
+                                                </span>
+                                                <el-dropdown-menu slot="dropdown">
+                                                    <el-dropdown-item @click.native="onFormat">格式化</el-dropdown-item>
+                                                    <el-dropdown-item @click.native="tabClose(0,item)" divided>关闭</el-dropdown-item>
+                                                    <el-dropdown-item @click.native="tabClose(1,item)">关闭其它标签页</el-dropdown-item>
+                                                    <el-dropdown-item @click.native="tabClose(2,item)">关闭右侧标签页</el-dropdown-item>
+                                                    <el-dropdown-item divided>
+                                                        <p style="margin:0px;">所在目录：#{item.model.parent}#</p>
+                                                        <p style="margin:0px;">文件类型：#{item.model.ftype}#</p>
+                                                        <p style="margin:0px;">文件大小：#{mx.bytesToSize(item.model.size)}#</p>
+                                                        <p style="margin:0px;">创建时间：#{moment(item.model.vtime).format("LLL")}#</p>
+                                                    </el-dropdown-item>
+                                                </el-dropdown-menu>
+                                            </el-dropdown>
+                                        </span>
+                                        <fs-editor-view :id="item.name" :item="item.model" :toolBar="toolBar" ref="editor"></fs-editor-view>
+                                    </el-tab-pane>
+                                </el-tabs>
+                            </el-main>
+                        </el-container>
                     </el-container>
                     <el-footer style="height:30px;line-height:30px;background:#f6f6f6;" class="draggable"> 
                         <span>#{moment().format(mx.global.register.format)}#</span>
@@ -395,29 +417,40 @@ Vue.component("mx-fs-editor",{
                     this.tabs.activeNode = _.find(this.tabs.list,{name:val}).model || null;
                 }
             }
+        },
+        'toolBar.left.show':{
+            handler(val,oldVal){
+                this.onToggleLeftBar(val);
+            },
+            immediate:true
+        },
+        'toolBar.preview.show':{
+            handler(val,oldVal){
+                localStorage.setItem('M3-EDITOR-PREVIEW', val);
+            }
+        },
+        'toolBar.log.show':{
+            handler(val,oldVal){
+                localStorage.setItem('M3-EDITOR-LOG', val);
+            }
         }
     },
     mounted() {
-        
         _.delay(()=>{
-            
             this.tabAdd(this.model);
-
-            _.delay(()=>{
-                Split([this.$refs.leftView.$el, this.$refs.mainView.$el], {
-                    sizes: [20, 80],
-                    minSize: [0, 0],
-                    gutterSize: 5,
-                    cursor: 'col-resize',
-                    direction: 'horizontal',
-                });
-            },500)
-            
+            // 初始化分隔栏
+            this.initSplit();
+            // 默认左边栏设置
+            this.onInitToolBar();
         },50)
     },
     methods: {
-        onTabClick(tab){
-            //this.tabs.activeNode = _.find(this.tabs.list,{name:val});
+        onInitToolBar(){
+            this.toolBar.left.show = (localStorage.getItem('M3-EDITOR-LEFTBAR') == 'true');
+            _.delay(()=>{
+                this.toolBar.preview.show = (localStorage.getItem('M3-EDITOR-PREVIEW') == 'true');
+                this.toolBar.log.show = (localStorage.getItem('M3-EDITOR-LOG') == 'true');
+            },800)
         },
         tabClose(key,tab){
             
@@ -435,6 +468,27 @@ Vue.component("mx-fs-editor",{
                 })
             }
         },
+        initSplit(){
+            this.splitInst = Split([this.$refs.leftView.$el, this.$refs.mainView.$el], {
+                sizes: [20, 80],
+                minSize: [0, 100],
+                expandToMin: true,
+                gutterSize: 5,
+                cursor: 'col-resize',
+                direction: 'horizontal',
+            });
+        },
+        onToggleLeftBar(show){
+            if(show){
+                this.splitInst.setSizes([20,80]);
+                $(this.$refs.leftView.$el).show();
+            } else {
+                this.splitInst.setSizes([0,100]);
+                $(this.$refs.leftView.$el).hide();
+            }
+
+            localStorage.setItem('M3-EDITOR-LEFTBAR',show);
+        },  
         tabAdd(item){
             
             try {
@@ -449,8 +503,14 @@ Vue.component("mx-fs-editor",{
                 // 添加tab
                 this.tabs.list.push({name: pID, title: [item.parent,item.name].join("/"), model: _.extend(item,{output:null})})
                 this.tabs.activeIndex = _.last(this.tabs.list).name;
+                
                 _.delay(()=>{
+                    // 初始化主题
                     this.initTheme();
+                    // 设置主题
+                    let theme = localStorage.getItem('M3-EDITOR-THEME');
+                    let editor = ace.edit('editor-'+this.tabs.activeIndex);
+                    editor.setTheme("ace/theme/"+theme);
                 },500)
                 
 
@@ -664,13 +724,13 @@ Vue.component("mx-fs-editor",{
             let id = this.tabs.activeIndex;
             
             $.contextMenu({
-                selector: `.editor-select-theme-${id}`,
+                selector: `.M3-EDITOR-THEME-${id}`,
                 trigger: 'left',
                 callback: function (key, options) {
                     if(key !== 'bright' && key !== 'dark'){
                         let editor = ace.edit('editor-'+id);
                         editor.setTheme("ace/theme/"+key);
-                        localStorage.setItem(`editor-select-theme-${id}`,key);
+                        localStorage.setItem('M3-EDITOR-THEME',key);
                     }
                 },
                 items: {

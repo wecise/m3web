@@ -1175,7 +1175,8 @@
                 Vue.component("fs-editor-view",{
                     props:{
                         id: String,
-                        item: Object
+                        item: Object,
+                        toolBar: Object
                     },
                     data() {
                         return{
@@ -1199,12 +1200,14 @@
                                             showToolsBar="false"
                                             showStatusBar="false"></fs-editor-component>
                                     </el-main>
-                                    <el-footer style="background-color:#ddd;overflow:hidden;padding:0px;height:200px;" ref="footerView">
-                                        <el-tabs value="result" type="border-card" style="height:100%;">
-                                            <el-tab-pane label="日志" name="log" style="height:100%;">
+                                    <el-footer style="background-color:#ddd;overflow:hidden;padding:0px;height:200px;" ref="footerView" v-if="toolBar.log.show || toolBar.preview.show">
+                                        <el-tabs value="preview" type="border-card" style="height:100%;" closable @tab-remove="onRemoveTab">
+                                            <el-tab-pane name="log" style="height:100%;" v-if="toolBar.log.show">
+                                                <span slot="label">日志</span>
                                                 <fs-editor-log-console :id="item.fullname" v-if="!_.isEmpty(item)"></fs-editor-log-console> 
                                             </el-tab-pane>
-                                            <el-tab-pane label="预览" name="result" style="height:100%;overflow:auto;padding-top: 1px;">
+                                            <el-tab-pane name="preview" style="height:100%;overflow:auto;padding-top: 1px;" v-if="toolBar.preview.show">
+                                                <span slot="label">预览</span>
                                                 <fs-editor-view-by-html :id="'output-'+id" :output="item" v-if="item.ftype=='html'" style="height:100%;"></fs-editor-view-by-html>
                                                 <fs-editor-view-by-other :id="'output-'+id" :output="item" style="height:100%;" v-else></fs-editor-view-by-other>
                                             </el-tab-pane>
@@ -1258,6 +1261,11 @@
                                 return 'javascript';
                             }
                             
+                        },
+                        onRemoveTab(targetName){
+                            if(_.isEmpty(targetName)) return false;
+                            
+                            this.toolBar[targetName].show = false;
                         }
                     }
     

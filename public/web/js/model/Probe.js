@@ -60,9 +60,8 @@ class Probe extends Matrix {
 
         // 组件实例化
         VueLoader.onloaded(["ai-robot-component",
-            "mx-tag",
-            "mx-tag-tree",
-            "probe-card-component"], function () {
+                            "mx-tag",
+                            "mx-tag-tree"], function () {
             
             
             // 探针管理
@@ -92,7 +91,7 @@ class Probe extends Matrix {
                                         <el-button type="text" icon="el-icon-s-fold" @click="onToggle"></el-button>
                                     </el-tooltip>
                                     <el-tooltip content="刷新" open-delay="500" placement="top">
-                                        <el-button type="text" icon="el-icon-refresh" @click="$root.getProbeList"></el-button>
+                                        <el-button type="text" icon="el-icon-refresh" @click="onRefresh"></el-button>
                                     </el-tooltip>
                                     <el-tooltip content="导出" delay-time="500">
                                         <el-dropdown @command="onExport">
@@ -122,7 +121,8 @@ class Probe extends Matrix {
                                         @selection-change="onSelectionChange"
                                         @current-change="onCurrentChange"
                                         v-loading="loading"
-                                        ref="table">
+                                        ref="table"
+                                        v-if="!_.isEmpty(dt.rows)">
                                         <!--el-table-column type="selection" align="center"></el-table-column--> 
                                         <el-table-column width="120">
                                             <template slot-scope="scope" v-if="!_.isEmpty(scope.row.depot)">
@@ -186,7 +186,7 @@ class Probe extends Matrix {
                                         </el-table-column>
                                         <el-table-column label="Toe探针" width="120">
                                             <template slot-scope="scope">
-                                                <el-tooltip content="启动" open-delay="500" v-if="scope.row.agentstatus.toe == '1'">
+                                                <el-tooltip content="启动" open-delay="500" v-if="!_.isEmpty(scope.row.agentstatus) && scope.row.agentstatus.toe == '1'">
                                                     <el-button type="text">
                                                         启动中
                                                     </el-button>
@@ -238,7 +238,7 @@ class Probe extends Matrix {
                     'model.rows': {
                         handler(val,oldVal){
                             if(val !== oldVal){
-                                this.dt.rows = [];
+                                //this.dt.rows = [];
                                 this.initData();
                             }
                             this.layout();
@@ -329,6 +329,10 @@ class Probe extends Matrix {
                     },
                     onRowDblclick(row, column, event){
                         
+                    },
+                    onRefresh(){
+                        this.$root.$refs.probeView.options.term = "";
+                        this.$root.$refs.probeView.$refs.searchRef.search();
                     },
                     onToogleExpand(row,index){
 
@@ -1965,35 +1969,95 @@ class Probe extends Matrix {
             })
 
             Vue.component("probe-view", {
-                props: {
-                    model: Object
-                },
+                delimiters: ['#{', '}#'],
                 data(){
                     return {
-                        splitInst: null
+                        model: {},
+                        splitInst: null,
+                        options: {
+                            // 视图定义
+                            view: {
+                                eidtEnable: false,
+                                show: false,
+                                value: "all"
+                            },
+                            // 搜索窗口
+                            window: { name:"所有", value: ""},
+                            // 输入
+                            term: "",
+                            autoSearch: true,
+                            // 指定类
+                            class: "#/matrix/system/hostinfo:",
+                            // 指定api
+                            api: {parent: "probe",name: "getProbeList.js"},
+                            // 其它设置
+                            others: {
+                                // 是否包含历史数据
+                                ifHistory: false,
+                                // 是否包含Debug信息
+                                ifDebug: false,
+                                // 指定时间戳
+                                forTime:  ' for vtime ',
+                            }
+                        }
                     }
                 },
                 template: `<el-container style="height:calc(100vh - 145px);">
                                 <el-aside style="background:#f2f2f2;width:20%;margin: -10px 0px -10px -10px;" ref="leftView">
                                     <mx-tag-tree :model="{parent:'/probe',name:'probe_tree_data.js',domain:'probe'}" :fun="onRefreshByTag" ref="probeTagTree"></mx-tag-tree>
                                 </el-aside>
-                                <el-main style="padding:0px;width:80%;" ref="mainView">
-                                    <el-container style="height:100%;">
-                                        <el-header style="height:120px;padding:0px;">
-                                            <probe-card-component :model="model.summary"></probe-card-component>
+                                <el-main style="padding:0px;width:80%;height:100%;overflow:hidden;" ref="mainView">
+                                    <el-container style="height:100%;display:block;">
+                                        <el-header style="height:auto;padding:0px;" v-if="!_.isEmpty(model)">
+                                            <el-button type="primary" v-for="item in model.summary"
+                                                style="max-width: 25%;width: 20%;height:auto;min-height:90px;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);">
+                                                <h3>#{item.name}#</h3>
+                                                <p>
+                                                    #{item.count}#
+                                                </p>
+                                            </el-button>
                                         </el-header>
-                                        <el-main style="padding:0px;overflow:hidden;">
-                                            <probe-manage :model="model.list"></probe-manage>
+                                        <el-main style="padding:10px;height:100%;overflow:hidden;">
+                                            <el-container style="height: calc(100% - 75px);">
+                                                <el-header class="probe-view-header" style="height: 40px;line-height: 40px;padding: 0px;background: #dddddd;display: inline-table;">
+                                                    <search-base-component :options="options"
+                                                                        ref="searchRef"
+                                                                        class="grid-content"></search-base-component>
+                                                </el-header>
+                                                <el-main style="padding:10px 0px;">
+                                                    <probe-manage :model="model.list" ref="probeManageRef"></probe-manage>
+                                                </el-main>
+                                            </el-container>
                                         </el-main>
                                     </el-container>
                                 </el-main>
                             </el-container>`,
                 mounted(){
                     this.$nextTick().then(()=>{
-                        this.initSplitH();
+                        let init = ()=>{
+                            if($(this.$refs.probeManageRef.$el).is(':visible')){
+                                this.initSplitH();
+                            } else {
+                                setTimeout(init,50);
+                            }
+                        }
+                        init();
+
+                        // 数据设置
+                        this.setData();
+
+                        // watch数据更新
+                        this.$watch(
+                            "$refs.searchRef.result",(val, oldVal) => {
+                                this.setData();
+                            }
+                        );
                     })   
                 },
                 methods: {
+                    setData(){
+                        this.$set(this, 'model', this.$refs.searchRef.result);
+                    },
                     initSplitH(){
                         this.splitInst = Split([this.$refs.leftView.$el, this.$refs.mainView.$el], {
                             sizes: [20, 80],
@@ -2012,7 +2076,8 @@ class Probe extends Matrix {
                         $(this.$refs.leftView.$el).toggle();
                     },
                     onRefreshByTag(tag){
-                        this.$root.getProbeListByTag(tag);
+                        this.options.term = `tags=${tag}`;
+                        this.$refs.searchRef.search();
                     }
                 }
             });
@@ -2131,54 +2196,37 @@ class Probe extends Matrix {
                 }
             })
 
-            $(function () {
-
-                this.app = new Vue({
-                    delimiters: ['${', '}'],
-                    template: ` <el-container style="background:#ffffff;">
-                                    <el-main style="padding:0px;overflow:hidden;">
-                                        <el-tabs v-model="tabs.activeName" type="border-card">
-                                            <el-tab-pane label="探针列表" name="probe">
-                                                <probe-view :model="probe" ref="probeView"></probe-view>
-                                            </el-tab-pane>
-                                            <el-tab-pane label="脚本管理" name="script" lazy>
-                                                <script-view ref="scriptView"></script-view>
-                                            </el-tab-pane>
-                                            <el-tab-pane label="执行控制台" name="job">
-                                                <job-view ref="jobView"></job-view>
-                                            </el-tab-pane>
-                                        </el-tabs>
-                                    </el-main>
-                                </el-container>`,
-                    data: {
-                        probe: {},
-                        tabs:{
-                            activeName: 'probe',
-                        }
-                    },
-                    created(){
-                        
-                    },
-                    mounted() {
-                        this.$nextTick(()=> {
-                            this.getProbeList();
-                        })
-                    },
-                    methods: {
-                        getProbeList() {
-                            this.probe = fsHandler.callFsJScript(`/matrix/probe/getProbeList.js`, '').message;
-                        },
-                        getProbeListByTag(tag){
-                            this.probe = fsHandler.callFsJScript("/matrix/probe/getProbeList.js", encodeURIComponent(tag)).message;
-                        }
-                    }
-                }).$mount("#app");
-
-            });
-
         })
     }
-}
 
-let probe = new Probe();
-probe.init();
+    mount(el){
+        let main = {
+            delimiters: ['#{', '}#'],
+            template:   `<el-container style="background:#ffffff;">
+                            <el-main style="padding:0px;overflow:hidden;">
+                                <el-tabs v-model="tabs.activeName" type="border-card">
+                                    <el-tab-pane label="探针列表" name="probe">
+                                        <probe-view ref="probeView"></probe-view>
+                                    </el-tab-pane>
+                                    <el-tab-pane label="脚本管理" name="script" lazy>
+                                        <script-view ref="scriptView"></script-view>
+                                    </el-tab-pane>
+                                    <el-tab-pane label="执行控制台" name="job" lazy>
+                                        <job-view ref="jobView"></job-view>
+                                    </el-tab-pane>
+                                </el-tabs>
+                            </el-main>
+                        </el-container>`,
+            data: {
+                tabs:{
+                    activeName: 'probe',
+                }
+            }
+        };
+        
+        _.delay(()=>{
+            this.app = new Vue(main).$mount(el);
+        },50)
+        
+    }
+}
