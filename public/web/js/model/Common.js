@@ -332,27 +332,29 @@ Vue.component("mx-fs-editor",{
                             </el-dialog>
                         </div>
                         <!-- 工具栏 -->
-                        <div v-if="!_.isEmpty(tabs.list)">  
+                        <div>  
                             <el-tooltip content="左边栏" placement="bottom" open-delay="500">
                                 <el-button type="text" :icon="toolBar.left.show?'el-icon-s-fold':'el-icon-s-unfold'" @click="toolBar.left.show = !toolBar.left.show"></el-button>
                             </el-tooltip>    
-                            <el-tooltip content="重打开" placement="bottom" open-delay="500">
-                                <el-button type="text" icon="el-icon-refresh" @click="onReload"></el-button>
-                            </el-tooltip>    
-                            <el-tooltip content="保存" placement="bottom" open-delay="500">
-                                <el-button type="text" icon="el-icon-edit" @click="onSave"></el-button>
-                            </el-tooltip>
-                            <el-tooltip content="另存为" placement="bottom" open-delay="500">
-                                <el-button type="text" icon="el-icon-edit-outline" @click="file.dialogSaveAs.visible=true"></el-button>
-                            </el-tooltip>
-                            <el-tooltip content="运行" placement="bottom" open-delay="500">
-                                <el-button type="text" icon="el-icon-caret-right" @click="onSaveAndPlay"></el-button>
-                            </el-tooltip>
-                            <el-tooltip content="主题" open-delay="500">
-                                <el-button type="text" :class="'M3-EDITOR-THEME-'+tabs.activeIndex" v-show="!_.isEmpty(tabs.list)" style="float:right;">
-                                    <i class="fas fa-tshirt"></i>
-                                </el-button>
-                            </el-tooltip>
+                            <span v-if="!_.isEmpty(tabs.list)">
+                                <el-tooltip content="重打开" placement="bottom" open-delay="500">
+                                    <el-button type="text" icon="el-icon-refresh" @click="onReload"></el-button>
+                                </el-tooltip>    
+                                <el-tooltip content="保存" placement="bottom" open-delay="500">
+                                    <el-button type="text" icon="el-icon-edit" @click="onSave"></el-button>
+                                </el-tooltip>
+                                <el-tooltip content="另存为" placement="bottom" open-delay="500">
+                                    <el-button type="text" icon="el-icon-edit-outline" @click="file.dialogSaveAs.visible=true"></el-button>
+                                </el-tooltip>
+                                <el-tooltip content="运行" placement="bottom" open-delay="500">
+                                    <el-button type="text" icon="el-icon-caret-right" @click="onSaveAndPlay"></el-button>
+                                </el-tooltip>
+                                <el-tooltip content="主题" open-delay="500">
+                                    <el-button type="text" :class="'M3-EDITOR-THEME-'+tabs.activeIndex" v-show="!_.isEmpty(tabs.list)" style="float:right;">
+                                        <i class="fas fa-tshirt"></i>
+                                    </el-button>
+                                </el-tooltip>
+                            </span>
                         </div>
                     </el-header>
                     <el-container style="height: 100%;min-height:300px;border-top:1px solid #fff;">

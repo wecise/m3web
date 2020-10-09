@@ -66,10 +66,10 @@ class Home extends Matrix {
                                                                 <el-button type="primary" 
                                                                     @click.stop.prevent="onCommand(subItem)"
                                                                     style="max-width: 120px;width: 120px;height:90px;border-radius: 10px!important;background:rgb(36, 44, 70);border:unset;margin: 5px;">
-                                                                    <el-image :src="subItem.icon | pickIcon" style="width:40px;margin:5px;"></el-image>
-                                                                    <p style="white-space:nowrap;overflow:hidden;margin:5px;">
-                                                                        <span v-if="window.MATRIX_LANG == 'zh-CN'">#{subItem.cnname}#</span>
-                                                                        <span v-else>#{subItem.enname}#</span>
+                                                                    <el-image :src="subItem.icon | pickIcon" style="width:40px;margin:5px;min-height: 40px;"></el-image>
+                                                                    <p style="white-space:nowrap;overflow:hidden;margin:5px;display:flex;">
+                                                                        <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" v-if="window.MATRIX_LANG == 'zh-CN'">#{subItem.cnname}#</span>
+                                                                        <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" v-else>#{subItem.enname}#</span>
                                                                         <el-dropdown @command="onAppCommand" trigger="hover" placement="top-end" style="color:rgba(255,255,255,.5);">
                                                                             <span class="el-dropdown-link">
                                                                                 <i class="el-icon-arrow-down el-icon--right" style="color:rgba(255,255,255,0.5)"></i>
@@ -101,7 +101,7 @@ class Home extends Matrix {
                                                     v-for="item in apps.appListUnGrouped" 
                                                     @click="onCommand(item)"
                                                     style="max-width: 120px;width: 120px;height:90px;border-radius: 10px!important;background:rgb(36, 44, 70);border:unset;margin: 5px;">
-                                                    <el-image style="width:40px;margin:5px;" :src="item.icon | pickIcon"></el-image>
+                                                    <el-image style="width:40px;margin:5px;min-height: 40px;" :src="item.icon | pickIcon"></el-image>
                                                     <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;">
                                                         <span v-if="window.MATRIX_LANG == 'zh-CN'">#{item.cnname}#</span>
                                                         <span v-else>#{item.enname}#</span>

@@ -113,6 +113,7 @@ class Probe extends Matrix {
                                     <el-table
                                         :data="dt.rows.slice((dt.pagination.currentPage - 1) * dt.pagination.pageSize,dt.pagination.currentPage * dt.pagination.pageSize)"
                                         highlight-current-row="true"
+                                        stripe
                                         style="width: 100%;"
                                         :row-class-name="rowClassName"
                                         :header-cell-style="headerRender"
@@ -820,14 +821,27 @@ class Probe extends Matrix {
                                                                                     <el-popover
                                                                                         placement="top-start"
                                                                                         :title="option.host"
-                                                                                        width="30vw"
+                                                                                        width="350px"
                                                                                         trigger="click"
-                                                                                        popper-class="dataTablePopper">
-                                                                                        <el-form label-width="120px">
-                                                                                            <el-form-item :label="k" v-for="v,k in option.config">
-                                                                                                <el-input :value="v"></el-input>
-                                                                                            </el-form-item>
-                                                                                        </el-form>
+                                                                                        popper-class="dataTablePopper"
+                                                                                        :popper-options="{ boundariesElement: 'body' }">
+                                                                                        <el-container>
+                                                                                            <el-main>
+                                                                                                <el-row>
+                                                                                                    <el-col :span="8">
+                                                                                                        <p v-for="v,k in option.config" v-if="!_.includes(k,'usedpercent')">
+                                                                                                            #{_.upperFirst(k)}#: #{v}#
+                                                                                                        </p>
+                                                                                                    </el-col>
+                                                                                                    <el-col :span="16" style="display:flex;border-left:1px solid #dddddd;padding:0px 20px;">
+                                                                                                        <div v-for="v,k in option.config" v-if="_.includes(k,'usedpercent')" style="margin:5px;text-align: center;">
+                                                                                                            <el-progress type="circle" :percentage="v"></el-progress>
+                                                                                                            <p>#{k}#</p>
+                                                                                                        </div>
+                                                                                                    </el-col>
+                                                                                                </el-row>
+                                                                                            </el-main>
+                                                                                        </el-container>
                                                                                         <el-button slot="reference" type="text" icon="el-icon-postcard"></el-button>
                                                                                     </el-popover>
                                                                                 </div>
@@ -2008,17 +2022,28 @@ class Probe extends Matrix {
                                 </el-aside>
                                 <el-main style="padding:0px;width:80%;height:100%;overflow:hidden;" ref="mainView">
                                     <el-container style="height:100%;display:block;">
-                                        <el-header style="height:auto;padding:0px;" v-if="!_.isEmpty(model)">
-                                            <el-button type="primary" v-for="item in model.summary"
+                                        <el-header style="height:auto;padding:5px;display:flex;" v-if="!_.isEmpty(model)">
+                                            <!--el-button type="primary" v-for="item in model.summary"
                                                 style="max-width: 25%;width: 20%;height:auto;min-height:90px;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);">
                                                 <h3>#{item.name}#</h3>
                                                 <p>
                                                     #{item.count}#
                                                 </p>
-                                            </el-button>
+                                            </el-button-->
+                                            <span v-for="item in model.summary" style="text-align:center;margin:0px 10px;">
+                                                <el-progress type="circle" :percentage="item.percent"></el-progress>
+                                                <p style="padding:0px;margin:0px;"> 
+                                                    <el-popover
+                                                        placement="top-start"
+                                                        trigger="hover"
+                                                        :content="item.count+' '+item.unit">
+                                                        <el-button type="text" slot="reference" style="padding:0px;"><h3 style="margin:5px 0px;">#{item.name}#</h3></el-button>
+                                                    </el-popover>
+                                                </p>
+                                            </span>
                                         </el-header>
                                         <el-main style="padding:10px;height:100%;overflow:hidden;">
-                                            <el-container style="height: calc(100% - 75px);">
+                                            <el-container style="height: calc(100% - 110px);">
                                                 <el-header class="probe-view-header" style="height: 40px;line-height: 40px;padding: 0px;background: #dddddd;display: inline-table;">
                                                     <search-base-component :options="options"
                                                                         ref="searchRef"

@@ -392,23 +392,23 @@ class SideBar {
                                             mode="horizontal" 
                                             @select="onSelect"
                                             menu-trigger="hover">
-                                        <el-submenu index="2">
+                                        <el-submenu index="1">
                                             <template slot="title">
                                                 <i class="el-icon-user-solid" style="color:#ffffff;"></i> #{window.SignedUser_UserName}#
                                             </template>
-                                            <el-menu-item index="user">
+                                            <el-menu-item index="/matrix/user">
                                                 <template slot="title">
                                                     <i class="el-icon-user"></i>
                                                     <span slot="title">#{ $t('topBar.menu.userInfo') }#</span>
                                                 </template>
                                             </el-menu-item>
-                                            <el-menu-item index="system" divided v-if="mxAuth.isAdmin">
+                                            <el-menu-item index="/matrix/system" divided v-if="mxAuth.isAdmin">
                                                 <template slot="title">
                                                     <i class="el-icon-setting"></i>
                                                     <span slot="title">#{ $t('topBar.menu.systemMain') }#</span>
                                                 </template>
                                             </el-menu-item>
-                                            <el-menu-item index="files">
+                                            <el-menu-item index="/matrix/files">
                                                 <template slot="title">
                                                     <i class="el-icon-folder-opened"></i>
                                                     <span slot="title">#{ $t('topBar.menu.myFiles') }#</span>
@@ -441,14 +441,16 @@ class SideBar {
             },
             methods: {
                 onSelect(key, keyPath) {
-                    if(key==='home'){
-                        sideBar.appAsHome({url:'/home'});
-                    } else if(key==='signout'){
-                        window.open(`/user/logout/${window.COMPANY_NAME}`,'_parent');
-                    } else if(key==='fullscreen'){
-                        //mx.fullScreen();
+                    if(_.startsWith(key,'/matrix/')){
+                        window.open(key, '_blank');
                     } else {
-                        window.open('/matrix/'+key, '_blank');
+                        if(key === 'home'){
+                            sideBar.appAsHome({url:'/home'});
+                        } else if(key==='signout'){
+                            window.open(`/user/logout/${window.COMPANY_NAME}`,'_parent');
+                        } else if(key==='fullscreen'){
+                            //mx.fullScreen();
+                        }
                     }
                 }
             }

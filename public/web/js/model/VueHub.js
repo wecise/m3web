@@ -80,6 +80,7 @@ class VueHub {
             $(".el-message-box__wrapper").removeClass("transition");
             $(".el-checkbox-group > label").addClass("el-checkbox");
             $(".el-radio-group > label").addClass("el-radio");
+            $(".el-progress--circle").addClass("el-progress");
             $("i[class^='elicon']").css("font-size","14px");
             $(".ElTreeNode").removeClass("ElTreeNode");
         },50)

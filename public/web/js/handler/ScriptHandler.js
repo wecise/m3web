@@ -45,9 +45,10 @@ class ScriptHandler {
             data: fm,
             async: false,
             beforeSend: function (xhr) {
-                // Pace.restart();
             },
             complete: function (xhr, textStatus) {
+                // Audit
+                auditLogHandler.writeLog("Script", "Script upload: " + event.name, 0);
             },
             success: function (data, status) {
 
@@ -61,6 +62,8 @@ class ScriptHandler {
             },
             error: function (xhr, textStatus, errorThrown) {
                 rtn = xhr.responseText;
+                // Audit
+                auditLogHandler.writeLog("Script", "Script upload: " + event.name, 1);
             }
         });
         return rtn;
@@ -86,6 +89,8 @@ class ScriptHandler {
                 // Pace.restart();
             },
             complete: function (xhr, textStatus) {
+                // Audit
+                auditLogHandler.writeLog("Script", "Script delete: " + name, 0);
             },
             success: function (data, status) {
 
@@ -99,6 +104,8 @@ class ScriptHandler {
             },
             error: function (xhr, textStatus, errorThrown) {
                 rtn = xhr.responseText;
+                // Audit
+                auditLogHandler.writeLog("Script", "Script delete: " + name, 1);
             }
         });
         return rtn;
@@ -136,6 +143,8 @@ class ScriptHandler {
             beforeSend:function(xhr){
             },
             complete: function(xhr, textStatus) {
+                // Audit
+                auditLogHandler.writeLog("Script", "Script update: " + event.name, 0);
             },
             success: function (data, status) {
 
@@ -149,6 +158,8 @@ class ScriptHandler {
             },
             error: function(xhr, textStatus, errorThrown){
                 rtn = xhr.responseText;
+                // Audit
+                auditLogHandler.writeLog("Script", "Script update: " + event.name, 1);
             }
         });
         return rtn;
@@ -182,6 +193,8 @@ class ScriptHandler {
             beforeSend:function(xhr){
             },
             complete: function(xhr, textStatus) {
+                // Audit
+                auditLogHandler.writeLog("Script", "Script info: " + event.name, 0);
             },
             success: function (data, status) {
 
@@ -194,6 +207,8 @@ class ScriptHandler {
             },
             error: function(xhr, textStatus, errorThrown){
                 rtn = xhr.responseText;
+                // Audit
+                auditLogHandler.writeLog("Script", "Script info: " + event.name, 1);
             }
         });
         return rtn;
@@ -216,6 +231,8 @@ class ScriptHandler {
             beforeSend:function(xhr){
             },
             complete: function(xhr, textStatus) {
+                // Audit
+                auditLogHandler.writeLog("Script", "Script list", 0);
             },
             success: function (data, status) {
 
@@ -228,6 +245,8 @@ class ScriptHandler {
             },
             error: function(xhr, textStatus, errorThrown){
                 rtn = xhr.responseText;
+                // Audit
+                auditLogHandler.writeLog("Script", "Script list", 1);
             }
         });
 
@@ -267,6 +286,8 @@ class ScriptHandler {
             beforeSend:function(xhr){
             },
             complete: function(xhr, textStatus) {
+                // Audit
+                auditLogHandler.writeLog("Script", "Script deploy: " + event.name, 0);
             },
             success: function (data, status) {
 
@@ -280,6 +301,8 @@ class ScriptHandler {
             },
             error: function(xhr, textStatus, errorThrown){
                 rtn = xhr.responseText;
+                // Audit
+                auditLogHandler.writeLog("Script", "Script deploy: " + event.name, 1);
             }
         });
 
@@ -314,6 +337,8 @@ class ScriptHandler {
             beforeSend:function(xhr){
             },
             complete: function(xhr, textStatus) {
+                // Audit
+                auditLogHandler.writeLog("Script", "Script undeploy: " + event.name, 0);
             },
             success: function (data, status) {
 
@@ -326,6 +351,8 @@ class ScriptHandler {
             },
             error: function(xhr, textStatus, errorThrown){
                 rtn = xhr.responseText;
+                // Audit
+                auditLogHandler.writeLog("Script", "Script undeploy: " + event.name, 1);
             }
         });
 
@@ -352,6 +379,8 @@ class ScriptHandler {
             beforeSend:function(xhr){
             },
             complete: function(xhr, textStatus) {
+                // Audit
+                auditLogHandler.writeLog("Script", "Script file by name: " + event.name, 0);
             },
             success: function (data, status) {
 
@@ -363,6 +392,8 @@ class ScriptHandler {
             },
             error: function(xhr, textStatus, errorThrown){
                 rtn = xhr.responseText;
+                // Audit
+                auditLogHandler.writeLog("Script", "Script file by name: " + event.name, 1);
             }
         });
 
@@ -404,6 +435,8 @@ class ScriptHandler {
             beforeSend:function(xhr){
             },
             complete: function(xhr, textStatus) {
+                // Audit
+                auditLogHandler.writeLog("Script", "Script file update: " + event.name, 0);
             },
             success: function (data, status) {
 
@@ -415,6 +448,8 @@ class ScriptHandler {
             },
             error: function(xhr, textStatus, errorThrown){
                 rtn = xhr.responseText;
+                // Audit
+                auditLogHandler.writeLog("Script", "Script file update: " + event.name, 1);
             }
         });
 
@@ -441,6 +476,8 @@ class ScriptHandler {
             beforeSend:function(xhr){
             },
             complete: function(xhr, textStatus) {
+                // Audit
+                auditLogHandler.writeLog("Script", "Script file compare: " + event.name, 0);
             },
             success: function (data, status) {
 
@@ -452,6 +489,8 @@ class ScriptHandler {
             },
             error: function(xhr, textStatus, errorThrown){
                 rtn = xhr.responseText;
+                // Audit
+                auditLogHandler.writeLog("Script", "Script file compare: " + event.name, 1);
             }
         });
 
@@ -484,6 +523,8 @@ class ScriptHandler {
             data: form,
             async:false,
             complete: function(xhr, textStatus) {
+                // Audit
+                auditLogHandler.writeLog("Script", "Script deploy for zabbix agent: " + depot.name, 0);
             },
             success: function(data, textStatus, xhr) {
 
@@ -495,6 +536,8 @@ class ScriptHandler {
             },
             error: function(xhr, textStatus, errorThrown) {
                 rtn =  xhr.responseText;
+                // Audit
+                auditLogHandler.writeLog("Script", "Script deploy for zabbix agent: " + depot.name, 1);
             }
         })
         return rtn;
@@ -524,6 +567,8 @@ class ScriptHandler {
             data: form,
             async:false,
             complete: function(xhr, textStatus) {
+                // Audit
+                auditLogHandler.writeLog("Script", "Script undeploy for zabbix agent: " + depot.name, 0);
             },
             success: function(data, textStatus, xhr) {
 
@@ -535,6 +580,8 @@ class ScriptHandler {
             },
             error: function(xhr, textStatus, errorThrown) {
                 rtn = xhr.responseText;
+                // Audit
+                auditLogHandler.writeLog("Script", "Script undeploy for zabbix agent: " + depot.name, 1);
             }
         })
         return rtn;
@@ -560,6 +607,8 @@ class ScriptHandler {
             data: form,
             async:true,
             complete: function(xhr, textStatus) {
+                // Audit
+                auditLogHandler.writeLog("Script", "Script " + depot.action + " for zabbix agent: " + depot.hosts.join(", "), 0);
             },
             success: function(data, textStatus, xhr) {
 
@@ -568,6 +617,9 @@ class ScriptHandler {
                 return data;
             },
             error: function(xhr, textStatus, errorThrown) {
+                // Audit
+                auditLogHandler.writeLog("Script", "Script " + depot.action + " for zabbix agent: " + depot.hosts.join(", "), 1);
+
                 return xhr.responseText;
             }
         })
