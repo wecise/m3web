@@ -116,10 +116,10 @@
       </script>
 
       <script type="text/x-template" id="app-template">
-         <el-row type="flex" justify="center">
-            <el-col :xs="14" :sm="12" :md="10" :lg="9" :xl="6">
+         <el-row type="flex" justify="center" style="height: 90vh;">
+            <el-col :xs="14" :sm="12" :md="10" :lg="9" :xl="6" style="align-content: center;display: grid;">
                <div class="sign-content">
-                  <el-container style="background:#ffffff;box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);margin-top:3rem;">
+                  <el-container style="background:#ffffff;box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);">
                      <el-header style="height:auto;">
                         {{.CsrfTokenHtml}}
                         <div class="logo">

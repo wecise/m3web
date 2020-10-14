@@ -1268,7 +1268,7 @@ class Search {
                             }
                         );
 
-                        this.$nextTick( ()=> {
+                        /* this.$nextTick( ()=> {
                             _.delay( ()=> {
                                 
                                 $(document).keypress(function(event) {
@@ -1281,7 +1281,7 @@ class Search {
                                 })
 
                             },500)
-                        })
+                        }) */
 
                         this.weclome();
 

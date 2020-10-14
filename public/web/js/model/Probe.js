@@ -64,6 +64,245 @@ class Probe extends Matrix {
                             "mx-tag-tree"], function () {
             
             
+            // 传输组件
+            Vue.component("mx-transfer",{
+                delimiters: ['#{', '}#'],
+                props: {
+                    template: Object,
+                    row: Object,
+                    list: Array,
+                    model: Array,
+                    prop: {
+                        key: String,
+                        label: Array,
+                        title: Array,
+                    },
+                    titles: Array,
+                    buttonTexts: Array
+                },
+                data(){
+                    return {
+                        all: {
+                            list: [],
+                            term: ""
+                        },
+                        source: {
+                            rows:[],
+                            selected: []
+                        },
+                        target:{
+                            rows: [],
+                            selected: [],
+                            term: ""
+                        }
+                    }
+                },
+                template:   `<el-row>
+                                <el-col :span="10">
+                                    <el-container style="border:1px solid #dddddd;height:45vh;">
+                                        <el-header style="height: 40px;line-height: 40px;background: #f2f2f2;">#{titles[0]}# #{source.selected.length}#/#{source.rows.length}#</el-header>
+                                        <el-main style="overflow:hidden;">
+                                            <el-input v-model="all.term" 
+                                                @input="onSearchAllList" 
+                                                @clear="onSearchAllList" 
+                                                placeholder="关键字" 
+                                                clearable suffix-icon="el-icon-search"
+                                                class="mx-transfer-search">
+                                            </el-input>
+                                            <el-table ref="source"
+                                                :data="source.rows"
+                                                style="width: 100%"
+                                                @selection-change="onSourceSelectionChange">
+                                                <el-table-column type="selection" width="55"></el-table-column>
+                                                <el-table-column :label="prop.title[0]">
+                                                    <template slot-scope="scope">
+                                                        #{scope.row[prop.label[0]]}#
+                                                        <span v-if="scope.row.iszabbix == 1"> - #{ scope.row.iszabbix | pickZabbix }# </span>
+                                                    </template>
+                                                </el-table-column>
+                                                <el-table-column :label="prop.title[1]" width="120">
+                                                    <template slot-scope="scope">
+                                                        #{scope.row[prop.label[1]].join(", ")}#
+                                                    </template>
+                                                </el-table-column>
+                                                <el-table-column width="80">
+                                                    <template slot-scope="scope">
+                                                        <el-popover
+                                                            placement="right-start"
+                                                            :title="scope.row.host"
+                                                            width="350px"
+                                                            trigger="click"
+                                                            popper-class="dataTablePopper"
+                                                            :popper-options="{ boundariesElement: 'body' }">
+                                                            <el-container>
+                                                                <el-main>
+                                                                    <el-row>
+                                                                        <el-col :span="8">
+                                                                            <p v-for="v,k in scope.row.config" v-if="!_.includes(k,'usedpercent')">
+                                                                                <span v-if="template[k].unit=='number'">#{template[k].title}#: #{mx.bytesToSize(v)}#</span>
+                                                                                <span v-else>#{template[k].title}#: #{v}#</span>
+                                                                            </p>
+                                                                        </el-col>
+                                                                        <el-col :span="16" style="display:flex;border-left:1px solid #dddddd;padding:0px 20px;">
+                                                                            <div v-for="v,k in scope.row.config" v-if="_.includes(k,'usedpercent')" style="margin:5px;text-align: center;">
+                                                                                <el-progress type="circle" :percentage="v"></el-progress>
+                                                                                <p>#{template[k].title}#</p>
+                                                                            </div>
+                                                                        </el-col>
+                                                                    </el-row>
+                                                                </el-main>
+                                                            </el-container>
+                                                            <el-button slot="reference" type="text" icon="el-icon-postcard"></el-button>
+                                                        </el-popover>
+                                                    </template>
+                                                </el-table-column>
+                                            </el-table>
+                                        </el-main>
+                                    </el-container>
+                                </el-col>
+                                <el-col :span="4" style="text-align: center;padding-top: 5em;">
+                                    <p><el-button type="primary" ref="toRightButton" :disabled="_.isEmpty(source.selected)" @click="onToRight">#{buttonTexts[0]}#</el-button></p>
+                                    <p><el-button type="primary" ref="toLeftButton" :disabled="_.isEmpty(target.selected)" @click="onToLeft">#{buttonTexts[1]}#</el-button></p>
+                                    <p><el-button type="default" ref="toLeftButton" :disabled="_.isEmpty(source.selected) && _.isEmpty(target.selected)" @click="onReset">#{buttonTexts[2]}#</el-button></p>
+                                </el-col>
+                                <el-col :span="10">
+                                    <el-container style="border:1px solid #dddddd;height:45vh;">
+                                        <el-header style="height: 40px;line-height: 40px;background: #f2f2f2;">#{titles[1]}# #{target.selected.length}#/#{target.rows.length}#</el-header>
+                                        <el-main style="overflow:hidden;">
+                                            <el-input v-model="target.term" 
+                                                @input="onSearchAllList" 
+                                                @clear="onSearchAllList" 
+                                                placeholder="关键字" 
+                                                clearable suffix-icon="el-icon-search"
+                                                class="mx-transfer-search">
+                                            </el-input>
+                                            <el-table ref="target"
+                                                :data="target.rows"
+                                                style="width: 100%"
+                                                @selection-change="onTargetSelectionChange">
+                                                <el-table-column type="selection" width="55"></el-table-column>
+                                                <el-table-column :label="prop.title[0]">
+                                                    <template slot-scope="scope">
+                                                        #{scope.row[prop.label[0]]}#
+                                                        <span v-if="scope.row.iszabbix == 1"> - #{ scope.row.iszabbix | pickZabbix }# </span>
+                                                    </template>
+                                                </el-table-column>
+                                                <el-table-column :label="prop.title[1]" width="120">
+                                                    <template slot-scope="scope">
+                                                        #{scope.row[prop.label[1]].join(", ")}#
+                                                    </template>
+                                                </el-table-column>
+                                                <el-table-column width="80">
+                                                    <template slot-scope="scope">
+                                                        <el-popover
+                                                            placement="left-start"
+                                                            :title="scope.row.host"
+                                                            width="350px"
+                                                            trigger="click"
+                                                            popper-class="dataTablePopper"
+                                                            :popper-options="{ boundariesElement: 'body' }">
+                                                            <el-container>
+                                                                <el-main>
+                                                                    <el-row>
+                                                                        <el-col :span="8">
+                                                                            <p v-for="v,k in scope.row.config" v-if="!_.includes(k,'usedpercent')">
+                                                                                <span v-if="template[k].unit=='number'">#{template[k].title}#: #{mx.bytesToSize(v)}#</span>
+                                                                                <span v-else>#{template[k].title}#: #{v}#</span>
+                                                                            </p>
+                                                                        </el-col>
+                                                                        <el-col :span="16" style="display:flex;border-left:1px solid #dddddd;padding:0px 20px;">
+                                                                            <div v-for="v,k in scope.row.config" v-if="_.includes(k,'usedpercent')" style="margin:5px;text-align: center;">
+                                                                                <el-progress type="circle" :percentage="v"></el-progress>
+                                                                                <p>#{template[k].title}#</p>
+                                                                            </div>
+                                                                        </el-col>
+                                                                    </el-row>
+                                                                </el-main>
+                                                            </el-container>
+                                                            <el-button slot="reference" type="text" icon="el-icon-postcard"></el-button>
+                                                        </el-popover>
+                                                    </template>
+                                                </el-table-column>
+                                            </el-table>
+                                        </el-main>
+                                    </el-container>
+                                </el-col>
+                            </el-row>`,
+                filters: {
+                    pickZabbix(val){
+                        return val == 1 ? 'Zabbix' : '';
+                    }
+                },
+                watch: {
+                    model(val,oldVal){
+                        // target
+                        this.setTargetData();
+                        // source
+                        this.setSourceData();
+                    }
+                },
+                mounted(){
+                    this.setAllList();
+                },
+                methods: {
+                    setAllList(){
+                        if(!_.isEmpty(this.list)){
+                            // all
+                            this.all.list = this.list;
+                            // target
+                            this.setTargetData();
+                            // source
+                            this.setSourceData();
+                        }
+                    },
+                    setTargetData(){
+                        // target
+                        if(!_.isEmpty(this.model)){
+                            this.target.rows = _.filter(this.list, (v)=>{
+                                if(_.includes(this.model, v.host)){
+                                    return v;
+                                }
+                            })
+                        } else {
+                            this.target.rows = [];
+                        }
+                    },
+                    setSourceData(){
+                        // source
+                        this.source.rows = _.difference(this.all.list, this.target.rows);
+                    },
+                    onSearchAllList: _.debounce(function(){
+                        let rtn = null;
+
+                        if(_.isEmpty(this.all.term)){
+                            this.all.list = fsHandler.callFsJScript("/matrix/depot/getServerList.js").message.rows;
+                            
+                        } else {
+                            this.all.list = fsHandler.callFsJScript("/matrix/depot/getServerList.js", encodeURIComponent(this.all.term) ).message.rows;
+                        }
+
+                        // 赋值给source
+                        this.setSourceData();
+                    },500),
+                    onSourceSelectionChange(val){
+                        this.source.selected = val;
+                    },
+                    onTargetSelectionChange(val){
+                        this.target.selected = val;
+                    },
+                    onToRight(){
+                        this.$emit('update:change', { value:null, direction: 'right', movedKeys: this.source.selected } );
+                    },
+                    onToLeft(){
+                        this.$emit('update:change', { value:null, direction: 'left', movedKeys: this.target.selected } );
+                    },
+                    onReset(){
+                        this.$refs.source.clearSelection();
+                        this.$refs.target.clearSelection();
+                    }
+                }
+            })
+
             // 探针管理
             Vue.component("probe-manage",{
                 delimiters: ['#{', '}#'],
@@ -678,16 +917,7 @@ class Probe extends Matrix {
                                                                 </el-tab-pane>
                                                                 <el-tab-pane name="script">
                                                                     <span slot="label">
-                                                                        <i class="el-icon-tickets"></i> 
-                                                                        <el-dropdown>
-                                                                            <span class="el-dropdown-link">
-                                                                                脚本文件 <i class="el-icon-arrow-down el-icon--right"></i>
-                                                                            </span>
-                                                                            <el-dropdown-menu slot="dropdown">
-                                                                                <!--el-dropdown-item @click.native="versionTree.dialog.fileUpdate = true">更新脚本库</el-dropdown-item-->
-                                                                                <!--el-dropdown-item @click.native="onScriptDelete(props.row,props.$index)">删除脚本库</el-dropdown-item-->
-                                                                            </el-dropdown-menu>
-                                                                        </el-dropdown>
+                                                                        <i class="el-icon-tickets"></i> 脚本文件
                                                                     </span>
                                                                     <el-dialog title="脚本库更新" :visible.sync="versionTree.dialog.fileUpdate">
                                                                         <el-form>
@@ -771,6 +1001,9 @@ class Probe extends Matrix {
                                                                     <span slot="label"><i class="el-icon-setting"></i> 下发设置</span>
                                                                     <el-form label-position="top" label-width="120px" style="background: #ffffff;padding: 10px 20px;min-height:200px;">
                                                                         <el-form-item label="执行命令">
+                                                                            <el-tooltip content="更新命令" open-delay="500">
+                                                                                <el-button type="primary" @click="onScriptCommandUpdate(props.row)" icon="el-icon-refresh" style="float:right;"></el-button>
+                                                                            </el-tooltip>
                                                                             <pre :ref="'commandRef'+props.row.id" style="width:100%;height:200px;border:1px solid #dddddd;"></pre>
                                                                         </el-form-item>
                                                                         <el-form-item label="Key">
@@ -786,74 +1019,32 @@ class Probe extends Matrix {
                                                                     <span slot="label"><i class="el-icon-monitor"></i> 下发对象</span>
                                                                     <el-form label-position="top" label-width="120px" style="background: #ffffff;padding: 10px 20px;">
                                                                         <el-form-item label="选择服务器">
-                                                                            <el-transfer
-                                                                                style="text-align: left; display: inline-block"
+                                                                            <mx-transfer 
+                                                                                :list="servers.list.rows"
+                                                                                :template="servers.list.template"
+                                                                                :model="props.row.fileObj[props.row.selectedVersion]['deployedServers']"
                                                                                 :titles="['服务器列表', '已下发服务器']"
-                                                                                :button-texts="['取消下发', '开始下发']"
-                                                                                :data="servers.list"
-                                                                                v-model="props.row.fileObj[props.row.selectedVersion]['deployedServers']"
-                                                                                :props="{
+                                                                                :buttonTexts="['开始下发', '取消下发','取消选择']"
+                                                                                :prop="{
                                                                                     key: 'host',
-                                                                                    label: 'host'
+                                                                                    label: ['host','iplist'],
+                                                                                    title: ['服务器','IP']
                                                                                 }"
-                                                                                @change="((value, direction, movedKeys)=>{ onScriptDeployOrUndeploy(value, direction, movedKeys, props.row) })"
-                                                                                class="script-deploy-transfer">
-                                                                                <el-input slot="left-footer" style="border:unset;" placeholder="关键字"
-                                                                                    v-model="servers.lTerm"
-                                                                                    @blur="onLeftBlur"
-                                                                                    @keyup.enter.native="onLeftBlur" 
-                                                                                    clearable
-                                                                                    autofocus>
-                                                                                    <i class="el-icon-search el-input__icon" slot="suffix"></i>
-                                                                                </el-input>
-                                                                                <el-input slot="right-footer" style="border:unset;" placeholder="关键字"
-                                                                                    v-model="servers.rTerm"
-                                                                                    @clear="getServerList"
-                                                                                    @blur="onRightBlur" 
-                                                                                    @keyup.enter.native="onRightBlur"
-                                                                                    clearable>
-                                                                                    <i class="el-icon-search el-input__icon" slot="suffix"></i>
-                                                                                </el-input>
-                                                                                <div slot-scope="{ option }">
-                                                                                    #{ option.host }# 
-                                                                                    <span v-if="option.iszabbix == 1"> - #{ option.iszabbix | pickZabbix }# </span>
-                                                                                    <span v-if="option.iplist"> - #{ option.iplist.join(",") }# </span>
-                                                                                    <el-popover
-                                                                                        placement="top-start"
-                                                                                        :title="option.host"
-                                                                                        width="350px"
-                                                                                        trigger="click"
-                                                                                        popper-class="dataTablePopper"
-                                                                                        :popper-options="{ boundariesElement: 'body' }">
-                                                                                        <el-container>
-                                                                                            <el-main>
-                                                                                                <el-row>
-                                                                                                    <el-col :span="8">
-                                                                                                        <p v-for="v,k in option.config" v-if="!_.includes(k,'usedpercent')">
-                                                                                                            #{_.upperFirst(k)}#: #{v}#
-                                                                                                        </p>
-                                                                                                    </el-col>
-                                                                                                    <el-col :span="16" style="display:flex;border-left:1px solid #dddddd;padding:0px 20px;">
-                                                                                                        <div v-for="v,k in option.config" v-if="_.includes(k,'usedpercent')" style="margin:5px;text-align: center;">
-                                                                                                            <el-progress type="circle" :percentage="v"></el-progress>
-                                                                                                            <p>#{k}#</p>
-                                                                                                        </div>
-                                                                                                    </el-col>
-                                                                                                </el-row>
-                                                                                            </el-main>
-                                                                                        </el-container>
-                                                                                        <el-button slot="reference" type="text" icon="el-icon-postcard"></el-button>
-                                                                                    </el-popover>
-                                                                                </div>
-                                                                            </el-transfer>
+                                                                                @update:change="((data)=>{ onScriptDeployOrUndeploy(data.value, data.direction, data.movedKeys, props.row) })"
+                                                                                :ref="'mxTransfer'+props.row.id">
+                                                                            </mx-transfer>
                                                                         </el-form-item>
                                                                     <el-form>
-                                                                    <el-dialog :title="'下发脚本: ' + dialog.scriptDeploy.script.name + '-' + dialog.scriptDeploy.script.selectedVersion" :visible.sync="dialog.scriptDeploy.show">
+                                                                    <el-dialog :title="'下发脚本: ' + dialog.scriptDeploy.script.name + '-' + dialog.scriptDeploy.script.selectedVersion" 
+                                                                        :visible.sync="dialog.scriptDeploy.show"
+                                                                        :close-on-press-escape="false"
+                                                                        :close-on-click-modal="false">
                                                                         <el-container>
                                                                             <el-main style="padding:0px;">
                                                                                 <el-table
                                                                                     :data="dialog.scriptDeploy.rows"
-                                                                                    style="width: 100%">
+                                                                                    style="width: 100%"
+                                                                                    max-height="350">
                                                                                     <el-table-column type="index"></el-table-column>
                                                                                     <el-table-column prop="host"
                                                                                         label="服务器"
@@ -872,6 +1063,11 @@ class Probe extends Matrix {
                                                                                         prop="msg"
                                                                                         label="消息">
                                                                                     </el-table-column>
+                                                                                    <el-table-column fixed="right" label="操作" width="80">
+                                                                                        <template slot-scope="scope">
+                                                                                            <el-button @click.native.prevent="dialog.scriptDeploy.rows.splice(scope.$index, 1);" type="text" icon="el-icon-delete"></el-button>
+                                                                                        </template>
+                                                                                    </el-table-column>
                                                                                 </el-table>
                                                                             </el-main>
                                                                             <el-footer style="line-height:60px;">
@@ -883,12 +1079,16 @@ class Probe extends Matrix {
                                                                             <el-button type="primary" @click="onScriptDeployHandler(dialog.scriptDeploy)">下 发</el-button>
                                                                         </div>
                                                                     </el-dialog>
-                                                                    <el-dialog :title="'取消下发脚本: ' + dialog.scriptUnDeploy.script.name + '-' + dialog.scriptUnDeploy.script.selectedVersion" :visible.sync="dialog.scriptUnDeploy.show">
+                                                                    <el-dialog :title="'取消下发脚本: ' + dialog.scriptUnDeploy.script.name + '-' + dialog.scriptUnDeploy.script.selectedVersion" 
+                                                                        :visible.sync="dialog.scriptUnDeploy.show"
+                                                                        :close-on-press-escape="false"
+                                                                        :close-on-click-modal="false">
                                                                         <el-container>
                                                                             <el-main style="padding:0px;">
                                                                                 <el-table
                                                                                     :data="dialog.scriptUnDeploy.rows"
-                                                                                    style="width: 100%">
+                                                                                    style="width: 100%"
+                                                                                    max-height="350">
                                                                                     <el-table-column type="index"></el-table-column>
                                                                                     <el-table-column prop="host"
                                                                                         label="服务器"
@@ -906,6 +1106,11 @@ class Probe extends Matrix {
                                                                                     <el-table-column
                                                                                         prop="msg"
                                                                                         label="消息">
+                                                                                    </el-table-column>
+                                                                                    <el-table-column fixed="right" label="操作" width="80">
+                                                                                        <template slot-scope="scope">
+                                                                                            <el-button @click.native.prevent="dialog.scriptUnDeploy.rows.splice(scope.$index, 1);" type="text" icon="el-icon-delete"></el-button>
+                                                                                        </template>
                                                                                     </el-table-column>
                                                                                 </el-table>
                                                                             </el-main>
@@ -1004,6 +1209,7 @@ class Probe extends Matrix {
                     }
                 },
                 created(){
+                    // 初始化服务器列表
                     this.getServerList();
                 },
                 mounted(){
@@ -1013,11 +1219,9 @@ class Probe extends Matrix {
                 },
                 methods: {
                     onPageSizeChange(val) {
-                        console.log(1,val)
                         this.dt.pagination.pageSize = val;
                     },
                     onCurrentPageChange(val) {
-                        console.log(2,val)
                         this.dt.pagination.currentPage = val;
                     },
                     layout(){
@@ -1073,16 +1277,8 @@ class Probe extends Matrix {
                             //return 'text-align:center;';
                         }
                     },
-                    onLeftBlur(){
-                        let rtn = fsHandler.callFsJScript("/matrix/depot/getServerList.js", encodeURIComponent(this.servers.lTerm) ).message;
-                        this.$set(this.servers,'list', rtn);
-                    },
-                    onRightBlur(term){
-                        let rtn = fsHandler.callFsJScript("/matrix/depot/getServerList.js", encodeURIComponent(term) ).message;
-                        this.$set(this.servers,'list', rtn);
-                    },
                     getServerList(){
-                        let rtn = fsHandler.callFsJScript("/matrix/depot/getServerList.js", null).message;
+                        let rtn = fsHandler.callFsJScript("/matrix/depot/getServerList.js").message;
                         this.$set(this.servers,'list', rtn);
                     },
                     pickFiles(row){
@@ -1374,16 +1570,25 @@ class Probe extends Matrix {
                                         this.$set(this.row, 'newVersion', this.row.newVersion);
                                         this.$set(this.row, 'type', 'M');
 
-                                        scriptHandler.updateDepotFileContent(this.row);
+                                        let rtn = scriptHandler.updateDepotFileContent(this.row);
 
-                                        _.delay(()=>{
+                                        if(rtn == 1){
+                                            _.delay(()=>{
+                                                this.$message({
+                                                    type:"success",
+                                                    message: "文件更新成功！"
+                                                })
+                                                this.control.form.show = false;
+                                                wnd.close();
+                                            },500)    
+                                        } else {
                                             this.$message({
-                                                type:"success",
-                                                message: "文件更新成功！"
+                                                type:"error",
+                                                message: "文件更新失败：" + rtn
                                             })
-                                            this.control.form.show = false;
-                                            wnd.close();
-                                        },500)
+                                            return false;
+                                        }
+                                        
                                         
                                     }).catch(()=>{
 
@@ -1449,9 +1654,6 @@ class Probe extends Matrix {
                                 self.$set(row, 'fileObj', versionObj);
                                 self.$set(row, 'versionObj', _.values(versionObj));
                                 self.$set(row, 'selectedVersion', row.version);
-    
-                                console.table(row)
-                                console.table(rtn)
     
                                 // 初始化命令编辑器
                                 _.delay(()=>{
@@ -1639,7 +1841,7 @@ class Probe extends Matrix {
                             // 取消下发服务器列表
                             this.dialog.scriptUnDeploy.script = row;
                             this.dialog.scriptUnDeploy.rows = _.map(movedKeys,(v)=>{
-                                return { host:v, status: 0, loading: false};
+                                return { host:v.host, status: 0, loading: false};
                             })
 
                             if( _.indexOf(row.tags,'zabbix') != -1 || _.indexOf(row.tags,'ZABBIX') != -1 ){
@@ -1651,6 +1853,19 @@ class Probe extends Matrix {
                         // 下发
                         else {
                             
+                            // 检查当前脚本是否已有下发版本
+                            // 下发的版本可以追加下发对象
+                            if( row.status == 1 ) {
+                                let deployedVersion = _.find(row.versionObj,{ifDeployed:true}).version;
+                                if( row.selectedVersion != deployedVersion ){
+                                    this.$message({
+                                        type: "warning",
+                                        message: `该脚本【${deployedVersion}】已下发，请确认！如果需要下发其它版本，请先取消当前版本的下发！`
+                                    })
+                                    return false;
+                                }
+                            }
+
                             this.dialog.scriptDeploy.show = true;
                             let editor = ace.edit(this.$refs['commandRef'+row.id]);
                             this.$set(row,'command', _.trim(editor.getValue()));
@@ -1666,15 +1881,15 @@ class Probe extends Matrix {
                             // 下发服务器列表
                             this.dialog.scriptDeploy.script = row;
                             this.dialog.scriptDeploy.rows = _.map(movedKeys,(v)=>{
-                                return { host:v, status: 0, loading: false};
+                                return { host:v.host, status: 0, loading: false};
                             })
 
                             if( _.indexOf(row.tags,'zabbix') != -1 || _.indexOf(row.tags,'ZABBIX') != -1 ){
                                 this.dialog.scriptDeploy.zabbix = true;
                             }
-
                             
                         }
+
                     },
                     onScriptDeployHandler(items){
                          
@@ -1694,31 +1909,40 @@ class Probe extends Matrix {
                             }
                             
                             _.delay(()=>{
-                                try{
-                                    let rtn = items.zabbix ? scriptHandler.deployToZabbixAgent(params) : scriptHandler.depotDeploy(params);
-                                    // 下发成功
-                                    if(rtn == 1){
-                                        item.status = 2;
-                                        items.script.fileObj[items.script.selectedVersion]['deployedServers'].push(item.host);
-                                        items.script.status = 1;
-    
-                                        this.tagAdd('已下发', items.script);
-                                        this.tagDelete('未下发', items.script);
-                                    } 
-                                    // 下发失败
-                                    else{
-                                        item.status = 3;
-                                        item.msg = rtn;
-                                    }
-                                    item.loading = false;
-    
-                                } catch(err){
-                                    // 下发失败
-                                    item.status = 3;
-                                    item.loading = false;
-                                    item.msg = err;
-                                    return;
+                                    
+                                if(items.zabbix){
+                                    scriptHandler.deployToZabbixAgent(params);
+                                } else {
+                                    
+                                    scriptHandler.depotDeploy(params).then( (rtn) => {
+                                        
+                                        // 下发成功
+                                        if(rtn == 1){
+                                            // 重置状态
+                                            item.status = 2;
+                                            items.script.fileObj[items.script.selectedVersion]['deployedServers'].push(item.host);
+                                            items.script.status = 1;
+
+                                            // 重置数据
+                                            let hostObj = _.find(this.$refs[`mxTransfer${items.script.id}`].source.rows, {host: item.host});
+                                            this.$refs[`mxTransfer${items.script.id}`].source.rows = _.difference(this.$refs[`mxTransfer${items.script.id}`].source.rows, [hostObj]);
+                                            this.$refs[`mxTransfer${items.script.id}`].target.rows.push(hostObj);
+                                            
+                                            // 重置标签
+                                            this.tagAdd('已下发', items.script);
+                                            this.tagDelete('未下发', items.script);
+                                        } 
+                                        // 下发失败
+                                        else{
+                                            // 重置状态
+                                            item.status = 3;
+                                            item.msg = rtn;
+                                        }
+                                        // 重置状态
+                                        item.loading = false;
+                                    })
                                 }
+    
                             },500)
 
                         })
@@ -1741,30 +1965,32 @@ class Probe extends Matrix {
                             }
                             
                             _.delay(()=>{
-                                try{
-                                    let rtn = items.zabbix ? scriptHandler.unDeployToZabbixAgent(params) : scriptHandler.depotUnDeploy(params);
-                                    // 取消下发成功
-                                    if(rtn == 1){
-                                        item.status = 2;
-                                        items.script.fileObj[items.script.selectedVersion]['deployedServers'] = _.difference(items.script.fileObj[items.script.selectedVersion]['deployedServers'], [item.host]);
-                                        status = 0;
-                                        overStatus[index] = 1;
-                                    } 
-                                    // 取消下发失败
-                                    else{
-                                        item.status = 3;
-                                        overStatus[index] = 0;
-                                        item.msg = rtn;
-                                    }
-                                    item.loading = false;
+                                if(items.zabbix){
 
-                                } catch(err){
-                                    // 取消下发失败
-                                    item.status = 3;
-                                    item.loading = false;
-                                    item.msg = err;
-                                    overStatus[index] = 0;
-                                    return;
+                                    scriptHandler.unDeployToZabbixAgent(params)
+                                    
+                                } else {
+                                    scriptHandler.depotUnDeploy(params).then( (rtn) => {
+                                        // 取消下发成功
+                                        if(rtn == 1){
+                                            item.status = 2;
+                                            items.script.fileObj[items.script.selectedVersion]['deployedServers'] = _.difference(items.script.fileObj[items.script.selectedVersion]['deployedServers'], [item.host]);
+                                            status = 0;
+                                            overStatus[index] = 1;
+
+                                            // 重置数据
+                                            let hostObj = _.find(this.$refs[`mxTransfer${items.script.id}`].target.rows, {host: item.host});
+                                            this.$refs[`mxTransfer${items.script.id}`].target.rows = _.difference(this.$refs[`mxTransfer${items.script.id}`].target.rows, [hostObj]);
+                                            this.$refs[`mxTransfer${items.script.id}`].source.rows.push(hostObj);
+                                        } 
+                                        // 取消下发失败
+                                        else{
+                                            item.status = 3;
+                                            overStatus[index] = 0;
+                                            item.msg = rtn;
+                                        }
+                                        item.loading = false;
+                                    })
                                 }
                             },500)
 
@@ -1945,6 +2171,31 @@ class Probe extends Matrix {
                     onScriptRefresh(){
                         this.$root.$refs.scriptView.getScriptList();
                     },
+                    // 脚本命令更新
+                    onScriptCommandUpdate(row){
+                        
+                        let editor = ace.edit(this.$refs['commandRef'+row.id]);
+                        this.$set(row,'command', _.trim(editor.getValue()));
+
+                        let rtn = scriptHandler.depotUpdate(row);
+
+                        if(rtn == 1){
+                            
+                            this.$message({
+                                type: "success",
+                                message: "更新成功！"
+                            })
+
+                            this.onScriptRefresh();
+                            
+                        } else{
+                            this.$message({
+                                type: "error",
+                                message: "更新失败：" + rtn
+                            })
+                        }
+
+                    },
                     // 脚本更新
                     onScriptUpdate(row){
 
@@ -2030,20 +2281,30 @@ class Probe extends Matrix {
                                                     #{item.count}#
                                                 </p>
                                             </el-button-->
-                                            <span v-for="item in model.summary" style="text-align:center;margin:0px 10px;">
-                                                <el-progress type="circle" :percentage="item.percent"></el-progress>
-                                                <p style="padding:0px;margin:0px;"> 
-                                                    <el-popover
-                                                        placement="top-start"
-                                                        trigger="hover"
-                                                        :content="item.count+' '+item.unit">
-                                                        <el-button type="text" slot="reference" style="padding:0px;"><h3 style="margin:5px 0px;">#{item.name}#</h3></el-button>
-                                                    </el-popover>
-                                                </p>
-                                            </span>
+                                            <el-button type="defult" v-for="item in model.summary" 
+                                                style="max-width: 20em;width: 20em;height:auto;min-height:90px;border-radius: 10px!important;margin: 5px;border: unset;background:#f2f2f2;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);">
+                                                <span style="display:flex;">
+                                                    <span style="width:30%;border-radius:30px;background:#409EFF;">
+                                                        <h3>
+                                                            <el-popover
+                                                                placement="top-start"
+                                                                trigger="hover"
+                                                                :content="item.count+' '+item.unit">
+                                                                <el-button type="text" slot="reference" style="padding:0px;"><h3 style="margin:5px 0px;color:#ffffff;">#{item.name}#</h3></el-button>
+                                                            </el-popover>
+                                                        </h3>
+                                                    </span>
+                                                    <span style="width:70%;text-align:right;">
+                                                        <h2>
+                                                            #{item.count}#
+                                                        </h2>
+                                                        <el-progress :percentage="item.percent"></el-progress>
+                                                    </span>
+                                                </span>
+                                            </el-button>
                                         </el-header>
                                         <el-main style="padding:10px;height:100%;overflow:hidden;">
-                                            <el-container style="height: calc(100% - 110px);">
+                                            <el-container style="height: calc(100% - 85px);">
                                                 <el-header class="probe-view-header" style="height: 40px;line-height: 40px;padding: 0px;background: #dddddd;display: inline-table;">
                                                     <search-base-component :options="options"
                                                                         ref="searchRef"
@@ -2211,12 +2472,24 @@ class Probe extends Matrix {
             });
 
             Vue.component("job-view",{
-                template:   `<div ref="jobView"></div>`,
+                template:   `<div ref="jobView" v-loading="loading" style="height: 100vh;"></div>`,
+                data(){
+                    return {
+                        loading: true
+                    }
+                },
                 mounted(){
                     _.delay(()=>{
+
                         let maxJob = new Job();
                         maxJob.init();
                         maxJob.mount(this.$refs.jobView,210);
+                        
+                        _.delay(()=>{
+                            //成功回调函数停止加载
+                            this.loading = false;
+                        },2000)
+
                     },500)
                 }
             })

@@ -125,7 +125,8 @@
 							@clear="search"
 							clearable
 							autofocus
-							style="margin-left:-2px;"></el-autocomplete>
+							style="margin-left:-2px;"
+							id="searchBase"></el-autocomplete>
 			<!--搜索条件预设置-->
 			<!--search-preset-component :options.sync='options' ref="preSetRef"></search-preset-component-->
 			
@@ -245,9 +246,10 @@
 
 			// 搜索Button Enter事件
 			$(document).keypress((event)=> {
+				
 				var keycode = (event.keyCode ? event.keyCode : event.which);
 				
-				if (keycode == 13 && document.activeElement.id=='') {
+				if (keycode == 13 && document.activeElement.id=='searchBase') {
 					this.search();
 				}
 			})

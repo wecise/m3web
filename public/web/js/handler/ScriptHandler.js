@@ -47,8 +47,6 @@ class ScriptHandler {
             beforeSend: function (xhr) {
             },
             complete: function (xhr, textStatus) {
-                // Audit
-                auditLogHandler.writeLog("Script", "Script upload: " + event.name, 0);
             },
             success: function (data, status) {
 
@@ -56,14 +54,17 @@ class ScriptHandler {
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
-                    fsHandler.callFsJScript(`/matrix/depot/setScriptListToCache.js`);
+                    
+
+                    // Audit
+                    auditLogHandler.writeLog("collection:rule", "Upload: " + event.name + " " + event.version, 0);
                 }
 
             },
             error: function (xhr, textStatus, errorThrown) {
                 rtn = xhr.responseText;
                 // Audit
-                auditLogHandler.writeLog("Script", "Script upload: " + event.name, 1);
+                auditLogHandler.writeLog("collection:rule", "Upload: " + event.name + " " + event.version, 1);
             }
         });
         return rtn;
@@ -89,8 +90,7 @@ class ScriptHandler {
                 // Pace.restart();
             },
             complete: function (xhr, textStatus) {
-                // Audit
-                auditLogHandler.writeLog("Script", "Script delete: " + name, 0);
+                
             },
             success: function (data, status) {
 
@@ -98,14 +98,16 @@ class ScriptHandler {
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
-                    fsHandler.callFsJScript(`/matrix/depot/setScriptListToCache.js`);
+                    
+                    // Audit
+                    auditLogHandler.writeLog("collection:rule", "Delete: " + name, 0);
                 }
 
             },
             error: function (xhr, textStatus, errorThrown) {
                 rtn = xhr.responseText;
                 // Audit
-                auditLogHandler.writeLog("Script", "Script delete: " + name, 1);
+                auditLogHandler.writeLog("collection:rule", "Delete: " + name, 1);
             }
         });
         return rtn;
@@ -126,6 +128,7 @@ class ScriptHandler {
         form.append("name", event.name);
         form.append("version", event.version);
         form.append("remark", event.remark);
+        form.append("command", event.command);
         form.append("uploadfile", event.uploadfile);
         _.forEach(event.tags,(v)=>{
             form.append("tags", v);
@@ -143,8 +146,7 @@ class ScriptHandler {
             beforeSend:function(xhr){
             },
             complete: function(xhr, textStatus) {
-                // Audit
-                auditLogHandler.writeLog("Script", "Script update: " + event.name, 0);
+                
             },
             success: function (data, status) {
 
@@ -152,14 +154,16 @@ class ScriptHandler {
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
-                    fsHandler.callFsJScript(`/matrix/depot/setScriptListToCache.js`);
+                    
+                    // Audit
+                    auditLogHandler.writeLog("collection:rule", "Update: " + event.name + " " + event.version, 0);
                 }
 
             },
             error: function(xhr, textStatus, errorThrown){
                 rtn = xhr.responseText;
                 // Audit
-                auditLogHandler.writeLog("Script", "Script update: " + event.name, 1);
+                auditLogHandler.writeLog("collection:rule", "Update: " + event.name + " " + event.version, 1);
             }
         });
         return rtn;
@@ -193,8 +197,6 @@ class ScriptHandler {
             beforeSend:function(xhr){
             },
             complete: function(xhr, textStatus) {
-                // Audit
-                auditLogHandler.writeLog("Script", "Script info: " + event.name, 0);
             },
             success: function (data, status) {
 
@@ -202,13 +204,16 @@ class ScriptHandler {
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = data.message;
+
+                    // Audit
+                    auditLogHandler.writeLog("collection:rule", "Get info: " + event.name + " " + event.version, 0);
                 }
 
             },
             error: function(xhr, textStatus, errorThrown){
                 rtn = xhr.responseText;
                 // Audit
-                auditLogHandler.writeLog("Script", "Script info: " + event.name, 1);
+                auditLogHandler.writeLog("collection:rule", "Get info: " + event.name + " " + event.version, 1);
             }
         });
         return rtn;
@@ -231,8 +236,7 @@ class ScriptHandler {
             beforeSend:function(xhr){
             },
             complete: function(xhr, textStatus) {
-                // Audit
-                auditLogHandler.writeLog("Script", "Script list", 0);
+                
             },
             success: function (data, status) {
 
@@ -240,13 +244,16 @@ class ScriptHandler {
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = data;
+
+                    // Audit
+                    auditLogHandler.writeLog("collection:rule", "List", 0);
                 }
 
             },
             error: function(xhr, textStatus, errorThrown){
                 rtn = xhr.responseText;
                 // Audit
-                auditLogHandler.writeLog("Script", "Script list", 1);
+                auditLogHandler.writeLog("collection:rule", "List", 1);
             }
         });
 
@@ -261,53 +268,58 @@ class ScriptHandler {
     *
     *
     * */
-    depotDeploy(event) {
+    async depotDeploy(event) {
         let rtn = null;
+    
+        try {
 
-        var form = new FormData();
+            var form = new FormData();
+            _.forEach(event.hosts,(v)=>{
+                form.append("hosts", v);
+            })
 
-        _.forEach(event.hosts,(v)=>{
-            form.append("hosts", v);
-        })
+            form.append("depots", event.name);
+            form.append("command", event.command);
+            form.append("versions", event.version);
 
-        form.append("depots", event.name);
-        form.append("command", event.command);
-        form.append("versions", event.version);
-
-        jQuery.ajax({
-            url: '/monitoring/deploy',
-            dataType: 'json',
-            type: 'POST',
-            async: false,
-            processData: false,
-            contentType: false,
-            mimeType: "multipart/form-data",
-            data: form,
-            beforeSend:function(xhr){
-            },
-            complete: function(xhr, textStatus) {
-                // Audit
-                auditLogHandler.writeLog("Script", "Script deploy: " + event.name, 0);
-            },
-            success: function (data, status) {
-
-                userHandler.ifSignIn(data);
-
-                if( _.lowerCase(data.status) == "ok"){
-                    rtn = 1;
-                    fsHandler.callFsJScript(`/matrix/depot/setScriptListToCache.js`);
+            await jQuery.ajax({
+                url: '/monitoring/deploy',
+                dataType: 'json',
+                type: 'POST',
+                async: true,
+                processData: false,
+                contentType: false,
+                mimeType: "multipart/form-data",
+                data: form,
+                beforeSend:function(xhr){
+                },
+                complete: function(xhr, textStatus) {
+                },
+                success: function (data, status) {
+                    
+                    userHandler.ifSignIn(data);
+    
+                    if( _.lowerCase(data.status) == "ok"){
+                        rtn = 1;
+                        
+                        // Audit
+                        auditLogHandler.writeLog("collection:rule", "Deploy: " + event.name + " " + event.version, 0);
+                    }
+    
+                },
+                error: function(xhr, textStatus, errorThrown){
+                    rtn = xhr.responseText;
+                    // Audit
+                    auditLogHandler.writeLog("collection:rule", "Deploy: " + event.name + " " + event.version, 1);
                 }
+            });
 
-            },
-            error: function(xhr, textStatus, errorThrown){
-                rtn = xhr.responseText;
-                // Audit
-                auditLogHandler.writeLog("Script", "Script deploy: " + event.name, 1);
-            }
-        });
+        } catch (err) {
+            
+        }
 
         return rtn;
-    };
+    }
 
 
     /*
@@ -317,44 +329,48 @@ class ScriptHandler {
     *
     *
     * */
-    depotUnDeploy(event) {
+   async depotUnDeploy(event) {
         let rtn = null;
+        try {
+            var form = new FormData();
+            form.append("hosts", event.hosts);
+            form.append("depots", event.name);
+            form.append("versions", event.version);
 
-        var form = new FormData();
-        form.append("hosts", event.hosts);
-        form.append("depots", event.name);
-        form.append("versions", event.version);
+            await jQuery.ajax({
+                url: '/monitoring/undeploy',
+                dataType: 'json',
+                type: 'POST',
+                async: true,
+                processData: false,
+                contentType: false,
+                mimeType: "multipart/form-data",
+                data: form,
+                beforeSend:function(xhr){
+                },
+                complete: function(xhr, textStatus) {
+                    
+                },
+                success: function (data, status) {
 
-        jQuery.ajax({
-            url: '/monitoring/undeploy',
-            dataType: 'json',
-            type: 'POST',
-            async: false,
-            processData: false,
-            contentType: false,
-            mimeType: "multipart/form-data",
-            data: form,
-            beforeSend:function(xhr){
-            },
-            complete: function(xhr, textStatus) {
-                // Audit
-                auditLogHandler.writeLog("Script", "Script undeploy: " + event.name, 0);
-            },
-            success: function (data, status) {
+                    userHandler.ifSignIn(data);
 
-                userHandler.ifSignIn(data);
-
-                if( _.lowerCase(data.status) == "ok"){
-                    rtn = 1;
-                    fsHandler.callFsJScript(`/matrix/depot/setScriptListToCache.js`);
+                    if( _.lowerCase(data.status) == "ok"){
+                        rtn = 1;
+                        
+                        // Audit
+                        auditLogHandler.writeLog("collection:rule", "Undeploy: " + event.name + " " + event.version, 0);
+                    }
+                },
+                error: function(xhr, textStatus, errorThrown){
+                    rtn = xhr.responseText;
+                    // Audit
+                    auditLogHandler.writeLog("collection:rule", "Undeploy: " + event.name + " " + event.version, 1);
                 }
-            },
-            error: function(xhr, textStatus, errorThrown){
-                rtn = xhr.responseText;
-                // Audit
-                auditLogHandler.writeLog("Script", "Script undeploy: " + event.name, 1);
-            }
-        });
+            });
+        } catch(err){
+            
+        }
 
         return rtn;
     };
@@ -379,8 +395,7 @@ class ScriptHandler {
             beforeSend:function(xhr){
             },
             complete: function(xhr, textStatus) {
-                // Audit
-                auditLogHandler.writeLog("Script", "Script file by name: " + event.name, 0);
+                
             },
             success: function (data, status) {
 
@@ -388,12 +403,15 @@ class ScriptHandler {
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = data.message;
+
+                    // Audit
+                    auditLogHandler.writeLog("collection:rule", "Get file by name: " + event.name + " " + event.version, 0);
                 }
             },
             error: function(xhr, textStatus, errorThrown){
                 rtn = xhr.responseText;
                 // Audit
-                auditLogHandler.writeLog("Script", "Script file by name: " + event.name, 1);
+                auditLogHandler.writeLog("collection:rule", "Get file by name: " + event.name + " " + event.version, 1);
             }
         });
 
@@ -435,21 +453,23 @@ class ScriptHandler {
             beforeSend:function(xhr){
             },
             complete: function(xhr, textStatus) {
-                // Audit
-                auditLogHandler.writeLog("Script", "Script file update: " + event.name, 0);
+                
             },
             success: function (data, status) {
 
                 userHandler.ifSignIn(data);
 
                 if( _.lowerCase(data.status) == "ok"){
-                    rtn = data.message;
+                    rtn = 1;
+
+                    // Audit
+                    auditLogHandler.writeLog("collection:rule", "Update file: " + event.name + " " + event.version, 0);
                 }
             },
             error: function(xhr, textStatus, errorThrown){
                 rtn = xhr.responseText;
                 // Audit
-                auditLogHandler.writeLog("Script", "Script file update: " + event.name, 1);
+                auditLogHandler.writeLog("collection:rule", "Update file: " + event.name + " " + event.version, 1);
             }
         });
 
@@ -476,8 +496,7 @@ class ScriptHandler {
             beforeSend:function(xhr){
             },
             complete: function(xhr, textStatus) {
-                // Audit
-                auditLogHandler.writeLog("Script", "Script file compare: " + event.name, 0);
+                
             },
             success: function (data, status) {
 
@@ -485,12 +504,15 @@ class ScriptHandler {
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = data.message;
+
+                    // Audit
+                    auditLogHandler.writeLog("collection:rule", "Compare file: " + event.name + " " + event.versions.join(","), 0);
                 }
             },
             error: function(xhr, textStatus, errorThrown){
                 rtn = xhr.responseText;
                 // Audit
-                auditLogHandler.writeLog("Script", "Script file compare: " + event.name, 1);
+                auditLogHandler.writeLog("collection:rule", "Compare file: " + event.name + " " + event.versions.join(","), 1);
             }
         });
 
@@ -523,8 +545,7 @@ class ScriptHandler {
             data: form,
             async:false,
             complete: function(xhr, textStatus) {
-                // Audit
-                auditLogHandler.writeLog("Script", "Script deploy for zabbix agent: " + depot.name, 0);
+                
             },
             success: function(data, textStatus, xhr) {
 
@@ -532,12 +553,15 @@ class ScriptHandler {
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
+
+                    // Audit
+                    auditLogHandler.writeLog("collection:rule", "Deploy for zabbix agent: " + depot.name + " " + depot.version, 0);
                 }
             },
             error: function(xhr, textStatus, errorThrown) {
                 rtn =  xhr.responseText;
                 // Audit
-                auditLogHandler.writeLog("Script", "Script deploy for zabbix agent: " + depot.name, 1);
+                auditLogHandler.writeLog("collection:rule", "Deploy for zabbix agent: " + depot.name + " " + depot.version, 1);
             }
         })
         return rtn;
@@ -567,8 +591,7 @@ class ScriptHandler {
             data: form,
             async:false,
             complete: function(xhr, textStatus) {
-                // Audit
-                auditLogHandler.writeLog("Script", "Script undeploy for zabbix agent: " + depot.name, 0);
+                
             },
             success: function(data, textStatus, xhr) {
 
@@ -576,12 +599,15 @@ class ScriptHandler {
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
+
+                    // Audit
+                    auditLogHandler.writeLog("collection:rule", "Undeploy for zabbix agent: " + depot.name + " " + depot.version, 0);
                 }
             },
             error: function(xhr, textStatus, errorThrown) {
                 rtn = xhr.responseText;
                 // Audit
-                auditLogHandler.writeLog("Script", "Script undeploy for zabbix agent: " + depot.name, 1);
+                auditLogHandler.writeLog("collection:rule", "Undeploy for zabbix agent: " + depot.name + " " + depot.version, 1);
             }
         })
         return rtn;
@@ -607,18 +633,20 @@ class ScriptHandler {
             data: form,
             async:true,
             complete: function(xhr, textStatus) {
-                // Audit
-                auditLogHandler.writeLog("Script", "Script " + depot.action + " for zabbix agent: " + depot.hosts.join(", "), 0);
+                
             },
             success: function(data, textStatus, xhr) {
 
                 userHandler.ifSignIn(data);
                 
+                // Audit
+                auditLogHandler.writeLog("Sccollection:ruleript", depot.action + " for zabbix agent: " + depot.hosts.join(", "), 0);
+
                 return data;
             },
             error: function(xhr, textStatus, errorThrown) {
                 // Audit
-                auditLogHandler.writeLog("Script", "Script " + depot.action + " for zabbix agent: " + depot.hosts.join(", "), 1);
+                auditLogHandler.writeLog("collection:rule", depot.action + " for zabbix agent: " + depot.hosts.join(", "), 1);
 
                 return xhr.responseText;
             }

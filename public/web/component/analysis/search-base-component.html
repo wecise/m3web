@@ -90,7 +90,8 @@
 							@select="search"
 							@clear="search"
 							clearable
-							autofocus></el-autocomplete>
+							autofocus
+							id="searchBase"></el-autocomplete>
 			<!--搜索条件预设置-->
 			<search-preset-component :options.sync='options' ref="preSetRef"></search-preset-component>
 			<!--快速过滤条件设置-->
@@ -137,7 +138,7 @@
 			// 搜索Button Enter事件
 			$(document).keypress((event)=> {
 				var keycode = (event.keyCode ? event.keyCode : event.which);
-				if (keycode == 13) {
+				if (keycode == 13 && document.activeElement.id=='searchBase') {
 					this.search();
 				}
 			})

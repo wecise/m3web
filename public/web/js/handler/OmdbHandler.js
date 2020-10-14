@@ -460,7 +460,7 @@ class OmdbHandler  {
                 
             },
             complete: function(xhr, textStatus) {
-                auditLogHandler.writeLog("omdb", "Execute Mql: " + param, 0);
+                auditLogHandler.writeLog("omdb:console", "Execute mql: " + param, 0);
             },
             success: function (data, status) {
 
@@ -481,7 +481,7 @@ class OmdbHandler  {
                     alert("Internal Server Error（500)");
                 }
 
-                auditLogHandler.writeLog("omdb", "Execute Mql: " + param, 1);
+                auditLogHandler.writeLog("omdb:console", "Execute mql: " + param, 1);
             }
         });
 
@@ -507,7 +507,7 @@ class OmdbHandler  {
             // Pace.restart();
         },
         complete: function(xhr, textStatus) {
-            auditLogHandler.writeLog("omdb", "Export DDL: " + param, 0);
+            auditLogHandler.writeLog("omdb:console", "Export ddl: " + param, 0);
         },
         success: function (data, status) {
 
@@ -520,7 +520,7 @@ class OmdbHandler  {
         },
         error: function(xhr, textStatus, errorThrown){
             rtn = xhr.responseText;
-            auditLogHandler.writeLog("omdb", "Export DDL: " + param, 1);
+            auditLogHandler.writeLog("omdb:console", "Export ddl: " + param, 1);
         }
     });
 
@@ -548,14 +548,14 @@ class OmdbHandler  {
                     var blob = new Blob([xhr.response], event.filetype=='mql'?{type: "octet/stream"}:{type: "application/vnd.ms-excel"});
                     saveAs(blob, fileName);
                     alertify.success("导出成功" + " " + fileName);
-                    auditLogHandler.writeLog("omdb", "Export Class Data: " + event.class, 0);
+                    auditLogHandler.writeLog("omdb:console", "Export class data: " + event.class, 0);
                 }
             }
             xhr.responseType = "arraybuffer";
             xhr.send();
         } catch(err){
             rtn = 0;
-            auditLogHandler.writeLog("omdb", "Export Class Data: " + event.class, 1);
+            auditLogHandler.writeLog("omdb:console", "Export class data: " + event.class, 1);
         }
         return rtn;
     };
@@ -583,7 +583,7 @@ class OmdbHandler  {
                 // // Pace.restart();
             },
             complete: function(xhr, textStatus) {
-                auditLogHandler.writeLog("omdb", "Import Class Data: " + file.name, 0);
+                auditLogHandler.writeLog("omdb:console", "Import class data: " + file.name, 0);
             },
             success: function(data, textStatus, xhr) {
 
@@ -598,7 +598,7 @@ class OmdbHandler  {
             error: function(xhr, textStatus, errorThrown) {
                 rtn = xhr.responseText;
                 alertify.error("导入失败");
-                auditLogHandler.writeLog("omdb", "Import Class Data: " + file.name, 1);
+                auditLogHandler.writeLog("omdb:console", "Import class data: " + file.name, 1);
             }
         })
         return rtn;
