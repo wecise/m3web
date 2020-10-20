@@ -45,7 +45,12 @@ class Pipe {
                                 root: `/home/${window.SignedUser_UserName}/Documents/pipe`,
                                 path: `/home/${window.SignedUser_UserName}/Documents/pipe`
                             },
-                            showView: 'table'
+                            showView: 'table',
+                            control: {
+                                tagTree: {
+                                    show: false
+                                }
+                            }
                         }
                     },
                     computed: {
@@ -54,7 +59,7 @@ class Pipe {
                         }
                     },
                     template:   `<el-container style="height: calc(100% - 85px);background:#ffffff;">
-                                    <el-aside width="200px" style="background: #f2f2f2;" ref="leftView">
+                                    <el-aside width="200px" style="background: #f2f2f2;" ref="leftView" v-show="control.tagTree.show">
                                         <mx-tag-tree :model="{parent:'/pipe',name:'pipe_tree_data.js',domain:'pipe'}" :fun="onRefreshByTag" ref="tagTree"></mx-tag-tree>
                                     </el-aside>
                                     <el-container ref="mainView">
@@ -118,7 +123,7 @@ class Pipe {
                                                 :row-class-name="rowClassName"
                                                 :header-cell-style="headerRender"
                                                 ref="table">
-                                                <el-table-column type="selection" align="center"></el-table-column> 
+                                                <el-table-column type="selection" align="center" width="55"></el-table-column> 
                                                 <el-table-column
                                                     sortable 
                                                     show-overflow-tooltip
@@ -192,6 +197,9 @@ class Pipe {
                                 </el-container>`,
                     created(){
                         this.initData();
+
+                        // 默认边栏显示状态
+                        this.control.tagTree.show = (localStorage.getItem("PIPE-TAG-TREE-IFSHOW") == 'true');
                     },
                     mounted(){
                         // 初始化分隔栏
@@ -224,7 +232,9 @@ class Pipe {
 
                         },
                         onTogglePanel(){
-							$(this.$refs.leftView.$el).toggle();
+							this.control.tagTree.show = !this.control.tagTree.show;
+
+                            localStorage.setItem("PIPE-TAG-TREE-IFSHOW",this.control.tagTree.show);
 						},
                         onRefreshByTag(){
 
@@ -326,7 +336,7 @@ class Pipe {
                               });
                         },
                         onNewPipe(row,index){
-                            this.$prompt('请输入接入名程', '提示', {
+                            this.$prompt('请输入接入名称', '提示', {
                                 confirmButtonText: '确定',
                                 cancelButtonText: '取消'
                               }).then(({ value }) => {
@@ -348,7 +358,7 @@ class Pipe {
                                 } else {
                                     this.$message({
                                         type: 'error',
-                                        message: '新建接入失败 ' + rtn.message
+                                        message: '新建接入失败: ' + rtn.message
                                     });
                                     return false;
                                 }

@@ -129,7 +129,9 @@ class ScriptHandler {
         form.append("version", event.version);
         form.append("remark", event.remark);
         form.append("command", event.command);
-        form.append("uploadfile", event.uploadfile);
+        if(!_.isEmpty(event.uploadfile)){
+            form.append("uploadfile", event.uploadfile);
+        }
         _.forEach(event.tags,(v)=>{
             form.append("tags", v);
         })
@@ -523,134 +525,150 @@ class ScriptHandler {
     /* 
         Deploy depot to zabbix agent
     */
-    deployToZabbixAgent(depot){
+   async deployToZabbixAgent(depot){
         let rtn = null;
         
-        let form = new FormData();
-        _.forEach(depot.hosts,(v)=>{
-            form.append('hosts', v);
-        })
-        form.append('name',  depot.name);
-        form.append('version', depot.version);
-        form.append('key', depot.key);
-        form.append('command', depot.command);
+        try{
+            let form = new FormData();
+            _.forEach(depot.hosts,(v)=>{
+                form.append('hosts', v);
+            })
+            form.append('name',  depot.name);
+            form.append('version', depot.version);
+            form.append('key', depot.key);
+            form.append('command', depot.command);
 
-        jQuery.ajax({
-            url: '/monitoring/zabbix/deploy',
-            type: "POST",
-            dataType: 'json',
-            processData: false,
-            contentType: false,
-            mimeType: 'multipart/form-data',
-            data: form,
-            async:false,
-            complete: function(xhr, textStatus) {
-                
-            },
-            success: function(data, textStatus, xhr) {
+            await jQuery.ajax({
+                url: '/monitoring/zabbix/deploy',
+                type: "POST",
+                dataType: 'json',
+                processData: false,
+                contentType: false,
+                mimeType: 'multipart/form-data',
+                data: form,
+                async: true,
+                complete: function(xhr, textStatus) {
+                    
+                },
+                success: function(data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                    userHandler.ifSignIn(data);
 
-                if( _.lowerCase(data.status) == "ok"){
-                    rtn = 1;
+                    if( _.lowerCase(data.status) == "ok"){
+                        rtn = 1;
 
+                        // Audit
+                        auditLogHandler.writeLog("collection:rule", "Deploy for zabbix agent: " + depot.name + " " + depot.version, 0);
+                    }
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    rtn =  xhr.responseText;
                     // Audit
-                    auditLogHandler.writeLog("collection:rule", "Deploy for zabbix agent: " + depot.name + " " + depot.version, 0);
+                    auditLogHandler.writeLog("collection:rule", "Deploy for zabbix agent: " + depot.name + " " + depot.version, 1);
                 }
-            },
-            error: function(xhr, textStatus, errorThrown) {
-                rtn =  xhr.responseText;
-                // Audit
-                auditLogHandler.writeLog("collection:rule", "Deploy for zabbix agent: " + depot.name + " " + depot.version, 1);
-            }
-        })
+            })
+        } catch(err){
+
+        }
+
         return rtn;
     };
 
     /*
         Undeploy depot to zabbix agent
     */
-    unDeployToZabbixAgent(depot){
+   async unDeployToZabbixAgent(depot){
         let rtn = null;
         
-        let form = new FormData();
-        
-        _.forEach(depot.hosts,(v)=>{
-            form.append('hosts', v);
-        })
-        form.append('name', depot.name);
-        form.append('version', depot.version);
+        try{
+            let form = new FormData();
+            
+            _.forEach(depot.hosts,(v)=>{
+                form.append('hosts', v);
+            })
+            form.append('name', depot.name);
+            form.append('version', depot.version);
 
-        jQuery.ajax({
-            url: '/monitoring/zabbix/undeploy',
-            type: "POST",
-            dataType: 'json',
-            processData: false,
-            contentType: false,
-            mimeType: 'multipart/form-data',
-            data: form,
-            async:false,
-            complete: function(xhr, textStatus) {
-                
-            },
-            success: function(data, textStatus, xhr) {
+            await jQuery.ajax({
+                url: '/monitoring/zabbix/undeploy',
+                type: "POST",
+                dataType: 'json',
+                processData: false,
+                contentType: false,
+                mimeType: 'multipart/form-data',
+                data: form,
+                async: true,
+                complete: function(xhr, textStatus) {
+                    
+                },
+                success: function(data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                    userHandler.ifSignIn(data);
 
-                if( _.lowerCase(data.status) == "ok"){
-                    rtn = 1;
+                    if( _.lowerCase(data.status) == "ok"){
+                        rtn = 1;
 
+                        // Audit
+                        auditLogHandler.writeLog("collection:rule", "Undeploy for zabbix agent: " + depot.name + " " + depot.version, 0);
+                    }
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    rtn = xhr.responseText;
                     // Audit
-                    auditLogHandler.writeLog("collection:rule", "Undeploy for zabbix agent: " + depot.name + " " + depot.version, 0);
+                    auditLogHandler.writeLog("collection:rule", "Undeploy for zabbix agent: " + depot.name + " " + depot.version, 1);
                 }
-            },
-            error: function(xhr, textStatus, errorThrown) {
-                rtn = xhr.responseText;
-                // Audit
-                auditLogHandler.writeLog("collection:rule", "Undeploy for zabbix agent: " + depot.name + " " + depot.version, 1);
-            }
-        })
+            })
+        } catch(err){
+
+        }
+
         return rtn;
     };
 
     /*  
         Start Stop Restart zabbix agent
     */
-    zabbixAgentAction(depot){
-        
-        let form = new FormData();
-        _.forEach(depot.hosts,(v)=>{
-            form.append('hosts', v);
-        })
+   async zabbixAgentAction(depot){
+        let rtn = null;
+        try{
+            let form = new FormData();
+            _.forEach(depot.hosts,(v)=>{
+                form.append('hosts', v);
+            })
 
-        jQuery.ajax({
-            url: `/monitoring/zabbix/${depot.action}`,
-            type: "POST",
-            dataType: 'json',
-            processData: false,
-            contentType: false,
-            mimeType: 'multipart/form-data',
-            data: form,
-            async:true,
-            complete: function(xhr, textStatus) {
-                
-            },
-            success: function(data, textStatus, xhr) {
+            await jQuery.ajax({
+                url: `/monitoring/zabbix/${depot.action}`,
+                type: "POST",
+                dataType: 'json',
+                processData: false,
+                contentType: false,
+                mimeType: 'multipart/form-data',
+                data: form,
+                async:true,
+                complete: function(xhr, textStatus) {
+                    
+                },
+                success: function(data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
-                
-                // Audit
-                auditLogHandler.writeLog("Sccollection:ruleript", depot.action + " for zabbix agent: " + depot.hosts.join(", "), 0);
+                    userHandler.ifSignIn(data);
+                    
+                    // Audit
+                    auditLogHandler.writeLog("Sccollection:ruleript", depot.action + " for zabbix agent: " + depot.hosts.join(", "), 0);
 
-                return data;
-            },
-            error: function(xhr, textStatus, errorThrown) {
-                // Audit
-                auditLogHandler.writeLog("collection:rule", depot.action + " for zabbix agent: " + depot.hosts.join(", "), 1);
+                    rtn = data;
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    // Audit
+                    auditLogHandler.writeLog("collection:rule", depot.action + " for zabbix agent: " + depot.hosts.join(", "), 1);
 
-                return xhr.responseText;
-            }
-        })
+                    rtn = xhr.responseText;
+                }
+            })
+        } catch(err){
+
+        }
+
+        return rtn;
         
     }; 
 }

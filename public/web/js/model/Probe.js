@@ -788,13 +788,15 @@ class Probe extends Matrix {
                                 show: false,
                                 rows: [],
                                 script: {},
-                                zabbix: false
+                                zabbix: false,
+                                asyncNum: 10
                             },
                             scriptUnDeploy: {
                                 show: false,
                                 rows: [],
                                 script: {},
-                                zabbix: false
+                                zabbix: false,
+                                asyncNum: 10
                             }
                         }
                     }
@@ -1001,16 +1003,20 @@ class Probe extends Matrix {
                                                                     <span slot="label"><i class="el-icon-setting"></i> 下发设置</span>
                                                                     <el-form label-position="top" label-width="120px" style="background: #ffffff;padding: 10px 20px;min-height:200px;">
                                                                         <el-form-item label="执行命令">
-                                                                            <el-tooltip content="更新命令" open-delay="500">
-                                                                                <el-button type="primary" @click="onScriptCommandUpdate(props.row)" icon="el-icon-refresh" style="float:right;"></el-button>
+                                                                            <el-tooltip content="更新命令到脚本" open-delay="500">
+                                                                                <el-button type="default" 
+                                                                                    @click="onScriptCommandUpdate(props.row)" 
+                                                                                    icon="el-icon-refresh" 
+                                                                                    style="float:right;margin: -30px 0px 10px 0;"
+                                                                                    >更新命令到脚本</el-button>
                                                                             </el-tooltip>
                                                                             <pre :ref="'commandRef'+props.row.id" style="width:100%;height:200px;border:1px solid #dddddd;"></pre>
                                                                         </el-form-item>
-                                                                        <el-form-item label="Key">
+                                                                        <el-form-item label="Key【下发Zabbix Agent时需指定该值】">
                                                                             <el-input
                                                                                 placeholder="key"
                                                                                 v-model="props.row.zabbixKey">
-                                                                            </el-input>                                                  
+                                                                            </el-input>                              
                                                                         </el-form-item>
                                                                     <el-form>
                                                                 </el-tab-pane>
@@ -1071,7 +1077,8 @@ class Probe extends Matrix {
                                                                                 </el-table>
                                                                             </el-main>
                                                                             <el-footer style="line-height:60px;">
-                                                                                <el-checkbox v-model="dialog.scriptDeploy.zabbix" border>Zabbix探针</el-checkbox>
+                                                                                <span><el-checkbox v-model="dialog.scriptDeploy.zabbix" border>Zabbix探针</el-checkbox></span>
+                                                                                <!--span style="padding-left:30px;">并发数量: <el-input type="number" v-model="dialog.scriptDeploy.asyncNum" style="width: 10em;height:30px;line-height:30px;"></el-input></span-->
                                                                             </el-footer>
                                                                         </el-container>
                                                                         <div slot="footer" class="dialog-footer">
@@ -1668,7 +1675,10 @@ class Probe extends Matrix {
                                         enableSnippets: true,
                                         enableLiveAutocompletion: false
                                     });
-                                    
+                                    editor.getSession().on('change', _.debounce(()=>{
+                                        // 内容变化，提示是否同步到脚本中
+                                        //this.$emit(`update:commandRef${row.id}`);
+                                    },500));
                                     editor.getSession().setMode("ace/mode/sh");
                                     editor.setTheme("ace/theme/chrome");
                                     editor.getSession().setUseSoftTabs(true);
@@ -1892,7 +1902,32 @@ class Probe extends Matrix {
 
                     },
                     onScriptDeployHandler(items){
-                         
+                        const self = this;
+                        
+                        let deployFun = function(rtn,item){
+                            // 下发成功
+                            if(rtn == 1){
+                                // 重置状态
+                                item.status = 2;
+                                items.script.fileObj[items.script.selectedVersion]['deployedServers'].push(item.host);
+                                items.script.status = 1;
+
+                                // 重置数据
+                                let hostObj = _.find(self.$refs[`mxTransfer${items.script.id}`].source.rows, {host: item.host});
+                                self.$refs[`mxTransfer${items.script.id}`].source.rows = _.difference(self.$refs[`mxTransfer${items.script.id}`].source.rows, [hostObj]);
+                                self.$refs[`mxTransfer${items.script.id}`].target.rows.push(hostObj);
+                                
+                            } 
+                            // 下发失败
+                            else{
+                                // 重置状态
+                                item.status = 3;
+                                item.msg = rtn;
+                            }
+                            // 重置状态
+                            item.loading = false;
+                        }
+
                         _.forEach(items.rows,(item)=>{
 
                             // 下发开始
@@ -1907,102 +1942,81 @@ class Probe extends Matrix {
                                 key: items.script.zabbixKey,
                                 command: items.script.command
                             }
-                            
-                            _.delay(()=>{
-                                    
-                                if(items.zabbix){
-                                    scriptHandler.deployToZabbixAgent(params);
-                                } else {
-                                    
-                                    scriptHandler.depotDeploy(params).then( (rtn) => {
-                                        
-                                        // 下发成功
-                                        if(rtn == 1){
-                                            // 重置状态
-                                            item.status = 2;
-                                            items.script.fileObj[items.script.selectedVersion]['deployedServers'].push(item.host);
-                                            items.script.status = 1;
 
-                                            // 重置数据
-                                            let hostObj = _.find(this.$refs[`mxTransfer${items.script.id}`].source.rows, {host: item.host});
-                                            this.$refs[`mxTransfer${items.script.id}`].source.rows = _.difference(this.$refs[`mxTransfer${items.script.id}`].source.rows, [hostObj]);
-                                            this.$refs[`mxTransfer${items.script.id}`].target.rows.push(hostObj);
-                                            
-                                            // 重置标签
-                                            this.tagAdd('已下发', items.script);
-                                            this.tagDelete('未下发', items.script);
-                                        } 
-                                        // 下发失败
-                                        else{
-                                            // 重置状态
-                                            item.status = 3;
-                                            item.msg = rtn;
-                                        }
-                                        // 重置状态
-                                        item.loading = false;
-                                    })
-                                }
+                            if(items.zabbix){
+                                scriptHandler.deployToZabbixAgent(params).then( (rtn) => {
+                                    deployFun(rtn,item);
+                                });
+                            } else {
+                                scriptHandler.depotDeploy(params).then( (rtn) => {
+                                    deployFun(rtn,item);
+                                })
+                            }
     
-                            },500)
-
                         })
+
                     },
                     onScriptUnDeployHandler(items){
                         
-                        var status = 1;
-                        var overStatus = [];
-                        _.forEach(items.rows,(item,index)=>{
+                        const self = this;
+                        
+                        try{
+                            let unDeployFun = function(rtn,item){
+                                // 取消下发成功
+                                if(rtn == 1){
+                                    item.status = 2;
+                                    
+                                    items.script.fileObj[items.script.selectedVersion]['deployedServers'] = _.difference(items.script.fileObj[items.script.selectedVersion]['deployedServers'], [item.host]);
+                                    
+                                    // 重置数据
+                                    let hostObj = _.find(self.$refs[`mxTransfer${items.script.id}`].target.rows, {host: item.host});
+                                    self.$refs[`mxTransfer${items.script.id}`].target.rows = _.difference(self.$refs[`mxTransfer${items.script.id}`].target.rows, [hostObj]);
+                                    self.$refs[`mxTransfer${items.script.id}`].source.rows.push(hostObj);
+                                } 
+                                // 取消下发失败
+                                else{
+                                    item.status = 3;
+                                    item.msg = rtn;
+                                }
+                                item.loading = false;
+                            };
 
-                            // 取消下发开始
-                            item.loading = true;
-                            item.status = 1;
+                            _.forEach(items.rows,(item)=>{
 
-                            // 一台一台取消下发
-                            let params = {
-                                hosts: [item.host],
-                                name: items.script.name,
-                                version: items.script.selectedVersion
-                            }
-                            
-                            _.delay(()=>{
+                                // 取消下发开始
+                                item.loading = true;
+                                item.status = 1;
+
+                                // 一台一台取消下发
+                                let params = {
+                                    hosts: [item.host],
+                                    name: items.script.name,
+                                    version: items.script.selectedVersion
+                                }
+                                
                                 if(items.zabbix){
 
-                                    scriptHandler.unDeployToZabbixAgent(params)
+                                    scriptHandler.unDeployToZabbixAgent(params).then( (rtn) => {
+                                        unDeployFun(rtn,item);
+                                    })
                                     
                                 } else {
                                     scriptHandler.depotUnDeploy(params).then( (rtn) => {
-                                        // 取消下发成功
-                                        if(rtn == 1){
-                                            item.status = 2;
-                                            items.script.fileObj[items.script.selectedVersion]['deployedServers'] = _.difference(items.script.fileObj[items.script.selectedVersion]['deployedServers'], [item.host]);
-                                            status = 0;
-                                            overStatus[index] = 1;
-
-                                            // 重置数据
-                                            let hostObj = _.find(this.$refs[`mxTransfer${items.script.id}`].target.rows, {host: item.host});
-                                            this.$refs[`mxTransfer${items.script.id}`].target.rows = _.difference(this.$refs[`mxTransfer${items.script.id}`].target.rows, [hostObj]);
-                                            this.$refs[`mxTransfer${items.script.id}`].source.rows.push(hostObj);
-                                        } 
-                                        // 取消下发失败
-                                        else{
-                                            item.status = 3;
-                                            overStatus[index] = 0;
-                                            item.msg = rtn;
-                                        }
-                                        item.loading = false;
+                                        unDeployFun(rtn,item);
                                     })
                                 }
-                            },500)
 
-                        })
+                            })
+                        } catch(err){
 
-                        _.delay(()=>{
-                            this.$set(items.script,'status',status);
-                            if(items.script.status == 0){
-                                this.tagAdd('未下发', items.script);
-                                this.tagDelete('已下发', items.script);
-                            }
-                        }, 500 * items.rows.length + 500)
+                        } finally{
+                            _.delay(()=>{
+                                if( _.isEmpty(items.script.fileObj[items.script.selectedVersion]['deployedServers']) ){
+                                    this.$set(items.script,'status', 0);
+                                }
+                            },3000)
+                        }
+                        
                     },
                     // 脚本上传
                     onScriptUpload(){
@@ -2186,7 +2200,8 @@ class Probe extends Matrix {
                                 message: "更新成功！"
                             })
 
-                            this.onScriptRefresh();
+                            // 刷新列表
+                            // this.onScriptRefresh();
                             
                         } else{
                             this.$message({
@@ -2218,7 +2233,8 @@ class Probe extends Matrix {
                                 message: "更新成功！"
                             })
 
-                            this.onScriptRefresh();
+                            // 刷新列表
+                            // this.onScriptRefresh();
                             
                         } else{
                             this.$message({
@@ -2373,6 +2389,11 @@ class Probe extends Matrix {
                     return {
                         model: {},
                         splitInst: null,
+                        control: {
+                            tagTree: {
+                                show: true
+                            }
+                        },
                         options: {
                             // 视图定义
                             view: {
@@ -2402,7 +2423,7 @@ class Probe extends Matrix {
                     }
                 },
                 template: `<el-container style="height:calc(100vh - 145px);width:100%;">
-                                <el-aside ref="leftView" style="background:#f2f2f2;margin: -10px 0px -10px -10px;">
+                                <el-aside ref="leftView" style="background:#f2f2f2;margin: -10px 0px -10px -10px;" v-show="control.tagTree.show">
                                     <mx-tag-tree :model="{parent:'/depot',name:'script_tree_data.js',domain:'script'}" :fun="onRefreshByTag" ref="scriptTagTree"></mx-tag-tree>
                                 </el-aside>
                                 <el-main style="padding:10px 10px 0px 10px;width:100%;overflow:hidden;" ref="mainView">
@@ -2418,6 +2439,10 @@ class Probe extends Matrix {
                                     </el-container>
                                 </el-main>
                             </el-container>`,
+                created(){
+                    // 默认边栏显示状态
+                    this.control.tagTree.show = (localStorage.getItem("SCRIPT-TAG-TREE-IFSHOW") == 'true');
+                },
                 mounted(){
                     this.$nextTick().then(()=>{
                         
@@ -2466,7 +2491,11 @@ class Probe extends Matrix {
                         this.$refs.searchRef.search();
                     },
                     onToggle(){
-                        $(this.$refs.leftView.$el).toggle();
+                        
+                        this.control.tagTree.show = !this.control.tagTree.show;
+
+                        localStorage.setItem("SCRIPT-TAG-TREE-IFSHOW",this.control.tagTree.show);
+                        
                     }
                 }
             });

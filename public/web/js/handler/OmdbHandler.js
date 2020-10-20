@@ -533,7 +533,7 @@ class OmdbHandler  {
     *   类数据导出
     *
     * */
-    classDataExport(event){
+    async classDataExport(event){
         let rtn = 1;
 
         let fileName = `${window.location.host}_${window.COMPANY_OSPACE}_${_.last(event.class.split("/"))}_${moment().format("YYYY-MM-DD HH:mm:SS")}.${event.filetype}`;
@@ -564,43 +564,48 @@ class OmdbHandler  {
     *   类数据导入
     *
     * */
-   classDataImport(file){
+   async classDataImport(file){
         let rtn = null;
 
-        let fm = new FormData();
-        fm.append("uploadfile", file);
+        try{
+            let fm = new FormData();
+            fm.append("uploadfile", file);
 
-        jQuery.ajax({
-            url: '/mxobject/import',
-            dataType: 'json',
-            type: 'POST',
-            data: fm,
-            mimeType: "multipart/form-data",
-            async: true,
-            processData:false,
-            contentType: false,
-            beforeSend:function(xhr){
-                // // Pace.restart();
-            },
-            complete: function(xhr, textStatus) {
-                auditLogHandler.writeLog("omdb:console", "Import class data: " + file.name, 0);
-            },
-            success: function(data, textStatus, xhr) {
+            await jQuery.ajax({
+                url: '/mxobject/import',
+                dataType: 'json',
+                type: 'POST',
+                data: fm,
+                mimeType: "multipart/form-data",
+                async: true,
+                processData:false,
+                contentType: false,
+                beforeSend:function(xhr){
+                    
+                },
+                complete: function(xhr, textStatus) {
+                    auditLogHandler.writeLog("omdb:console", "Import class data: " + file.name, 0);
+                },
+                success: function(data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                    userHandler.ifSignIn(data);
 
-                if( _.lowerCase(data.status) == "ok"){
-                    rtn = data.message;
-                    alertify.success("导入成功" + " " + file.name);
+                    if( _.lowerCase(data.status) == "ok"){
+                        rtn = data.message;
+                        alertify.success("导入成功" + " " + file.name);
+                    }
+
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    rtn = xhr.responseText;
+                    alertify.error("导入失败");
+                    auditLogHandler.writeLog("omdb:console", "Import class data: " + file.name, 1);
                 }
+            })
+        } catch(err){
 
-            },
-            error: function(xhr, textStatus, errorThrown) {
-                rtn = xhr.responseText;
-                alertify.error("导入失败");
-                auditLogHandler.writeLog("omdb:console", "Import class data: " + file.name, 1);
-            }
-        })
+        }
+
         return rtn;
     };
 

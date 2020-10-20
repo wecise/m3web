@@ -2085,14 +2085,18 @@ class Omdb{
                                             this.model.template = true;
                                            // this.model.limit = 0;
                                         }
-                                        let rtn = omdbHandler.classDataExport(this.model);
+                                        
                                         this.$message({
                                             type: "info",
                                             message: "导出操作将提交至后台，请稍后。。。"
                                         })
-                                        if(rtn == 1){
-                                            wnd.close();
-                                        }
+
+                                        omdbHandler.classDataExport(this.model).then((rtn)=>{
+                                            if(rtn == 1){
+                                                wnd.close();
+                                            }
+                                        });
+                                    
                                     }
                                 }
                             }).$mount("#class-template-export");
@@ -2151,11 +2155,15 @@ class Omdb{
                                         wnd.close();
                                     },
                                     onImport(){
-                                        this.rtnInfo = JSON.parse(omdbHandler.classDataImport(this.fileList[0]));
+                                        
                                         this.$message({
                                             type: "info",
                                             message: "导入操作将提交至后台，请稍后。。。"
                                         })
+
+                                        omdbHandler.classDataImport(this.fileList[0]).then( (rtn) => {
+                                            this.rtnInfo = JSON.parse(rtn);
+                                        });
                                     },
                                     clearInfo(){
                                         this.rtnInfo = null;
