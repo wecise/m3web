@@ -118,6 +118,67 @@ class FsHandler {
         return rtn;
     };
 
+    /*
+    *   文件系统
+    *
+    *   异步提交到
+    *
+    *   参数：
+    *       文件名称
+    *       扩展名
+    *
+    */
+    async fsNewAsync(ftype, path, name, content, attr){
+        let rtn = null;
+        
+        try{
+            let parent = path.replace(/\/\//g,'/');
+            let _url = `/fs${parent}/${name}`;
+
+            if(window.SignedUser_IsAdmin){
+                _url += '?issys=true';
+            }
+
+            let fm = new FormData();
+
+            fm.append("data", content);
+            fm.append("type", ftype);
+            fm.append("attr", JSON.stringify(attr));
+            fm.append("index", true);
+
+            await jQuery.ajax({
+                url: _url,
+                type: 'PUT',
+                processData: false,
+                contentType: false,
+                mimeType: 'multipart/form-data;',
+                dataType: "json",
+                data: fm,
+                async: true,
+                beforeSend: function(xhr) {
+                },
+                complete: function(xhr, textStatus) {
+                },
+                success: function(data, textStatus, xhr) {
+
+                    userHandler.ifSignIn(data);
+
+                    if( _.lowerCase(data.status) == "ok"){
+                        rtn = 1;
+                    }
+
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    rtn = xhr.responseJSON;
+                }
+            })
+        } catch(err){
+
+        }
+
+        return rtn;
+    };
+
 
     /*
     *   文件系统

@@ -113,7 +113,7 @@ class Probe extends Matrix {
                                                 :data="source.rows"
                                                 style="width: 100%"
                                                 @selection-change="onSourceSelectionChange">
-                                                <el-table-column type="selection" width="55"></el-table-column>
+                                                <el-table-column type="selection" width="55" :selectable='onSelectCheckBox'></el-table-column>
                                                 <el-table-column :label="prop.title[0]">
                                                     <template slot-scope="scope">
                                                         #{scope.row[prop.label[0]]}#
@@ -245,6 +245,13 @@ class Probe extends Matrix {
                     this.setAllList();
                 },
                 methods: {
+                    onSelectCheckBox(row,index){
+                        if( row['disable'] ){
+                          return 0;
+                        } else {
+                          return 1;
+                        }
+                    },
                     setAllList(){
                         if(!_.isEmpty(this.list)){
                             // all
@@ -268,8 +275,23 @@ class Probe extends Matrix {
                         }
                     },
                     setSourceData(){
-                        // source
-                        this.source.rows = _.difference(this.all.list, this.target.rows);
+                        try{
+                            // 排除当前选择的
+                            this.source.rows = _.difference(this.all.list, this.target.rows);
+                            
+                            // 排除选择的数据
+                            let selectedRows = JSON.parse(JSON.stringify(this.model));
+                            _.forEach(this.source.rows,(v)=>{
+                                if( _.indexOf( selectedRows, v.host) !== -1 ) {
+                                    v['disable'] = true;
+                                } else {
+                                    v['disable'] = false;
+                                }
+                            })
+                            
+                        } catch(err){
+                            console.error(err);
+                        }
                     },
                     onSearchAllList: _.debounce(function(){
                         let rtn = null;
@@ -282,7 +304,9 @@ class Probe extends Matrix {
                         }
 
                         // 赋值给source
-                        this.setSourceData();
+                        _.delay(()=>{
+                            this.setSourceData();
+                        },500)
                     },500),
                     onSourceSelectionChange(val){
                         this.source.selected = val;
@@ -879,8 +903,8 @@ class Probe extends Matrix {
                                         </el-table-column>
                                         <el-table-column type="expand" width="0">
                                             <template slot-scope="props">
-                                                <el-container style="width:90%;height:100%;min-height:40vh;background: #ffffff;">
-                                                    <el-aside style="width:200px;background: #f2f2f2;">
+                                                <el-container style="width:90vw;height:100%;min-height:40vh;background: #ffffff;">
+                                                    <el-aside style="width:20em;background: #f2f2f2;">
                                                         <el-container style="height:100%;">
                                                             <el-header style="height:40px;line-height:40px;">
                                                                 <h4 style="margin:0px;">版本历史</h4>
@@ -939,10 +963,15 @@ class Probe extends Matrix {
                                                                         </div>
                                                                     </el-dialog>
                                                                     <div style="display:flex;" v-if="props.row.status==0">
-                                                                        <el-button type="default" v-for="item in props.row.fileObj[props.row.selectedVersion]['files']" style="position:relative;box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);max-width: 12em;width: 12em;height:110px;margin:5px;">
+                                                                        <el-button type="default" v-for="item in props.row.fileObj[props.row.selectedVersion]['files']" 
+                                                                            style="position:relative;box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);max-width: 12em;width: 12em;height:110px;margin:5px;"
+                                                                            v-if="!_.isEmpty(props.row.fileObj[props.row.selectedVersion])">
                                                                             <i class="el-icon-document" style="font-size:48px;color:#f8a502;"></i>
                                                                             <span style="text-align:center;">
-                                                                                <p>#{item.name}#</p>
+                                                                                <p>#{  _.truncate(item.name, {
+                                                                                    'length': 20,
+                                                                                    'omission': ' ...'
+                                                                                }) }#</p>
                                                                             </span>
                                                                             <el-dropdown style="position:absolute;right:5px;top:5px;">
                                                                                 <span class="el-dropdown-link">
@@ -974,11 +1003,16 @@ class Probe extends Matrix {
                                                                         </el-upload>
                                                                     </div>
                                                                     <div v-else>
-                                                                        <el-button type="default" v-for="item in props.row.fileObj[props.row.selectedVersion]['files']" style="position:relative;box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);max-width: 12em;width: 12em;height:110px;margin:5px;"
-                                                                            @dblclick.native="onFileEditor(item,props.row)">
+                                                                        <el-button type="default" v-for="item in props.row.fileObj[props.row.selectedVersion]['files']" 
+                                                                            style="position:relative;box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);max-width: 12em;width: 12em;height:110px;margin:5px;"
+                                                                            @dblclick.native="onFileEditor(item,props.row)"
+                                                                            v-if="!_.isEmpty(props.row.fileObj[props.row.selectedVersion])">
                                                                             <i class="el-icon-document" style="font-size:48px;color:#f8a502;"></i>
                                                                             <span style="text-align:center;">
-                                                                                <p>#{item.name}#</p>
+                                                                                <p>#{  _.truncate(item.name, {
+                                                                                        'length': 20,
+                                                                                        'omission': ' ...'
+                                                                                    }) }#</p>
                                                                             </span>
                                                                             <el-dropdown style="position:absolute;right:5px;top:5px;">
                                                                                 <span class="el-dropdown-link">
@@ -1076,9 +1110,11 @@ class Probe extends Matrix {
                                                                                     </el-table-column>
                                                                                 </el-table>
                                                                             </el-main>
-                                                                            <el-footer style="line-height:60px;">
+                                                                            <el-footer style="line-height:60px;padding:0px;">
                                                                                 <span><el-checkbox v-model="dialog.scriptDeploy.zabbix" border>Zabbix探针</el-checkbox></span>
-                                                                                <!--span style="padding-left:30px;">并发数量: <el-input type="number" v-model="dialog.scriptDeploy.asyncNum" style="width: 10em;height:30px;line-height:30px;"></el-input></span-->
+                                                                                <span style="float:right;font-size:12px;">
+                                                                                    并发数量设置 <el-input type="number" v-model="dialog.scriptDeploy.asyncNum" style="width: 10em;height:30px;line-height:30px;" class="input-number-setup"></el-input>
+                                                                                </span>
                                                                             </el-footer>
                                                                         </el-container>
                                                                         <div slot="footer" class="dialog-footer">
@@ -1121,8 +1157,11 @@ class Probe extends Matrix {
                                                                                     </el-table-column>
                                                                                 </el-table>
                                                                             </el-main>
-                                                                            <el-footer style="line-height:60px;">
-                                                                                <el-checkbox v-model="dialog.scriptUnDeploy.zabbix" border>Zabbix探针</el-checkbox>
+                                                                            <el-footer style="line-height:60px;padding:0px;">
+                                                                                <span><el-checkbox v-model="dialog.scriptUnDeploy.zabbix" border>Zabbix探针</el-checkbox></span>
+                                                                                <span style="float:right;font-size:12px;">
+                                                                                    并发数量设置 <el-input type="number" v-model="dialog.scriptDeploy.asyncNum" style="width: 10em;height:30px;line-height:30px;" class="input-number-setup"></el-input>
+                                                                                </span>
                                                                             </el-footer>
                                                                         </el-container>
                                                                         <div slot="footer" class="dialog-footer">
@@ -1928,33 +1967,48 @@ class Probe extends Matrix {
                             item.loading = false;
                         }
 
-                        _.forEach(items.rows,(item)=>{
-
-                            // 下发开始
-                            item.loading = true;
-                            item.status = 1;
-
-                            // 一台一台下发
-                            let params = {
-                                hosts: [item.host],
-                                name: items.script.name,
-                                version: items.script.selectedVersion,
-                                key: items.script.zabbixKey,
-                                command: items.script.command
-                            }
-
-                            if(items.zabbix){
-                                scriptHandler.deployToZabbixAgent(params).then( (rtn) => {
-                                    deployFun(rtn,item);
-                                });
-                            } else {
-                                scriptHandler.depotDeploy(params).then( (rtn) => {
-                                    deployFun(rtn,item);
-                                })
-                            }
+                        
+                        let chunkCall = function(v){
+                            
+                            let callHandler = function(item){
+                                // 下发开始
+                                item.loading = true;
+                                item.status = 1;
     
-                        })
+                                // 一台一台下发
+                                let params = {
+                                    hosts: [item.host],
+                                    name: items.script.name,
+                                    version: items.script.selectedVersion,
+                                    key: items.script.zabbixKey,
+                                    command: items.script.command
+                                }
+    
+                                if(items.zabbix){
+                                    scriptHandler.deployToZabbixAgent(params).then( (rtn) => {
+                                        deployFun(rtn,item);
+                                    });
+                                } else {
+                                    scriptHandler.depotDeploy(params).then( (rtn) => {
+                                        deployFun(rtn,item);
+                                    })
+                                }
+                            }
 
+                            Promise.all(_.map(v,(val)=>{
+                                return callHandler(val);
+                            }));
+
+                        }
+
+                        // 根据并发数量进行chunk
+                        let chunkArr = _.chunk(items.rows, this.dialog.scriptDeploy.asyncNum);
+                        
+                        _.forEach(chunkArr, (v,index)=>{
+                            setTimeout(()=>{
+                                chunkCall(v);
+                            }, index * 5000)
+                        })
                     },
                     onScriptUnDeployHandler(items){
                         
@@ -1981,32 +2035,49 @@ class Probe extends Matrix {
                                 item.loading = false;
                             };
 
-                            _.forEach(items.rows,(item)=>{
-
-                                // 取消下发开始
-                                item.loading = true;
-                                item.status = 1;
-
-                                // 一台一台取消下发
-                                let params = {
-                                    hosts: [item.host],
-                                    name: items.script.name,
-                                    version: items.script.selectedVersion
-                                }
+                            let chunkCall = function(v){
                                 
-                                if(items.zabbix){
-
-                                    scriptHandler.unDeployToZabbixAgent(params).then( (rtn) => {
-                                        unDeployFun(rtn,item);
-                                    })
+                                let callHandler = function(item){
+                                    // 取消下发开始
+                                    item.loading = true;
+                                    item.status = 1;
+    
+                                    // 一台一台取消下发
+                                    let params = {
+                                        hosts: [item.host],
+                                        name: items.script.name,
+                                        version: items.script.selectedVersion
+                                    }
                                     
-                                } else {
-                                    scriptHandler.depotUnDeploy(params).then( (rtn) => {
-                                        unDeployFun(rtn,item);
-                                    })
+                                    if(items.zabbix){
+    
+                                        scriptHandler.unDeployToZabbixAgent(params).then( (rtn) => {
+                                            unDeployFun(rtn,item);
+                                        })
+                                        
+                                    } else {
+                                        scriptHandler.depotUnDeploy(params).then( (rtn) => {
+                                            unDeployFun(rtn,item);
+                                        })
+                                    }
                                 }
 
+                                Promise.all(_.map(v,(val)=>{
+                                    return callHandler(val);
+                                }));
+                                
+                            };
+
+                            // 根据并发数量进行chunk
+                            let chunkArr = _.chunk(items.rows, this.dialog.scriptDeploy.asyncNum);
+
+                            _.forEach(chunkArr, (v,index)=>{
+                                setTimeout(()=>{
+                                    chunkCall(v)
+                                }, index * 5000);
                             })
+
+                            
                         } catch(err){
 
                         } finally{

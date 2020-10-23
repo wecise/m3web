@@ -385,8 +385,17 @@ class Notes {
                                         <span style="font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;" v-if="!_.isEmpty(model)">
                                             #{model.item.name | pickName}#
                                         </span>
-                                        <el-button type="text" icon="el-icon-s-platform" @click="mode='view'" style="margin-left:10px;float:right;"></el-button>
-                                        <el-button type="text" icon="el-icon-edit" @click="mode='edit'" style="float:right;"></el-button>
+                                        <el-tooltip content="保存" open-delay="800">
+                                            <el-button type="text" icon="el-icon-position" @click="onSaveNow" style="margin-left:10px;float:right;" :loading="tip.loading">
+                                                <span style="padding-left:20px;font-size:12px;" v-if="tip.loading">#{tip}#</span>
+                                            </el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="预览模式" open-delay="800">
+                                            <el-button type="text" icon="el-icon-s-platform" @click="mode='view'" style="margin-left:10px;float:right;"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="编辑模式" open-delay="800">
+                                            <el-button type="text" icon="el-icon-edit" @click="mode='edit'" style="float:right;"></el-button>
+                                        </el-tooltip>
                                     </el-header>
                                     <el-main style="height:100%;overflow:hidden;">
                                         <el-container style="height:100%;">
@@ -421,15 +430,29 @@ class Notes {
                                 smartLists: true,
                                 smartypants: false
                             },
-                            mode:"view"
+                            mode:"view",
+                            tip: {
+                                message: "",
+                                loading: false
+                            }
                         }
                     },
                     watch:{
                         model:{
                             handler(val,oldVal){
+                                
+                                if(_.isEmpty(val)) return false;
+
                                 if(this.editor){
                                     this.editor.setValue(val.content);
-                                    this.compiledMarkdown = marked(val.content);
+                                    this.mdOption.renderer.code = function (code, language) {
+                                        if(language == 'mermaid')
+                                            return '<pre class="mermaid">'+code+'</pre>';
+                                        else
+                                            return '<pre><code>'+code+'</code></pre>';
+                                    };
+                                    this.compiledMarkdown = marked(val.content,{ renderer: this.mdOption.renderer });
+                                    mermaid.init();
                                 }
                             },
                             deep:true
@@ -466,7 +489,14 @@ class Notes {
                                     enableLiveAutocompletion: false
                                 });
                                 this.editor.on("input", ()=> {
-                                    this.compiledMarkdown = marked(this.editor.getValue());
+                                    this.mdOption.renderer.code = function (code, language) {
+                                        if(language == 'mermaid')
+                                            return '<pre class="mermaid">'+code+'</pre>';
+                                        else
+                                            return '<pre><code>'+code+'</code></pre>';
+                                    };
+                                    this.compiledMarkdown = marked(this.editor.getValue(),{ renderer: this.mdOption.renderer });
+                                    mermaid.init();
                                     this.onSave();
                                 });
                                 this.editor.setTheme("ace/theme/tomorrow");
@@ -495,9 +525,26 @@ class Notes {
                             }
                         },
                         onSave: _.debounce(function(){
-                                    let attr = {remark: '', ctime: _.now(), author: window.SignedUser_UserName};
-                                    let rtn = fsHandler.fsNew(this.model.item.ftype, this.model.item.parent, this.model.item.name, this.editor.getValue(), attr);
-                                },5000)
+                                    const self = this;
+                                    self.onSaveNow();
+                                },3000),
+                        onSaveNow(){
+                            this.tip.loading = true;
+
+                            let attr = {remark: '', ctime: _.now(), author: window.SignedUser_UserName};
+                            fsHandler.fsNewAsync(this.model.item.ftype, this.model.item.parent, this.model.item.name, this.editor.getValue(), attr).then( (rtn) => {
+                                if(rtn == 1){
+                                    this.tip.message = "更新成功";
+                                } else {
+                                    this.tip.message = "更新失败";
+                                }
+
+                                setTimeout(()=>{
+                                    this.tip.message = "";
+                                    this.tip.loading = false;
+                                },3000)
+                            });
+                        }
     
                     }
                 });
