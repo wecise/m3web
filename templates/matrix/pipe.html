@@ -23,6 +23,19 @@
 
 {{template "base/head" .}}
 
+<!--MXClient JS & CSS-->
+<script>
+	mxBasePath = '{{AppSubUrl}}/web/creative/src';
+	mxLanguage = window.MATRIX_LANG.replace(/en/g,"eg").split("-")[0];
+</script>
+
+<script src="{{AppSubUrl}}/web/creative/src/js/mxClient.js" type="text/javascript"></script>
+<link href="{{AppSubUrl}}/web/creative/graph/styles/grapheditor.css" type="text/css" rel="stylesheet">
+
+<script>
+    mxResources.add('{{AppSubUrl}}/web/creative/graph/resources/grapheditor');
+</script>
+
 <style type="text/css" media="screen">
 
 	body {

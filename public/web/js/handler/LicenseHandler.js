@@ -61,6 +61,48 @@ class LicenseHandler {
         return rtn;
     };
 
+    async licenseImportAsync(event){
+
+        let rtn = null;
+
+        try{
+
+            var fm = new FormData();
+            fm.append("uploadfile", event);
+
+            await jQuery.ajax({
+                url: '/license/import',
+                dataType: 'json',
+                processData: false,
+                contentType: false,
+                mimeType: "multipart/form-data",
+                type: 'POST',
+                data: fm,
+                async: true,
+                beforeSend(xhr) {
+                    
+                },
+                complete(xhr, textStatus) {
+                },
+                success(data, status) {
+
+                    if( _.lowerCase(data.status) == "ok"){
+                        rtn = 1;
+                        alertify.log("导入成功" + " " + data.message);
+                    }
+
+                },
+                error(xhr, textStatus, errorThrown) {
+                    rtn = xhr.responseText;
+                }
+            });
+        } catch(err){
+
+        }
+
+        return rtn;
+    };
+
 
     /*
     *  License管理

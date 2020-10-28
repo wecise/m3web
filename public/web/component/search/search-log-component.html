@@ -224,10 +224,11 @@
 				};
 
 			    // 搜索
-				let rtn = fsHandler.callFsJScript(`/matrix/${this.options.api.parent}/${this.options.api.name}`, encodeURIComponent(JSON.stringify(term))).message;
+				fsHandler.callFsJScriptAsync(`/matrix/${this.options.api.parent}/${this.options.api.name}`, encodeURIComponent(JSON.stringify(term))).then( (rtn)=>{
+					// 结果
+					this.result = rtn.message;
+				} );
 
-				// 结果
-				this.result = rtn;
 			},
 			resetTerm(){
 				this.preset.term = "";

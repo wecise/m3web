@@ -289,19 +289,25 @@ class Config {
                     },
                     created(){
                         
-                        let rtn = fsHandler.callFsJScript("/matrix/config/log-by-name.js", encodeURIComponent(this.id)).message;
-                        this.rows = rtn.rows;
-                        this.columns = _.map(rtn.columns,function(v){
-                                            if(v.render){
-                                                v.render = eval(v.render);
-                                            }
-                                            return v;
-                                        });
+                        fsHandler.callFsJScriptAsync("/matrix/config/log-by-name.js", encodeURIComponent(this.id)).then( (val)=>{
+                            let rtn = val.message;
+
+                            this.rows = rtn.rows;
+                            this.columns = _.map(rtn.columns,function(v){
+                                                if(v.render){
+                                                    v.render = eval(v.render);
+                                                }
+                                                return v;
+                                            });
+                        } );
+                        
                         
                         // 更新DataTable
                         eventHub.$on("CONFIG-LOG-UPDATE-EVENT",()=>{
-                            let rtn = fsHandler.callFsJScript("/matrix/config/log-by-name.js", encodeURIComponent(this.id)).message;
-                            this.rows = rtn.rows;
+                            fsHandler.callFsJScriptAsync("/matrix/config/log-by-name.js", encodeURIComponent(this.id)).then( (val)=>{
+                                let rtn = val.message;
+                                this.rows = rtn.rows;
+                            } );
                         })
                     },
                     methods:{
@@ -315,15 +321,18 @@ class Config {
                         },
                         onReset(){
                             let item = {class:"/matrix/consolelog/", ids: _.map(this.selectedRows,'id').join("', '"), ifDeleteVersionData: self.ifDeleteVersionData}
-                            let act = fsHandler.callFsJScript("/matrix/config/action-by-delete.js",encodeURIComponent(JSON.stringify(item))).message;
-                            _.delay(()=>{
-                                let rtn = fsHandler.callFsJScript("/matrix/config/log-by-name.js", encodeURIComponent(this.id)).message;
-                                this.rows = rtn.rows;
-                            })
+                            fsHandler.callFsJScriptAsync("/matrix/config/action-by-delete.js",encodeURIComponent(JSON.stringify(item))).then( ()=>{
+                                fsHandler.callFsJScriptAsync("/matrix/config/log-by-name.js", encodeURIComponent(this.id)).then( (val)=>{
+                                    let rtn = val.message;
+                                    this.rows = rtn.rows;
+                                } );
+                            } );
                         },
                         onLoad(){
-                            let rtn = fsHandler.callFsJScript("/matrix/config/log-by-name.js", encodeURIComponent(this.id)).message;
-                            this.rows = rtn.rows;
+                            fsHandler.callFsJScriptAsync("/matrix/config/log-by-name.js", encodeURIComponent(this.id)).then( (val)=>{
+                                let rtn = val.message;
+                                this.rows = rtn.rows;
+                            } );
                         },
                         handleSelectionChange(val) {
                             this.selectedRows = val;
@@ -363,8 +372,13 @@ class Config {
                     data(){
                         return {
                             editor: null,
-                            mode: fsHandler.callFsJScript("/matrix/config/modeList.js",null).message
+                            mode: null
                         }
+                    },
+                    created(){
+                        fsHandler.callFsJScriptAsync("/matrix/config/modeList.js",null).then( (rtn)=>{
+                            this.mode = rtn.message;
+                        } );
                     },
                     mounted: function() {
                         this.initEditor();
@@ -420,10 +434,12 @@ class Config {
                             }
 
                             let term = encodeURIComponent(JSON.stringify(_.extend({},{rule:this.rule, term: debug})));
-                            let rtn = fsHandler.callFsJScript("/matrix/config/forwardDebug.js",term);
-                            if(rtn.status = 'ok'){
-                                eventHub.$emit("CONFIG-LOG-UPDATE-EVENT");
-                            }
+                            fsHandler.callFsJScriptAsync("/matrix/config/forwardDebug.js",term).then( (rtn)=>{
+                                if(rtn.status = 'ok'){
+                                    eventHub.$emit("CONFIG-LOG-UPDATE-EVENT");
+                                }
+                            } );
+                            
                         },
                         onHandleCommand(cmd){
                             this.editor.session.setMode("ace/mode/"+cmd);
@@ -486,19 +502,24 @@ class Config {
                     },
                     created(){
                         
-                        let rtn = fsHandler.callFsJScript("/matrix/config/data-by-name.js", encodeURIComponent(this.model.name)).message;
-                        this.rows = rtn.rows;
-                        this.columns = _.map(rtn.columns,function(v){
-                                            if(v.render){
-                                                v.render = eval(v.render);
-                                            }
-                                            return v;
-                                        });
-                        
+                        fsHandler.callFsJScriptAsync("/matrix/config/data-by-name.js", encodeURIComponent(this.model.name)).then( (val)=>{
+                            let rtn = val.message;
+
+                            this.rows = rtn.rows;
+                            this.columns = _.map(rtn.columns,function(v){
+                                                if(v.render){
+                                                    v.render = eval(v.render);
+                                                }
+                                                return v;
+                                            });
+                        } );
+
                         // 更新DataTable
                         eventHub.$on("CONFIG-LOG-UPDATE-EVENT",()=>{
-                            let rtn = fsHandler.callFsJScript("/matrix/config/data-by-name.js", encodeURIComponent(this.model.name)).message;
-                            this.rows = rtn.rows;
+                            fsHandler.callFsJScriptAsync("/matrix/config/data-by-name.js", encodeURIComponent(this.model.name)).then( (val)=>{
+                                let rtn = val.message;
+                                this.rows = rtn.rows;
+                            } );
                         })
                     },
                     methods:{
@@ -522,11 +543,12 @@ class Config {
                             }).then(() => {
 
                                 let item = {class:"/matrix/", ids: _.map(this.selectedRows,'id').join("', '"), ifDeleteVersionData: this.ifDeleteVersionData};
-                                let act = fsHandler.callFsJScript("/matrix/config/action-by-delete.js",encodeURIComponent(JSON.stringify(item))).message;
-                                _.delay(()=>{
-                                    let rtn = fsHandler.callFsJScript("/matrix/config/data-by-name.js", encodeURIComponent(this.model.name)).message;
-                                    this.rows = rtn.rows;
-                                })
+                                fsHandler.callFsJScriptAsync("/matrix/config/action-by-delete.js",encodeURIComponent(JSON.stringify(item))).then( (val)=>{
+                                    fsHandler.callFsJScript("/matrix/config/data-by-name.js", encodeURIComponent(this.model.name)).then( (val)=>{
+                                        let rtn = val.message;
+                                        this.rows = rtn.rows;
+                                    } );
+                                } )
 
                             }).catch(() => {
                                     
@@ -534,8 +556,10 @@ class Config {
                             
                         },
                         onLoad(){
-                            let rtn = fsHandler.callFsJScript("/matrix/config/data-by-name.js", encodeURIComponent(this.model.name)).message;
-                            this.rows = rtn.rows;
+                            fsHandler.callFsJScript("/matrix/config/data-by-name.js", encodeURIComponent(this.model.name)).then( (val)=>{
+                                let rtn = val.message;
+                                this.rows = rtn.rows;
+                            } );
                         },
                         handleSelectionChange(val) {
                             this.selectedRows = val;
@@ -676,8 +700,11 @@ class Config {
                                 let snippetManager = ace.require("ace/snippets").snippetManager;
                                 let className = _.trim(_.split(_.first(self.model.value.match(/^--class.*/mgi)),"=",2)[1]);    
                                 let term = encodeURIComponent(JSON.stringify( {mode:self.mode, class:className} ));
-                                let snippetText = fsHandler.callFsJScript("/matrix/config/snippets.js",term).message;
-                                snippetManager.register(snippetText, self.mode);
+                                
+                                fsHandler.callFsJScriptAsync("/matrix/config/snippets.js",term).then( (val)=>{
+                                    let snippetText = val.message;
+                                    snippetManager.register(snippetText, self.mode);
+                                } );
                             } catch(err){
 
                             }

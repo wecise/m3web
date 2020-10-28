@@ -179,6 +179,74 @@ class UserHandler{
         return rtn;
 
     };
+
+    async userUpdateAsync(event,token) {
+        let rtn = 0;
+        
+        try{
+
+        
+            let data = {
+                email: event.email, 
+                mobile: event.mobile,
+                telephone: event.telephone,
+                firstname: event.firstname,
+                lastname: event.lastname,
+                wechat: event.wechat,
+                address: event.address,
+                isactive: event.isactive,
+                isadmin: event.isadmin,
+                status: event.status
+            };
+
+            if(event.resetPasswd){
+                _.extend(data, {passwd: event.passwd});
+            }
+            
+            await jQuery.ajax({
+                url: `/admin/users/${event.id}`,
+                dataType: 'json',
+                type: 'POST',
+                processData: false,
+                contentType: false,
+                contentType: 'application/json; charset=utf-8',
+                async: true,
+                data: JSON.stringify(data),
+                beforeSend(xhr) {
+                    xhr.setRequestHeader("X-Csrf-Token", token);
+                },
+                complete(xhr, textStatus) {
+                    // 初始化新用户文件系统
+                    if(event.otype == 'usr'){
+                        userHandler.userFsInit(event.username);
+                    }
+                },
+                success(data, status) {
+
+                    userHandler.ifSignIn(data);
+
+                    if( _.lowerCase(data.status) == "ok"){
+                        rtn = 1;
+
+                        // Audit
+                        auditLogHandler.writeLog("system:user", "Update: " + event.username, 0);
+                    }
+
+                },
+                error(xhr, textStatus, errorThrown) {
+                    rtn = xhr.responseText;
+
+                    // Audit
+                    auditLogHandler.writeLog("system:user", "Update: " + event.username, 1);
+                }
+
+            })
+        } catch(err){
+
+        }
+        return rtn;
+
+    };
     
     /* 
         用户删除
@@ -470,6 +538,46 @@ class UserHandler{
                 auditLogHandler.writeLog("system:permission", "Query group permissions: " + event.parent, 1);
             }
         });
+        return rtn;
+    };
+
+    async getGroupPermissionsByParentAsync(event) {
+        let rtn = null;
+
+        try{
+            await jQuery.ajax({
+                url: `/admin/perms/group?parent=${event.parent}`,
+                dataType: 'json',
+                type: 'GET',
+                async: false,
+                beforeSend:function(xhr){
+                },
+                complete: function(xhr, textStatus) {
+                    
+                },
+                success: function (data, status) {
+
+                    userHandler.ifSignIn(data);
+
+                    if( _.lowerCase(data.status) == "ok"){
+                        rtn = data.message;
+
+                        // Audit
+                        auditLogHandler.writeLog("system:permission", "Query group permissions: " + event.parent, 0);
+                    }
+
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    rtn = xhr.responseText;
+
+                    // Audit
+                    auditLogHandler.writeLog("system:permission", "Query group permissions: " + event.parent, 1);
+                }
+            });
+        } catch(err){
+
+        }
+        
         return rtn;
     };
 

@@ -134,12 +134,16 @@ Vue.component("mx-app-deploy",{
             }
             this.app.seat = _.random(100, 10000);
 
-            this.app.groups.list = fsHandler.callFsJScript("/matrix/apps/appList.js",null).message.groups;
-            this.app.groups.default = _.first(this.app.groups.list);
-
-            this.app.icon.list = fsHandler.fsList(`${window.ASSETS_ICON}/apps/png`);
-            this.app.icon.value = `${window.ASSETS_ICON}/apps/png/creative.png?type=download&issys=${window.SignedUser_IsAdmin}`;
+            fsHandler.callFsJScriptAsync("/matrix/apps/appList.js",null).then( (rtn)=>{
+                this.app.groups.list = rtn.message.groups;
+                this.app.groups.default = _.first(this.app.groups.list);
+            } );
             
+
+            fsHandler.fsListAsync(`${window.ASSETS_ICON}/apps/png`).then( (rtn)=>{
+                this.app.icon.list = rtn;
+                this.app.icon.value = `${window.ASSETS_ICON}/apps/png/creative.png?type=download&issys=${window.SignedUser_IsAdmin}`;
+            } );
         })
     },
     methods: {
@@ -148,33 +152,38 @@ Vue.component("mx-app-deploy",{
         },
         onSaveAppDeploy(){
                     
-            let check = fsHandler.callFsJScript("/matrix/apps/app_exist_check.js",encodeURIComponent(JSON.stringify(this.app.cnname))).message;;
+            fsHandler.callFsJScriptAsync("/matrix/apps/app_exist_check.js",encodeURIComponent(JSON.stringify(this.app.cnname))).then( (rtn)=>{
+                let check = rtn.message;
 
-            if(check==1){
-                this.$message({
-                    type: "info",
-                    message:"应用已经发布，请确认!"
-                });
-                return false;
-            }
+                if(check==1){
+                    this.$message({
+                        type: "info",
+                        message:"应用已经发布，请确认!"
+                    });
+                    return false;
+                } else {
+                    _.extend(this.app,{ icon: this.app.icon.value.replace(/\/fs\/assets\/images\/apps\/png\//,'').replace(/\?type=download&issys=true/,'') } );
+                    _.extend(this.app.groups, { group: this.app.groups.default.name} );
+                    
+                    fsHandler.callFsJScriptAsync("/matrix/apps/app.js",encodeURIComponent(JSON.stringify(this.app))).then( (rtn)=>{
+                        if( _.lowerCase(rtn.status) == "ok"){
+                            
+                            this.$notify({
+                                title: window.MATRIX_LANG == 'zh-CN' ? this.app.cnname : this.app.enname,
+                                message: '应用发布成功',
+                                position: 'top-left'
+                            });
+                            
+                            eventHub.$emit("APP-REFRESH-EVENT");
+            
+                            this.model.show = false;   
+            
+                        }
+                    } );
+                }
 
-            _.extend(this.app,{ icon: this.app.icon.value.replace(/\/fs\/assets\/images\/apps\/png\//,'').replace(/\?type=download&issys=true/,'') } );
-            _.extend(this.app.groups, { group: this.app.groups.default.name} );
-            let rtn = fsHandler.callFsJScript("/matrix/apps/app.js",encodeURIComponent(JSON.stringify(this.app)));
+            } );
 
-            if( _.lowerCase(rtn.status) == "ok"){
-                
-                this.$notify({
-                    title: this.app.groups.default.name,
-                    message: '应用发布成功',
-                    position: 'top-left'
-                });
-                
-                eventHub.$emit("APP-REFRESH-EVENT");
-
-                this.model.show = false;   
-
-            }
         }
     }
 })
@@ -262,7 +271,11 @@ Vue.component("mx-fs-editor",{
                     show: true
                 }
             },
-            splitInst: null
+            splitInst: null,
+            tip: {
+                loading: false,
+                message: ""
+            }
         }
     },
     template:  `<el-container style="height: 100%;">
@@ -347,13 +360,14 @@ Vue.component("mx-fs-editor",{
                                     <el-button type="text" icon="el-icon-edit-outline" @click="file.dialogSaveAs.visible=true"></el-button>
                                 </el-tooltip>
                                 <el-tooltip content="运行" placement="bottom" open-delay="500">
-                                    <el-button type="text" icon="el-icon-caret-right" @click="onSaveAndPlay"></el-button>
+                                    <el-button type="text" icon="el-icon-caret-right" @click="onSaveAndPlay" :loading="tip.loading"></el-button>
                                 </el-tooltip>
                                 <el-tooltip content="主题" open-delay="500">
                                     <el-button type="text" :class="'M3-EDITOR-THEME-'+tabs.activeIndex" v-show="!_.isEmpty(tabs.list)" style="float:right;">
                                         <i class="fas fa-tshirt"></i>
                                     </el-button>
                                 </el-tooltip>
+                                <span style="padding-left:20px;font-size:12px;" v-if="tip.loading">#{tip.message}#</span>
                             </span>
                         </div>
                     </el-header>
@@ -644,7 +658,10 @@ Vue.component("mx-fs-editor",{
             }
         },
         onSave(){
-            let me = this;
+            
+            this.tip.loading = true;
+            this.tip.message = "保存中...";
+
             let editor = ace.edit('editor-'+this.tabs.activeIndex);
             let sc = editor.getValue();
 
@@ -653,18 +670,26 @@ Vue.component("mx-fs-editor",{
             }
 
             // save
-            let sRtn = fsHandler.fsNew(this.tabs.activeNode.ftype, this.tabs.activeNode.parent, this.tabs.activeNode.name, sc, _.attempt(JSON.parse.bind(null, this.tabs.activeNode.attr)));
+            fsHandler.fsNewAsync(this.tabs.activeNode.ftype, this.tabs.activeNode.parent, this.tabs.activeNode.name, sc, _.attempt(JSON.parse.bind(null, this.tabs.activeNode.attr))).then( (rtn)=>{
 
-            if(sRtn == 0){
-                this.$message("请确认脚本！");
-                return false;
-            }
+                if(rtn == 0){
+                    this.$message("请确认脚本！");
+                    return false;
+                }
 
-            editor.session.getUndoManager().markClean();
-            //self.updateToolbar();
+                editor.session.getUndoManager().markClean();
+
+                this.tip.loading = false;
+                this.tip.message = "";
+            } );
+
+            
         },
         onSaveAs(){
-            let me = this;
+            
+            this.tip.loading = true;
+            this.tip.message = "另存中...";
+
             let editor = ace.edit('editor-'+this.tabs.activeIndex);
             let sc = editor.getValue();
 
@@ -673,21 +698,26 @@ Vue.component("mx-fs-editor",{
             }
 
             // save
-            let sRtn = fsHandler.fsNew(this.tabs.activeNode.ftype, this.tabs.activeNode.parent, this.tabs.activeNode.name, sc, _.attempt(JSON.parse.bind(null, this.tabs.activeNode.attr)));
+            fsHandler.fsNewAsync(this.tabs.activeNode.ftype, this.tabs.activeNode.parent, this.tabs.activeNode.name, sc, _.attempt(JSON.parse.bind(null, this.tabs.activeNode.attr))).then( (rtn)=>{
+                if(rtn == 0){
+                    this.$message("请确认脚本！");
+                    return false;
+                }
+                
+                editor.session.getUndoManager().markClean();
 
-            if(sRtn == 0){
-                this.$message("请确认脚本！");
-                return false;
-            }
+                this.tip.loading = false;
+                this.tip.message = "";
+            } );
 
-            editor.session.getUndoManager().markClean();
-            //self.updateToolbar();
         },
         onSaveAndPlay(){
             
+            this.tip.loading = true;
+            this.tip.message = "执行中...";
+
             // 先保存
             // this.onSave();
-
             _.delay(()=>{
                 // 后运行 depend ftype: js/html
                 if(_.includes(['html','html'],this.tabs.activeNode.ftype)){
@@ -701,13 +731,16 @@ Vue.component("mx-fs-editor",{
 
                     try {
                         
-                        let rtn = fsHandler.callFsJScript([this.tabs.activeNode.parent, this.tabs.activeNode.name].join("/").replace(/\/script\//g, "/"), '');
-                        
-                        _.forEach(this.tabs.list,(v)=>{
-                            if(v.name == this.tabs.activeIndex){
-                                _.extend(v.model,{output:rtn});
-                            }
-                        })
+                        fsHandler.callFsJScriptAsync([this.tabs.activeNode.parent, this.tabs.activeNode.name].join("/").replace(/\/script\//g, "/"), '').then( (rtn)=>{
+                            _.forEach(this.tabs.list,(v)=>{
+                                if(v.name == this.tabs.activeIndex){
+                                    _.extend(v.model,{output:rtn});
+                                }
+                            })
+
+                            this.tip.loading = false;
+                            this.tip.message = "";
+                        } );
                         
                     } catch(err) {
                         console.log(err)
@@ -716,7 +749,6 @@ Vue.component("mx-fs-editor",{
                 }
             },500)
             
-            // $(".fas.fa-play.fa-spin").removeClass("fa-spin");
         },
         onDeploy(){
             
@@ -830,9 +862,12 @@ Vue.component("mx-fs-open",{
                     </el-main>
                 </el-container>`,
     created(){
-        this.classList = fsHandler.callFsJScript("/matrix/fs/fs_list.js",encodeURIComponent(JSON.stringify({path:this.dfsRoot,onlyDir:false, ftype:['xml','imap']}))).message;
-        // 默认创建目录
-        _.extend(this.node,{fullname: this.dfsRoot});
+        fsHandler.callFsJScriptAsync("/matrix/fs/fs_list.js",encodeURIComponent(JSON.stringify({path:this.dfsRoot,onlyDir:false, ftype:['xml','imap']}))).then( (rtn)=>{
+            this.classList = rtn.message;
+
+            // 默认创建目录
+            _.extend(this.node,{fullname: this.dfsRoot});
+        } );
     },
     methods:{
         onNodeClick(node){
@@ -911,7 +946,9 @@ Vue.component("mx-fs-saveas",{
     },
     methods:{
         initTreeData(){
-            this.classList = fsHandler.callFsJScript("/matrix/fs/fs_list.js",encodeURIComponent(JSON.stringify({path:this.dfsRoot,onlyDir:true}))).message;
+            fsHandler.callFsJScriptAsync("/matrix/fs/fs_list.js",encodeURIComponent(JSON.stringify({path:this.dfsRoot,onlyDir:true}))).then((rtn)=>{
+                this.classList = rtn.message;
+            });
         },
         onNodeClick(node){
             this.node = node;
@@ -1047,7 +1084,9 @@ Vue.component("mx-fs-info",{
         }
         
         // 初始化图片列表
-        this.icon.list = fsHandler.fsList('/assets/images/files/png');
+        fsHandler.fsListAsync('/assets/images/files/png').then( (rtn)=>{
+            this.icon.list = rtn;
+        } );
     },
     filters: {
         pickIcon(item) {
@@ -1218,9 +1257,9 @@ Vue.component("mx-fs-tree",{
             this.$set(item, 'show', false)
         },
         onRefresh(item,index){
-            let childrenData = fsHandler.fsList(item.fullname);
-
-            this.$set(data, 'children', childrenData);
+            fsHandler.fsListAsync(item.fullname).then( (rtn)=>{
+                this.$set(data, 'children', rtn);
+            } );
         },
         onNewDir(item,index){
             this.$prompt('请输入目录名称', '提示', {
@@ -1237,22 +1276,22 @@ Vue.component("mx-fs-tree",{
 
                 let _attr = {remark: '', ctime: _.now(), author: this.signedUserName, rate: 0};
 
-                let rtn = fsHandler.fsNew('dir', item.fullname, value, null, _attr);
-                
-                if(rtn == 1){
-                    this.$message({
-                        type: "success",
-                        message: "新建目录成功！"
-                    })
-                    _.delay(()=>{
-                        this.initData();
-                    },500)
-                } else {
-                    this.$message({
-                        type: "error",
-                        message: "新建目录失败，" + rtn.message
-                    })
-                }
+                fsHandler.fsNewAsync('dir', item.fullname, value, null, _attr).then( (rtn)=>{
+                    if(rtn == 1){
+                        this.$message({
+                            type: "success",
+                            message: "新建目录成功！"
+                        })
+                        
+                        this.onInit();
+                        
+                    } else {
+                        this.$message({
+                            type: "error",
+                            message: "新建目录失败，" + rtn.message
+                        })
+                    }
+                } );
                 
               }).catch(() => {
                 this.$message({
@@ -1277,22 +1316,20 @@ Vue.component("mx-fs-tree",{
 
                 let _attr = {remark: '', ctime: _.now(), author: this.signedUserName, rate: 0};
 
-                let rtn = fsHandler.fsNew('md', item.fullname, [value,'md'].join("."), null, _attr);
-                
-                if(rtn == 1){
-                    this.$message({
-                        type: "success",
-                        message: "新建成功！"
-                    })
-                    _.delay(()=>{
-                        this.initData();
-                    },500)
-                } else {
-                    this.$message({
-                        type: "error",
-                        message: "新建失败，" + rtn.message
-                    })
-                }
+                fsHandler.fsNewAsync('md', item.fullname, [value,'md'].join("."), null, _attr).then( (rtn)=>{
+                    if(rtn == 1){
+                        this.$message({
+                            type: "success",
+                            message: "新建成功！"
+                        })
+                        this.onInit();
+                    } else {
+                        this.$message({
+                            type: "error",
+                            message: "新建失败，" + rtn.message
+                        })
+                    }
+                } );
                 
               }).catch(() => {
                 this.$message({
@@ -1302,31 +1339,29 @@ Vue.component("mx-fs-tree",{
               });
         },
         onDelete(item,index){
-
+            
             this.$confirm(`确认要删除该目录或文件：${item.name}？`, '提示', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
                 type: 'warning'
             }).then(() => {
                 
-                let rtn = fsHandler.fsDelete(item.parent,item.name);
-                
-                if(rtn == 1){
-                    this.$messsage({
-                        type: "success",
-                        message: "删除成功！"
-                    })
-                    
-                    _.delay(()=>{
-                        this.initData();
-                    },1000)
-                    
-                } else {
-                    this.$messsage({
-                        type: "error",
-                        message: "删除失败！"
-                    })
-                }
+                fsHandler.fsDeleteAsync(item.parent,item.name).then( (rtn)=>{
+                    if(rtn == 1){
+                        this.$message({
+                            type: "success",
+                            message: "删除成功！"
+                        })
+                        
+                        this.onInit();
+                        
+                    } else {
+                        this.$message({
+                            type: "error",
+                            message: "删除失败！"
+                        })
+                    }
+                } );
 
             }).catch(() => {
                 
@@ -1384,7 +1419,9 @@ Vue.component("mx-fs-tree",{
                         this.upload.fileList = FileList;
                     },
                     onRemove(file, fileList) {
-                        let rtn = fsHandler.fsDelete(item.fullname,file.name);
+                        fsHandler.fsDeleteAsync(item.fullname,file.name).then( (rtn)=>{
+
+                        } );
                     },
                     onPreview(file) {
                         console.log(file);
@@ -1394,12 +1431,16 @@ Vue.component("mx-fs-tree",{
             
         },  
         onFilterNode:_.debounce(function(value, data) {
+            const self = this;
+
             if (!value) return true;
+
             try{
-                let rtn = fsHandler.callFsJScript("/matrix/fs/getFsByTerm.js", encodeURIComponent(value)).message;
-                this.treeData = rtn;
+                fsHandler.callFsJScriptAsync("/matrix/fs/getFsByTerm.js", encodeURIComponent(value)).then( (rtn)=>{
+                    self.treeData = rtn.message;
+                } );
             } catch(err){
-                this.treeData = [];
+                self.treeData = [];
             }
         },1000),
         onNodeClick(data){
@@ -1410,13 +1451,16 @@ Vue.component("mx-fs-tree",{
 
                 } else {
 
-                    let rtn = _.map(fsHandler.fsList(data.fullname),(v)=>{
-                        return _.extend(v,{show:false});
-                    });
-
-                    let childrenData = _.sortBy(rtn,'fullname');
-
-                    this.$set(data, 'children', childrenData);
+                    fsHandler.fsListAsync(data.fullname).then( (val)=>{
+                        let rtn = _.map(val,(v)=>{
+                            return _.extend(v,{show:false});
+                        });
+    
+                        let childrenData = _.sortBy(rtn,'fullname');
+    
+                        this.$set(data, 'children', childrenData);
+    
+                    } )
 
                     eventHub.$emit("FS-FORWARD-EVENT", data, data.fullname);
                     
@@ -1431,9 +1475,11 @@ Vue.component("mx-fs-tree",{
         },
         onInit(){
             if(window.FS_TREE_DATA){
-                this.treeData = window.FS_TREE_DATA;//fsHandler.callFsJScript("/matrix/devops/getFsForTree.js", encodeURIComponent(this.root)).message;
+                this.treeData = window.FS_TREE_DATA;
             } else {
-                this.treeData = fsHandler.callFsJScript("/matrix/devops/getFsForTree.js", encodeURIComponent(this.root)).message;
+                fsHandler.callFsJScriptAsync("/matrix/devops/getFsForTree.js", encodeURIComponent(this.root)).then( (rtn)=>{
+                    this.treeData = rtn.message
+                } );
             }
         }
     }
@@ -1862,22 +1908,23 @@ Vue.component("mx-entity-new",{
 
             _.extend(this.model.form, {type: "new"});
 
-            let rtn = fsHandler.callFsJScript("/matrix/graph/entity-action.js",encodeURIComponent(JSON.stringify(this.model.form)));
-            
-            if(rtn.status == 'ok'){
-                this.$message({
-                    type: "success",
-                    message: "实体插入成功！"
-                })
-                this.$parent.$parent.$parent.$parent.entity.newDialog.show = false;
-                // 实体新建成功
-                eventHub.$emit("ENTITY-ADD-EVENT",this.model.form);
-            } else {
-                this.$message({
-                    type: "error",
-                    message: "实体插入失败 " + rtn.message
-                })
-            }
+            fsHandler.callFsJScriptAsync("/matrix/graph/entity-action.js",encodeURIComponent(JSON.stringify(this.model.form))).then( (rtn)=>{
+                if(rtn.status == 'ok'){
+                    this.$message({
+                        type: "success",
+                        message: "实体插入成功！"
+                    })
+                    this.$parent.$parent.$parent.$parent.entity.newDialog.show = false;
+                    // 实体新建成功
+                    eventHub.$emit("ENTITY-ADD-EVENT",this.model.form);
+                } else {
+                    this.$message({
+                        type: "error",
+                        message: "实体插入失败 " + rtn.message
+                    })
+                }
+            } );
+        
         }
     }
 })
@@ -1940,17 +1987,24 @@ Vue.component("mx-entity-tree",{
     },
     methods: {
         initData(){
-            this.treeData = fsHandler.callFsJScript("/matrix/entity/entity_class.js",encodeURIComponent(this.root)).message;
+            fsHandler.callFsJScriptAsync("/matrix/entity/entity_class.js",encodeURIComponent(this.root)).then( (rtn)=>{
+                this.treeData = rtn.message;
+            } );
         },
         onFilterNode:_.debounce(function(value, data) {
+            const self = this;
+
             if (!value) return true;
+            
             try{
-                let rtn = fsHandler.callFsJScript("/matrix/graph/entity-search-by-term.js",encodeURIComponent(value)).message;
-                this.treeData = _.map(rtn,(v)=>{
-                    return _.extend(v,{ children:[], alias:_.last(v.class.split("/"))});
-                });
+                fsHandler.callFsJScriptAsync("/matrix/graph/entity-search-by-term.js",encodeURIComponent(value)).then( (val)=>{
+                    let rtn = val.message
+                    self.treeData = _.map(rtn,(v)=>{
+                        return _.extend(v,{ children:[], alias:_.last(v.class.split("/"))});
+                    });
+                } );
             } catch(err){
-                this.treeData = [];
+                self.treeData = [];
             }
         },1000),
         onNodeClick(data){
@@ -1961,12 +2015,13 @@ Vue.component("mx-entity-tree",{
 
                 } else {
 
-                    let childrenData = _.sortBy(fsHandler.fsList(data.fullname),'fullname');
+                    fsHandler.fsListAsync(data.fullname).then( (rtn)=>{
+                        let childrenData = _.sortBy(rtn,'fullname');
 
-                    this.$set(data, 'children', childrenData);
+                        this.$set(data, 'children', childrenData);
 
-                    eventHub.$emit("FS-FORWARD-EVENT", data, data.fullname);
-                    
+                        eventHub.$emit("FS-FORWARD-EVENT", data, data.fullname);
+                    } )    
                 }
 
                 window.FS_TREE_DATA = this.$refs.tree.data;

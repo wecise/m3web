@@ -26,6 +26,9 @@ class Notes {
                 // Notes Tree
                 Vue.component("notes-tree",{
                     delimiters: ['#{', '}#'],
+                    props: {
+                        defaultNote: Array
+                    },
                     data() {
                         return {
                             defaultProps: {
@@ -316,11 +319,13 @@ class Notes {
 
                                     },
                                     onRemove(file, fileList) {
-                                        let rtn = fsHandler.fsDelete(item.fullname,file.name);
-                                        if(rtn == 1){
-                                            // 刷新
-                                            self.onRefresh(item,index);
-                                        }
+                                        fsHandler.fsDeleteAsync(item.fullname,file.name).then( (rtn)=>{
+                                            if(rtn == 1){
+                                                // 刷新
+                                                self.onRefresh(item,index);
+                                            }
+                                        } );
+                                        
                                     },
                                     onPreview(file) {
                                         console.log(file);
@@ -335,41 +340,64 @@ class Notes {
                         },
                         onFilterNode:_.debounce(function(value, data) {
                             if (!value) return true;
+
                             try{
-                                let rtn = fsHandler.callFsJScript("/matrix/fs/getFsByTerm.js", encodeURIComponent(value)).message;
-                                this.treeData = rtn;
+                                fsHandler.callFsJScriptAsync("/matrix/fs/getFsByTerm.js", encodeURIComponent(value)).then( (rtn)=>{
+                                    this.treeData = rtn.message;
+                                } );
+                                
                             } catch(err){
                                 this.treeData = [];
                             }
+
                         },1000),
                         onNodeClick(data){
                             if(!data.isdir) {
                                 
-                                let childrenData = fsHandler.fsList(data.fullname);
+                                fsHandler.fsListAsync(data.fullname).then( (rtn)=>{
+                                    this.$set(data, 'children', rtn);
+
+                                    let content = fsHandler.fsContent(data.parent, data.name);
+                                    this.$root.model = {item:data, content: content};
+                                } );
                                 
-                                this.$set(data, 'children', childrenData);
-
-                                this.$root.model = {item:data, content:fsHandler.fsContent(data.parent, data.name)};
                             } else {
-                                let childrenData = fsHandler.fsList(data.fullname);
-
-                                this.$set(data, 'children', childrenData);
+                                fsHandler.fsListAsync(data.fullname).then( (rtn)=>{
+                                    this.$set(data, 'children', rtn);
+                                } );
                             }
                         },
                         onInit(){
-                            this.treeData = fsHandler.callFsJScript("/matrix/devops/getFsForTree.js", encodeURIComponent(this.root)).message;
-                            
-                            let childrenData = fsHandler.fsList(this.treeData[2].fullname);
-                            this.$set(this.treeData[2], 'children', childrenData);
 
-                            // 默认首页
-                            let homeNode = _.find(_.flattenDeep(_.map(this.treeData,'children')),{name: '系统介绍.md'});
-                            
-                            let item = _.extend(homeNode,{
-                                size: _.find(fsHandler.fsList(homeNode.parent),{name: homeNode.name}).size || 0
+                            fsHandler.callFsJScriptAsync("/matrix/devops/getFsForTree.js", encodeURIComponent(this.root)).then( (rtn)=>{
+                                
+                                this.treeData = rtn.message; 
+                                
+                                fsHandler.fsListAsync(this.treeData[2].fullname).then( (val)=>{
+                                    
+                                    this.$set(this.treeData[2], 'children', val);
+
+                                    // 默认首页
+                                    let homeNode = null;
+                                    let content = null;
+                                    if(_.isEmpty(this.defaultNote)){
+                                        homeNode = _.find(_.flattenDeep(_.map(this.treeData,'children')),{name: '系统介绍.md'});
+                                        _.extend(homeNode,{
+                                            size: _.find(fsHandler.fsList(homeNode.parent),{name: homeNode.name}).size || 0
+                                        });
+                                        content = fsHandler.fsContent(homeNode.parent, homeNode.name);
+                                    } else {
+                                        content = fsHandler.fsContent(this.defaultNote[0], this.defaultNote[1]);
+                                        homeNode = _.find(fsHandler.fsList(this.defaultNote[0]),{name: this.defaultNote[1]});
+                                        _.extend(homeNode,{
+                                            size: _.find(fsHandler.fsList(homeNode.parent),{name: homeNode.name}).size || 0
+                                        });
+                                    }
+                                    
+                                    this.$root.model = {item:homeNode, content: content};
+
+                                } );
                             });
-                            
-                            this.$root.model = {item:homeNode, content:fsHandler.fsContent(homeNode.parent, homeNode.name)};
                         }
                     }
                 });
@@ -387,7 +415,7 @@ class Notes {
                                         </span>
                                         <el-tooltip content="保存" open-delay="800">
                                             <el-button type="text" icon="el-icon-position" @click="onSaveNow" style="margin-left:10px;float:right;" :loading="tip.loading">
-                                                <span style="padding-left:20px;font-size:12px;" v-if="tip.loading">#{tip}#</span>
+                                                <span style="padding-left:20px;font-size:12px;" v-if="tip.loading">#{tip.message}#</span>
                                             </el-button>
                                         </el-tooltip>
                                         <el-tooltip content="预览模式" open-delay="800">
@@ -396,6 +424,9 @@ class Notes {
                                         <el-tooltip content="编辑模式" open-delay="800">
                                             <el-button type="text" icon="el-icon-edit" @click="mode='edit'" style="float:right;"></el-button>
                                         </el-tooltip>
+                                        
+                                        <el-button icon="el-icon-share" type="text" class="copy" style="margin-left:10px;float:right;" @click="onShareUrl"></el-button>
+                                        
                                     </el-header>
                                     <el-main style="height:100%;overflow:hidden;">
                                         <el-container style="height:100%;">
@@ -417,7 +448,11 @@ class Notes {
                     },
                     data(){
                         return {
-                            editor: null,
+                            editor: {
+                                inst:  null,
+                                ignore: false,
+                                changed: false
+                            },
                             splitInst: null,
                             compiledMarkdown: "",
                             mdOption: {
@@ -443,8 +478,12 @@ class Notes {
                                 
                                 if(_.isEmpty(val)) return false;
 
-                                if(this.editor){
-                                    this.editor.setValue(val.content);
+                                if(this.editor.inst){
+                                    
+                                    this.editor.ignore = true;
+                                    this.editor.inst.setValue(val.content);
+                                    this.editor.ignore = false;
+
                                     this.mdOption.renderer.code = function (code, language) {
                                         if(language == 'mermaid')
                                             return '<pre class="mermaid">'+code+'</pre>';
@@ -480,31 +519,47 @@ class Notes {
                         initEditor(){
                             try{
                                 // Editor
-                                this.editor = ace.edit(this.$refs.editor.$el);
-                                this.editor.setOptions({
+                                this.editor.inst = ace.edit(this.$refs.editor.$el);
+                                this.editor.inst.setOptions({
                                     //maxLines: 1000,
                                     minLines: 20,
                                     autoScrollEditorIntoView: false,
                                     enableBasicAutocompletion: false,
                                     enableLiveAutocompletion: false
                                 });
-                                this.editor.on("input", ()=> {
-                                    this.mdOption.renderer.code = function (code, language) {
-                                        if(language == 'mermaid')
-                                            return '<pre class="mermaid">'+code+'</pre>';
-                                        else
-                                            return '<pre><code>'+code+'</code></pre>';
-                                    };
-                                    this.compiledMarkdown = marked(this.editor.getValue(),{ renderer: this.mdOption.renderer });
-                                    mermaid.init();
-                                    this.onSave();
+                                this.editor.inst.on("input", ()=> {
+                                    
+                                    if(this.editor.changed) {
+                                        this.editor.changed = false;
+                                    }
+
                                 });
-                                this.editor.setTheme("ace/theme/tomorrow");
-                                this.editor.getSession().setMode("ace/mode/markdown");
-                                this.editor.renderer.setShowGutter(false);
+                                this.editor.inst.on('change', ()=> {
+
+                                    if (!this.editor.ignore) {
+                                        this.editor.changed = true;
+
+                                        this.mdOption.renderer.code = function (code, language) {
+                                            if(language == 'mermaid')
+                                                return '<pre class="mermaid">'+code+'</pre>';
+                                            else
+                                                return '<pre><code>'+code+'</code></pre>';
+                                        };
+                                        
+                                        this.compiledMarkdown = marked(this.editor.inst.getValue(),{ renderer: this.mdOption.renderer });
+                                        mermaid.init();
+    
+                                        this.onSave();
+                                    }
+                                });
+                                this.editor.inst.setTheme("ace/theme/tomorrow");
+                                this.editor.inst.getSession().setMode("ace/mode/markdown");
+                                this.editor.inst.renderer.setShowGutter(false);
                                 
                                 if(!_.isEmpty(this.model.content)){
-                                    this.editor.setValue(this.model.content);
+                                    this.editor.ignore = true;
+                                    this.editor.inst.setValue(this.model.content);
+                                    this.editor.ignore = false;
                                 }
                             } catch(err){
                                 console.log(err)
@@ -513,7 +568,6 @@ class Notes {
                         },
                         initSplit(){
                             if(!this.splitInst){
-                                console.log(11,this.$refs.editor.$el,this.$refs.content.$el)
                                 this.splitInst = Split([this.$refs.editor.$el, this.$refs.content.$el], {
                                     sizes: [0, 100],
                                     minSize: [0, 0],
@@ -524,15 +578,38 @@ class Notes {
                                 });
                             }
                         },
+                        onShareUrl(){
+                            
+                            var clipboard = new Clipboard('.copy', {
+                                text: (trigger)=>{
+                                    
+                                    this.$message({
+                                        type: "info",
+                                        message: "已复制！"
+                                    });
+                                    
+                                    let url = `${window.location.origin}/matrix/notes?parent=${encodeURIComponent(this.model.item.parent)}&name=${ encodeURIComponent(this.model.item.name)}`;
+                                    return url;
+                                }
+                            });
+                            _.delay(()=>{
+                                clipboard.destroy();
+                            },1000)
+                            
+                            
+                        },
                         onSave: _.debounce(function(){
                                     const self = this;
+                                    self.tip.loading = true;
                                     self.onSaveNow();
-                                },3000),
+                                },2000),
                         onSaveNow(){
+                            
                             this.tip.loading = true;
+                            this.tip.message = "更新中...";
 
                             let attr = {remark: '', ctime: _.now(), author: window.SignedUser_UserName};
-                            fsHandler.fsNewAsync(this.model.item.ftype, this.model.item.parent, this.model.item.name, this.editor.getValue(), attr).then( (rtn) => {
+                            fsHandler.fsNewAsync(this.model.item.ftype, this.model.item.parent, this.model.item.name, this.editor.inst.getValue(), attr).then( (rtn) => {
                                 if(rtn == 1){
                                     this.tip.message = "更新成功";
                                 } else {
@@ -542,7 +619,7 @@ class Notes {
                                 setTimeout(()=>{
                                     this.tip.message = "";
                                     this.tip.loading = false;
-                                },3000)
+                                },1000)
                             });
                         }
     
@@ -552,19 +629,23 @@ class Notes {
                 mxNotes.app = new Vue({
                     delimiters: ['${', '}'],
                     data:{
-                        model:{}
+                        model: null,
+                        defaultNote : []
+                    },
+                    created(){
+                        // 接收参数
+                        if(mx.urlParams['parent'] && mx.urlParams['name']){
+                            this.defaultNote = [decodeURIComponent(mx.urlParams['parent']),decodeURIComponent(mx.urlParams['name'])];
+                        } 
                     },
                     template:   `<el-container style="height:calc(100vh - 85px);background:#ffffff;">
                                     <el-main style="padding:0px;overflow:hidden;" ref="mainView">
                                         <notes-view :model="model" ref="viewRef"></notes-view>
                                     </el-main>
                                     <el-aside style="width:20em;overflow:hidden;background:#f7f7f7;" ref="leftView">
-                                        <notes-tree ref="treeRef"></notes-tree>
+                                        <notes-tree :defaultNote="defaultNote" ref="treeRef"></notes-tree>
                                     </el-aside>
-                                </el-container>`,
-                    mounted() {
-                        
-                    }
+                                </el-container>`
                 }).$mount("#app");
 
             })

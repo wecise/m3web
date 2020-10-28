@@ -668,10 +668,12 @@ class Topological {
                         return _.extend(_.omit(v,["cell"]),{ edgeProperty: _.omit(this.$refs[v.id][0].edge,["list","show"]) });
                     });
 
-                    let rtn = fsHandler.callFsJScript("/matrix/graph/graph-by-id.js",encodeURIComponent(JSON.stringify(term))).message;
-                    
-                    inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.graphData = rtn.result.data[0].graph;
-                    inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.$refs.graphViewSearch.term = rtn.mql;
+                    fsHandler.callFsJScriptAsync("/matrix/graph/graph-by-id.js",encodeURIComponent(JSON.stringify(term))).then( (val)=>{
+                        let rtn = val.message;
+                        
+                        inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.graphData = rtn.result.data[0].graph;
+                        inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.$refs.graphViewSearch.term = rtn.mql;
+                    } );
                     
                 },
                 onSelectionChange(val){
@@ -886,13 +888,13 @@ class Topological {
                 },
                 onSearchEntity() {
                     
-                    try{
-                        if(_.isEmpty(this.search.term)){
-                            return false;
-                        }
-    
-                        let entitys = fsHandler.callFsJScript("/matrix/graph/entity-search-by-term.js",encodeURIComponent(this.search.term)).message;
-                        
+                    if(_.isEmpty(this.search.term)){
+                        return false;
+                    }
+
+                    fsHandler.callFsJScriptAsync("/matrix/graph/entity-search-by-term.js",encodeURIComponent(this.search.term)).then( (rtn)=>{
+                        let entitys = rtn.message;
+
                         if(_.isEmpty(entitys)){
                             this.$message({
                                 type: "info",
@@ -909,10 +911,7 @@ class Topological {
                         this.search.result = _.map(this.search.result,(v)=>{
                             return _.extend(v,{ cell: {edge:false} } );
                         })
-                
-                    } catch(err){
-                        console.log(err)
-                    }
+                    } )
                     
                 },
                 createStateFilter(term) {
@@ -1032,11 +1031,9 @@ class Topological {
             },
             methods: {
                 loadHistory(){
-                    try{
-                        this.history = fsHandler.callFsJScript("/matrix/graph/loadConfig.js","history").message;
-                    } catch(err){
-
-                    }
+                    fsHandler.callFsJScriptAsync("/matrix/graph/loadConfig.js","history").then( (rtn)=>{
+                        this.history = rtn.message;
+                    } );
                 },
                 onSearch(term){
                     if(_.isEmpty(term)){
@@ -1048,35 +1045,30 @@ class Topological {
                 },
                 onSetDefault(item){
                     let term = {key: "topological.default.match", value:item.value };
-                    let rtn = fsHandler.callFsJScript("/matrix/system/global-update.js",encodeURIComponent(JSON.stringify(term)));
-                    if(rtn.status=='ok'){
-                        this.$message({
-                            type: "success",
-                            message: "已设为默认图例"
-                        })
-                    }
+                    fsHandler.callFsJScriptAsync("/matrix/system/global-update.js",encodeURIComponent(JSON.stringify(term))).then( (rtn)=>{
+                        if(rtn.status=='ok'){
+                            this.$message({
+                                type: "success",
+                                message: "已设为默认图例"
+                            })
+                        }
+                    } );
+                    
                 },
                 onDeleteHistory(item){
-                    try{
-                        let term = _.extend(item, {action:"delete"});
-                        fsHandler.callFsJScript("/matrix/graph/history-action.js",encodeURIComponent(JSON.stringify(term))).message;
-                    }catch(err){
+                    let term = _.extend(item, {action:"delete"});
 
-                    } finally{
+                    fsHandler.callFsJScriptAsync("/matrix/graph/history-action.js",encodeURIComponent(JSON.stringify(term))).then( (rtn)=>{
                         this.loadHistory();
-                    }
+                    } );
                 },
                 onDeleteAllHistory(){
-                    try{
-                        _.forEach(this.history,(v)=>{
-                            let term = _.extend(v, {action:"delete"});
-                            fsHandler.callFsJScript("/matrix/graph/history-action.js",encodeURIComponent(JSON.stringify(term))).message;
-                        })
-                    }catch(err){
-
-                    } finally{
-                        this.loadHistory();
-                    }
+                    _.forEach(this.history,(v)=>{
+                        let term = _.extend(v, {action:"delete"});
+                        fsHandler.callFsJScriptAsync("/matrix/graph/history-action.js",encodeURIComponent(JSON.stringify(term))).then( (rtn)=>{
+                            this.loadHistory();
+                        } );
+                    })
                 }
             }
         })
@@ -2328,35 +2320,38 @@ class Topological {
                     try{
 
                         let term = encodeURIComponent( JSON.stringify(this.model) );
-                        let rtn = fsHandler.callFsJScript("/matrix/performance/searchPerformanceByTerm.js",term).message.result;
-                        
-                        //取实时数据的time作为xAxis
-                        this.option.xAxis.data = _.map(rtn.reverse(),(v)=>{
-                            return moment(v[0]).format('YY-MM-DD HH:mm');
-                        });
-                        
-                        this.option.series = [{
-                            name: this.model.bucket + ' ' + this.model.key,
-                            data: _.map(rtn.reverse(),(v)=>{ return v[1];}),
-                            type: 'line',
-                            smooth:true,
-                            color: 'rgba(108, 212, 11, 1)',
-                            areaStyle: {
-                                normal: {
-                                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
-                                        offset: 0,
-                                        color: 'rgba(108, 212, 11, .5)'
-                                    }, {
-                                        offset: 1,
-                                        color: 'rgba(108, 212, 11, .1)'
-                                    }])
-                                }
-                            }
-                        }];
+                        fsHandler.callFsJScriptAsync("/matrix/performance/searchPerformanceByTerm.js",term).then( (val)=>{
+                            let rtn = val.message.result;
 
-                        if(this.$refs.chartContainer){
-                            this.chart.setOption(this.option);
-                        }
+                            //取实时数据的time作为xAxis
+                            this.option.xAxis.data = _.map(rtn.reverse(),(v)=>{
+                                return moment(v[0]).format('YY-MM-DD HH:mm');
+                            });
+                            
+                            this.option.series = [{
+                                name: this.model.bucket + ' ' + this.model.key,
+                                data: _.map(rtn.reverse(),(v)=>{ return v[1];}),
+                                type: 'line',
+                                smooth:true,
+                                color: 'rgba(108, 212, 11, 1)',
+                                areaStyle: {
+                                    normal: {
+                                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                            offset: 0,
+                                            color: 'rgba(108, 212, 11, .5)'
+                                        }, {
+                                            offset: 1,
+                                            color: 'rgba(108, 212, 11, .1)'
+                                        }])
+                                    }
+                                }
+                            }];
+
+                            if(this.$refs.chartContainer){
+                                this.chart.setOption(this.option);
+                            }
+                        } );
+                        
                     } catch(err){
 
                     }
@@ -3317,7 +3312,9 @@ class Topological {
                         if( !_.isEmpty(inst.URL_PARAMS_ITEM) ){
                             this.model = fsHandler.fsContent(inst.URL_PARAMS_ITEM.parent, inst.URL_PARAMS_ITEM.name);
                         } else {
-                            this.model = fsHandler.callFsJScript("/matrix/graph/graph_service.js", term).message[0].graph;
+                            fsHandler.callFsJScriptAsync("/matrix/graph/graph_service.js", term).then( (rtn)=>{
+                                this.model = rtn.message[0].graph;
+                            } );
                         }
 
                     } catch(err) {

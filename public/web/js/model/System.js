@@ -3133,12 +3133,13 @@ class System {
 							},
 							nodes: [],
 							selectedKeys: [],
-							selectedNodes: []
+							selectedNodes: [],
+							loading:false
 						}
 					},
 					watch: {
 						selectedKeys(val){
-							this.$emit("count:selectedTag",val.length);
+							this.$emit("count:selectedTag", val.length);
 						}
 					},
 					template: `<el-container>
@@ -3183,7 +3184,7 @@ class System {
 									</el-main>
 									<el-footer style="text-align:right;line-height:60px;">
 										<el-button type="default" @click="rowData.show = false;">关闭</el-button>
-										<el-button type="primary" @click="onUpdateRoleGroupByTag">更新标签权限</el-button>
+										<el-button type="primary" @click="onUpdateRoleGroupByTag" :loading="loading">更新标签权限</el-button>
 									</el-footer>
 								</el-container>`,
 					created(){
@@ -3191,26 +3192,22 @@ class System {
 					},
 					methods:{
 						loadNodes(){
-							this.nodes = fsHandler.callFsJScript(`${['/matrix'+this.model.parent,this.model.name].join("/")}`).message;
-							_.delay(()=>{
+							fsHandler.callFsJScriptAsync(`${['/matrix'+this.model.parent,this.model.name].join("/")}`).then( (rtn)=>{
+								this.nodes = rtn.message;
 								this.onSetSelected();
-							},50)
+							} );
 						},
 						onSetSelected(){
-							
-							try{
-								let stags = fsHandler.callFsJScript("/matrix/system/getStagsById.js", this.rowData.row.id).message;
-								
+							fsHandler.callFsJScriptAsync("/matrix/system/getStagsById.js", this.rowData.row.id).then( (rtn)=>{
+								let stags = rtn.message;
+
 								_.forEach(stags,(v,k)=>{
 									let perms = JSON.parse(v);
 									_.extend( this.findNodeById(k), { perms: JSON.parse(v), checked:true } );
 								});
 								this.selectedKeys = _.keys(stags);
-
-
-							} catch(err){
-								console.log(err)
-							}
+							} );
+							
 						},
 						findNodeById(id){
 							let rtn = null;
@@ -3308,12 +3305,12 @@ class System {
 						// 标签授权
 						onUpdateRoleGroupByTag(){
 							
+							this.loading = true;
+
 							// 更新
-							console.log(this.selectedNodes, this.selectedNodes.length)
 							let term = encodeURIComponent( JSON.stringify( { roleGroup: [this.rowData.row], data: this.selectedNodes } ) );
 							
-							let rtn = fsHandler.callFsJScript("/matrix/system/updateGroupByTagdir.js", term);
-							_.delay(()=>{
+							fsHandler.callFsJScriptAsync("/matrix/system/updateGroupByTagdir.js", term).then( (rtn)=>{
 								this.$emit('update:selectedTag');
 								this.$message({
 									type: "success",
@@ -3321,13 +3318,10 @@ class System {
 								})
 
 								// 标签相应的类需要授权
-								try{
-									fsHandler.callFsJScriptAsync("/matrix/system/updateRoleGroupByDataAfterTagdir.js", term);
-								} catch(err){
+								fsHandler.callFsJScriptAsync("/matrix/system/updateRoleGroupByDataAfterTagdir.js", term);
 
-								}
-
-							},500)
+								this.loading = false;
+							} );
 						}
 					}
 				})
@@ -3348,7 +3342,8 @@ class System {
 							selectedNode: null,
 							selectedNodes: [],
 							selectedKeys: [],
-							filterText: ""
+							filterText: "",
+							loading: false
 						}
 					},
 					template:   `<el-container style="height:70vh;background:#f2f2f2;">
@@ -3394,7 +3389,7 @@ class System {
 										</el-main>
 										<el-footer style="text-align:right;line-height:60px;">
 											<el-button type="default" @click="rowData.show = false;">关闭</el-button>
-											<el-button type="primary" @click="onUpdateRoleGroupByApp">更新应用权限</el-button>
+											<el-button type="primary" @click="onUpdateRoleGroupByApp" :loading="loading">更新应用权限</el-button>
 										</el-footer>
 									</el-aside>
 									<el-container v-if="!_.isEmpty(selectedNode)" style="width:40%;">
@@ -3420,7 +3415,7 @@ class System {
 							}
 						},
 						selectedNodes(val){
-							this.$emit("count:selectedApp",val.length);
+							this.$emit("count:selectedApp", _.uniq(_.filter(val,(v)=>{ return v.checked; })).length);
 						}
 					},
 					computed:{
@@ -3433,24 +3428,22 @@ class System {
 					},
 					methods: {
 						onInit(){
-							this.treeData = fsHandler.callFsJScript("/matrix/system/getAppList.js").message;
-							_.delay(()=>{
+							fsHandler.callFsJScriptAsync("/matrix/system/getAppList.js").then( (rtn)=>{
+								this.treeData = rtn.message;
+
 								this.onSetSelected();
-							},50)
+							} );
 						},
 						onSetSelected(){
-							try{
-								let sapp = fsHandler.callFsJScript("/matrix/system/getSappById.js", this.rowData.row.id).message;
-								console.log(22,sapp)
+							fsHandler.callFsJScriptAsync("/matrix/system/getSappById.js", this.rowData.row.id).then( (rtn)=>{
+								let sapp = rtn.message;
+
 								_.forEach(sapp,(v,k)=>{
 									let cPerms = JSON.parse(v);
 									_.extend( this.findNodeById(k), { perms: cPerms, checked:true } );
 								});
 								this.selectedKeys = _.keys(sapp);
-
-							} catch(err){
-								console.log(err)
-							}
+							} );
 						},
 						findNodeById(id){
 							let rtn = null;
@@ -3541,18 +3534,19 @@ class System {
 							if(_.isEmpty(data.name)) {
 								return false;
 							}
-
+							
 							this.selectedNodes.push(data);
 
 						},
 						// 应用授权
 						onUpdateRoleGroupByApp(event){
 							
+							this.loading = true;
+
 							// 更新
 							let term = encodeURIComponent( JSON.stringify( { roleGroup: [this.rowData.row], data: this.selectedNodes } ) );
 							console.log(JSON.stringify( { roleGroup: [this.rowData.row], data: this.selectedNodes } ))
-							let rtn = fsHandler.callFsJScript("/matrix/system/updateGroupByApp.js", term);
-							_.delay(()=>{
+							fsHandler.callFsJScriptAsync("/matrix/system/updateGroupByApp.js", term).then( (rtn)=>{
 								this.$emit('update:selectedApp');
 								this.$message({
 									type: "success",
@@ -3560,7 +3554,9 @@ class System {
 								})
 								// 刷新应用缓存，针对应用权限过滤
 								userHandler.refreshAppCache();
-							},500)
+
+								this.loading = false;
+							} );
 						}
 					}
 				})
@@ -3587,7 +3583,8 @@ class System {
 								rows:[],
 								columns: [],
 								selected: []
-							}
+							},
+							loading: false
 						}
 					},
 					template:   `<el-container style="height:70vh;background:#f2f2f2;">
@@ -3632,7 +3629,7 @@ class System {
 											</el-main>
 											<el-footer style="text-align:right;line-height:60px;">
 												<el-button type="default" @click="rowData.show = false;">关闭</el-button>
-												<el-button type="primary" @click="onUpdateRoleGroupByData">更新类权限</el-button>
+												<el-button type="primary" @click="onUpdateRoleGroupByData" :loading="loading">更新类权限</el-button>
 											</el-footer>
 										</el-container>
 									</el-header>
@@ -3691,7 +3688,7 @@ class System {
 							}
 						},
 						selectedNodes(val){
-							this.$emit("count:selectedData",val.length);
+							this.$emit("count:selectedData", _.uniq(_.filter(val,(v)=>{ return v.checked; })).length);
 						}
 					},
 					created(){
@@ -3699,23 +3696,22 @@ class System {
 					},
 					methods: {
 						initData(){
-							this.treeData = fsHandler.callFsJScript("/matrix/entity/entity_class.js",encodeURIComponent(this.root)).message;
-							_.delay(()=>{
+							fsHandler.callFsJScriptAsync("/matrix/entity/entity_class.js",encodeURIComponent(this.root)).then( (rtn)=>{
+								this.treeData = rtn.message;
+
 								this.onSetSelected();
-							},50)
+							} );
 						},
 						onSetSelected(){
-							try{
-								let sdata = fsHandler.callFsJScript("/matrix/system/getSdataById.js", this.rowData.row.id).message;
+							fsHandler.callFsJScriptAsync("/matrix/system/getSdataById.js", this.rowData.row.id).then( (rtn)=>{
+								let sdata = rtn.message;
+								
 								_.forEach(sdata,(v,k)=>{
 									let dcPerms = v;
 									_.extend( this.findNodeById(k), { cPerms: dcPerms, checked:true } );
 								});
 								this.selectedKeys = _.keys(sdata);
-
-							} catch(err){
-								console.log(err)
-							}
+							} );
 						},
 						findNodeById(id){
 							let rtn = null;
@@ -3814,17 +3810,22 @@ class System {
 						},
 						// 数据类授权
 						onUpdateRoleGroupByData(){
+							
+							this.loading = true;
+
 							// 更新
 							let term = encodeURIComponent( JSON.stringify( { roleGroup: [this.rowData.row], data: this.selectedNodes } ) );
 							console.log(JSON.stringify( { roleGroup: [this.rowData.row], data: this.selectedNodes } ))
-							let rtn = fsHandler.callFsJScript("/matrix/system/updateGroupByData.js", term);
-							_.delay(()=>{
+							fsHandler.callFsJScriptAsync("/matrix/system/updateGroupByData.js", term).then( (rtn)=>{
+								
 								this.$emit('update:selectedData');
 								this.$message({
 									type: "success",
 									message: "更新类权限成功！"
 								})
-							},500)
+
+								this.loading = false;
+							} );
 						}
 					}
 				})
@@ -3853,7 +3854,8 @@ class System {
 									pprefix: []
 								}
 							},
-							expandedView: 'edit'
+							expandedView: 'edit',
+							loading: false
 						}
 					},
 					template:   `<el-container style="width:100%;height:70vh;background:#f2f2f2;">
@@ -3913,7 +3915,8 @@ class System {
 											@row-contextmenu="onRowContextmenu"
 											@selection-change="onSelectionChange"
 											@current-change="onCurrentChange"
-											ref="table">
+											ref="table"
+											:loading="loading">
 											<el-table-column type="selection" align="center"></el-table-column> 
 											<el-table-column
 												sortable 
@@ -4182,6 +4185,8 @@ class System {
 						// 设置角色组
 						onSelectionChange(val) {
 							
+							this.loading = true;
+
 							if(_.isEmpty(val)){
 								_.forEach(this.dt.rows, (v,index)=>{
 									userHandler.deleteApiPermissionsGroups({name:v.name, roleGroups: _.map([this.roleGroup],'fullname') });
@@ -4202,6 +4207,8 @@ class System {
 							}
 							
 							this.dt.selected = val;
+
+							this.loading = false;
 						},
 						onCurrentChange(val){
 							this.dt.selected = [val];
@@ -5071,23 +5078,28 @@ class System {
 							doLayout();
 						},
 						getRoleGroupChildrens(fullname){
+							
 							let rtn = userHandler.getGroupPermissionsByParent({parent: fullname});
 							if(!_.isEmpty(rtn)){
 								return true;
 							} else {
 								return false;
 							}
+							
 						},
 						initData(){
 							const self = this;
 							
 							// 过滤 "/" 角色组
-							this.dt.rows = _.sortBy(_.filter(userHandler.getGroupPermissionsByParent({parent:""}),(v)=>{ 
+							userHandler.getGroupPermissionsByParentAsync({parent:""}).then( (rtn)=>{
+								this.dt.rows = _.sortBy(_.filter(rtn,(v)=>{ 
 													if(v.fullname != '/'){
 														let isParent = this.getRoleGroupChildrens(v.fullname);
 														return _.extend(v, {isParent: isParent}); 
 													}
 											}),['fullname'],['asc']);
+							} );
+							
 
 							let init = function(){
 								
@@ -5111,9 +5123,7 @@ class System {
 								}
 							};
 	
-							_.delay(()=>{
-								init();
-							},1000)
+							init();
 							
 						},
 						rowClassName({row, rowIndex}){
@@ -5617,93 +5627,113 @@ class System {
 				// 应用管理
 				Vue.component('apps-manage',{
 					delimiters: ['#{', '}#'],
-					template: 	`<el-container>
+					template: 	`<el-container style="height:100%;padding:20px;">
 									<el-header style="line-height: 60px;">
 										<el-tooltip content="发布应用" open-delay="500">
 											<el-button type="success" icon="el-icon-plus" @click="dialog.appDeploy.show = true;">发布应用</el-button> 
 										</el-tooltip>
-										<el-tooltip content="导出应用" open-delay="500">
-											<el-button type="default">导出应用</el-button>
-										</el-tooltip>
-										<el-tooltip content="导入应用" open-delay="500">
-											<el-button type="default">导入应用</el-button>
-										</el-tooltip>
+
+										<el-dropdown style="float:right;">
+											<span class="el-dropdown-link">
+												<i class="el-icon-setting el-icon--right"></i>
+											</span>
+											<el-dropdown-menu slot="dropdown">
+												<el-dropdown-item @click.native="onAppExport('mql')">导出应用(MQL)</el-dropdown-item>
+												<el-dropdown-item @click.native="onAppExport('xlsx')">导出应用(Excel)</el-dropdown-item>
+												<el-dropdown-item @click.native="dialog.appImport.show = true;" divided>导入应用</el-dropdown-item>
+											</el-dropdown-menu>
+										</el-dropdown>
 									</el-header>
 									<el-main>
 										<el-button type="default" 
-											style="width: auto;height:auto;padding: 10px 30px;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);background:rgb(81, 123, 160);"
+											style="position: relative;width: auto;height:auto;padding: 10px 30px;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);background:rgb(81, 123, 160);"
 											v-for="(item,index) in model.list"
 											:key="index">
 											<el-image style="width:64px;height:64px;margin:5px;" :src="item.icon | pickIcon"></el-image>
 											<p style="color:#fff;">#{item.cnname}#</p>
-											<p class="apps-manage">
-												<el-collapse accordion="true">
-													<el-collapse-item>
-														<div style="padding:10px;">
-															<el-form ref="form" :model="item" label-width="80px" >
-																<el-form-item label="中文名">
-																	<el-input v-model="item.cnname"></el-input>
-																</el-form-item>
-																<el-form-item label="英文名称">
-																	<el-input v-model="item.enname"></el-input>
-																</el-form-item>
-																<el-form-item label="Url">
-																	<el-input v-model="item.url">
-																		
-																	</el-input>
-																</el-form-item>
-																<el-form-item label="图标">
-																	<el-input v-model="item.icon"></el-input>
-																</el-form-item>
-																<el-form-item label="Target">
-																	<el-radio-group v-model="item.target">
-																		<el-radio label="_blank">打开新窗口</el-radio>
-																		<el-radio label="_parent">当前窗口打开</el-radio>
-																	</el-radio-group>
-																</el-form-item>
-																<el-form-item label="分组">
-																	<el-radio-group v-model="item.groups.group">
-																		#{item.groups.group}#
-																		<el-radio :label="item.name" v-for="item in model.groups">#{item.title}#</el-radio>
-																	</el-radio-group>
-																</el-form-item>
-																<el-form-item>
-																	<el-button type="primary" @click="update(item)">发布</el-button>
-																	<el-button type="danger" @click="remove(item.name)">删除</el-button>
-																</el-form-item>
-															</el-form> 
-														</div>
-													</el-collapse-item>
-												</el-collapse>
-											</p>
+											<div style="position:absolute;top:0px;right:5px;">
+												<el-button type="text"  @click="onAppEdit(item)">
+													<span class="el-icon-setting"  style="color:#ffffff;"></span> 
+												</el-button>
+											</div>
 										</el-button>
+										<el-dialog :title="'应用编辑-'+dialog.appEdit.item.name"  :visible.sync="dialog.appEdit.show" v-if="dialog.appEdit.show" destroy-on-close="true">
+											<el-container>
+												<el-main>
+													<el-form ref="form" :model="dialog.appEdit.item" label-width="80px" >
+														<el-form-item label="中文名">
+															<el-input v-model="dialog.appEdit.item.cnname"></el-input>
+														</el-form-item>
+														<el-form-item label="英文名称">
+															<el-input v-model="dialog.appEdit.item.enname"></el-input>
+														</el-form-item>
+														<el-form-item label="Url">
+															<el-input v-model="dialog.appEdit.item.url"></el-input>
+														</el-form-item>
+														<el-form-item label="图标">
+															<el-input v-model="dialog.appEdit.item.icon"></el-input>
+														</el-form-item>
+														<el-form-item label="Target">
+															<el-radio-group v-model="dialog.appEdit.item.target">
+																<el-radio label="_blank">打开新窗口</el-radio>
+																<el-radio label="_parent">当前窗口打开</el-radio>
+															</el-radio-group>
+														</el-form-item>
+														<el-form-item label="分组">
+															<el-radio-group v-model="dialog.appEdit.item.groups.group">
+																#{dialog.appEdit.item.groups.group}#
+																<el-radio :label="item.name" v-for="item in model.groups">#{item.title}#</el-radio>
+															</el-radio-group>
+														</el-form-item>
+													</el-form> 
+												</el-main>
+												<el-footer style="text-align:right;line-height:60px;">
+													<el-button type="default" @click="dialog.appEdit.show = false;">取消</el-button>
+													<el-button type="primary" @click="onAppUpdate(dialog.appEdit.item)">更新应用</el-button>
+													<el-button type="danger" @click="onAppRemove(dialog.appEdit.item)">卸载应用</el-button>
+												</el-footer>
+											</el-container>
+										</el-dialog>
 										<el-dialog title="应用发布" :visible.sync="dialog.appDeploy.show" v-if="dialog.appDeploy.show" destroy-on-close="true">
 											<mx-app-deploy :model="dialog.appDeploy"></mx-app-deploy>
+										</el-dialog>
+										<el-dialog title="应用导入" :visible.sync="dialog.appImport.show" v-if="dialog.appImport.show" destroy-on-close="true">
+											<el-container>
+												<el-main>
+													<el-upload
+														class="upload-demo"
+														drag
+														:auto-upload="false"
+														:on-change="onFilesChange"
+														:file-list="dialog.appImport.files">
+														<i class="el-icon-upload"></i>
+														<div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+														<div class="el-upload__tip" slot="tip">只能上传Mql/Excel文件</div>
+													</el-upload>
+												</el-main>
+												<el-footer style="line-height:60px;text-align:right;">
+													<el-button type="default" @click="dialog.appImport.show = false;">取消</el-button>
+													<el-button type="primary" @click="onAppImport">导入</el-button>
+												</el-footer>
+											</el-container>
 										</el-dialog>
 									</el-main>
 								</el-container>`,
 					data(){
 						return {
-							form: {
-								cnname: "",
-								enname: "",
-								url: "",
-								icon: "",
-								target: "_blank",
-								selected: 1,
-								groups: {"group":"application"}
-							},
 							model: null,
-							isDragging: false,
-							delayedDragging:false,
-							layout:{
-								tabs: [],
-								activeIndex: ''
-							},
 							dialog: {
 								appDeploy: {
 									show: false,
 									item: null
+								},
+								appEdit: {
+									show: false,
+									item: null
+								},
+								appImport: {
+									show: false,
+									files: null
 								}
 							}
 						}
@@ -5713,19 +5743,6 @@ class System {
 							this.init(); 
 						})
 					},
-					watch: {
-						isDragging(newValue) {
-							
-							if (newValue){
-								this.delayedDragging = true;
-								return;
-							}
-
-							this.$nextTick( ()=>{
-								this.delayedDragging = false;
-							})
-						}
-					},
 					filters:{
 						pickIcon(icon){
 							return `${window.ASSETS_ICON}/apps/png/${icon}?type=download&issys=${window.SignedUser_IsAdmin}`;
@@ -5733,104 +5750,116 @@ class System {
 					},
 					methods: {
 						init(){
-							const self = this;
-							self.model = fsHandler.callFsJScript("/matrix/apps/appList.js",null).message;
+							fsHandler.callFsJScriptAsync("/matrix/apps/appList.js",null).then( (rtn)=>{
+								this.model = rtn.message;
+							} );
 						},
-						add(){
-							const self = this;
+						onAppUpdate(item){
 
-							let rtn = fsHandler.callFsJScript("/matrix/apps/app.js",encodeURIComponent(JSON.stringify(self.form)));
-							if( _.lowerCase(rtn.status) == "ok"){
-								self.$message({
-									type: "info",
-									message: "应用发布成功"
-								});
-								
-								eventHub.$emit("APP-REFRESH-EVENT");
+							fsHandler.callFsJScriptAsync("/matrix/apps/app.js",encodeURIComponent(JSON.stringify(item))).then( (rtn)=>{
+								if( _.lowerCase(rtn.status) == "ok"){
+									
+									this.$message({
+										type: "info",
+										message: "应用更新成功"
+									});
+									
+									this.dialog.appEdit.show = false;
+	
+									eventHub.$emit("APP-REFRESH-EVENT");
 
-								$("ul.nav").find("li>a[title='应用']").popover({
-									container: "body",
-									title: "",
-									content: `${self.form.cnname} 应用发布成功！`
-								}).popover('show');
-
-								_.delay(function(){
-									$("ul.nav").find("li>a[data-original-title='应用']").popover('destroy');
-								},8000)
-
-								self.resetForm();
-
-								// 刷新应用缓存，针对应用权限过滤
-								userHandler.refreshAppCache();
-							}
-
+									// 刷新应用缓存，针对应用权限过滤
+									userHandler.refreshAppCache();
+								}
+							} );
 						},
-						update(item){
-
-							const self = this;
-
-							let rtn = fsHandler.callFsJScript("/matrix/apps/app.js",encodeURIComponent(JSON.stringify(item)));
-							if( _.lowerCase(rtn.status) == "ok"){
-								self.$message({
-									type: "info",
-									message: "应用更新成功"
-								});
-								
-								eventHub.$emit("APP-REFRESH-EVENT");
-
-								$("ul.nav").find("li>a[title='应用']").popover({
-									container: "body",
-									title: "",
-									content: `${item.cnname} 应用更新成功！`
-								}).popover('show');
-
-								_.delay(function(){
-									$("ul.nav").find("li>a[data-original-title='应用']").popover('destroy');
-								},8000)
-
-								self.hide(item.name);
-								self.resetForm();
-
-								// 刷新应用缓存，针对应用权限过滤
-								userHandler.refreshAppCache();
-							}
-						},
-						remove(event) {
+						onAppRemove(item) {
 							
-							alertify.confirm(`确定要删除？<br><br> ${event}`, (e)=> {
-								if (e) {
-									let _mql = `delete from /matrix/portal/tools where name='${event}'`;
-									let rtn = omdbHandler.fetchDataByMql(_mql);
+							this.$confirm(`确认要删除该应用：${item.name}？`, '提示', {
+                                confirmButtonText: '确定',
+                                cancelButtonText: '取消',
+                                type: 'warning'
+                            }).then(() => {
+								
+								fsHandler.callFsJScriptAsync("/matrix/apps/app_delete.js",encodeURIComponent(JSON.stringify(item))).then( (rtn)=>{
+									
 									if(rtn.status === 'ok'){
+										
 										this.init();
 
 										// 刷新应用缓存，针对应用权限过滤
 										userHandler.refreshAppCache();
+
+										this.dialog.appEdit.show = false;
+
 									} else {
 										this.$message({
 											type: "error",
-											message: rtn.message
+											message: rtn
 										})
 									}
-								} else {
-									
-								}
-							});
+
+								} );
+								
+                            }).catch(() => {
+                                
+                            });
 
 						},
-						resetForm(){
-							_.extend(this.form, {
-								cnname: "",
-								enname: "",
-								url: "",
-								icon: "",
-								target: "_blank",
-								selected: 1,
-								groups: "application"
+						onAppEdit(item){
+							this.dialog.appEdit.item = item;
+							this.dialog.appEdit.show = true;
+						},
+						onAppExport(ftype){
+							axios.get(`/mxobject/export?recursive=true&relation_defined=false&filetype=${ftype}&template=true&class=%2Fmatrix%2Fportal%2Ftools&ignoreclass=%2Fmatrix%2Ffilesystem&limit=-1`,{
+								headers: {
+									"Content-type":"text/csv",
+									"Access-Control-Allow-Origin":"*"
+								},
+								responseType:"arraybuffer"
+							})
+							.then((response)=> {
+								var blob = new Blob([response.data], ftype=='mql'?{type: "octet/stream"}:{type: "application/vnd.ms-excel"});
+                    			saveAs(blob, `Apps-${moment().format('LLL')}.${ftype}`);
+							})
+							.catch((error)=> {
+								console.error(error);
 							});
 						},
-						hide(name){
-							$("#collapse"+name).collapse('hide');
+						onFilesChange(file){
+							this.dialog.appImport.files = [file.raw];
+						},
+						onAppImport(){
+							
+							let fileName = this.dialog.appImport.files[0].name;
+
+							this.$confirm(`确认要导入应用：${fileName}？`, '提示', {
+                                confirmButtonText: '确定',
+                                cancelButtonText: '取消',
+                                type: 'warning'
+                            }).then(() => {
+								
+								omdbHandler.classDataImport(this.dialog.appImport.files[0]).then( (rtn)=>{
+									if(_.lowerCase(rtn.status) == 'ok'){
+										this.$message({
+											type: "success",
+											message: "导入成功！"
+										});
+									} else {
+										this.$message({
+											type: "error",
+											message: "导入失败：" + rtn.message
+										});
+									}
+								} );
+								
+                            }).catch(() => {
+                                this.$message({
+									type: "info",
+									message: "取消导入操作！"
+								});
+							});
+							
 						}
 
 					}

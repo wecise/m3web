@@ -933,20 +933,20 @@ class Job extends Matrix {
                         // event
                         let term = encodeURIComponent(JSON.stringify(event).replace(/%/g,'%25'));
                         // 根据event获取关联信息
-                        let model = fsHandler.callFsJScript("/matrix/job/diagnosis-by-id.js",term).message;
-                        
-                        // 添加tab
-                        let detail = {title:`作业分析 ${event.name}`, name:`diagnosis-${id}`, type: 'diagnosis', child:[
-                                        {title:'作业详情', name:`diagnosis-detail-${id}`, type: 'detail', model:model},
-                                        {title:'作业轨迹', name:`diagnosis-journal-${id}`, type: 'journal', model:model},
-                                        {title:'执行命令', name:`diagnosis-cmd-${id}`, type: 'cmd', model:model}
-                                    ]};
-                        
-                        
-                        this.layout.main.tabs.push(detail);
-                        this.layout.main.activeIndex = `diagnosis-${id}`;
-                        this.layout.main.detail.activeIndex = _.first(detail.child).name;
+                        fsHandler.callFsJScriptAsync("/matrix/job/diagnosis-by-id.js",term).then( (rtn)=>{
+                            let model = rtn.message
 
+                            // 添加tab
+                            let detail = {title:`作业分析 ${event.name}`, name:`diagnosis-${id}`, type: 'diagnosis', child:[
+                                {title:'作业详情', name:`diagnosis-detail-${id}`, type: 'detail', model:model},
+                                {title:'作业轨迹', name:`diagnosis-journal-${id}`, type: 'journal', model:model},
+                                {title:'执行命令', name:`diagnosis-cmd-${id}`, type: 'cmd', model:model}
+                            ]};
+                            
+                            this.layout.main.tabs.push(detail);
+                            this.layout.main.activeIndex = `diagnosis-${id}`;
+                            this.layout.main.detail.activeIndex = _.first(detail.child).name;
+                        } );
                         
                     } catch(error){
                         this.layout.main.tabs = [];

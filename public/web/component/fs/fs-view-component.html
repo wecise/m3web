@@ -1882,18 +1882,17 @@
                         // 重置选择
                         this.selectedItem = [];
     
-                        let _rtn = fsHandler.fsList(this.rootPath);
+                        fsHandler.fsListAsync(this.rootPath).then( (rtn)=>{
+                            this.model = _.orderBy(_.map(rtn,(v,k)=>{
 
-                        this.model = _.orderBy(_.map(_rtn,(v,k)=>{
+                                            return _.merge(v, {"username": `${this.signedUserName}`, editable: false});
 
-                            return _.merge(v, {"username": `${this.signedUserName}`, editable: false});
+                                        }),[v => v.name.toLowerCase(),"vtime"],["asc","desc"]);
 
-                        }),[v => v.name.toLowerCase(),"vtime"],["asc","desc"]);
-
-                        _.delay(()=>{
                             // 刷新
                             this.refresh();
-                        },100);  
+                        } );
+
                     })
     
                 },
@@ -2046,20 +2045,20 @@
                             cancelButtonText: '取消',
                             type: 'warning'
                             }).then(() => {
-                                let rtn = fsHandler.fsDelete(event.parent,event.name);
-    
-                                if (rtn == 1){
-                                    this.load();
-                                    this.$message({
-                                        type: "success",
-                                        message: "删除成功！"
-                                    });
-                                } else {
-                                    this.$message({
-                                        type: "error",
-                                        message: "删除失败 " + rtn.message
-                                    })
-                                }
+                                fsHandler.fsDeleteAsync(event.parent,event.name).then( (rtn)=>{
+                                    if (rtn == 1){
+                                        this.$message({
+                                            type: "success",
+                                            message: "删除成功！"
+                                        });
+                                        this.load();
+                                    } else {
+                                        this.$message({
+                                            type: "error",
+                                            message: "删除失败 " + rtn.message
+                                        })
+                                    }
+                                } );
 
                             }).catch(() => {
                                 
@@ -2067,20 +2066,21 @@
                         
                     } else {
     
-                        let rtn = fsHandler.fsDelete(event.parent,event.name);
-    
-                        if (rtn == 1){
-                            this.load();
-                            this.$message({
-                                type: "success",
-                                message: "删除成功！"
-                            })
-                        } else {
-                            this.$message({
-                                type: "error",
-                                message: "删除失败 " + rtn.message
-                            })
-                        }
+                        fsHandler.fsDeleteAsync(event.parent,event.name).then( (rtn)=>{
+                            if (rtn == 1){
+                                this.$message({
+                                    type: "success",
+                                    message: "删除成功！"
+                                })
+
+                                this.load();
+                            } else {
+                                this.$message({
+                                    type: "error",
+                                    message: "删除失败 " + rtn.message
+                                })
+                            } 
+                        });
                     }
     
                 },
@@ -2137,47 +2137,16 @@
     
                 },
                 downloadIt(item, prompt) {
-                    const self = this
-    
+                    
                     if(item.ftype == 'dir'){
-                        let rtn = fsHandler.fsList(item.parent);
-    
-    
+                        fsHandler.fsListAsync(item.parent).then( (rtn)=>{
+
+                        } );
                     } else {
-    
-                        /*if(_.includes(['zip','gz','tar','exe','png','gif','svg','doc','ppt','file'],item.ftype)){
-                            let _url = `/fs/${item.parent}/${item.name}?type=download`.replace(/\/\//g,'/');
-                            let _target = '_blank';
-                            // system || extend || ...
-                            if(_.startsWith(item.parent,'/extend') || _.startsWith(item.parent,'/script') || _.startsWith(item.parent,'/app')){
-                                _url += '&issys=true';
-                            }
-                            window.open(_url, _target);
-                        } else if(_.includes(['mp3','mp4'],item.ftype)){
-                            let _url = `/fs/${item.parent}/${item.name}?type=download`.replace(/\/\//g,'/');
-                            let _target = '_blank';
-                            // system || extend || ...
-                            if(_.startsWith(item.parent,'/extend') || _.startsWith(item.parent,'/script') || _.startsWith(item.parent,'/app')){
-                                _url += '&issys=true';
-                            }
-                            window.location.href=_url;
-                        } else {
-                            let rtn = fsHandler.fsContent(item.parent, item.name);
-                            let blob = new Blob([rtn], {type: "text/plain;charset=utf-8"});
-    
-                            saveAs(blob, `${item.name}`);
-                        }*/
-    
                         let _url = `/fs/${item.parent}/${item.name}?type=download&issys=${window.SignedUser_IsAdmin}`.replace(/\/\//g,'/');
                         let _target = '_blank';
-                        // system || extend || ...
-                        //if(_.startsWith(item.parent,'/extend') || _.startsWith(item.parent,'/script') || _.startsWith(item.parent,'/app')){
-                        /*if(item.parent === "/"){
-                            _url += '&issys=true';
-                        }*/
                         window.open(_url, _target);
                     }
-    
     
                 },
                 downloadThem(){

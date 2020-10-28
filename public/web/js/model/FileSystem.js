@@ -227,7 +227,7 @@ class FileSystem {
         new Vue({
             delimiters: ['#{', '}#'],
             data:{
-                classList: fsHandler.callFsJScript("/matrix/fs/fs_list.js",encodeURIComponent(JSON.stringify({path:app,onlyDir:true}))).message,
+                classList: null,
                 defaultProps: {
                     children: 'children',
                     label: 'alias'
@@ -264,6 +264,11 @@ class FileSystem {
                                 <el-button type="primary" @click="onCopy">复制</el-button>
                             </el-footer>
                         </el-container>`,
+            created(){
+                fsHandler.callFsJScriptAsync("/matrix/fs/fs_list.js",encodeURIComponent(JSON.stringify({path:app,onlyDir:true}))).then( (rtn)=>{
+                    this.classList = rtn.message;
+                } );
+            },
             methods:{
                 onNodeClick(node){
                     this.node = node;
@@ -276,11 +281,13 @@ class FileSystem {
                         let rtn = true;
                         
                         _.forEach(sourceList,(v) => {
-                            let _rtn = fsHandler.fsCopy([v.parent,v.name].join("/"), this.node.fullname);
-                            if(_rtn===0){
-                                rtn = false;
-                            }
+                            fsHandler.fsCopyAsync([v.parent,v.name].join("/"), this.node.fullname).then( (rtn)=>{
+                                if(rtn===0){
+                                    rtn = false;
+                                }
+                            } );
                         })
+                        
                         if(rtn){
                             this.$message({
                                 message: "复制成功 " + this.node.fullname,
@@ -318,14 +325,15 @@ class FileSystem {
         new Vue({
             delimiters: ['#{', '}#'],
             data:{
-                classList: fsHandler.callFsJScript("/matrix/fs/fs_list.js",encodeURIComponent(JSON.stringify({path:app,onlyDir:true}))).message,
+                classList: null,
                 defaultProps: {
                     children: 'children',
                     label: 'alias'
                 },
-                node: {}
+                node: {},
+                loading: true
             },
-            template: `<el-container style="height:100%;">
+            template: `<el-container style="height:100%;" v-loading="loading">
                             <el-header style="height:30px;line-height:30px;background-color:#f2f2f2;">
                                 移动到：<span v-if="!_.isEmpty(node.fullname)">#{node.fullname}#</span>
                             </el-header>
@@ -355,6 +363,12 @@ class FileSystem {
                                 <el-button type="primary" @click="onMove">移动</el-button>
                             </el-footer>
                         </el-container>`,
+            created(){
+                fsHandler.callFsJScriptAsync("/matrix/fs/fs_list.js",encodeURIComponent(JSON.stringify({path:app,onlyDir:true}))).then( (rtn)=>{
+                    this.classList = rtn.message;
+                    this.loading = false;
+                } );
+            },
             methods:{
                 onNodeClick(node){
                     this.node = node;
@@ -367,11 +381,13 @@ class FileSystem {
                         let rtn = true;
                         
                         _.forEach(sourceList,(v) => {
-                            let _rtn = fsHandler.fsMove([v.parent,v.name].join("/"), this.node.fullname);
-                            if(_rtn===0){
-                                rtn = false;
-                            }
+                            fsHandler.fsMoveAsync([v.parent,v.name].join("/"), this.node.fullname).then( (rtn)=>{
+                                if(_rtn===0){
+                                    rtn = false;
+                                }
+                            } );
                         })
+
                         if(rtn){
                             this.$message({
                                 message: "移动成功 " + this.node.fullname,

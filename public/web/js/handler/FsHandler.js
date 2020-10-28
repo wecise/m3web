@@ -155,11 +155,11 @@ class FsHandler {
                 dataType: "json",
                 data: fm,
                 async: true,
-                beforeSend: function(xhr) {
+                beforeSend(xhr) {
                 },
-                complete: function(xhr, textStatus) {
+                complete(xhr, textStatus) {
                 },
-                success: function(data, textStatus, xhr) {
+                success(data, textStatus, xhr) {
 
                     userHandler.ifSignIn(data);
 
@@ -168,7 +168,7 @@ class FsHandler {
                     }
 
                 },
-                error: function(xhr, textStatus, errorThrown) {
+                error(xhr, textStatus, errorThrown) {
                     rtn = xhr.responseJSON;
                 }
             })
@@ -232,6 +232,54 @@ class FsHandler {
         return rtn;
     };
 
+    async fsListAsync(path){
+        let rtn = null;
+
+        try{
+            let _issys = false;
+            let parent = path.replace(/\/\//g,'/');
+
+            if(window.SignedUser_IsAdmin){
+                _issys = true;
+            }
+
+            let url = `/fs${parent}`.replace(/\/fs\/fs/,"/fs");
+
+            await jQuery.ajax({
+                url: url,
+                type: 'GET',
+                dataType: 'text json',
+                contentType: "application/text; charset=utf-8",
+                data: {
+                    type: 'dir',
+                    issys: _issys
+                },
+                async: true,
+                beforeSend: function(xhr) {
+                    // Pace.restart();
+                },
+                complete: function(xhr, textStatus) {
+                },
+                success: function(data, textStatus, xhr) {
+
+                    userHandler.ifSignIn(data);
+
+                    if (_.isEmpty(data.message)) return false;
+
+                    rtn = data.message;
+
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    rtn = xhr.responseText;
+                }
+            });
+        } catch(err){
+
+        }
+
+        return rtn;
+    };
+
     /*
     *   文件系统
     *
@@ -275,6 +323,47 @@ class FsHandler {
                 rtn = xhr.responseJSON;
             }
         })
+
+        return rtn;
+    };
+
+    async fsDeleteAsync(path,name){
+        let rtn = null;
+        try{
+            let parent = path.replace(/\/\//g,'/');
+            let _url = `/fs${parent}/${name}`;
+
+            if(window.SignedUser_IsAdmin){
+                _url += '?issys=true';
+            }
+
+            await jQuery.ajax({
+                url: _url,
+                type: 'DELETE',
+                dataType: 'text json',
+                contentType: "application/text; charset=utf-8",
+                async: true,
+                beforeSend: function(xhr) {
+                    // Pace.restart();
+                },
+                complete: function(xhr, textStatus) {
+                },
+                success: function(data, textStatus, xhr) {
+
+                    userHandler.ifSignIn(data);
+
+                    if( _.lowerCase(data.status) == "ok"){
+                        rtn = 1;
+                    }
+
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    rtn = xhr.responseJSON;
+                }
+            })
+        } catch(err){
+            
+        }
 
         return rtn;
     };
@@ -436,6 +525,54 @@ class FsHandler {
         return rtn;
     };
 
+    async fsCopyAsync(srcpath,dstpath){
+        let rtn = null;
+
+        try{
+            let _issys = false;
+
+            // Root
+            srcpath = srcpath.replace(/\/\//g,'/');
+            dstpath = dstpath.replace(/\/\//g,'/');
+
+            if(window.SignedUser_IsAdmin){
+                _issys = true;
+            }
+
+            await jQuery.ajax({
+                url: `/fs/copy?issys=${_issys}`,
+                type: 'POST',
+                dataType: 'json',
+                async: true,
+                data: {
+                    srcpath: srcpath,
+                    dstpath: dstpath
+                },
+                beforeSend(xhr) {
+                    // Pace.restart();
+                },
+                complete(xhr, textStatus) {
+                },
+                success(data, textStatus, xhr) {
+
+                    userHandler.ifSignIn(data);
+
+                    if( _.lowerCase(data.status) == "ok"){
+                        rtn = 1;
+                    }
+
+                },
+                error(xhr, textStatus, errorThrown) {
+                    rtn = xhr.responseText;
+                }
+            })
+        } catch(err){
+
+        }
+
+        return rtn;
+    };
+
 
     /*
     *   文件系统
@@ -490,6 +627,56 @@ class FsHandler {
         return rtn;
     };
 
+    async fsMoveAsync(srcpath,dstpath){
+        let rtn = 0;
+
+        try{
+
+            let _issys = false;
+
+            // Root
+            srcpath = srcpath.replace(/\/\//g,'/');
+            dstpath = dstpath.replace(/\/\//g,'/');
+
+            if(window.SignedUser_IsAdmin){
+                _issys = true;
+            }
+            
+            await jQuery.ajax({
+                url: `/fs/move?issys=${_issys}`,
+                type: 'POST',
+                dataType: 'json',
+                async: true,
+                data: {
+                    srcpath: srcpath,
+                    dstpath: dstpath
+                },
+                beforeSend: function (xhr) {
+                    // Pace.restart();
+                },
+                complete: function (xhr, textStatus) {
+                },
+                success: function (data, textStatus, xhr) {
+
+                    userHandler.ifSignIn(data);
+
+                    if( _.lowerCase(data.status) == "ok"){
+                        rtn = 1;
+                    }
+
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    rtn = 0;
+                    alertify.error("移动失败" + " " + xhr.responseJSON);
+                    console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+                }
+            })
+        } catch(err){
+
+        }
+
+        return rtn;
+    };
 
     /*
     *   文件系统
@@ -855,45 +1042,11 @@ class FsHandler {
     */
    callFsJScriptString(term,content){
 
-    let rtn = null;
-
-    // 打标签
-    if(_.endsWith(name,'tag_service.js')){
-        let system = window.location.pathname.replace(/\/matrix\//,'');
-        term = encodeURIComponent(JSON.stringify(_.merge(JSON.parse(decodeURIComponent(term)), {
-            system:system,
-            user:window.SignedUser_UserName
-        })));
-    }
-
-    jQuery.ajax({
-        url: `/script/exec/js?input=${term}`,
-        type: "POST",
-        data: content,
-        async: false,
-        dataType: 'json',
-        contentType: false,
-        beforeSend: function(xhr) {},
-        complete: function(xhr, textStatus) {},
-        success: function(data, textStatus, xhr) {
-            userHandler.ifSignIn(data);
-            rtn = data;
-        },
-        error: function(xhr, textStatus, errorThrown) {
-            rtn = xhr.responseText;
-        }
-    });
-
-    return rtn;
-};
-
-    callFsJScriptAsync(name,term){
-
         let rtn = null;
 
         // 打标签
         if(_.endsWith(name,'tag_service.js')){
-            let system = window.location.pathname.replace(/\/janesware\//,'');
+            let system = window.location.pathname.replace(/\/matrix\//,'');
             term = encodeURIComponent(JSON.stringify(_.merge(JSON.parse(decodeURIComponent(term)), {
                 system:system,
                 user:window.SignedUser_UserName
@@ -901,31 +1054,70 @@ class FsHandler {
         }
 
         jQuery.ajax({
-            url: `/script/exec/js?input=${term}&isfile=true`,
+            url: `/script/exec/js?input=${term}`,
             type: "POST",
-            data: name,
-            async: true,
+            data: content,
+            async: false,
             dataType: 'json',
             contentType: false,
-            beforeSend: function(xhr) {
-                // 忽略
-                if(!_.includes(term,'aiStatusGet')){
-                    // Pace.restart();
-                }
-            },
-            complete: function(xhr, textStatus) {
-            },
+            beforeSend: function(xhr) {},
+            complete: function(xhr, textStatus) {},
             success: function(data, textStatus, xhr) {
-
                 userHandler.ifSignIn(data);
-
                 rtn = data;
             },
             error: function(xhr, textStatus, errorThrown) {
                 rtn = xhr.responseText;
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
             }
         });
+
+        return rtn;
+    };
+
+    async callFsJScriptAsync(name,term){
+
+        let rtn = null;
+        try{
+                
+
+            // 打标签
+            if(_.endsWith(name,'tag_service.js')){
+                let system = window.location.pathname.replace(/\/janesware\//,'');
+                term = encodeURIComponent(JSON.stringify(_.merge(JSON.parse(decodeURIComponent(term)), {
+                    system:system,
+                    user:window.SignedUser_UserName
+                })));
+            }
+
+            await jQuery.ajax({
+                url: `/script/exec/js?input=${term}&isfile=true`,
+                type: "POST",
+                data: name,
+                async: true,
+                dataType: 'json',
+                contentType: false,
+                beforeSend: function(xhr) {
+                    // 忽略
+                    if(!_.includes(term,'aiStatusGet')){
+                        // Pace.restart();
+                    }
+                },
+                complete: function(xhr, textStatus) {
+                },
+                success: function(data, textStatus, xhr) {
+
+                    userHandler.ifSignIn(data);
+
+                    rtn = data;
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    rtn = xhr.responseText;
+                    console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
+                }
+            });
+        } catch(err){
+
+        }
 
         return rtn;
     };

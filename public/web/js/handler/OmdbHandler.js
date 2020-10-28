@@ -488,41 +488,93 @@ class OmdbHandler  {
         return rtn;
     };
 
+    async fetchDataByMqlAsync(param) {
+
+        let rtn = null;
+        
+        try {
+            await jQuery.ajax({
+                url: "/mxobject/mql",
+                dataType: 'json',
+                type: 'POST',
+                async: true,
+                data: {
+                    mql: param,
+                    meta: true
+                },
+                beforeSend(xhr){
+                    
+                },
+                complete(xhr, textStatus) {
+                    auditLogHandler.writeLog("omdb:console", "Execute mql: " + param, 0);
+                },
+                success(data, status) {
+
+                    userHandler.ifSignIn(data);
+
+                    // MQL for CRUD
+                    if(_.lowerCase(data.status) == "ok"){
+                        rtn = data;
+                    }
+
+                },
+                error(xhr, textStatus, errorThrown){
+                    
+                    if(xhr.status){
+                        rtn = xhr.responseJSON;
+                    } else{
+                        $("body").css("opacity",'.3');
+                        alert("Internal Server Error（500)");
+                    }
+
+                    auditLogHandler.writeLog("omdb:console", "Execute mql: " + param, 1);
+                }
+            });
+        } catch(err){
+
+        }
+
+        return rtn;
+    };
+
     /*
     *   导出DDL
     *
     *       参数：
     *           mql
     */
-   classToDDL(param) {
+   async classToDDLAsync(param) {
 
     let rtn = null;
-    
-    jQuery.ajax({
-        url: `/mxobject/export?recursive=false&filetype=mql&class=${encodeURIComponent(param)}&limit=0`,
-        dataType: 'json',
-        type: 'GET',
-        async: false,
-        beforeSend:function(xhr){
-            // Pace.restart();
-        },
-        complete: function(xhr, textStatus) {
-            auditLogHandler.writeLog("omdb:console", "Export ddl: " + param, 0);
-        },
-        success: function (data, status) {
+    try{
+        await jQuery.ajax({
+            url: `/mxobject/export?recursive=false&filetype=mql&class=${encodeURIComponent(param)}&limit=0`,
+            dataType: 'json',
+            type: 'GET',
+            async: true,
+            beforeSend:function(xhr){
+                // Pace.restart();
+            },
+            complete: function(xhr, textStatus) {
+                auditLogHandler.writeLog("omdb:console", "Export ddl: " + param, 0);
+            },
+            success: function (data, status) {
 
-            userHandler.ifSignIn(data);
+                userHandler.ifSignIn(data);
 
-            if(_.lowerCase(data.status) == "ok"){
-                rtn = data;
+                if(_.lowerCase(data.status) == "ok"){
+                    rtn = data;
+                }
+
+            },
+            error: function(xhr, textStatus, errorThrown){
+                rtn = xhr.responseText;
+                auditLogHandler.writeLog("omdb:console", "Export ddl: " + param, 1);
             }
+        });
+    } catch(err){
 
-        },
-        error: function(xhr, textStatus, errorThrown){
-            rtn = xhr.responseText;
-            auditLogHandler.writeLog("omdb:console", "Export ddl: " + param, 1);
-        }
-    });
+    }
 
     return rtn;
 };
@@ -533,7 +585,7 @@ class OmdbHandler  {
     *   类数据导出
     *
     * */
-    async classDataExport(event){
+    classDataExport(event){
         let rtn = 1;
 
         let fileName = `${window.location.host}_${window.COMPANY_OSPACE}_${_.last(event.class.split("/"))}_${moment().format("YYYY-MM-DD HH:mm:SS")}.${event.filetype}`;
@@ -557,6 +609,36 @@ class OmdbHandler  {
             rtn = 0;
             auditLogHandler.writeLog("omdb:console", "Export class data: " + event.class, 1);
         }
+
+        return rtn;
+    };
+
+    async classDataExportAsync(event){
+        let rtn = 1;
+
+        let fileName = `${window.location.host}_${window.COMPANY_OSPACE}_${_.last(event.class.split("/"))}_${moment().format("YYYY-MM-DD HH:mm:SS")}.${event.filetype}`;
+
+        try {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", `/mxobject/export?recursive=true&relation_defined=${event.ifRelation}&filetype=${event.filetype}&template=${event.template}&class=${encodeURIComponent(event.class)}&ignoreclass=${encodeURIComponent(event.ignoreClass)}&limit=${event.limit}`, true);
+            xhr.setRequestHeader("Content-type","text/csv");
+            xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
+            xhr.onreadystatechange = await function() {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var blob = new Blob([xhr.response], event.filetype=='mql'?{type: "octet/stream"}:{type: "application/vnd.ms-excel"});
+                    saveAs(blob, fileName);
+                    alertify.success("导出成功" + " " + fileName);
+                    auditLogHandler.writeLog("omdb:console", "Export class data: " + event.class, 0);
+                }
+            }
+            xhr.responseType = "arraybuffer";
+            xhr.send();
+
+        } catch(err){
+            rtn = 0;
+            auditLogHandler.writeLog("omdb:console", "Export class data: " + event.class, 1);
+        }
+
         return rtn;
     };
 
@@ -580,13 +662,13 @@ class OmdbHandler  {
                 async: true,
                 processData:false,
                 contentType: false,
-                beforeSend:function(xhr){
+                beforeSend(xhr){
                     
                 },
-                complete: function(xhr, textStatus) {
+                complete(xhr, textStatus) {
                     auditLogHandler.writeLog("omdb:console", "Import class data: " + file.name, 0);
                 },
-                success: function(data, textStatus, xhr) {
+                success(data, textStatus, xhr) {
 
                     userHandler.ifSignIn(data);
 
@@ -596,7 +678,7 @@ class OmdbHandler  {
                     }
 
                 },
-                error: function(xhr, textStatus, errorThrown) {
+                error(xhr, textStatus, errorThrown) {
                     rtn = xhr.responseText;
                     alertify.error("导入失败");
                     auditLogHandler.writeLog("omdb:console", "Import class data: " + file.name, 1);

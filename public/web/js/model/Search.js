@@ -1197,6 +1197,7 @@ class Search {
                             window: { name:"所有", value: ""},
                             // 输入
                             term: "",
+                            autoSearch: true,
                             // 指定类
                             class: "",
                             // 指定api
@@ -1216,7 +1217,7 @@ class Search {
                             result: []
                         }
                     },
-                    created: function(){
+                    created(){
                         
                         // 初始化preset
                         try{
@@ -1288,12 +1289,17 @@ class Search {
                     },
                     methods: {
                         weclome(){
-                            this.$notify({
-                                title: '欢迎使用一键搜索',
-                                type: 'success',
-                                dangerouslyUseHTMLString: true,
-                                message: fsHandler.callFsJScript("/matrix/search/weclome.js",null).message
-                              });
+
+                            fsHandler.callFsJScriptAsync("/matrix/search/weclome.js",null).then( (rtn)=>{
+                                let message = rtn.message;
+
+                                this.$notify({
+                                    title: '欢迎使用一键搜索',
+                                    type: 'success',
+                                    dangerouslyUseHTMLString: true,
+                                    message: message
+                                });
+                            } );
                         },
                         setData(){
                             _.extend(this.model, {message:this.$refs.searchRef.result});

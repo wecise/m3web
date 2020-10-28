@@ -282,7 +282,9 @@
 	    },
 	    methods: {
             initDiagnosisData(){
-                this.tree.data = fsHandler.callFsJScript("/matrix/graph/getEntityDiagnosisDataType.js",null).message;
+                fsHandler.callFsJScriptAsync("/matrix/graph/getEntityDiagnosisDataType.js",null).then( (rtn)=>{
+                    this.tree.data = rtn.message;
+                } );
             },
             onNodeCheckChange(data, checked, indeterminate){
                 this.tree.selected = _.groupBy(this.$refs.tree.getCheckedNodes(),'name');
@@ -375,33 +377,35 @@
                     model: _.keys(this.tree.selected),
                     ids:this.model.join(";")
                 };
-                this.tree.diagnosisData = fsHandler.callFsJScript("/matrix/graph/getDiagnosisDataByIds.js",encodeURIComponent(JSON.stringify(term))).message;
+                fsHandler.callFsJScriptAsync("/matrix/graph/getDiagnosisDataByIds.js",encodeURIComponent(JSON.stringify(term))).then( (rtn)=>{
+                    this.tree.diagnosisData = rtn.message;
+                    
+                    _.forEach(this.tree.diagnosisData,(v,k)=>{
+                        let items  = [];
+                        _.forEach(v,(val)=>{
+                            let bg = this.pickBgStyle(val);
+                            let status = mx.global.register.event.status[val.status]?mx.global.register.event.status[val.status][1]:'未知';
+                            if(val.id){
+                                let id = [val.id,val.entity].join("::");
+                                let item = {
+                                    id: id,
+                                    group: k,
+                                    content: `<div id="timeline_${objectHash.sha1(id)}" style="${bg}">
+                                                <p>告警状态：${status}</p>
+                                                <p>告警摘要：${val.msg}</p>
+                                                <p>告警时间：${moment(val.vtime).format(mx.global.register.format)}</p>
+                                            </div>`,
+                                    start: val.vtime
+                                };
+                                
+                                items.push(item);
+                            }
+                        });
+                        this.timeline.items.add(items);
+                    })
+                    this.timeline.inst.redraw();
+                } );
                 
-                _.forEach(this.tree.diagnosisData,(v,k)=>{
-                    let items  = [];
-                    _.forEach(v,(val)=>{
-                        let bg = this.pickBgStyle(val);
-                        let status = mx.global.register.event.status[val.status]?mx.global.register.event.status[val.status][1]:'未知';
-                        if(val.id){
-                            let id = [val.id,val.entity].join("::");
-                            let item = {
-                                id: id,
-                                group: k,
-                                content: `<div id="timeline_${objectHash.sha1(id)}" style="${bg}">
-                                            <p>告警状态：${status}</p>
-                                            <p>告警摘要：${val.msg}</p>
-                                            <p>告警时间：${moment(val.vtime).format(mx.global.register.format)}</p>
-                                        </div>`,
-                                start: val.vtime
-                            };
-                            
-                            items.push(item);
-                        }
-                    });
-                    this.timeline.items.add(items);
-                })
-                this.timeline.inst.redraw();
-
             },
             onTimelineZoomin(percentage){
                 this.timeline.inst.zoomIn(percentage);

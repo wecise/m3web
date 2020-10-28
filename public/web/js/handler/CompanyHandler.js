@@ -217,6 +217,45 @@ class CompanyHandler{
         return rtn;
 
     };
+
+    async companyUpdateAsync(com) {
+        let rtn = null;
+        
+        try{
+            await jQuery.ajax({
+                url: '/companys',
+                dataType: 'json',
+                processData: false,
+                contentType: 'application/json; charset=utf-8',
+                type: 'PUT',
+                async: true,
+                data: JSON.stringify(com),
+                beforeSend(xhr) {
+                    // Pace.restart();
+                },
+                complete(xhr, textStatus) {
+                },
+                success(data, status) {
+
+                    userHandler.ifSignIn(data);
+
+                    if( _.lowerCase(data.status) == "ok"){
+                        rtn = 1;
+                    }
+
+                },
+                error(xhr, textStatus, errorThrown) {
+                    rtn = xhr.responseText;
+                }
+
+            })
+        } catch(err){
+
+        }
+
+        return rtn;
+
+    };
 }
 
 var companyHandler = new CompanyHandler();

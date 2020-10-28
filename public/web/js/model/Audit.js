@@ -110,7 +110,44 @@ class Audit {
                                                 :formatter="item.render" 
                                                 v-for="item in dt.columns"
                                                 :width="item.width"
-                                                v-if="item.visible">
+                                                v-if="item.visible"
+                                                min-width="160">
+                                                <template slot-scope="scope" slot="header">
+                                                    <span> #{item['title']}# </span>
+                                                </template>
+                                                <template slot-scope="scope">
+                                                    <div v-if="pickFtype(item['field']) == 'timestamp'">#{moment(scope.row[item['field']]).format(mx.global.register.format)}#</div>
+                                                    <div v-else-if="pickFtype(item['field']) == 'date'">#{moment(scope.row[item['field']]).format('YYYY-MM-DD')}#</div>
+                                                    <el-popover
+                                                        placement="top-start"
+                                                        width="550"
+                                                        trigger="click"
+                                                        popper-class="info-popper"
+                                                        :popper-options="{ boundariesElement: 'body' }"
+                                                        v-else-if="_.includes(['operation'],item['field']) && !_.isEmpty(scope.row[item['field']])">
+                                                        <el-container>
+                                                            <el-header style="height:30px;line-height:30px;padding:0px;">
+                                                                <el-button type="text" icon="el-icon-copy-document" class="el-button-copy" @click="onCopy(item['field'],scope.$index)"></el-button>
+                                                            </el-header>
+                                                            <el-main style="padding:0px;">
+                                                                <textarea rows="10" style="width:98%;white-space:nowrap;" :id="'textarea_'+scope.$index">#{scope.row[item['field']]}#</textarea>
+                                                            </el-main>
+                                                        </el-container>
+                                                        <el-button type="text" slot="reference">
+                                                            #{  _.truncate(scope.row[item['field']], {
+                                                            'length': 100,
+                                                            'omission': ' ...'
+                                                        }) }# <span class="el-icon-date"></span> #{ _.size(scope.row[item['field']]) }#</el-button>
+                                                    </el-popover>
+                                                    <div v-else>
+                                                        <div v-html='item.render(scope.row, scope.column, scope.row[item.field], scope.$index)' 
+                                                            v-if="typeof item.render === 'function'">
+                                                        </div>
+                                                        <div v-else>
+                                                            #{scope.row[item.field]}#
+                                                        </div>
+                                                    </div>
+                                                </template>
                                             </el-table-column>
                                             <el-table-column label="标签" prop="tags" width="120">
                                                 <template slot-scope="scope">
@@ -140,6 +177,29 @@ class Audit {
                                     </el-main>
                                 </el-container>`,
                     methods: {
+                        pickFtype(key){
+                            
+                            let rtn = 'string';
+                            try{
+                                rtn = _.find(this.metaColumns,{data:key}).type;
+                            } catch(err){
+                                return rtn;
+                            }
+                            return rtn;
+                        },
+                        onCopy(data,index){
+                            try{
+                                let tx = document.getElementById('textarea_'+index);
+                                tx.select(); 
+                                document.execCommand("Copy"); 
+                                this.$message({
+                                    type: "info",
+                                    message: "已复制"
+                                });
+                            } catch(err){
+        
+                            }
+                        },
                         onPageSizeChange(val) {
                             this.dt.pagination.pageSize = val;
                         },
@@ -149,8 +209,8 @@ class Audit {
                         layout(){
                             let doLayout = ()=>{
                                 if($(".el-table__body-wrapper",this.$el).is(':visible')){
-                                    //this.$refs.table.setCurrentRow(this.dt.rows[0]);
-                                    this.$refs.table.doLayout();
+                                    this.$refs.table.setCurrentRow(this.dt.rows[0]);
+                                    //this.$refs.table.doLayout();
                                 } else {
                                     setTimeout(doLayout,50);
                                 }
@@ -221,10 +281,9 @@ class Audit {
 									type: 'warning'
 							}).then(() => {
 
-								fsHandler.callFsJScript("/matrix/audit/deleteLog.js", encodeURIComponent(JSON.stringify(row))).message;
-                                
-                                this.onRefresh();
-
+								fsHandler.callFsJScriptAsync("/matrix/audit/deleteLog.js", encodeURIComponent(JSON.stringify(row))).then( (rtn)=>{
+                                    this.onRefresh();
+                                } );
 
 							}).catch(() => {
                                 

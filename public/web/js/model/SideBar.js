@@ -188,19 +188,21 @@ class SideBar {
             },
             methods: {
                 init(){
-                    let rtn = fsHandler.callFsJScript("/matrix/user/user.js",window.SignedUser_UserName).message;
-                    this.apps = rtn;
-                    
-                    // appIds
-                    this.selectedApps = rtn.appIds;
-                    this.checkList = [];
-                    this.model = _.map(rtn.appList,(v)=>{
-                        if(_.includes(rtn.appIds,v.id)){
-                            v.selected = 1;
-                            this.checkList.push(v.id);
-                        }
-                        return v;
-                    });
+                    fsHandler.callFsJScriptAsync("/matrix/user/user.js",window.SignedUser_UserName).then( (val)=>{
+                        let rtn = val.message;
+                        this.apps = rtn;
+
+                        // appIds
+                        this.selectedApps = rtn.appIds;
+                        this.checkList = [];
+                        this.model = _.map(rtn.appList,(v)=>{
+                            if(_.includes(rtn.appIds,v.id)){
+                                v.selected = 1;
+                                this.checkList.push(v.id);
+                            }
+                            return v;
+                        });
+                    } );
 
                 },
                 initStyle(){
@@ -260,10 +262,11 @@ class SideBar {
                     }
                 },
                 toggleGroup(item){
-                    let rtn = fsHandler.callFsJScript("/matrix/apps/app.js",encodeURIComponent(JSON.stringify(item)));
-                    if( _.lowerCase(rtn.status) == "ok"){
-                        eventHub.$emit("APP-REFRESH-EVENT");
-                    }
+                    fsHandler.callFsJScriptAsync("/matrix/apps/app.js",encodeURIComponent(JSON.stringify(item))).then( (rtn)=>{
+                        if( _.lowerCase(rtn.status) == "ok"){
+                            eventHub.$emit("APP-REFRESH-EVENT");
+                        }
+                    } );
                 },
                 onChange(evt){
                     
@@ -273,12 +276,15 @@ class SideBar {
                     ldap.id = window.SignedUser_Id;
                     ldap.remark = evt.join(",");
 
-                    let rtn = fsHandler.callFsJScript("/matrix/ldap/action.js", encodeURIComponent(JSON.stringify(ldap))).message;
+                    fsHandler.callFsJScriptAsync("/matrix/ldap/action.js", encodeURIComponent(JSON.stringify(ldap))).then( (val)=>{
+                        let rtn = val.message
 
-                    if(rtn == 1){
-                        this.init();
-                        eventHub.$emit("APP-REFRESH-EVENT");
-                    }
+                        if(rtn == 1){
+                            this.init();
+                            eventHub.$emit("APP-REFRESH-EVENT");
+                        }
+                    } );
+                    
                 },
                 onClose(){
                     try{
@@ -538,10 +544,14 @@ class SideBar {
                 }
             },
             created(){
+                
                 // API菜单
-                this.api.list = _.map(fsHandler.callFsJScript('/matrix/footer/api_contextmenu.js', null).message,(v,k)=>{
-                    return {name: v.name, url: k, icon: v.icon};
-                });
+                fsHandler.callFsJScriptAsync('/matrix/footer/api_contextmenu.js', null).then( (rtn)=>{
+                    this.api.list = _.map(rtn.message,(v,k)=>{
+                        return {name: v.name, url: k, icon: v.icon};
+                    });
+                } );
+                
             },
             methods: {
                 onLangCommand(cmd) {
@@ -570,102 +580,118 @@ class SideBar {
                 appConfig: [],
                 sideBarStatus: 2
             },
-            template:   `<aside id="aside"><div id="sidebar" class="sidebar animated fadeInLeft" style="display:none;">
-                            <el-menu :default-active="defaultActive"
-                                    mode="vertical"
-                                    @select="onSelect"
-                                    @open="onOpen" 
-                                    @close="onClose" 
-                                    :collapse="isCollapse"
-                                    :collapse-transition="false"
-                                    class="el-menu-vertical-sidebar"
-                                    background-color="transparent"
-                                    text-color="#fff"
-                                    active-text-color="#ffd04b"
-                                    style="height:100vh;width:100%;overflow-y:auto;float:left;">
-                                <el-menu-item index="toggle" style="display:">
-                                    <i :class="isCollapse?'el-icon-s-unfold':'el-icon-s-fold'" style="width:16px;color:#fff;"></i>
-                                </el-menu-item>
-                                <el-menu-item index="apps" v-if="window.COMPANY_NAME == 'wecise'">
-                                    <img :src="preFixIcon+'app.png'+postFixIcon" style="width:16px;"></img> 
-                                    <span style="padding-left:5px;" slot="title">#{ $t('sideBar.menu.application') }#</span>
-                                </el-menu-item>
-                                <el-menu-item index="/">
-                                    <img :src="preFixIcon+'home.png'+postFixIcon" style="width:16px;"></img>
-                                    <span style="padding-left:5px;" slot="title">#{ $t('sideBar.menu.home') }#</span>
-                                </el-menu-item>
-                                
-                                <!-- 有模板情况-->
-                                <el-submenu :index="item.name" v-for="item in model.template" v-show="sideBarStatus === 0">
-                                    <template slot="title">
-                                        <img :src="item.icon | pickIcon" style="width:16px;"></img>
-                                        <span style="padding-left:5px;font-size:12px;">#{ _.isEmpty($t('home.group')[item.name])?item.title:$t('home.group')[item.name] }#【#{item.groups.length}#】</span>
-                                    </template>
+            template:   `<aside id="aside">
+                            <div id="sidebar" class="sidebar animated fadeInLeft" style="display:none;">
+                                <el-menu :default-active="defaultActive"
+                                        mode="vertical"
+                                        @select="onSelect"
+                                        @open="onOpen" 
+                                        @close="onClose" 
+                                        :collapse="isCollapse"
+                                        :collapse-transition="false"
+                                        class="el-menu-vertical-sidebar"
+                                        popper-class="sidebar-el-menu"
+                                        background-color="transparent"
+                                        text-color="#fff"
+                                        active-text-color="#ffd04b"
+                                        style="height:100vh;width:100%;overflow-y:auto;float:left;">
+                                    <el-menu-item index="toggle" style="display:">
+                                        <i :class="isCollapse?'el-icon-s-unfold':'el-icon-s-fold'" style="width:16px;color:#fff;"></i>
+                                    </el-menu-item>
+                                    <el-menu-item index="apps" v-if="window.COMPANY_NAME == 'wecise'">
+                                        <img :src="preFixIcon+'app.png'+postFixIcon" style="width:16px;"></img> 
+                                        <span style="padding-left:5px;" slot="title">#{ $t('sideBar.menu.application') }#</span>
+                                    </el-menu-item>
+                                    <el-menu-item index="/">
+                                        <img :src="preFixIcon+'home.png'+postFixIcon" style="width:16px;"></img>
+                                        <span style="padding-left:5px;" slot="title">#{ $t('sideBar.menu.home') }#</span>
+                                    </el-menu-item>
                                     
-                                    <el-menu-item-group>
-                                        <span slot="title" style="font-size:12px;">#{ _.isEmpty($t('home.group')[item.name])?item.title:$t('home.group')[item.name] }#【#{item.groups.length}#】</span>
-                                        <el-menu-item :class="subItem.status" :index="subItem.url" v-for="subItem in item.groups">
-                                            <img :src="subItem.icon | pickIcon" style="width:16px;"></img>
-                                            <span slot="title">
-                                                <span style="padding-left:5px;" v-if="window.MATRIX_LANG == 'zh-CN'">#{subItem.cnname}#</span>
-                                                <span style="padding-left:5px;" v-else>#{subItem.enname}#</span>
-                                                <el-tooltip content="在新窗口中打开" open-delay="500"  placement="right-start">
-                                                    <el-button type="text" icon="el-icon-position" @click.stop.prevent="onClick(subItem.url)" style="float:right;transform:scale(0.6);color:#ffffff;"></el-button>
-                                                </el-tooltip>
-                                            </span>
-                                            <!--object ><a :href="subItem.url" target="_blank"><i class="fas fa-plus" style="color:#f7f7f7;transform: scale(.5);float:right;"></i></a></object-->
-                                        </el-menu-item>
-                                    <el-menu-item-group>
-                                </el-submenu>
-
-                                <!-- 没有模板情况，且菜单项数量超过阈值-->
-                                <el-submenu index="appList" v-show="sideBarStatus === 1">
-                                    <template slot="title">
-                                        <i class="fas fa-cubes" style="color:#ffffff;font-size:18px;"></i>
-                                        <span>#{ $t('sideBar.menu.application') }#</span>
-                                    </template>
-
-                                    <el-menu-item-group>
-                                        <span slot="title">#{ $t('sideBar.menu.application') }#</span>
-                                        <el-menu-item :class="item.status" :index="item.url" v-for="item in model.list">
+                                    <!-- 有模板情况-->
+                                    <el-submenu :index="item.name" v-for="item in model.template" v-show="sideBarStatus === 0">
+                                        <template slot="title">
                                             <img :src="item.icon | pickIcon" style="width:16px;"></img>
-                                            <span slot="title">
-                                                <span style="padding-left:5px;" v-if="window.MATRIX_LANG == 'zh-CN'">#{item.cnname}#</span>
-                                                <span style="padding-left:5px;" v-else>#{item.enname}#</span>
-                                                <el-tooltip content="在新窗口中打开" open-delay="500"  placement="right-start">
-                                                    <el-button type="text" icon="el-icon-position" @click.stop.prevent="onClick(item.url)" style="float:right;transform:scale(0.6);color:#ffffff;"></el-button>
-                                                </el-tooltip>
-                                            </span>
+                                            <span style="padding-left:5px;font-size:12px;">#{ _.isEmpty($t('home.group')[item.name])?item.title:$t('home.group')[item.name] }#【#{item.groups.length}#】</span>
+                                        </template>
+                                        
+                                        <el-menu-item-group>
+                                            <span slot="title" style="font-size:12px;">#{ _.isEmpty($t('home.group')[item.name])?item.title:$t('home.group')[item.name] }#【#{item.groups.length}#】</span>
+                                            <el-menu-item :class="subItem.status" :index="subItem.url" v-for="subItem in item.groups">
+                                                <img :src="subItem.icon | pickIcon" style="width:16px;"></img>
+                                                <span slot="title">
+                                                    <span style="padding-left:5px;" v-if="window.MATRIX_LANG == 'zh-CN'">#{subItem.cnname}#</span>
+                                                    <span style="padding-left:5px;" v-else>#{subItem.enname}#</span>
+                                                    <el-tooltip content="在新窗口中打开" open-delay="500"  placement="right-start">
+                                                        <el-button type="text" icon="el-icon-position" @click.stop.prevent="onClick(subItem.url)" style="float:right;transform:scale(0.6);color:#ffffff;"></el-button>
+                                                    </el-tooltip>
+                                                </span>
+                                                <!--object ><a :href="subItem.url" target="_blank"><i class="fas fa-plus" style="color:#f7f7f7;transform: scale(.5);float:right;"></i></a></object-->
+                                            </el-menu-item>
+                                        <el-menu-item-group>
+                                    </el-submenu>
+
+                                    <!-- 没有模板情况，且菜单项数量超过阈值-->
+                                    <el-submenu index="appList" v-show="sideBarStatus === 1">
+                                        <template slot="title">
+                                            <i class="fas fa-cubes" style="color:#ffffff;font-size:18px;"></i>
+                                            <span>#{ $t('sideBar.menu.application') }#</span>
+                                        </template>
+
+                                        <el-menu-item-group>
+                                            <span slot="title">#{ $t('sideBar.menu.application') }#</span>
+                                            <el-menu-item :class="item.status" :index="item.url" v-for="item in model.list">
+                                                <img :src="item.icon | pickIcon" style="width:16px;"></img>
+                                                <span slot="title">
+                                                    <span style="padding-left:5px;" v-if="window.MATRIX_LANG == 'zh-CN'">#{item.cnname}#</span>
+                                                    <span style="padding-left:5px;" v-else>#{item.enname}#</span>
+                                                    <el-tooltip content="在新窗口中打开" open-delay="500"  placement="right-start">
+                                                        <el-button type="text" icon="el-icon-position" @click.stop.prevent="onClick(item.url)" style="float:right;transform:scale(0.6);color:#ffffff;"></el-button>
+                                                    </el-tooltip>
+                                                </span>
+                                            </el-menu-item>
+                                        </el-menu-item-group>
+                                    </el-submenu>
+
+                                    <!-- 没有模板情况，且菜单项数量没超过阈值-->
+                                    <el-menu-item :class="item.status" :index="item.url" v-for="item in model.list" v-show="sideBarStatus === 2">
+                                        <img :src="item.icon | pickIcon" style="width:16px;"></img>
+                                        <span slot="title">
+                                            <span style="padding-left:5px;" v-if="window.MATRIX_LANG == 'zh-CN'">#{item.cnname}#</span>
+                                            <span style="padding-left:5px;" v-else>#{item.enname}#</span>
+                                            <el-tooltip content="在新窗口中打开" open-delay="500"  placement="right-start">
+                                                <el-button type="text" icon="el-icon-position" @click.stop.prevent="onClick(item.url)" style="float:right;transform:scale(0.6);color:#ffffff;"></el-button>
+                                            </el-tooltip>
+                                        </span>
+                                    </el-menu-item>
+
+                                    <!-- 没有分组的应用-->
+                                    <el-submenu :class="item.status" :index="item.url" v-for="item in model.appListUnGrouped">
+                                        <template slot="title">
+                                            <img :src="item.icon | pickIcon" style="width:16px;"></img>
+                                            <span style="padding-left:5px;" v-if="window.MATRIX_LANG == 'zh-CN'">#{item.cnname}#</span>
+                                            <span style="padding-left:5px;" v-else>#{item.enname}#</span>
+                                        </template>
+                                        <el-menu-item :index="item.url">
+                                            <span style="padding-left:5px;" v-if="window.MATRIX_LANG == 'zh-CN'">#{item.cnname}#</span>
+                                            <span style="padding-left:5px;" v-else>#{item.enname}#</span>
+                                            <el-tooltip content="在新窗口中打开" open-delay="500"  placement="right-start">
+                                                <el-button type="text" icon="el-icon-position" @click.stop.prevent="onClick(item.url)" style="float:right;transform:scale(0.6);color:#ffffff;"></el-button>
+                                            </el-tooltip>
                                         </el-menu-item>
-                                    </el-menu-item-group>
-                                </el-submenu>
+                                    </el-submenu>
+                                    <!--el-menu-item :class="item.status" :index="item.url" v-for="item in model.appListUnGrouped">
+                                        <img :src="item.icon | pickIcon" style="width:16px;"></img>
+                                        <span slot="title">
+                                            <span style="padding-left:5px;" v-if="window.MATRIX_LANG == 'zh-CN'">#{item.cnname}#</span>
+                                            <span style="padding-left:5px;" v-else>#{item.enname}#</span>
+                                            <el-tooltip content="在新窗口中打开" open-delay="500"  placement="right-start">
+                                                <el-button type="text" icon="el-icon-position" @click.stop.prevent="onClick(item.url)" style="float:right;transform:scale(0.6);color:#ffffff;"></el-button>
+                                            </el-tooltip>
+                                        </span>
+                                    </el-menu-item-->
 
-                                <!-- 没有模板情况，且菜单项数量没超过阈值-->
-                                <el-menu-item :class="item.status" :index="item.url" v-for="item in model.list" v-show="sideBarStatus === 2">
-                                    <img :src="item.icon | pickIcon" style="width:16px;"></img>
-                                    <span slot="title">
-                                        <span style="padding-left:5px;" v-if="window.MATRIX_LANG == 'zh-CN'">#{item.cnname}#</span>
-                                        <span style="padding-left:5px;" v-else>#{item.enname}#</span>
-                                        <el-tooltip content="在新窗口中打开" open-delay="500"  placement="right-start">
-                                            <el-button type="text" icon="el-icon-position" @click.stop.prevent="onClick(item.url)" style="float:right;transform:scale(0.6);color:#ffffff;"></el-button>
-                                        </el-tooltip>
-                                    </span>
-                                </el-menu-item>
-
-                                <!-- 没有分组的应用-->
-                                <el-menu-item :class="item.status" :index="item.url" v-for="item in model.appListUnGrouped">
-                                    <img :src="item.icon | pickIcon" style="width:16px;"></img>
-                                    <span slot="title">
-                                        <span style="padding-left:5px;" v-if="window.MATRIX_LANG == 'zh-CN'">#{item.cnname}#</span>
-                                        <span style="padding-left:5px;" v-else>#{item.enname}#</span>
-                                        <el-tooltip content="在新窗口中打开" open-delay="500"  placement="right-start">
-                                            <el-button type="text" icon="el-icon-position" @click.stop.prevent="onClick(item.url)" style="float:right;transform:scale(0.6);color:#ffffff;"></el-button>
-                                        </el-tooltip>
-                                    </span>
-                                </el-menu-item>
-
-                            </el-menu>
-                        </div>
+                                </el-menu>
+                            </div>
                         </aside>`,
             created(){
                 this.init();
@@ -680,25 +706,27 @@ class SideBar {
                 }
             },
             methods: {
-                init: function(){
-                    let rtn = fsHandler.callFsJScript("/matrix/user/user.js",window.SignedUser_UserName).message;
+                init(){
+                    fsHandler.callFsJScriptAsync("/matrix/user/user.js",window.SignedUser_UserName).then( (val)=>{
+                        let rtn = val.message;
+
+                        this.model = {
+                            list: _.map(rtn.appListSelected,(v)=>{
+                                    let _page = _.last(mx.getPage().split("/"));
+    
+                                    if(_.endsWith(v.url,_page)){
+                                        return _.merge(v, {status: "active"});
+                                    }
+    
+                                    return _.merge(v, {status: ""});
+                                }),
+                            template: rtn.template,
+                            appListUnGrouped: rtn.appListUnGrouped
+                        };
+    
+                        this.setStatus();
+                    } );
                     
-                    this.model = {
-                        list: _.map(rtn.appListSelected,function(v){
-                                let _page = _.last(mx.getPage().split("/"));
-
-                                if(_.endsWith(v.url,_page)){
-                                    return _.merge(v, {status: "active"});
-                                }
-
-                                return _.merge(v, {status: ""});
-                            }),
-                        template: rtn.template,
-                        appListUnGrouped: rtn.appListUnGrouped
-                    };
-
-                    this.setStatus();
-
                 },
                 setStatus(){
                     // 有模板情况
@@ -893,7 +921,7 @@ class SideBar {
                 rtn = data;
             },
             error(xhr, textStatus, errorThrown) {
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+                console.log(xhr.responseJSON.error);
             }
         })
         return rtn;
@@ -901,7 +929,7 @@ class SideBar {
 
     appAsHomeForAllUser(item){
         let rtn = null;
-        console.log(item)
+        
         jQuery.ajax({
             url: "/admin/users/home",
             type: "POST",
@@ -926,7 +954,7 @@ class SideBar {
                 rtn = data;
             },
             error(xhr, textStatus, errorThrown) {
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+                console.log(xhr.responseJSON.error);
             }
         })
         return rtn;
@@ -1054,8 +1082,9 @@ class SideBar {
                     type: 'warning'
             }).then(() => {
 
-                let rtn = fsHandler.callFsJScript("/matrix/apps/app_delete.js",encodeURIComponent(JSON.stringify(event)));
-                eventHub.$emit("APP-REFRESH-EVENT");
+                fsHandler.callFsJScriptAsync("/matrix/apps/app_delete.js",encodeURIComponent(JSON.stringify(event))).then( (rtn)=>{
+                    eventHub.$emit("APP-REFRESH-EVENT");
+                } );
 
             }).catch(() => {
                     

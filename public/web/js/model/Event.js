@@ -291,7 +291,7 @@ class Event {
                                                     let tmp = JSON.parse(key.split("::")[1]);
                                                     let url = tmp.url;
                                                     let target = tmp.target;
-                                                    window.open(url,target);
+                                                    window.open(url+row.id,target);
                                                 } catch(err){
                                                     
                                                 }
@@ -1425,9 +1425,13 @@ class Event {
                     created(){
                         // 根据model进行分组
                         let ids = _.map(this.model.rows,'id').join(";");
-                        let rtn = fsHandler.callFsJScript("/matrix/event/aigroup-list-by-ids.js",encodeURIComponent(ids)).message;
-                        this.dt.rows = rtn.rows;
-                        this.dt.columns = rtn.columns;
+                        fsHandler.callFsJScriptAsync("/matrix/event/aigroup-list-by-ids.js",encodeURIComponent(ids)).then( (val)=>{
+                            let rtn = val.message
+
+                            this.dt.rows = rtn.rows;
+                            this.dt.columns = rtn.columns;
+                        } );
+                        
                     },
                     mounted(){
                         this.init();
@@ -1468,7 +1472,9 @@ class Event {
                             try{
                                 // SEARCH
                                 let where = this.dt.selected[0].ids;
-                                this.dt.modelByGroup = fsHandler.callFsJScript("/matrix/event/aigroup-by-id.js", encodeURIComponent(where)).message;
+                                fsHandler.callFsJScriptAsync("/matrix/event/aigroup-by-id.js", encodeURIComponent(where)).then( (rtn)=>{
+                                    this.dt.modelByGroup = rtn.message;
+                                } );
                             } catch(err){
                                 this.dt.modelByGroup = null;
                             }
@@ -1766,7 +1772,9 @@ class Event {
 
                                 // SEARCH
                                 let where = temp.join(` ${this.dt.ifOR=='1'?' | ':'; '} `);
-                                this.modelByDimension = fsHandler.callFsJScript("/matrix/event/diagnosis-dimension-by-value.js", encodeURIComponent(where)).message;
+                                fsHandler.callFsJScriptAsync("/matrix/event/diagnosis-dimension-by-value.js", encodeURIComponent(where)).then( (rtn)=>{
+                                    this.modelByDimension = rtn.message;
+                                } );
                             } catch(err){
                                 this.modelByDimension = null;
                             }
@@ -2355,26 +2363,27 @@ class Event {
                             this.view.class.list = fsHandler.callFsJScript("/matrix/view/class.js",encodeURIComponent(this.view.activeModel.filter.class)).message;
                             
                             // 当前视图属性
-                            
                             this.onPropsChange(this.view.activeModel.filter.class);
                         },
                         // 视图属性配置
                         onPropsChange(val){
-                            this.view.filter.template = fsHandler.callFsJScript("/matrix/view/props.js",encodeURIComponent(val)).message;
-                            if(!_.isEmpty(this.view.activeModel.filter.template)){
-                                
-                                _.forEach(this.view.activeModel.filter.template,(v)=>{
-                                    let index = _.findIndex(this.view.filter.template.rows,{field:v.field});
-                                    if(index != -1){
-                                        this.view.filter.template.rows[index] = v;
-                                    } else {
-                                        this.view.filter.template.rows.push(v);
-                                    }
-                                })
+                            fsHandler.callFsJScriptAsync("/matrix/view/props.js",encodeURIComponent(val)).then( (rtn)=>{
+                                this.view.filter.template = rtn.message;
 
-                            }
-                            _.extend(this.view.filter.template,{selected:this.view.activeModel.filter.template});
-                            
+                                if(!_.isEmpty(this.view.activeModel.filter.template)){
+                                
+                                    _.forEach(this.view.activeModel.filter.template,(v)=>{
+                                        let index = _.findIndex(this.view.filter.template.rows,{field:v.field});
+                                        if(index != -1){
+                                            this.view.filter.template.rows[index] = v;
+                                        } else {
+                                            this.view.filter.template.rows.push(v);
+                                        }
+                                    })
+    
+                                }
+                                _.extend(this.view.filter.template,{selected:this.view.activeModel.filter.template});
+                            } );
                         },
                         // 视图切换
                         onChange(val){
@@ -2402,11 +2411,15 @@ class Event {
                                                             time: _.now()
                                                         }
                                                     });
-                            let rtn = fsHandler.callFsJScript("/matrix/view/action.js",encodeURIComponent(term)).message;
-                            if(rtn==1){
-                                this.view.activeName = name;
-                                this.load();
-                            }
+                            fsHandler.callFsJScriptAsync("/matrix/view/action.js",encodeURIComponent(term)).then( (val)=>{
+                                let rtn = val.message;
+
+                                if(rtn==1){
+                                    this.view.activeName = name;
+                                    this.load();
+                                }
+                            } );
+                            
                         },
                         onSave(){
                             
@@ -2419,10 +2432,13 @@ class Event {
                                                         model: this.view.activeModel
                                         });
 
-                            let rtn = fsHandler.callFsJScript("/matrix/view/action.js",encodeURIComponent(term)).message;
-                            if(rtn==1){
-                                this.load();
-                            }
+                            fsHandler.callFsJScriptAsync("/matrix/view/action.js",encodeURIComponent(term)).then( (val)=>{
+                                let rtn = val.message;
+
+                                if(rtn==1){
+                                    this.load();
+                                }
+                            } );
                         },
                         onDelete(item){
                             this.$confirm(`确认要删除该视图：${item.name}？`, '提示', {
@@ -2431,20 +2447,22 @@ class Event {
                                 type: 'warning'
                             }).then(() => {
                                 let term = JSON.stringify({class: "event", action:"delete", name:item.name});
-                                let rtn = fsHandler.callFsJScript("/matrix/view/action.js",encodeURIComponent(term)).message;
-                                
-                                if(rtn==1){
-                                    this.load();
-                                    this.$message({
-                                        type: 'success',
-                                        message: '删除成功!'
-                                    });
-                                }else {
-                                    this.$message({
-                                        type: 'info',
-                                        message: rtn.message
-                                    });
-                                }
+                                fsHandler.callFsJScriptAsync("/matrix/view/action.js",encodeURIComponent(term)).then( (val)=>{
+                                    let rtn = val.message;
+
+                                    if(rtn==1){
+                                        this.load();
+                                        this.$message({
+                                            type: 'success',
+                                            message: '删除成功!'
+                                        });
+                                    }else {
+                                        this.$message({
+                                            type: 'info',
+                                            message: rtn.message
+                                        });
+                                    }
+                                } );
                             }).catch(() => {
                                 this.$message({
                                   type: 'info',
@@ -2943,21 +2961,24 @@ class Event {
                                 // event
                                 let term = encodeURIComponent(JSON.stringify(event).replace(/%/g,'%25'));
                                 // 根据event获取关联信息
-                                let model = fsHandler.callFsJScript("/matrix/event/diagnosis-by-id.js",term).message;
-                                
-                                // 添加tab
-                                let detail = {title:`告警分析 ${event.id}`, name:`diagnosis-${id}`, type: 'diagnosis', child:[
-                                                {title:'告警详情', name:`diagnosis-detail-${id}`, type: 'detail', model:model},
-                                                {title:'告警轨迹', name:`diagnosis-journal-${id}`, type: 'journal', model:model},
-                                                {title:'维度关联性告警', name:`diagnosis-dimension-${id}`, type: 'dimension', model:model},
-                                                //{title:'概率相关性告警', name:`diagnosis-probability-${id}`, type: 'probability', model:model},
-                                                {title:'历史相似告警', name:`diagnosis-history-${id}`, type: 'history', model:model},
-                                                {title:'资源信息', name:`diagnosis-topological-${id}`, type: 'topological', model:model},
-                                                {title:'Runbook', name:`diagnosis-script-${id}`, type: 'script', model:model}
-                                            ]};
-                                this.layout.main.activeIndex = `diagnosis-${id}`;
-                                this.layout.main.tabs.push(detail);
-                                this.layout.main.detail.activeIndex = _.first(detail.child).name;
+                                fsHandler.callFsJScriptAsync("/matrix/event/diagnosis-by-id.js",term).then( (rtn)=>{
+                                    let model = rtn.message;
+
+                                    // 添加tab
+                                    let detail = {title:`告警分析 ${event.id}`, name:`diagnosis-${id}`, type: 'diagnosis', child:[
+                                        {title:'告警详情', name:`diagnosis-detail-${id}`, type: 'detail', model:model},
+                                        {title:'告警轨迹', name:`diagnosis-journal-${id}`, type: 'journal', model:model},
+                                        {title:'维度关联性告警', name:`diagnosis-dimension-${id}`, type: 'dimension', model:model},
+                                        //{title:'概率相关性告警', name:`diagnosis-probability-${id}`, type: 'probability', model:model},
+                                        {title:'历史相似告警', name:`diagnosis-history-${id}`, type: 'history', model:model},
+                                        {title:'资源信息', name:`diagnosis-topological-${id}`, type: 'topological', model:model},
+                                        {title:'Runbook', name:`diagnosis-script-${id}`, type: 'script', model:model}
+                                    ]};
+                                    
+                                    this.layout.main.activeIndex = `diagnosis-${id}`;
+                                    this.layout.main.tabs.push(detail);
+                                    this.layout.main.detail.activeIndex = _.first(detail.child).name;
+                                } )
                                 
                             } catch(error){
                                 this.layout.main.tabs = [];

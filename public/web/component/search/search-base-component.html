@@ -133,7 +133,9 @@
 			<!--快速过滤条件设置-->
 
 			<!--搜索按钮-->
-			<el-button type="primary" @click="search" @keyup.enter.native="search" ref="searchNowRef">#{ $t('search.actions.search') }#</el-button>
+			<el-button type="primary" @click="search" @keyup.enter.native="search" ref="searchNowRef">
+				#{ $t('search.actions.search') }#
+			</el-button>
 		</div>
 	</template>
 
@@ -208,6 +210,10 @@
 								}
 							}
 					]}
+				},
+				tip: {
+					loading: false,
+					message: ""
 				}
 	        }
 		},
@@ -288,6 +294,7 @@
 				this.search();
 			},
 			search(){
+				this.tip.loading = true;
 
 				// 预设值
 				let ifHistory = this.options.others.ifHistory?"":"#";
@@ -307,10 +314,12 @@
 				};
 
 			    // 搜索
-				let rtn = fsHandler.callFsJScript(`/matrix/${this.options.api.parent}/${this.options.api.name}`, encodeURIComponent(JSON.stringify(term))).message;
+				fsHandler.callFsJScriptAsync(`/matrix/${this.options.api.parent}/${this.options.api.name}`, encodeURIComponent(JSON.stringify(term))).then( (rtn)=>{
+					// 结果
+					this.result = rtn.message
 
-				// 结果
-				this.result = rtn;
+					this.tip.loading = false;
+				} );
 			},
 			resetTerm(){
 				this.preset.term = "";

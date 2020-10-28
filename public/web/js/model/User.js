@@ -158,17 +158,19 @@ class User {
 							}).then(() => {
 									
 								let _csrf = window.CsrfToken.replace(/'/g,"");
-								let rtn = userHandler.userUpdate(row, _csrf);
+								userHandler.userUpdateAsync(row, _csrf).then( (rtn)=>{
+                                    if(rtn == 1){
+                                        this.$message({
+                                            type: "success",
+                                            message: `更新用户: ${row.username} 成功！`
+                                        })
+    
+                                        this.$root.currentView = "user-info";
+    
+                                    }
+                                } );
 
-								if(rtn == 1){
-									this.$message({
-										type: "success",
-										message: `更新用户: ${row.username} 成功！`
-									})
-
-									this.$root.currentView = "user-info";
-
-								}
+								
 								
 							}).catch(() => {
 								
@@ -306,11 +308,11 @@ class User {
         
                         },
                         update(){
-                            let rtn = companyHandler.companyUpdate(this.signedUser.Company);
-        
-                            if(rtn == 1){
-                                document.location.href = mx.getPage();
-                            }
+                            companyHandler.companyUpdateAsync(this.signedUser.Company).then( (rtn)=>{
+                                if(rtn == 1){
+                                    document.location.href = mx.getPage();
+                                }
+                            } );
                         },
                         cancel(){
                             this.$root.currentView = 'user-info';
@@ -321,11 +323,12 @@ class User {
         
                                 let file = event.target.files[0];
         
-                                let rtn = licenseHandler.licenseImport(file);
+                                licenseHandler.licenseImportAsync(file).then( (rtn)=>{
+                                    if(rtn == 1){
+                                        document.location.href = mx.getPage();
+                                    }
+                                } );
         
-                                if(rtn == 1){
-                                    document.location.href = mx.getPage();
-                                }
                             } catch(err){
                                 console.error(err)
                             }
@@ -470,7 +473,9 @@ class User {
                         },
                         methods: {
                             init(){
-                                this.model.icon.list = fsHandler.fsList('/assets/images/files/png');
+                                fsHandler.fsListAsync('/assets/images/files/png').then( (rtn)=>{
+                                    this.model.icon.list = rtn;
+                                } );
                             },
                             triggerInput(id){
                                 $(this.$refs[id]).click()

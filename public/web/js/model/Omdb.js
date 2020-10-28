@@ -1049,7 +1049,9 @@ class Omdb{
                             return `${v}${spaceWord(v.length)}${splitTab}${value}`;
                         })).join(endWord);;
                     } else if(tab.name == 'ddl'){
-                        self.ddlModel.newInput = omdbHandler.classToDDL(self.model.node.name);
+                        omdbHandler.classToDDLAsync(self.model.node.name).then( (rtn)=>{
+                            self.ddlModel.newInput = rtn;
+                        } );
                     }
                 },
                 onUpdate(column){
@@ -1991,7 +1993,7 @@ class Omdb{
                             new Vue({
                                 delimiters: ['#{', '}#'],
                                 data:{
-                                    classList: fsHandler.callFsJScript("/matrix/omdb/getClassListForTree.js",encodeURIComponent(selectedNode)).message,
+                                    classList: null,
                                     defaultProps: {
                                         children: 'children',
                                         label: 'class'
@@ -2057,10 +2059,15 @@ class Omdb{
                                     if(!_.isEmpty(selectedNode)){
                                         this.model.class = selectedNode;
                                     }
+
+                                    fsHandler.callFsJScriptAsync("/matrix/omdb/getClassListForTree.js",encodeURIComponent(selectedNode)).then( (rtn)=>{
+                                        this.classList = rtn.message;
+                                    } ) 
                                 },
                                 mounted(){
-                                    let allNodes = fsHandler.callFsJScript("/matrix/omdb/getClassList.js",encodeURIComponent(this.model.class)).message;
-                                    this.$refs.classTree.setCheckedKeys(allNodes);
+                                    fsHandler.callFsJScriptAsync("/matrix/omdb/getClassList.js",encodeURIComponent(this.model.class)).then( (rtn)=>{
+                                        this.$refs.classTree.setCheckedKeys(rtn.message);
+                                    } ); 
                                 },
                                 methods:{
                                     onCancel(){
@@ -2071,29 +2078,39 @@ class Omdb{
                                         this.model.filetype = type;
 
                                         //获取所有Class
-                                        let allNodes = fsHandler.callFsJScript("/matrix/omdb/getClassList.js",encodeURIComponent(this.model.class)).message;
-                                        //checked Class
-                                        let checkedClass = _.map(this.$refs.classTree.getCheckedNodes(),'class');
-                                        
-                                        // 交集
-                                        _.extend(this.model, {ignoreClass: _.concat(this.model.ignoreClass,_.xor(allNodes,checkedClass)) } );
+                                        fsHandler.callFsJScriptAsync("/matrix/omdb/getClassList.js",encodeURIComponent(this.model.class)).then( (rtn)=>{
+                                            let allNodes = rtn.message;
 
-                                        if(this.model.ifData){
-                                            //this.model.limit = -1;
-                                            this.model.template = false;
-                                        } else {
-                                            this.model.template = true;
-                                           // this.model.limit = 0;
-                                        }
-                                        
-                                        this.$message({
-                                            type: "info",
-                                            message: "导出操作将提交至后台，请稍后。。。"
-                                        })
+                                            //checked Class
+                                            let checkedClass = _.map(this.$refs.classTree.getCheckedNodes(),'class');
+                                            
+                                            // 交集
+                                            _.extend(this.model, {ignoreClass: _.concat(this.model.ignoreClass,_.xor(allNodes,checkedClass)) } );
 
-                                        omdbHandler.classDataExport(this.model).then((rtn)=>{
-                                            if(rtn == 1){
-                                                wnd.close();
+                                            if(this.model.ifData){
+                                                //this.model.limit = -1;
+                                                this.model.template = false;
+                                            } else {
+                                                this.model.template = true;
+                                            // this.model.limit = 0;
+                                            }
+                                            
+                                            this.$message({
+                                                type: "info",
+                                                message: "导出操作将提交至后台，请稍后。。。"
+                                            })
+
+                                        } );
+
+                                        omdbHandler.classDataExportAsync(this.model).then((rtn)=>{
+                                            wnd.close();
+                                            
+                                            if(rtn == 0){
+
+                                                this.$message({
+                                                    type: "error",
+                                                    message: "导出失败!"
+                                                })  
                                             }
                                         });
                                     
@@ -2298,19 +2315,27 @@ class Omdb{
                                 },
                                 methods:{
                                     onRefreshDirectory(){
-                                        this.classObj.list = fsHandler.callFsJScript("/matrix/omdb/getClassListFromCache.js", encodeURIComponent('refresh-cache')).message;
+                                        fsHandler.callFsJScriptAsync("/matrix/omdb/getClassListFromCache.js", encodeURIComponent('refresh-cache')).then( (rtn)=>{
+                                            this.classObj.list = rtn.message;
+                                        } );
                                     },
                                     initTreeData(){
-                                        this.tree.data = fsHandler.callFsJScript("/matrix/omdb/propsDirectory.js",null).message;
-                                        this.classObj.list = fsHandler.callFsJScript("/matrix/omdb/getClassListFromCache.js", encodeURIComponent('no-refresh')).message;
+                                        fsHandler.callFsJScriptAsync("/matrix/omdb/propsDirectory.js",null).then( (rtn)=>{
+                                            this.tree.data = rtn.message;
+                                        } );
+                                        fsHandler.callFsJScriptAsync("/matrix/omdb/getClassListFromCache.js", encodeURIComponent('no-refresh')).then( (rtn)=>{
+                                            this.classObj.list = rtn.message;
+                                        } );
                                     },
                                     onNodeClick(tNode){
                                         this.classObj.propAtClass.rows = [];
 
                                         if(tNode.isParent){
                                             tNode.children = [];
-                                            tNode.children = fsHandler.callFsJScript("/matrix/omdb/getPropsByName.js",encodeURIComponent(tNode.label)).message;
-                                            _.extend(this.tree.data,tNode);
+                                            fsHandler.callFsJScriptAsync("/matrix/omdb/getPropsByName.js",encodeURIComponent(tNode.label)).then( (rtn)=>{
+                                                tNode.children = rtn.message;
+                                                _.extend(this.tree.data,tNode);
+                                            } );
                                         } else {
                                             // 当前prop所在Class分布
                                             let propObj = _.filter(this.classObj.list,(v)=>{

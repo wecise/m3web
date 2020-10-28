@@ -397,7 +397,7 @@ class Knowledge {
                                         }
                                     },
                                     onPreview(file) {
-                                        console.log(file);
+                                        
                                     }
                                 }
                             }).$mount(`#${wndID}`);
@@ -641,7 +641,11 @@ class Knowledge {
                                 smartLists: true,
                                 smartypants: false
                             },
-                            mode:"view"
+                            mode:"view",
+                            tip: {
+                                message: "",
+                                loading: false
+                            }
                         }
                     },
                     template:   `<el-container style="height:100%;">
@@ -649,10 +653,17 @@ class Knowledge {
                                         <span style="font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;" v-if="!_.isEmpty(model)">
                                             #{model.item.name | pickName}#
                                         </span>
-                                        
-                                        <el-button type="text" icon="el-icon-position" @click="onSaveNow" style="margin-left:10px;float:right;"></el-button>
-                                        <el-button type="text" icon="el-icon-s-platform" @click="mode='view'" style="margin-left:10px;float:right;"></el-button>
-                                        <el-button type="text" icon="el-icon-edit" @click="mode='edit'" style="float:right;"></el-button>
+                                        <el-tooltip content="保存" open-delay="800">
+                                            <el-button type="text" icon="el-icon-position" @click="onSaveNow" style="margin-left:10px;float:right;" :loading="tip.loading">
+                                                <span style="padding-left:20px;font-size:12px;" v-if="tip.loading">#{tip.message}#</span>
+                                            </el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="预览模式" open-delay="800">
+                                            <el-button type="text" icon="el-icon-s-platform" @click="mode='view'" style="margin-left:10px;float:right;"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="编辑模式" open-delay="800">
+                                            <el-button type="text" icon="el-icon-edit" @click="mode='edit'" style="float:right;"></el-button>
+                                        </el-tooltip>
                                     </el-header>
                                     <el-main style="height:100%;padding:0px;overflow:hidden;">
                                         <el-container style="height:100%;">
@@ -677,7 +688,15 @@ class Knowledge {
                             handler(val,oldVal){
                                 if(this.editor){
                                     this.editor.setValue(val.content,1);
-                                    this.compiledMarkdown = marked(val.content);
+                                    
+                                    this.mdOption.renderer.code = function (code, language) {
+                                        if(language == 'mermaid')
+                                            return '<pre class="mermaid">'+code+'</pre>';
+                                        else
+                                            return '<pre><code>'+code+'</code></pre>';
+                                    };
+                                    this.compiledMarkdown = marked(val.content,{ renderer: this.mdOption.renderer });
+                                    mermaid.init();
                                 }
                             },
                             deep:true
@@ -720,8 +739,15 @@ class Knowledge {
                                     enableLiveAutocompletion: false
                                 });
                                 this.editor.on("input", ()=> {
-                                    this.compiledMarkdown = marked(this.editor.getValue());
-                                    //this.onSave();
+                                    this.mdOption.renderer.code = function (code, language) {
+                                        if(language == 'mermaid')
+                                            return '<pre class="mermaid">'+code+'</pre>';
+                                        else
+                                            return '<pre><code>'+code+'</code></pre>';
+                                    };
+                                    this.compiledMarkdown = marked(this.editor.getValue(),{ renderer: this.mdOption.renderer });
+                                    mermaid.init();
+                                    this.onSave();
                                 });
                                 this.editor.setTheme("ace/theme/tomorrow");
                                 this.editor.getSession().setMode("ace/mode/markdown");
@@ -752,7 +778,9 @@ class Knowledge {
                             }
                         },
                         onSaveNow(){
-                            
+                            this.tip.loading = true;
+                            this.tip.message = "更新中...";
+
                             try{
                                 let attr = null;
                                 
@@ -767,18 +795,18 @@ class Knowledge {
                                     }
                                 }
                                 
-                                let rtn = fsHandler.fsNew(this.model.item.ftype, this.model.item.parent, this.model.item.name, this.editor.getValue(), attr);
-                                if(rtn == 1){
-                                    this.$message({
-                                        type: "success",
-                                        message: "提交成功！"
-                                    })
-                                } else {
-                                    this.$message({
-                                        type: "error",
-                                        message: "提交失败 " + rtn.message
-                                    })
-                                }
+                                fsHandler.fsNewAsync(this.model.item.ftype, this.model.item.parent, this.model.item.name, this.editor.getValue(), attr).then( (rtn)=>{
+                                    if(rtn == 1){
+                                        this.tip.message = "更新成功";
+                                    } else {
+                                        this.tip.message = "更新失败";
+                                    }
+    
+                                    setTimeout(()=>{
+                                        this.tip.message = "";
+                                        this.tip.loading = false;
+                                    },1000)
+                                } );
                                 
                             } catch(err){
 
@@ -786,26 +814,9 @@ class Knowledge {
                             
                         },
                         onSave: _.debounce(function(){
-                                    try{
-                                        let attr = null;
-                                        
-                                        if(_.isEmpty(this.model.item.attr)){
-                                            attr = {remark: '', rate:1};
-                                        } else {
-                                            attr = _.attempt(JSON.parse.bind(null, this.model.item.attr));
-                                            if(attr.rate){
-                                                _.extend(attr, {rate:attr.rate + 1});    
-                                            } else {
-                                                _.extend(attr, {rate:1}); 
-                                            }
-                                        }
-                                        
-                                        let rtn = fsHandler.fsNew(this.model.item.ftype, this.model.item.parent, this.model.item.name, this.editor.getValue(), attr);    
-                                        
-                                    } catch(err){
-
-                                    }
-                                    
+                                    const self = this;
+                                    self.tip.loading = true;
+                                    self.onSaveNow();
                                 },3000)
     
                     }

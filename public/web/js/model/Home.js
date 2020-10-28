@@ -377,51 +377,54 @@ class Home extends Matrix {
                         },
                         loadApps() {
                             
-                            this.apps = fsHandler.callFsJScript("/matrix/user/user.js",window.SignedUser_UserName).message;
+                            fsHandler.callFsJScriptAsync("/matrix/user/user.js",window.SignedUser_UserName).then( (rtn)=>{
+                                this.apps = rtn.message;
 
-                            _.extend(this.apps, {appList:_.orderBy(this.apps.appList,["seat"],["asc"]) });
+                                _.extend(this.apps, {appList:_.orderBy(this.apps.appList,["seat"],["asc"]) });
 
-                            this.$nextTick().then(()=> {
-                                //初始化可拖拽
-                                
-                                let name = _.map(this.apps.template,(v,k)=>{
-                                    return `sortable${k}`;
-                                })
-
-                                _.forEach(this.apps.template,(v,k)=>{
-                                    let el = $(`.drag-content-${k}`,this.$el)[0];
-                                    let elParent = $(el).parent()[0];
+                                this.$nextTick().then(()=> {
+                                    //初始化可拖拽
                                     
-                                    Sortable.create(el,{
-                                        group: {
-                                            name: name[k],
-                                            put: _.concat(['drag-content'],_.xor(name,[`sortable${k}`])),
-                                            pull: _.concat(['drag-content'],_.xor(name,[`sortable${k}`]))
-                                        },
-                                        animation: 150,
-                                        onMove: function (evt, originalEvent) {
-                                        }
-                                    });
+                                    let name = _.map(this.apps.template,(v,k)=>{
+                                        return `sortable${k}`;
+                                    })
 
-                                    Sortable.create(elParent,{
-                                        group: {
-                                            name: 'drag-content',
-                                            put: name,
-                                            pull: name
-                                        },
-                                        animation: 150,
-                                        onMove: function (evt, originalEvent) {
-                                        }
-                                    });
+                                    _.forEach(this.apps.template,(v,k)=>{
+                                        let el = $(`.drag-content-${k}`,this.$el)[0];
+                                        let elParent = $(el).parent()[0];
+                                        
+                                        Sortable.create(el,{
+                                            group: {
+                                                name: name[k],
+                                                put: _.concat(['drag-content'],_.xor(name,[`sortable${k}`])),
+                                                pull: _.concat(['drag-content'],_.xor(name,[`sortable${k}`]))
+                                            },
+                                            animation: 150,
+                                            onMove: function (evt, originalEvent) {
+                                            }
+                                        });
+
+                                        Sortable.create(elParent,{
+                                            group: {
+                                                name: 'drag-content',
+                                                put: name,
+                                                pull: name
+                                            },
+                                            animation: 150,
+                                            onMove: function (evt, originalEvent) {
+                                            }
+                                        });
+                                    })
                                 })
-                            })
+                            } );
                         
                         },
                         toggleGroup(item){
-                            let rtn = fsHandler.callFsJScript("/matrix/apps/app.js",encodeURIComponent(JSON.stringify(item)));
-							if( _.lowerCase(rtn.status) == "ok"){
-								this.loadApps();
-							}
+                            fsHandler.callFsJScriptAsync("/matrix/apps/app.js",encodeURIComponent(JSON.stringify(item))).then( (rtn)=>{
+                                if( _.lowerCase(rtn.status) == "ok"){
+                                    this.loadApps();
+                                }
+                            } );
                         },
                         groupAdd(){
                             
@@ -438,22 +441,26 @@ class Home extends Matrix {
                                 action:"add",
                                 data: this.group.newDialog.form   
                             };
-                            let rtn = fsHandler.callFsJScript("/matrix/apps/group.js",encodeURIComponent(JSON.stringify(data))).message;
-                            if(rtn === 1){
-                                this.group.newDialog.form.title = "";
-                                this.loadApps();
-                            } else{
-                                this.$message({
-                                    type: "error",
-                                    message: this.$t('home.tip.newGroupFail')
-                                });
-                            }
-                            this.group.newDialog.show = false;
+                            fsHandler.callFsJScriptAsync("/matrix/apps/group.js",encodeURIComponent(JSON.stringify(data))).then( (val)=>{
+                                let rtn = val.message;
+
+                                if(rtn === 1){
+                                    this.group.newDialog.form.title = "";
+                                    this.loadApps();
+                                } else{
+                                    this.$message({
+                                        type: "error",
+                                        message: this.$t('home.tip.newGroupFail')
+                                    });
+                                }
+                                this.group.newDialog.show = false;
+                            } );
                         },
                         groupUpdate(){
 
                         },
                         groupRemove(item){
+                            
                             let data = {
                                 user: window.SignedUser_UserName,
                                 action: item.cmd,
@@ -465,19 +472,22 @@ class Home extends Matrix {
                                 cancelButtonText: this.$t('home.actions.cancel'),
                                 type: 'warning'
                               }).then(() => {
-                                let rtn = fsHandler.callFsJScript("/matrix/apps/group.js",encodeURIComponent(JSON.stringify(data))).message;
-                                if(rtn === 1){
-                                    this.loadApps();
-                                    this.$message({
-                                        type: 'success',
-                                        message: this.$t('home.tip.deleteGroupSuccess')
-                                    });
-                                } else{
-                                    this.$message({
-                                        type: "error",
-                                        message: this.$t('home.tip.deleteGroupFail')
-                                    });
-                                }
+                                fsHandler.callFsJScriptAsync("/matrix/apps/group.js",encodeURIComponent(JSON.stringify(data))).then( (val)=>{
+                                    let rtn = val.message;
+
+                                    if(rtn === 1){
+                                        this.loadApps();
+                                        this.$message({
+                                            type: 'success',
+                                            message: this.$t('home.tip.deleteGroupSuccess')
+                                        });
+                                    } else{
+                                        this.$message({
+                                            type: "error",
+                                            message: this.$t('home.tip.deleteGroupFail')
+                                        });
+                                    }
+                                } );
                               }).catch(() => {
                                 
                             });
