@@ -84,6 +84,7 @@ class Pipe {
                     data(){
                         return {
                             editor: null,
+                            config: null,
                             control: {
                                 split: null,
                                 log: {
@@ -113,19 +114,16 @@ class Pipe {
                                             </el-dropdown-menu>
                                         </el-dropdown>
                                         <el-divider direction="vertical"></el-divider>
-                                        <el-dropdown>
+                                        <el-dropdown v-if="config">
                                             <el-button type="text" icon="el-dropdown-link">
                                                 数据源<i class="el-icon-arrow-down el-icon--right"></i>
                                             </el-button>
                                             <el-dropdown-menu slot="dropdown">
-                                            <el-dropdown-item>日志</el-dropdown-item>
-                                            <el-dropdown-item divided>REST</el-dropdown-item>
-                                            <el-dropdown-item divided>文件</el-dropdown-item>
-                                            <el-dropdown-item disabled divided>数据库</el-dropdown-item>
+                                                <el-dropdown-item :key="item.id" v-for="(item,idx) in config['source']" :divided="idx>0?true:false">#{item.fileContent.title}#</el-dropdown-item>
                                             </el-dropdown-menu>
                                         </el-dropdown>
                                         <el-divider direction="vertical"></el-divider>
-                                        <el-dropdown>
+                                        <el-dropdown v-if="config">
                                             <el-button type="text" icon="el-dropdown-link">
                                                 处理规则<i class="el-icon-arrow-down el-icon--right"></i>
                                             </el-button>
@@ -137,7 +135,7 @@ class Pipe {
                                             </el-dropdown-menu>
                                         </el-dropdown>
                                         <el-divider direction="vertical"></el-divider>
-                                        <el-dropdown>
+                                        <el-dropdown v-if="config">
                                             <el-button type="text" icon="el-dropdown-link">
                                                 导出规则<i class="el-icon-arrow-down el-icon--right"></i>
                                             </el-button>
@@ -180,7 +178,12 @@ class Pipe {
                                         </el-tabs>
                                     </el-footer>
                                 </el-container>`,
+                    created(){
+                        // 初始化配置
+                        this.onInitConfig();
+                    },
                     mounted(){
+                        // 初始化画布
                         this.init();
                     },
                     methods:{
@@ -249,6 +252,11 @@ class Pipe {
                                 graph.getModel().endUpdate();    
 
                             }
+                        },
+                        onInitConfig(){
+                            fsHandler.callFsJScriptAsync("/matrix/pipe/getConfigList.js").then( (rtn)=>{
+                                this.config = rtn.message;
+                            } );
                         },
                         onRemoveConsoleTab(targetName){
                             this.control[targetName].show = !this.control[targetName].show;

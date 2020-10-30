@@ -5644,55 +5644,103 @@ class System {
 											</el-dropdown-menu>
 										</el-dropdown>
 									</el-header>
-									<el-main>
+									<el-main style="padding:20px 0px;">
 										<el-button type="default" 
-											style="position: relative;width: auto;height:auto;padding: 10px 30px;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);background:rgb(81, 123, 160);"
+											style="position: relative;width: 14em;height:10em;padding: 10px 30px;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);background:rgb(81, 123, 160);"
 											v-for="(item,index) in model.list"
 											:key="index">
 											<el-image style="width:64px;height:64px;margin:5px;" :src="item.icon | pickIcon"></el-image>
-											<p style="color:#fff;">#{item.cnname}#</p>
+											<p style="color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:center;">#{item.cnname}#</p>
 											<div style="position:absolute;top:0px;right:5px;">
 												<el-button type="text"  @click="onAppEdit(item)">
 													<span class="el-icon-setting"  style="color:#ffffff;"></span> 
 												</el-button>
 											</div>
 										</el-button>
-										<el-dialog :title="'应用编辑-'+dialog.appEdit.item.name"  :visible.sync="dialog.appEdit.show" v-if="dialog.appEdit.show" destroy-on-close="true">
-											<el-container>
-												<el-main>
-													<el-form ref="form" :model="dialog.appEdit.item" label-width="80px" >
-														<el-form-item label="中文名">
-															<el-input v-model="dialog.appEdit.item.cnname"></el-input>
-														</el-form-item>
-														<el-form-item label="英文名称">
-															<el-input v-model="dialog.appEdit.item.enname"></el-input>
-														</el-form-item>
-														<el-form-item label="Url">
-															<el-input v-model="dialog.appEdit.item.url"></el-input>
-														</el-form-item>
-														<el-form-item label="图标">
-															<el-input v-model="dialog.appEdit.item.icon"></el-input>
-														</el-form-item>
-														<el-form-item label="Target">
-															<el-radio-group v-model="dialog.appEdit.item.target">
-																<el-radio label="_blank">打开新窗口</el-radio>
-																<el-radio label="_parent">当前窗口打开</el-radio>
+										<el-dialog :title="'应用编辑 '+dialog.appEdit.item.name"  :visible.sync="dialog.appEdit.show" v-if="dialog.appEdit.show" destroy-on-close="true">
+											<el-tabs v-model="tabs.activeName" ref="tabs">
+												<el-tab-pane name="app">
+													<span slot="label" style="font-size:14px;">
+														<i class="el-icon-s-platform"></i> 应用信息
+													</span>
+													<el-container>
+														<el-main style="padding:0px 20px;">
+															<el-form ref="form" :model="dialog.appEdit.item" label-width="80px" >
+																<el-form-item label="中文名">
+																	<el-input v-model="dialog.appEdit.item.cnname"></el-input>
+																</el-form-item>
+																<el-form-item label="英文名称">
+																	<el-input v-model="dialog.appEdit.item.enname"></el-input>
+																</el-form-item>
+																<el-form-item label="Url">
+																	<el-input v-model="dialog.appEdit.item.url"></el-input>
+																</el-form-item>
+																<el-form-item label="图标">
+																	<el-button type="text" @click="tabs.activeName='icon'">
+																		<el-avatar shape="square" fit="fill" size="100" :src="icon.value"></el-avatar>
+																	</el-button>
+																</el-form-item>
+																<el-form-item label="Target">
+																	<el-radio-group v-model="dialog.appEdit.item.target">
+																		<el-radio label="_blank">打开新窗口</el-radio>
+																		<el-radio label="_parent">当前窗口打开</el-radio>
+																	</el-radio-group>
+																</el-form-item>
+																<el-form-item label="分组">
+																	<el-radio-group v-model="dialog.appEdit.item.groups.group">
+																		#{dialog.appEdit.item.groups.group}#
+																		<el-radio :label="item.name" v-for="item in model.groups">#{item.title}#</el-radio>
+																	</el-radio-group>
+																</el-form-item>
+															</el-form> 
+														</el-main>
+														<el-footer style="text-align:right;line-height:60px;">
+															<el-button type="default" @click="dialog.appEdit.show = false;">取消</el-button>
+															<el-button type="primary" @click="onAppUpdate(dialog.appEdit.item)">更新应用</el-button>
+															<el-button type="danger" @click="onAppRemove(dialog.appEdit.item)">卸载应用</el-button>
+														</el-footer>
+													</el-container>
+												</el-tab-pane>
+												<el-tab-pane name="icon">
+													<span slot="label" style="font-size:14px;">
+														<i class="el-icon-picture"></i> 选择图标
+													</span>
+													<el-container style="height:100%;">
+														<el-main style="height:300px;overflow:auto;padding:10px 0px;background:#666666;">
+															<el-radio-group v-model="icon.value">
+																<el-radio :label="'/fs'+icon.parent+'/'+icon.name+'?type=download&issys='+window.SignedUser_IsAdmin" 
+																	v-model="icon.value"  
+																	v-for="icon in icon.list"
+																	:ref="'radio_'+icon.id"
+																	style="margin-left: 20px;">
+																	<el-button type="default" style="border: unset;width:100px;height:120px;margin:5px;padding:0px;cursor:pointer;background:transparent;" @click="onTriggerRadioClick(icon)"> 
+																		<el-image :src="icon | pickExtIcon" fit="fill"  style="width:48px;"></el-image> 
+																	</el-button>
+																</el-radio>
 															</el-radio-group>
-														</el-form-item>
-														<el-form-item label="分组">
-															<el-radio-group v-model="dialog.appEdit.item.groups.group">
-																#{dialog.appEdit.item.groups.group}#
-																<el-radio :label="item.name" v-for="item in model.groups">#{item.title}#</el-radio>
-															</el-radio-group>
-														</el-form-item>
-													</el-form> 
-												</el-main>
-												<el-footer style="text-align:right;line-height:60px;">
-													<el-button type="default" @click="dialog.appEdit.show = false;">取消</el-button>
-													<el-button type="primary" @click="onAppUpdate(dialog.appEdit.item)">更新应用</el-button>
-													<el-button type="danger" @click="onAppRemove(dialog.appEdit.item)">卸载应用</el-button>
-												</el-footer>
-											</el-container>
+														</el-main>
+														<el-footer style="padding:20px 0px 50px 0px;display:flex;height:auto;position:releative;">
+															<span style="position:absolute;right:140px;">
+																<el-button type="default" icon="el-icon-close" @click="tabs.activeName='app';">返回</el-button>
+																<el-button type="primary" icon="el-icon-refresh" @click="initIconList">刷新图标</el-button>
+															</span>
+															<span style="position:absolute;right:20px;">
+																<el-upload
+																	multiple
+																	:data="{index:true}"
+																	:action="upload.url+'?issys=true'"
+																	:before-upload="onBeforeUpload"
+																	:on-success="onSuccess"
+																	:on-error="onError"
+																	:show-file-list="false"
+																	name="uploadfile">
+																	<el-button icon="el-icon-upload" type="primary" style="padding-left:20px;" :loading="upload.loading">上传图标</el-button>
+																</el-upload>
+															</span>
+														</el-footer>
+													</el-container>
+												</el-tab-pane>
+											</el-tabs>
 										</el-dialog>
 										<el-dialog title="应用发布" :visible.sync="dialog.appDeploy.show" v-if="dialog.appDeploy.show" destroy-on-close="true">
 											<mx-app-deploy :model="dialog.appDeploy"></mx-app-deploy>
@@ -5735,15 +5783,42 @@ class System {
 									show: false,
 									files: null
 								}
+							},
+							icon: {
+								value: '',
+								list: []
+							},
+							upload: {
+								url: `${window.ASSETS_ICON}/apps/png`,
+								fileList: [],
+								loading: false
+							},
+							tabs: {
+								activeName: "app"
 							}
 						}
 					},
 					mounted() {
 						this.$nextTick( ()=>{
 							this.init(); 
+							this.initIconList();
 						})
 					},
+					computed: {
+						groupedModelList(){
+							try{
+								return _.groupBy(this.model.list, (v)=>{
+									return v.name;//moment(v.day).format("YYYYMMDD");
+								});
+							} catch(err){
+								return [];
+							}
+						}
+					},
 					filters:{
+						pickExtIcon(icon) {
+							return `/fs${icon.parent}/${icon.name}?type=download&issys=${window.SignedUser_IsAdmin}`;
+						},
 						pickIcon(icon){
 							return `${window.ASSETS_ICON}/apps/png/${icon}?type=download&issys=${window.SignedUser_IsAdmin}`;
 						}
@@ -5754,8 +5829,19 @@ class System {
 								this.model = rtn.message;
 							} );
 						},
+						initIconList(){
+							fsHandler.fsListAsync(this.upload.url).then( (rtn)=>{
+								this.icon.list = rtn;
+								this.icon.value = `${this.upload.url}/creative.png?type=open&issys=${window.SignedUser_IsAdmin}`;
+							} );   
+						},
+						onTriggerRadioClick(item){
+							this.$refs['radio_'+item.id][0].$el.click();
+						},
 						onAppUpdate(item){
-
+							
+							_.extend(item,{ icon: this.icon.value.replace(/\/fs\/assets\/images\/apps\/png\//,'').replace(/\?type=open&issys=true/,'').replace(/\?type=download&issys=true/,'') } );
+							
 							fsHandler.callFsJScriptAsync("/matrix/apps/app.js",encodeURIComponent(JSON.stringify(item))).then( (rtn)=>{
 								if( _.lowerCase(rtn.status) == "ok"){
 									
@@ -5811,7 +5897,10 @@ class System {
 							this.dialog.appEdit.show = true;
 						},
 						onAppExport(ftype){
-							axios.get(`/mxobject/export?recursive=true&relation_defined=false&filetype=${ftype}&template=true&class=%2Fmatrix%2Fportal%2Ftools&ignoreclass=%2Fmatrix%2Ffilesystem&limit=-1`,{
+							
+							let template = ftype=='mql'?true:false;
+
+							axios.get(`/mxobject/export?recursive=true&relation_defined=false&filetype=${ftype}&template=${template}&class=%2Fmatrix%2Fportal%2Ftools&ignoreclass=%2Fmatrix%2Ffilesystem&limit=-1`,{
 								headers: {
 									"Content-type":"text/csv",
 									"Access-Control-Allow-Origin":"*"
@@ -5860,6 +5949,26 @@ class System {
 								});
 							});
 							
+						},
+						onBeforeUpload(){
+							this.upload.loading = true;
+						},
+						onSuccess(res,file,FileList){
+							this.upload.fileList = FileList;
+							this.$message({
+								type: "success",
+								message: "上传成功！"
+							})
+							this.upload.loading = false;
+							this.initIconList();
+						},
+						onError(err,file,FileList){
+							this.$message({
+								type: "error",
+								message: "上传失败：" + err
+							})
+							this.upload.loading = false;
+							this.initIconList();
 						}
 
 					}

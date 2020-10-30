@@ -45,14 +45,19 @@ Vue.component("mx-app-deploy",{
                     value: '',
                     list: []
                 }                                
+            },
+            upload: {
+                url: `${window.ASSETS_ICON}/apps/png`,
+                fileList: [],
+                loading: false
             }
         }
     },
     template:  `<el-container>
-                    <el-main>
+                    <el-main style="padding:0px 20px;">
                         <el-tabs v-model="app.activeTab" ref="tabs">
                             <el-tab-pane name="app">
-                                <span slot="label" style="font-size:16px;">
+                                <span slot="label" style="font-size:14px;">
                                     <i class="el-icon-s-platform"></i> 应用信息
                                 </span>
                                 <el-container style="height:100%;">
@@ -93,27 +98,43 @@ Vue.component("mx-app-deploy",{
                                 </el-container>
                             </el-tab-pane>
                             <el-tab-pane name="icon">
-                                <span slot="label" style="font-size:16px;">
+                                <span slot="label" style="font-size:14px;">
                                     <i class="el-icon-picture"></i> 选择图标
                                 </span>
                                 <el-container style="height:100%;">
-                                    <el-main style="height:300px;overflow:auto;padding:10px 0px;">
+                                    <el-main style="height:300px;overflow:auto;padding:10px 0px;background:#666666;">
                                         <el-radio-group v-model="app.icon.value">
-                                            <el-radio :label="'/fs'+icon.parent+'/'+icon.name+'?type=download&issys='+window.SignedUser_IsAdmin" 
+                                            <el-radio :label="'/fs'+icon.parent+'/'+icon.name+'?type=open&issys='+window.SignedUser_IsAdmin" 
                                                 v-model="app.icon.value"  
                                                 v-for="icon in app.icon.list"
                                                 :ref="'radio_'+icon.id"
                                                 style="margin-left: 20px;">
-                                                <el-button type="default" style="border: unset;width:100px;height:120px;margin:5px;padding:0px;cursor:pointer;" @click="onTriggerRadioClick(icon)"> 
+                                                <el-button type="default" style="border: unset;width:100px;height:120px;margin:5px;padding:0px;cursor:pointer;background:transparent;" @click="onTriggerRadioClick(icon)"> 
                                                     <el-image :src="icon | pickIcon" fit="fill" 
-                                                    style="width:48px;filter:grayscale(100%) brightness(45%) sepia(100%) hue-rotate(-180deg) saturate(700%) contrast(0.8);">
+                                                    style="width:48px;">
                                                     </el-image> 
                                                 </el-button>
                                             </el-radio>
                                         </el-radio-group>
                                     </el-main>
-                                    <el-footer style="height:30px;line-height:30px;text-align:center;">
-                                        <el-button type="text" @click="app.activeTab='app'">返回</el-button>  
+                                    <el-footer style="padding:20px 0px 50px 0px;display:flex;height:auto;position:releative;">
+                                        <span style="position:absolute;right:140px;">
+                                            <el-button type="default" icon="el-icon-close" @click="app.activeTab='app';">返回</el-button>
+                                            <el-button type="primary" icon="el-icon-refresh" @click="initIconList">刷新图标</el-button>
+                                        </span>
+                                        <span style="position:absolute;right:20px;">
+                                            <el-upload
+                                                multiple
+                                                :data="{index:true}"
+                                                :action="upload.url+'?issys=true'"
+                                                :before-upload="onBeforeUpload"
+                                                :on-success="onSuccess"
+                                                :on-error="onError"
+                                                :show-file-list="false"
+                                                name="uploadfile">
+                                                <el-button icon="el-icon-upload" type="primary" style="padding-left:20px;" :loading="upload.loading">上传图标</el-button>
+                                            </el-upload>
+                                        </span>
                                     </el-footer>
                                 </el-container>
                             </el-tab-pane>
@@ -122,7 +143,7 @@ Vue.component("mx-app-deploy",{
                 </el-container>`,
     filters:{
         pickIcon(icon) {
-            return `/fs${icon.parent}/${icon.name}?type=download&issys=${window.SignedUser_IsAdmin}`;
+            return `/fs${icon.parent}/${icon.name}?type=open&issys=${window.SignedUser_IsAdmin}`;
         }
     },
     mounted(){
@@ -134,19 +155,24 @@ Vue.component("mx-app-deploy",{
             }
             this.app.seat = _.random(100, 10000);
 
+            this.initAppList();
+
+            this.initIconList();
+        })
+    },
+    methods: {
+        initAppList(){
             fsHandler.callFsJScriptAsync("/matrix/apps/appList.js",null).then( (rtn)=>{
                 this.app.groups.list = rtn.message.groups;
                 this.app.groups.default = _.first(this.app.groups.list);
             } );
-            
-
-            fsHandler.fsListAsync(`${window.ASSETS_ICON}/apps/png`).then( (rtn)=>{
+        },
+        initIconList(){
+            fsHandler.fsListAsync(this.upload.url).then( (rtn)=>{
                 this.app.icon.list = rtn;
-                this.app.icon.value = `${window.ASSETS_ICON}/apps/png/creative.png?type=download&issys=${window.SignedUser_IsAdmin}`;
-            } );
-        })
-    },
-    methods: {
+                this.app.icon.value = `${this.upload.url}/creative.png?type=open&issys=${window.SignedUser_IsAdmin}`;
+            } );   
+        },
         onTriggerRadioClick(item){
             this.$refs['radio_'+item.id][0].$el.click();
         },
@@ -162,7 +188,7 @@ Vue.component("mx-app-deploy",{
                     });
                     return false;
                 } else {
-                    _.extend(this.app,{ icon: this.app.icon.value.replace(/\/fs\/assets\/images\/apps\/png\//,'').replace(/\?type=download&issys=true/,'') } );
+                    _.extend(this.app,{ icon: this.app.icon.value.replace(/\/fs\/assets\/images\/apps\/png\//,'').replace(/\?type=open&issys=true/,'').replace(/\?type=download&issys=true/,'') } );
                     _.extend(this.app.groups, { group: this.app.groups.default.name} );
                     
                     fsHandler.callFsJScriptAsync("/matrix/apps/app.js",encodeURIComponent(JSON.stringify(this.app))).then( (rtn)=>{
@@ -184,6 +210,26 @@ Vue.component("mx-app-deploy",{
 
             } );
 
+        },
+        onBeforeUpload(){
+            this.upload.loading = true;
+        },
+        onSuccess(res,file,FileList){
+            this.upload.fileList = FileList;
+            this.$message({
+                type: "success",
+                message: "上传成功！"
+            })
+            this.upload.loading = false;
+            this.initIconList();
+        },
+        onError(err,file,FileList){
+            this.$message({
+                type: "error",
+                message: "上传失败：" + err
+            })
+            this.upload.loading = false;
+            this.initIconList();
         }
     }
 })
@@ -349,12 +395,12 @@ Vue.component("mx-fs-editor",{
                             <el-tooltip content="左边栏" placement="bottom" open-delay="500">
                                 <el-button type="text" :icon="toolBar.left.show?'el-icon-s-fold':'el-icon-s-unfold'" @click="toolBar.left.show = !toolBar.left.show"></el-button>
                             </el-tooltip>    
-                            <span v-if="!_.isEmpty(tabs.list)">
+                            <span v-if="!_.isEmpty(tabs.list)" style="padding-left:10px;">
                                 <el-tooltip content="重打开" placement="bottom" open-delay="500">
                                     <el-button type="text" icon="el-icon-refresh" @click="onReload"></el-button>
                                 </el-tooltip>    
                                 <el-tooltip content="保存" placement="bottom" open-delay="500">
-                                    <el-button type="text" icon="el-icon-edit" @click="onSave"></el-button>
+                                    <el-button type="text" icon="far fa-save" @click="onSave"></el-button>
                                 </el-tooltip>
                                 <el-tooltip content="另存为" placement="bottom" open-delay="500">
                                     <el-button type="text" icon="el-icon-edit-outline" @click="file.dialogSaveAs.visible=true"></el-button>

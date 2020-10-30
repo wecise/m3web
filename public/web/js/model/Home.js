@@ -134,7 +134,8 @@ class Home extends Matrix {
                                                         </span>
                                                         <el-dropdown-menu slot="dropdown">
                                                             <el-dropdown-item @click.native="onPlusCommand({type:'newGroup',url:''})">#{ $t('home.actions.newGroup') }#</el-dropdown-item>
-                                                            <el-dropdown-item @click.native="onPlusCommand({type:'newApp',url:'/matrix/system'})">#{ $t('home.actions.newApp') }#</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onPlusCommand({type:'newApp',url:'/matrix/system'})" divided>#{ $t('home.actions.newApp') }#</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onCommand({type:'appFc',url:'/matrix/appfc'})" divided>#{ $t('home.actions.appFc') }#</el-dropdown-item>
                                                         </el-dropdown-menu>
                                                     </el-dropdown>
                                                 </el-button>

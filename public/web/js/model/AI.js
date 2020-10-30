@@ -636,56 +636,57 @@ class AI {
                         onSave(){
                             let attr = {ctime: _.now()};
                             
-                            let rt = fsHandler.fsNew('json', this.model.parent, this.model.name, JSON.stringify(this.content,null,2), attr);
-                            if(rt == 1){
+                            fsHandler.fsNewAsync('json', this.model.parent, this.model.name, JSON.stringify(this.content,null,2), attr).then( (rt)=>{
+                                if(rt == 1){
 
-                                if(_.isEmpty(this.content.job.group)){
-                                    this.$message({
-                                        type: "info",
-                                        message: "请选择服务器组"
-                                    })
-                                    return false;
-                                }
-                                
-                                let name = this.model.name.split(".")[0];
-                                
-                                let jobObj = { 
-                                    name: name, 
-                                    dir: this.content.job.dir, 
-                                    exec: [this.content.job.exec[0], this.model.fullname].join(" "), 
-                                    group: this.content.job.group, 
-                                    schedule: `${this.content.job.cron}`, // 'cron 0 0 * * *'
-                                    timeout: 43200
-                                };
-
-                                this.$set(this.content,'name',name);
-
-                                // 检查job是否存在
-                                // let check = jobHandler.jobExist(jobObj);
-                                // console.log(23,check)
-
-                                // 如果不存在，生成Job
-                                //let rtn = jobHandler.jobAdd(jobObj);
-                                let rtn = jobHandler.jobMerge(jobObj);
-                                
-                                if(rtn.status == 'ok'){
-                                    this.$message({
-                                        type: 'success',
-                                        message: '作业提交成功！'
-                                    })
+                                    if(_.isEmpty(this.content.job.group)){
+                                        this.$message({
+                                            type: "info",
+                                            message: "请选择服务器组"
+                                        })
+                                        return false;
+                                    }
+                                    
+                                    let name = this.model.name.split(".")[0];
+                                    
+                                    let jobObj = { 
+                                        name: name, 
+                                        dir: this.content.job.dir, 
+                                        exec: [this.content.job.exec[0], this.model.fullname].join(" "), 
+                                        group: this.content.job.group, 
+                                        schedule: `${this.content.job.cron}`, // 'cron 0 0 * * *'
+                                        timeout: 43200
+                                    };
+    
+                                    this.$set(this.content,'name',name);
+    
+                                    // 检查job是否存在
+                                    // let check = jobHandler.jobExist(jobObj);
+                                    // console.log(23,check)
+    
+                                    // 如果不存在，生成Job
+                                    //let rtn = jobHandler.jobAdd(jobObj);
+                                    let rtn = jobHandler.jobMerge(jobObj);
+                                    
+                                    if(rtn.status == 'ok'){
+                                        this.$message({
+                                            type: 'success',
+                                            message: '作业提交成功！'
+                                        })
+                                    } else {
+                                        this.$message({
+                                            type: 'error',
+                                            message: '作业提交失败：' + rtn.message
+                                        })
+                                    }
+    
                                 } else {
                                     this.$message({
-                                        type: 'error',
-                                        message: '作业提交失败：' + rtn.message
+                                        type: 'warning',
+                                        message: '保存失败:' + rt.message
                                     })
                                 }
-
-                            } else {
-                                this.$message({
-                                    type: 'warning',
-                                    message: '保存失败:' + rt.message
-                                })
-                            }
+                            } );
                         },
                         // 删除规则
                         onDelete() {
@@ -704,25 +705,23 @@ class AI {
 
                                 } finally{
                                     // 删除文件系统
-                                    let rtn = fsHandler.fsDelete(this.model.parent, this.model.name);
-                                    if (rtn == 1){
-                                    
-                                        // 刷新rules
-                                        _.delay(()=>{
+                                    fsHandler.fsDeleteAsync(this.model.parent, this.model.name).then( (rtn)=>{
+                                        if (rtn == 1){
+                                            // 刷新rules
                                             this.$root.$refs.aiSetup.load();
                                             this.$root.$refs.aiSetup.close(this.model.id);
-                                        },1000)
-
-                                        this.$message({
-                                            type: "success",
-                                            message: "删除成功！"
-                                        })
-                                    } else {
-                                        this.$message({
-                                            type: "error",
-                                            message: "删除失败 " + rtn.message
-                                        })
-                                    }
+                                            
+                                            this.$message({
+                                                type: "success",
+                                                message: "删除成功！"
+                                            })
+                                        } else {
+                                            this.$message({
+                                                type: "error",
+                                                message: "删除失败 " + rtn.message
+                                            })
+                                        }
+                                    } );
                                 }
 
                             }).catch(() => {
@@ -736,20 +735,20 @@ class AI {
                             
                             // 更新到文件系统
                             let attr = {ctime: _.now()};
-                            let rtn = fsHandler.fsNew('json', this.model.parent, this.model.name, JSON.stringify(this.content,null,2), attr);
-                            
-                            // 生成JOB
-                            if(rtn == 1){
-                                this.$message({
-                                    type: 'success',
-                                    message: '作业提交成功！'
-                                })
-                            } else {
-                                this.$message({
-                                    type: 'error',
-                                    message: '作业提交失败!'
-                                })        
-                            }
+                            fsHandler.fsNewAsync('json', this.model.parent, this.model.name, JSON.stringify(this.content,null,2), attr).then( (rtn)=>{
+                                // 生成JOB
+                                if(rtn == 1){
+                                    this.$message({
+                                        type: 'success',
+                                        message: '作业提交成功！'
+                                    })
+                                } else {
+                                    this.$message({
+                                        type: 'error',
+                                        message: '作业提交失败!'
+                                    })        
+                                }
+                            } );
                             
                         },
                         job(term){
@@ -1700,7 +1699,9 @@ class AI {
                             
                             // 更新到文件系统
                             let attr = {ctime: _.now()};
-                            let rtn = fsHandler.fsNew('json', this.model.parent, this.model.name, JSON.stringify(this.content,null,2), attr);
+                            fsHandler.fsNewAsync('json', this.model.parent, this.model.name, JSON.stringify(this.content,null,2), attr).then( (rtn)=>{
+
+                            } );
                         },
                         onSave(){
                             let attr = {ctime: _.now()};
@@ -2002,15 +2003,16 @@ class AI {
                                                             time:  _.now(),
                                                             name: this.name
                                                         });
-                                        let rtn = fsHandler.fsNew('json', this.model.fullname, this.name+'.json', JSON.stringify(content,null,2), attr);
-                                        if(rtn == 1){
-                                            // Reload规则列表
-                                            self.load();
-                                            // 刷新菜单
-                                            self.open(item.id,[item.id]);
-                                            // 关闭窗体
-                                            win.close();
-                                        }
+                                        fsHandler.fsNewAsync('json', this.model.fullname, this.name+'.json', JSON.stringify(content,null,2), attr).then( (rtn)=>{
+                                            if(rtn == 1){
+                                                // Reload规则列表
+                                                self.load();
+                                                // 刷新菜单
+                                                self.open(item.id,[item.id]);
+                                                // 关闭窗体
+                                                win.close();
+                                            }
+                                        } );
                                     },
                                     cancel(){
                                         win.close();
@@ -2019,7 +2021,9 @@ class AI {
                             }).$mount("#ai-rule-new");
                         },
                         load(){
-                            this.ruleList = fsHandler.callFsJScript("/matrix/ai/ai-rule-list.js",null).message;
+                            fsHandler.callFsJScriptAsync("/matrix/ai/ai-rule-list.js",null).then( (rtn)=>{
+                                this.ruleList = rtn.message;
+                            } );
                         },
                         clickMe(item){
                             

@@ -348,7 +348,7 @@ class User {
                             <el-aside id="nav" style="width:auto;">
                                 <el-container>
                                     <el-header style="height:auto;text-align:center;">
-                                        <el-button type="text" icon="el-icon-s-tools" @click="changeLogo" style="float: right;" v-if="mxAuth.isAdmin"></el-button>
+                                        <el-button type="text" icon="el-icon-s-tools" @click="dialog.iconUpdate.show=true" style="float: right;" v-if="mxAuth.isAdmin"></el-button>
                                         <p><img :src="logo" style="width:120px;max-width:120px;"></img></p>
                                     </el-header>
                                     <el-main style="overflow:hidden;">
@@ -371,11 +371,101 @@ class User {
                             <el-main id="content" style="margin: 0px 0px 0px 10px;height: calc(100vh - 90px);background: rgb(255, 255, 255);">
                                 <component v-bind:is="currentView"></component>
                             </el-main>
+                            <el-dialog title="更换图标" :visible.sync="dialog.iconUpdate.show" v-if="dialog.iconUpdate.show" destroy-on-close="true">
+                                <el-container style="height:50vh;">
+                                    <el-main style="display:flex;flex-wrap:wrap;align-content: flex-start;padding:10px;">
+                                        <el-button type="text" style="width:10em;max-width: 10em;height: 105px;padding: 10px;line-height: 1;margin: 5px;text-align: center;border:1px solid rgba(0,0,0,.2);"
+                                            v-for="icon in dialog.iconUpdate.model.icon.list"
+                                            :key="icon.id"
+                                            @click="triggerInput(icon.id)">
+                                            <el-image :src="icon | pickIcon" style="max-width: 55px;min-width: 55px;"></el-image>
+                                            <p>
+                                                <input type="radio" :ref="icon.id" :id="icon.id"  :value="'/fs'+icon.parent+'/'+icon.name+'?type=download&issys=true'" v-model="dialog.iconUpdate.model.icon.value" >
+                                            </p>
+                                        </el-button>
+                                        </el-main>
+                                    <el-footer style="padding:20px 0px 50px 0px;display:flex;height:auto;position:releative;">
+                                        <span style="position:absolute;right:140px;">
+                                            <el-button type="default" icon="el-icon-close" @click="dialog.iconUpdate.show=false;">取消</el-button>
+                                        </span>
+                                        <span style="position:absolute;right:20px;">
+                                            <el-upload
+                                                multiple
+                                                :data="{index:true}"
+                                                :action="dialog.iconUpdate.upload.url"
+                                                :before-upload="onBeforeUpload"
+                                                :on-success="onSuccess"
+                                                :on-error="onError"
+                                                :show-file-list="false"
+                                                name="uploadfile">
+                                                <el-button icon="el-icon-upload" type="primary" style="padding-left:20px;" :loading="dialog.iconUpdate.upload.loading">上传图标</el-button>
+                                            </el-upload>
+                                        </span>
+                                    </el-footer>
+                                </el-container>
+                            </el-dialog>
                         </el-container>`,
             data: {
                 signedUser: mxAuth.signedUser,
                 currentView: 'user-info',
-                ifShow: true
+                ifShow: true,
+                dialog: {
+                    iconUpdate: {
+                        show: false,
+                        model: {
+                            icon: {
+                                value: '',
+                                list: []
+                            }
+                        },
+                        upload: {
+                            url: `/fs/assets/images/files/png?issys=true`,
+                            fileList: [],
+                            loading: false
+                        }
+                    }
+                }
+            },
+            filters: {
+                pickIcon(item) {
+                    return "/fs" + item.parent + "/" + item.name + "?type=download&issys=true";
+                }
+            },
+            watch: {
+                'dialog.iconUpdate.model.icon.value': {
+                    handler(val,oldVal){
+                        
+                        this.$confirm(`确认要更换图标？`, '提示', {
+                            confirmButtonText: '确定',
+                            cancelButtonText: '取消',
+                            type: 'warning'
+                        }).then(() => {
+                            
+                            this.toDataURL(val,(dataUrl)=> {
+                            
+                                let company = {
+                                    "name": this.signedUser.Company.name,
+                                    "logo": dataUrl,
+                                    "fullname": this.signedUser.Company.fullname,
+                                    "icon": this.signedUser.Company.icon,
+                                    "ospace": this.signedUser.Company.ospace,
+                                    "title": this.signedUser.Company.title,
+                                    "web": this.signedUser.Company.web,
+                                    "config": {}
+                                };
+                                let rtn = companyHandler.companyUpdate(company);
+                                if(rtn == 1){
+                                    document.location.href = mx.getPage();
+                                }
+                            });
+                            
+                        }).catch(() => {
+                            
+                        });
+
+                    },
+                    deep:true
+                }
             },
             computed: {
                 logo(){
@@ -401,104 +491,54 @@ class User {
                     }
                 }
             },
+            created(){
+                this.init();
+            },
             methods: {
+                init(){
+                    fsHandler.fsListAsync('/assets/images/files/png').then( (rtn)=>{
+                        this.dialog.iconUpdate.model.icon.list = rtn;
+                    } );
+                },
+                triggerInput(id){
+                    $(this.$refs[id]).click()
+                },
+                toDataURL(url, callback) {
+                    let xhr = new XMLHttpRequest();
+
+                    xhr.onload = function() {
+                        var reader = new FileReader();
+                        reader.onloadend = function() {
+                            callback(reader.result);
+                        }
+                        reader.readAsDataURL(xhr.response);
+                    };
+                    xhr.open('GET', url);
+                    xhr.responseType = 'blob';
+                    xhr.send();
+                },
                 toggleView(view){
                     this.currentView = view;
                 },
-                changeLogo(){
-                    const self = this;
-
-                    let wnd = maxWindow.winInfo("更改Logo",'<div id="fs-info"></div>',null,$('#content'));
-
-                    let app = new Vue({
-                        delimiters: ['#{', '}#'],
-                        template: `<el-container style="height:100%;">
-                                      <el-main style="display:flex;flex-wrap:wrap;align-content: flex-start;padding:10px;">
-                                        <el-button type="text" style="width:10em;max-width: 10em;height: 105px;padding: 10px;line-height: 1;margin: 5px;text-align: center;border:1px solid rgba(0,0,0,.2);"
-                                            v-for="icon in model.icon.list"
-                                            :key="icon.id"
-                                            @click="triggerInput(icon.id)">
-                                            <el-image :src="icon | pickIcon" style="max-width: 55px;min-width: 55px;"></el-image>
-                                            <p>
-                                                <input type="radio" :ref="icon.id" :id="icon.id"  :value="'/fs'+icon.parent+'/'+icon.name+'?type=download&issys=true'" v-model="model.icon.value" >
-                                            </p>
-                                        </el-button>
-                                      </el-main>
-                                    <el-footer style="line-height:60px;text-align:right;">
-                                        <el-button type="default" @click="onClose">取消</el-button>
-                                    </el-footer>
-                                </el-container>`,
-                        data: {
-                            model: {
-                                icon: {
-                                    value: '',
-                                    list: []
-                                }
-                            }
-                        },
-                        watch: {
-                            'model.icon.value': {
-                                handler(val,oldVal){
-                                    
-                                    this.toDataURL(val,(dataUrl)=> {
-                                        
-                                        let company = {
-                                            "name": self.signedUser.Company.name,
-                                            "logo": dataUrl,
-                                            "fullname": self.signedUser.Company.fullname,
-                                            "icon": self.signedUser.Company.icon,
-                                            "ospace": self.signedUser.Company.ospace,
-                                            "title": self.signedUser.Company.title,
-                                            "web": self.signedUser.Company.web,
-                                            "config": {}
-                                        };
-                                        let rtn = companyHandler.companyUpdate(company);
-                                        if(rtn == 1){
-                                            document.location.href = mx.getPage();
-                                        }
-                                    });
-                                },
-                                deep:true
-                            }
-                        },
-                        mounted() {
-                            this.$nextTick(()=> {
-                                this.init();
-                            })
-                        },
-                        filters: {
-                            pickIcon(item) {
-                                return "/fs" + item.parent + "/" + item.name + "?type=download&issys=true";
-                            }
-                        },
-                        methods: {
-                            init(){
-                                fsHandler.fsListAsync('/assets/images/files/png').then( (rtn)=>{
-                                    this.model.icon.list = rtn;
-                                } );
-                            },
-                            triggerInput(id){
-                                $(this.$refs[id]).click()
-                            },
-                            toDataURL(url, callback) {
-                                let xhr = new XMLHttpRequest();
-
-                                xhr.onload = function() {
-                                    var reader = new FileReader();
-                                    reader.onloadend = function() {
-                                        callback(reader.result);
-                                    }
-                                    reader.readAsDataURL(xhr.response);
-                                };
-                                xhr.open('GET', url);
-                                xhr.responseType = 'blob';
-                                xhr.send();
-                            },
-                            onClose(){
-                                wnd.close();
-                            }
-                        }
-                    }).$mount("#fs-info");
+                onBeforeUpload(){
+                    this.dialog.iconUpdate.upload.loading = true;
+                },
+                onSuccess(res,file,FileList){
+                    this.dialog.iconUpdate.upload.fileList = FileList;
+                    this.$message({
+                        type: "success",
+                        message: "上传成功！"
+                    })
+                    this.dialog.iconUpdate.upload.loading = false;
+                    this.init();
+                },
+                onError(err,file,FileList){
+                    this.$message({
+                        type: "error",
+                        message: "上传失败：" + err
+                    })
+                    this.dialog.iconUpdate.upload.loading = false;
+                    this.init();
                 }
 
             }

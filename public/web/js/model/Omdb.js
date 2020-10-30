@@ -1275,6 +1275,13 @@ class Omdb{
                                 <div style="padding:20px;" v-if="model.type=='insert-class'">
                                     <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 插入成功。</h3>
                                 </div>
+                                <div style="padding:20px;" v-else>
+                                    <h3><i class="el-icon-info" style="font-size:32px;color:#4caf50;"></i> 很抱歉，没有找到相关的记录。</h3>
+                                    <p>温馨提示：  
+                                    请检查您的输入是否正确
+                                    如有任何意见或建议，请及时反馈给我们。
+                                    </p>
+                                </div>
                             </el-main>
                             <el-footer  style="height:30px;line-height:30px;">
                                 #{ info.join(' &nbsp; | &nbsp;') }#

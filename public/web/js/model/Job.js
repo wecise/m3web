@@ -640,7 +640,7 @@ class Job extends Matrix {
                                                     ref="searchRef"
                                                     class="grid-content"></search-base-component>
                             </el-header>
-                            <el-main id="job-view-container" style="padding: 5px 0px 0px 0px;overflow:hidden;">
+                            <el-main id="job-view-container" style="padding: 5px 0px 0px 0px;overflow:hidden;" :loading="loading">
                                 <el-tabs :value="layout.main.activeIndex" class="grid-content" type="border-card" closable @tab-remove="detailRemove" @tab-click="handleClick">
                                     <el-tab-pane v-for="(item,index) in layout.main.tabs" :key="item.name" :label="item.title" :name="item.name">
                                         <div v-if="item.type==='main'">
@@ -756,7 +756,8 @@ class Job extends Matrix {
                         // 指定时间戳
                         forTime:  ' for vtime ',
                     }
-                }
+                },
+                loading: false
             },
             watch:{
                 'layout.main.tabs':{
@@ -925,6 +926,9 @@ class Job extends Matrix {
                     }
                 },
                 detailAdd(event){
+
+                    this.loading = true;
+
                     try {
                         let id = event.id;
                         
@@ -946,10 +950,13 @@ class Job extends Matrix {
                             this.layout.main.tabs.push(detail);
                             this.layout.main.activeIndex = `diagnosis-${id}`;
                             this.layout.main.detail.activeIndex = _.first(detail.child).name;
+
+                            this.loading = false;
                         } );
                         
                     } catch(error){
                         this.layout.main.tabs = [];
+                        this.loading = false;
                     }
                 },
                 detailRemove(targetName) {

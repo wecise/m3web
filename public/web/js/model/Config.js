@@ -982,7 +982,7 @@ class Config {
                                             <el-button type="text" @click="configDelete" v-show="!_.isEmpty(configTabs.tabs)"><i class="el-icon-delete" style="color:#ff0000;font-size:15px;"><i></el-button>
                                         </el-tooltip-->
                                         <el-tooltip content="保存" open-delay="500">
-                                            <el-button type="text" @click="configUpdate" v-show="!_.isEmpty(configTabs.tabs)"><i class="el-icon-edit-outline" style="color:#009688;font-size:15px;"><i></el-button>
+                                            <el-button type="text" @click="configUpdate" v-show="!_.isEmpty(configTabs.tabs)"><i class="far fa-save" style="color:#009688;font-size:15px;"><i></el-button>
                                         </el-tooltip>
                                         <!--el-button type="text" @click="configDegug" v-show="!_.isEmpty(configTabs.tabs)" icon="fas fa-tv"></el-button-->
                                     

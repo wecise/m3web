@@ -1,0 +1,117 @@
+<!--
+
+    [[[[[[[[[[[[[[[      ]]]]]]]]]]]]]]]
+    [::::::::::::::      ::::::::::::::]
+    [::::::::::::::      ::::::::::::::]
+    [::::::[[[[[[[:      :]]]]]]]::::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[    CODE BY WANGZD    ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [::::::[[[[[[[:      :]]]]]]]::::::]
+    [::::::::::::::      ::::::::::::::]
+    [::::::::::::::      ::::::::::::::]
+    [[[[[[[[[[[[[[[      ]]]]]]]]]]]]]]]
+
+-->
+{{template "base/head" .}}
+
+<link href="{{AppSubUrl}}/web/vendor/jquery-file-upload/css/jquery.fileupload.css" rel="stylesheet" >
+
+
+<style>
+
+    body {
+        overflow: hidden;
+    }
+
+    #content.content {
+        padding: 5px;
+    }
+
+    [id="app"] {
+        width: 100%;
+        height: 100vh;
+    }
+
+    /* Split Style */
+	.gutter.gutter-horizontal {
+        cursor: ew-resize;
+        background-color: rgb(241, 241, 241);
+        background-image: url(/fs/assets/images/others/png/vSplit.png?type=open&issys=true);
+        background-size: 7px;
+        background-position-x: 50%;
+        background-position-y: 50%;
+        background-repeat: no-repeat;
+        z-index: 100;
+		width: 5px;
+		border: none!important;
+    }
+
+    .gutter.gutter-vertical {
+        cursor: ns-resize;
+        background-color: rgb(241, 241, 241);
+        background-image: url(/fs/assets/images/others/png/vSplit.png?type=open&issys=true);
+        background-size: 7px;
+        background-position-x: 50%;
+        background-position-y: 50%;
+        background-repeat: no-repeat;
+        z-index: 100;
+		height: 5px;
+        border: none!important;
+    }
+
+    /* 全屏模式 */
+	section#header{
+		display:initial!important;
+	}
+	aside>#sidebar{
+		display:initial!important;
+	}
+    footer#footer{
+        display:flex!important;
+    }
+
+</style>
+
+<main id="content" class="content">
+    <div id="app"></div>
+</main>
+
+<script src="{{AppSubUrl}}/web/js/model/AppFc.js"></script>
+<script src="{{AppSubUrl}}/web/js/model/FileSystem.js"></script>
+<script src="{{AppSubUrl}}/web/js/model/Robot.js"></script>
+
+<!--File Parse JS-->
+<script src="{{AppSubUrl}}/web/vendor/papaparse/papaparse.min.js"></script>
+<!--Jquery File Upload JS-->
+<script src="{{AppSubUrl}}/web/vendor/js-load-image/js/load-image.all.min.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/canvas-to-blob.min.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/vendor/jquery.ui.widget.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/jquery.iframe-transport.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/jquery.fileupload.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/jquery.fileupload-process.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/jquery.fileupload-image.js"></script>
+
+<link rel="vc" href="{{AppSubUrl}}/web/component/tag/mx-tag.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/tag/mx-tag-tree.html"></link>
+
+<link rel="vc" href="{{AppSubUrl}}/web/component/fs/fs-tree-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/fs/fs-view-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/fs/fs-editor-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/fs/fs-editor-tree-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/fs/fs-output-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/fs/fs-datatable-component.html"></link>
+
+<link rel="vc" href="{{AppSubUrl}}/web/component/devops/devops-tree-component.html"></link>
+
+<link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
+
+
+{{template "base/footer" .}}
