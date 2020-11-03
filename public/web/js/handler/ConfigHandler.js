@@ -51,6 +51,43 @@ class ConfigHandler {
         return rtn;
     };
 
+    async configGetAsync(event) {
+        let rtn = null;
+
+        try{
+            await jQuery.ajax({
+                url: '/config/get',
+                type: 'GET',
+                dataType: 'json',
+                async: true,
+                data: {
+                    key: event
+                },
+                beforeSend(xhr) {
+                    
+                },
+                complete(xhr, textStatus) {
+                },
+                success(data, textStatus, xhr) {
+                    
+                    userHandler.ifSignIn(data);
+
+                    if(!_.isEmpty(data.message)){
+                        let tmp = JSON.stringify(data.message).replace(new RegExp('"dir":true', 'gm'), '"isParent":true,"dir":true');
+                        rtn = _.attempt(JSON.parse.bind(null, tmp));
+                    }
+                    
+                },
+                error(xhr, textStatus, errorThrown) {
+                    rtn = xhr.responseText;
+                }
+            });
+        } catch(err){
+
+        }
+        return rtn;
+    };
+
     /*
     *  Config Add ETCD
     *
@@ -86,6 +123,45 @@ class ConfigHandler {
                 rtn = xhr.responseText;
             }
         });
+        return rtn;
+    };
+
+    async configAddAsync(event) {
+        let rtn = null;
+
+        try{
+            await jQuery.ajax({
+                url: '/config/set',
+                type: 'POST',
+                dataType: 'json',
+                async: true,
+                data: {
+                    key:event.key,
+                    ttl: event.ttl,
+                    value: event.value
+                },
+                beforeSend(xhr) {
+                    
+                },
+                complete(xhr, textStatus) {
+                },
+                success(data, textStatus, xhr) {
+                    
+                    userHandler.ifSignIn(data);
+
+                    if( _.lowerCase(data.status) == "ok"){
+                        rtn = 1;
+                    }
+                    
+                },
+                error(xhr, textStatus, errorThrown) {
+                    rtn = xhr.responseText;
+                }
+            });
+        } catch(err){
+
+        }
+
         return rtn;
     };
 
@@ -125,6 +201,41 @@ class ConfigHandler {
                 console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
             }
         })
+        return rtn;
+    }
+
+    async configDeleteAsync(event) {
+        let rtn = null;
+
+        try{
+            await jQuery.ajax({
+                url: '/config/del',
+                type: 'POST',
+                dataType: 'json',
+                async: true,
+                data: {
+                    key: event.key
+                },
+                beforeSend(xhr) {
+                },
+                complete(xhr, textStatus) {
+                },
+                success(data, textStatus, xhr) {
+
+                    userHandler.ifSignIn(data);
+
+                    if( _.lowerCase(data.status) == "ok"){
+                        rtn = 1;
+                    }
+            
+                },
+                error(xhr, textStatus, errorThrown) {
+                    rtn = xhr.responseText;
+                }
+            })
+        } catch(err){
+            
+        }
         return rtn;
     }
 

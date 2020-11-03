@@ -583,7 +583,7 @@ class Summary {
                     },
                     template:   `<el-container id="content" class="content" style="height:calc(100vh - 80px);">
                                     
-                                    <el-main style="padding:10px 0px;" ref="mainView">
+                                    <el-main style="padding:10px 0px;" ref="mainView" v-if="model">
                                         
                                         <el-button type="text" icon="el-icon-plus" style="position:absolute;z-index:1000;top:55px;right:25px;" @click="control.show=!control.show"></el-button>
                                         
@@ -598,7 +598,7 @@ class Summary {
                                             </div>
                                         </div>
                                         <div style="font-size: 18px;padding: 0px 20px;">数据概览</div>
-                                        <div class="grid-stack grid-container" data-gs-animate="yes" style="background:#f2f2f2;margin:0 20px;">
+                                        <div class="grid-stack grid-container" data-gs-animate="yes" style="background:#f2f2f2;margin:0 20px;" v-if="model.byDay">
                                             <div class="grid-stack-item" data-gs-width="2" data-gs-height="2">
                                                 <div class="grid-stack-item-content" style="overflow:hidden;">
                                                     <larger-number title="数据吞吐量"
@@ -674,7 +674,7 @@ class Summary {
                                         <div class="grid-stack grid-container" 
                                             data-gs-animate="yes" 
                                             v-for="(item,api) in model.byApi" 
-                                            style="background:#f2f2f2;margin:0px 20px;border-top:1px solid #fff;" >
+                                            style="background:#f2f2f2;margin:0px 20px;border-top:1px solid #fff;"  v-if="model.byApi">
                                             <div class="grid-stack-item" data-gs-width="12" data-gs-height="3">
                                                 <div class="grid-stack-item-content" style="overflow:hidden;">
                                                     <h5 style="margin:0px;padding:10px 20px;">#{_.upperCase(api)}#</h5>
@@ -718,7 +718,7 @@ class Summary {
 
                         setInterval(()=>{
                             this.initData();
-                        },3000)
+                        },5000)
                     },
                     mounted() {
                         this.$nextTick().then(()=>{
@@ -727,10 +727,14 @@ class Summary {
                     },
                     methods: {
                         initData(){
-                            this.model = fsHandler.callFsJScript("/matrix/summary/getSummary.js",null).message;
+                            fsHandler.callFsJScriptAsync("/matrix/summary/getSummary.js",null).then( (rtn)=>{
+                                this.model = rtn.message;
+                            } );
                         },
                         init(){
                             
+                            if(!this.mode) return false;
+
                             let grid = GridStack.initAll({
                                 resizable: {
                                     handles: 'e, se, s, sw, w'

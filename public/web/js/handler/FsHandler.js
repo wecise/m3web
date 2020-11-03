@@ -169,7 +169,7 @@ class FsHandler {
 
                 },
                 error(xhr, textStatus, errorThrown) {
-                    rtn = xhr.responseJSON;
+                    rtn = xhr.responseText;
                 }
             })
         } catch(err){

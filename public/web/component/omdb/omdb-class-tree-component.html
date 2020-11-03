@@ -312,7 +312,7 @@
                     }
                 });
 
-                $("#omdb-class-tree").contextMenu({
+                /* $("#omdb-class-tree").contextMenu({
                     selector: 'span.edge.parent.more',
                     trigger: 'left',
                     items: {
@@ -361,9 +361,9 @@
                             $.contextMenu.getInputValues(opt, $this.data());
                         }
                     }
-                });
+                }); */
 
-                $("#omdb-class-tree").contextMenu({
+                /* $("#omdb-class-tree").contextMenu({
                     selector: 'span.edge.leaf.more',
                     trigger: 'left',
                     items: {
@@ -401,7 +401,7 @@
                             $.contextMenu.getInputValues(opt, $this.data());
                         }
                     }
-                });
+                }); */
 
 	        },
             initData(node){
@@ -539,7 +539,7 @@
 
                     let addStr =   `<div class="well edge-toolbars" id='toolbars_${treeNode.tId}' >
                                         <span class='button edge add' id='addBtn_${treeNode.tId}' title='新建' ></span>
-										<span class='button edge parent more' id='moreBtn_${treeNode.tId}' title='更多'  ></span>
+										<span class='button edge parent more' id='moreBtn_${treeNode.tId}' title='更多'></span>
 								    </div>`;
 
                     if(scObj.length > 0){
@@ -667,7 +667,7 @@
 
                     let addStr =   `<div class="well edge-toolbars" id='toolbars_${treeNode.tId}' >
                                         <span class='button edge remove' id='delBtn_${treeNode.tId}' title='删除'></span>
-										<span class='button edge leaf more' id='moreBtn_${treeNode.tId}' title='更多'  ></span>
+										<span class='button edge leaf more' id='moreBtn_${treeNode.tId}' title='更多' style="display:none;"></span>
 								    </div>`;
 
                     if(scObj.length > 0){

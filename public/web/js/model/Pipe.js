@@ -253,14 +253,81 @@ class Pipe {
 
                             }
                         },
+                        // 初始化菜单项目
                         onInitConfig(){
                             fsHandler.callFsJScriptAsync("/matrix/pipe/getConfigList.js").then( (rtn)=>{
                                 this.config = rtn.message;
                             } );
                         },
+                        // 关闭调试、日志
                         onRemoveConsoleTab(targetName){
                             this.control[targetName].show = !this.control[targetName].show;
+                        },
+                        // 添加菜单项
+                        addSidebarIcon(graph, sidebar, label, image){
+                            // Function that is executed when the image is dropped on
+                            // the graph. The cell argument points to the cell under
+                            // the mousepointer if there is one.
+                            var funct = function(graph, evt, cell, x, y){
+                                var parent = graph.getDefaultParent();
+                                var model = graph.getModel();
+                                
+                                var v1 = null;
+                                
+                                model.beginUpdate();
+                                try {
+                                    // NOTE: For non-HTML labels the image must be displayed via the style
+                                    // rather than the label markup, so use 'image=' + image for the style.
+                                    // as follows: v1 = graph.insertVertex(parent, null, label,
+                                    // pt.x, pt.y, 120, 120, 'image=' + image);
+                                    v1 = graph.insertVertex(parent, null, label, x, y, 120, 120);
+                                    v1.setConnectable(false);
+                                    
+                                    // Presets the collapsed size
+                                    v1.geometry.alternateBounds = new mxRectangle(0, 0, 120, 40);
+                                                        
+                                    // Adds the ports at various relative locations
+                                    var port = graph.insertVertex(v1, null, 'Trigger', 0, 0.25, 16, 16,
+                                            'port;image=editors/images/overlays/flash.png;align=right;imageAlign=right;spacingRight=18', true);
+                                    port.geometry.offset = new mxPoint(-6, -8);
+                        
+                                    var port = graph.insertVertex(v1, null, 'Input', 0, 0.75, 16, 16,
+                                            'port;image=editors/images/overlays/check.png;align=right;imageAlign=right;spacingRight=18', true);
+                                    port.geometry.offset = new mxPoint(-6, -4);
+                                    
+                                    var port = graph.insertVertex(v1, null, 'Error', 1, 0.25, 16, 16,
+                                            'port;image=editors/images/overlays/error.png;spacingLeft=18', true);
+                                    port.geometry.offset = new mxPoint(-8, -8);
+
+                                    var port = graph.insertVertex(v1, null, 'Result', 1, 0.75, 16, 16,
+                                            'port;image=editors/images/overlays/information.png;spacingLeft=18', true);
+                                    port.geometry.offset = new mxPoint(-8, -4);
+
+                                } finally {
+                                    model.endUpdate();
+                                }
+                                
+                                graph.setSelectionCell(v1);
+                            }
+                            
+                            // Creates the image which is used as the sidebar icon (drag source)
+                            var img = document.createElement('img');
+                            img.setAttribute('src', image);
+                            img.style.width = '48px';
+                            img.style.height = '48px';
+                            img.title = 'Drag this to the diagram to create a new vertex';
+                            sidebar.appendChild(img);
+                            
+                            var dragElt = document.createElement('div');
+                            dragElt.style.border = 'dashed black 1px';
+                            dragElt.style.width = '120px';
+                            dragElt.style.height = '120px';
+                                                
+                            // Creates the image which is used as the drag icon (preview)
+                            var ds = mxUtils.makeDraggable(img, graph, funct, dragElt, 0, 0, true, true);
+                            ds.setGuidesEnabled(true);
                         }
+
                     }
                 })
 
@@ -373,7 +440,7 @@ class Pipe {
                                                                     </el-tooltip>
                                                                 </el-col>
                                                             </el-row>
-                                                        </el-header>   
+                                                        </el-header>
                                                         <el-main v-if="showView=='table'">
                                                             <el-table
                                                                 :data="dt.rows.slice((dt.pagination.currentPage - 1) * dt.pagination.pageSize,dt.pagination.currentPage * dt.pagination.pageSize)"
@@ -382,7 +449,8 @@ class Pipe {
                                                                 style="width: 100%;"
                                                                 :row-class-name="rowClassName"
                                                                 :header-cell-style="headerRender"
-                                                                ref="table">
+                                                                ref="table"
+                                                                v-if="!_.isEmpty(dt.rows)">
                                                                 <el-table-column type="selection" align="center" width="55"></el-table-column> 
                                                                 <el-table-column
                                                                     sortable 
@@ -424,9 +492,13 @@ class Pipe {
                                                                     </template>
                                                                 </el-table-column>
                                                             </el-table>
+                                                            <object data="/fs/assets/images/files/svg/toe.svg?type=open&issys=true" 
+                                                                type="image/svg+xml" style="position: absolute;width:100%;height:100%;background: #ffffff;top:15%;left:25%;"
+                                                                v-else>
+                                                            </object>
                                                         </el-main>
                                                         <el-main v-else>
-                                                            <el-checkbox-group v-model="dt.selected" class="pipe-grid-node">
+                                                            <el-checkbox-group v-model="dt.selected" class="pipe-grid-node" v-if="!_.isEmpty(dt.rows)">
                                                                 <el-button type="default" 
                                                                         style="max-width: 12em;width: 12em;height:110px;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);"
                                                                         @dblclick.native="onForward(item.fullname)"
@@ -441,6 +513,10 @@ class Pipe {
                                                                         <el-checkbox :label="item" :ref="'checkBox_'+item.id"></el-checkbox>
                                                                 </el-button>
                                                             </el-checkbox-group>
+                                                            <object data="/fs/assets/images/files/svg/toe.svg?type=open&issys=true" 
+                                                                type="image/svg+xml" style="position: absolute;width:100%;height:100%;background: #ffffff;top:15%;left:25%;"
+                                                                v-else>
+                                                            </object>
                                                         </el-main>
                                                         <el-footer style="height:30px;line-height:30px;">
                                                             <el-pagination

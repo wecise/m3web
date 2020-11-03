@@ -5666,19 +5666,19 @@ class System {
 													<el-container>
 														<el-main style="padding:0px 20px;">
 															<el-form ref="form" :model="dialog.appEdit.item" label-width="80px" >
-																<el-form-item label="中文名">
+																<el-form-item style="position:absolute;right:10px;">
+																	<el-button type="text" @click="tabs.activeName='icon'" style="background:#444444;border-radius:15px!important;padding:20px;">
+																		<el-image shape="square" fit="scale-down" style="width:64px;" :src="icon.value"></el-image>
+																	</el-button>
+																</el-form-item>
+																<el-form-item label="中文名" style="width:75%;">
 																	<el-input v-model="dialog.appEdit.item.cnname"></el-input>
 																</el-form-item>
-																<el-form-item label="英文名称">
+																<el-form-item label="英文名称" style="width:75%;">
 																	<el-input v-model="dialog.appEdit.item.enname"></el-input>
 																</el-form-item>
-																<el-form-item label="Url">
+																<el-form-item label="Url" style="width:75%;">
 																	<el-input v-model="dialog.appEdit.item.url"></el-input>
-																</el-form-item>
-																<el-form-item label="图标">
-																	<el-button type="text" @click="tabs.activeName='icon'">
-																		<el-avatar shape="square" fit="fill" size="100" :src="icon.value"></el-avatar>
-																	</el-button>
 																</el-form-item>
 																<el-form-item label="Target">
 																	<el-radio-group v-model="dialog.appEdit.item.target">
@@ -5707,16 +5707,18 @@ class System {
 													</span>
 													<el-container style="height:100%;">
 														<el-main style="height:300px;overflow:auto;padding:10px 0px;background:#666666;">
-															<el-radio-group v-model="icon.value">
-																<el-radio :label="'/fs'+icon.parent+'/'+icon.name+'?type=download&issys='+window.SignedUser_IsAdmin" 
-																	v-model="icon.value"  
+															<el-radio-group v-model="icon.value" class="mx-app-icon">
+																<el-button type="default" style="border: unset;width:100px;height:120px;margin:5px;padding:0px;cursor:pointer;background:transparent;" 
 																	v-for="icon in icon.list"
-																	:ref="'radio_'+icon.id"
-																	style="margin-left: 20px;">
-																	<el-button type="default" style="border: unset;width:100px;height:120px;margin:5px;padding:0px;cursor:pointer;background:transparent;" @click="onTriggerRadioClick(icon)"> 
-																		<el-image :src="icon | pickExtIcon" fit="fill"  style="width:48px;"></el-image> 
-																	</el-button>
-																</el-radio>
+																	:key="icon.id"
+																	@click="onTriggerRadioClick(icon)"> 
+																	<el-image :src="icon | pickExtIcon" fit="fill"  style="width:48px;"></el-image> 
+																	<p>
+																		<el-radio :label="'/fs'+icon.parent+'/'+icon.name+'?type=download&issys='+window.SignedUser_IsAdmin" 
+																			:ref="'radio_'+icon.id">
+																		</el-radio>
+																	</p>
+																</el-button>
 															</el-radio-group>
 														</el-main>
 														<el-footer style="padding:20px 0px 50px 0px;display:flex;height:auto;position:releative;">

@@ -1257,22 +1257,22 @@ class Omdb{
                                 <div style="padding:20px;" v-if="model.type=='create-class'">
                                     <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 创建类成功。</h3>
                                 </div>
-                                <div style="padding:20px;" v-if="model.type=='drop-class'">
+                                <div style="padding:20px;" v-else-if="model.type=='drop-class'">
                                     <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 删除类成功。</h3>
                                 </div>
-                                <div style="padding:20px;" v-if="model.type=='delete'">
+                                <div style="padding:20px;" v-else-if="model.type=='delete'">
                                     <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 删除数据成功。</h3>
                                 </div>
-                                <div style="padding:20px;" v-if="model.type=='create-edge-type'">
+                                <div style="padding:20px;" v-else-if="model.type=='create-edge-type'">
                                     <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 创建关系成功。</h3>
                                 </div>
-                                <div style="padding:20px;" v-if="model.type=='drop-edge-type'">
+                                <div style="padding:20px;" v-else-if="model.type=='drop-edge-type'">
                                     <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 删除关系成功。</h3>
                                 </div>
-                                <div style="padding:20px;" v-if="model.type=='alter-class'">
+                                <div style="padding:20px;" v-else-if="model.type=='alter-class'">
                                     <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 更新类成功。</h3>
                                 </div>
-                                <div style="padding:20px;" v-if="model.type=='insert-class'">
+                                <div style="padding:20px;" v-else-if="model.type=='insert-class'">
                                     <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 插入成功。</h3>
                                 </div>
                                 <div style="padding:20px;" v-else>

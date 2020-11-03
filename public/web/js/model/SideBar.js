@@ -384,57 +384,64 @@ class SideBar {
                 }
             },
             template:   `<el-container style="position:fixed;z-index:20;top:0;left:0;width:100%;background:rgb(37, 45, 71);" id="header">
-                            <el-header style="padding:0px 0px 0px 10px;height:50px;line-height:50px;display:flex;">
-                                <div style="width:88%;">
-                                    <el-link href="/" :underline="false">
-                                        <img id="company_logo" src="">
-                                        <span style="color:#ffffff;">#{mxTitle}#</span>
-                                    </el-link>
-                                </div>
-                                <div id="ai-robot" style="width:6%;"></div>
-                                <div style="width:6%;">
-                                    <el-menu :default-active="activeIndex" 
-                                            class="topbar-el-menu" 
-                                            mode="horizontal" 
-                                            @select="onSelect"
-                                            menu-trigger="hover">
-                                        <el-submenu index="1">
-                                            <template slot="title">
-                                                <i class="el-icon-user-solid" style="color:#ffffff;"></i> #{window.SignedUser_UserName}#
-                                            </template>
-                                            <el-menu-item index="/matrix/user">
+                            <el-header style="padding:0px 0px 0px 10px;height:50px;line-height:50px;">
+                                <el-row type="flex" :gutter="0">
+                                    <el-col :span="19">
+                                        <el-link href="/" :underline="false">
+                                            <img id="company_logo" src="">
+                                            <span style="color:#ffffff;">#{mxTitle}#</span>
+                                        </el-link>
+                                    </el-col>
+                                    <el-col :span="1" style="text-align: right;">
+                                        <div id="ai-robot"></div>
+                                    </el-col>
+                                    <el-col :span="2" style="text-align: left;">
+                                        <el-link href="/matrix/notes" target="_blank" type="primary" :underline="false" v-if="mx.global.register.trainingCenter">培训中心</el-link>
+                                    </el-col>
+                                    <el-col :span="2">
+                                        <el-menu :default-active="activeIndex" 
+                                                class="topbar-el-menu" 
+                                                mode="horizontal" 
+                                                @select="onSelect"
+                                                menu-trigger="hover">
+                                            <el-submenu index="1">
                                                 <template slot="title">
-                                                    <i class="el-icon-user"></i>
-                                                    <span slot="title">#{ $t('topBar.menu.userInfo') }#</span>
+                                                    <i class="el-icon-user-solid" style="color:#ffffff;"></i> #{window.SignedUser_UserName}#
                                                 </template>
-                                            </el-menu-item>
-                                            <el-menu-item index="/matrix/system" divided v-if="mxAuth.isAdmin">
-                                                <template slot="title">
-                                                    <i class="el-icon-setting"></i>
-                                                    <span slot="title">#{ $t('topBar.menu.systemMain') }#</span>
-                                                </template>
-                                            </el-menu-item>
-                                            <el-menu-item index="/matrix/files">
-                                                <template slot="title">
-                                                    <i class="el-icon-folder-opened"></i>
-                                                    <span slot="title">#{ $t('topBar.menu.myFiles') }#</span>
-                                                </template>
-                                            </el-menu-item>
-                                            <el-menu-item index="home">
-                                                <template slot="title">
-                                                    <i class="el-icon-s-home"></i>
-                                                    <span slot="title">#{ $t('topBar.menu.defaultHome') }#</span>
-                                                </template>
-                                            </el-menu-item>
-                                            <el-menu-item index="signout" divided>
-                                                <template slot="title">
-                                                    <i class="el-icon-switch-button"></i>
-                                                    <span slot="title">#{ $t('topBar.menu.signOut') }#</span>
-                                                </template>
-                                            </el-menu-item>
-                                        </el-submenu>
-                                    </el-menu>
-                                </div>
+                                                <el-menu-item index="/matrix/user">
+                                                    <template slot="title">
+                                                        <i class="el-icon-user"></i>
+                                                        <span slot="title">#{ $t('topBar.menu.userInfo') }#</span>
+                                                    </template>
+                                                </el-menu-item>
+                                                <el-menu-item index="/matrix/system" divided v-if="mxAuth.isAdmin">
+                                                    <template slot="title">
+                                                        <i class="el-icon-setting"></i>
+                                                        <span slot="title">#{ $t('topBar.menu.systemMain') }#</span>
+                                                    </template>
+                                                </el-menu-item>
+                                                <el-menu-item index="/matrix/files">
+                                                    <template slot="title">
+                                                        <i class="el-icon-folder-opened"></i>
+                                                        <span slot="title">#{ $t('topBar.menu.myFiles') }#</span>
+                                                    </template>
+                                                </el-menu-item>
+                                                <el-menu-item index="home">
+                                                    <template slot="title">
+                                                        <i class="el-icon-s-home"></i>
+                                                        <span slot="title">#{ $t('topBar.menu.defaultHome') }#</span>
+                                                    </template>
+                                                </el-menu-item>
+                                                <el-menu-item index="signout" divided>
+                                                    <template slot="title">
+                                                        <i class="el-icon-switch-button"></i>
+                                                        <span slot="title">#{ $t('topBar.menu.signOut') }#</span>
+                                                    </template>
+                                                </el-menu-item>
+                                            </el-submenu>
+                                        </el-menu>
+                                    </el-col>
+                                </el-row>
                             </el-header>
                         </el-container>`,
             mounted(){

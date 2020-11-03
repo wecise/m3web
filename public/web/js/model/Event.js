@@ -3021,39 +3021,51 @@ class Event {
                             }
                         },
                         action(event){
-                            const self = this;
                             
-                            let tip = null;
+                            let tip = [];
                             let list = [];
 
                             if(event.list.length < 2){
                                 list = event.list;
-                                tip = `确定要【${mx.global.register.event.status[event.action][1]}】以下事件？<br><br>
-                                        告警摘要：${list[0].msg}<br><br>
-                                        告警时间：${moment(list[0].vtime).format("YYYY-MM-DD HH:mm:ss")}<br><br>
-                                        告警级别：${list[0].severity}<br><br>
-                                        告警时间：${list[0].status}<br><br>
-                                        告警ID：${list[0].id}`
+                                tip = [
+                                        `告警摘要：${list[0].msg}`,
+                                        `告警时间：${moment(list[0].vtime).format("YYYY-MM-DD HH:mm:ss")}`,
+                                        `告警级别：${list[0].severity}`,
+                                        `告警时间：${list[0].status}`,
+                                        `告警ID：${list[0].id}`
+                                    ];
                             } else {
                                 list =  _.map(event.list,function(v){ 
                                             return _.pick(v, ['id','class'])
                                         });
                                 let ids = _.map(list,'id').join("<br><br>");
-                                tip = `确定要【${mx.global.register.event.status[event.action][1]}】以下事件？<br><br>
-                                        告警ID【${list.length}】：<br><br>${ids}`
+                                tip = [
+                                        `告警ID【${list.length}】：`,
+                                        `${ids}`
+                                    ];
                             }
 
-                            alertify.confirm(`${tip}`, function (e) {
-                                if (e) {
-                                    let rtn = fsHandler.callFsJScript("/matrix/event/action-by-id.js", encodeURIComponent(JSON.stringify(event).replace(/%/g,'%25'))).message;
+                            const h = this.$createElement;
+                            this.$msgbox({
+                                    title: `确定要【${mx.global.register.event.status[event.action][1]}】以下事件？`, 
+                                    message: h('span', null, _.map(tip,(v)=>{ return h('p', null, v);})),
+                                    showCancelButton: true,
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                    type: 'warning'
+                            }).then(() => {
+
+                                fsHandler.callFsJScriptAsync("/matrix/event/action-by-id.js", encodeURIComponent(JSON.stringify(event).replace(/%/g,'%25'))).then( (val)=>{
+                                    let rtn = val.message;
+
                                     if(rtn == 1){
-                                        //self.options.term = _.map(list,'id').join(";");
-                                        self.$refs.searchRef.search();
+                                        this.$refs.searchRef.search();
                                     }
-                                } else {
+                                } );
+
+                            }).catch(() => {
                                     
-                                }
-                            });
+                            }); 
                             
                         },
                         contextMenu(tId,inst,items,fun){
@@ -3078,30 +3090,48 @@ class Event {
                                                 let action = _.last(key.split("_"));
                                                 self.action({list: [inst.selectedRows], action:action});
                                             } else if(_.includes(key,'ticket')){
-                                                alertify.confirm(`确定生成工单<br><br>
-                                                                    告警ID：${inst.selectedRows.id}<br><br>
-                                                                    实体ID：${inst.selectedRows.entity}<br><br>
-                                                                    模板ID：b223c78b-3107-11e6-8487-446d577ed81c<br><br>
-                                                                    告警摘要：${inst.selectedRows.msg}<br><br>
-                                                                    告警时间：${moment(inst.selectedRows.vtime).format("LLL")}<br><br>`, function (e) {
-                                                    if (e) {
-                                                        try{
-                                                            let rtn = fsHandler.callFsJScript("/matrix/readysoft/eventToTicket.js", encodeURIComponent(JSON.stringify(inst.selectedRows).replace(/%/g,'%25'))).message.data;
-                                                            if(rtn.data.success == 1){
-                                                                self.options.term = inst.selectedRows.id;
-                                                                self.$refs.searchRef.search();
-                                                                alertify.success(`创建工单成功! <br><br>
-                                                                            工单单号：${rtn.data.ticket_number}`)
-                                                            }
-                                                        }catch(err){
-                                                            alertify.error(`创建工单失败，请确认！ <br><br>
-                                                                            ${rtn}<br><br>
-                                                                            ${err}`)
+                                                
+
+                                                const h = this.$createElement;
+                                                this.$msgbox({
+                                                        title: `确定生成工单`, 
+                                                        message: h('span', null, [
+                                                            h('p', null, `告警ID：${inst.selectedRows.id}`),
+                                                            h('p', null, `实体ID：${inst.selectedRows.entity}`),
+                                                            h('p', null, `模板ID：b223c78b-3107-11e6-8487-446d577ed81c`),
+                                                            h('p', null, `告警摘要：${inst.selectedRows.msg}`),
+                                                            h('p', null, `告警时间：${moment(inst.selectedRows.vtime).format("LLL")}`)
+                                                        ]),
+                                                        showCancelButton: true,
+                                                        confirmButtonText: '确定',
+                                                        cancelButtonText: '取消',
+                                                        type: 'warning'
+                                                }).then(() => {
+
+                                                    fsHandler.callFsJScriptAsync("/matrix/readysoft/eventToTicket.js", encodeURIComponent(JSON.stringify(inst.selectedRows).replace(/%/g,'%25'))).then( (val)=>{
+                                                        let rtn = val.message.data;
+
+                                                        if(rtn.data.success == 1){
+                                                            self.options.term = inst.selectedRows.id;
+                                                            self.$refs.searchRef.search();
+                                                            
+                                                            self.$message({
+                                                                type: "success",
+                                                                message: `创建工单成功! <br><br>工单单号：${rtn.data.ticket_number}`
+                                                            });
+
+                                                        } else {
+                                                            self.$message({
+                                                                type: "error",
+                                                                message: `创建工单失败：` + rtn
+                                                            });
                                                         }
-                                                    } else {
+                                                    } );
+
+                                                }).catch(() => {
                                                         
-                                                    }
-                                                });
+                                                }); 
+
                                             }
                                         },
                                         items: items

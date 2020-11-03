@@ -54,28 +54,28 @@ Vue.component("mx-app-deploy",{
         }
     },
     template:  `<el-container>
-                    <el-main style="padding:0px 20px;">
+                    <el-main style="padding:0px;">
                         <el-tabs v-model="app.activeTab" ref="tabs">
                             <el-tab-pane name="app">
                                 <span slot="label" style="font-size:14px;">
                                     <i class="el-icon-s-platform"></i> 应用信息
                                 </span>
                                 <el-container style="height:100%;">
-                                    <el-main style="height:100%;overflow:auto;padding:10px 0px;">
+                                    <el-main style="height:100%;overflow:auto;">
                                         <el-form ref="form" :model="app" label-width="80px">
-                                            <el-form-item label="中文名">
+                                            <el-form-item style="position:absolute;right:10px;">
+                                                <el-button type="text" @click="app.activeTab='icon'" style="background:#444444;border-radius:15px!important;padding:20px;">
+                                                    <el-image shape="square" fit="scale-down" style="width:64px;" :src="app.icon.value"></el-image>
+                                                </el-button>
+                                            </el-form-item>
+                                            <el-form-item label="中文名" style="width:75%;">
                                                 <el-input v-model="app.cnname"></el-input>
                                             </el-form-item>
-                                            <el-form-item label="英文名称">
+                                            <el-form-item label="英文名称" style="width:75%;">
                                                 <el-input v-model="app.enname"></el-input>
                                             </el-form-item>
-                                            <el-form-item label="应用地址" v-if="_.isEmpty(model.item)">
+                                            <el-form-item label="应用地址" v-if="_.isEmpty(model.item)" style="width:75%;">
                                                 <el-input v-model="app.url" placeholder="应用地址:http://www.baidu.com"></el-input>
-                                            </el-form-item>
-                                            <el-form-item label="图标选择">
-                                                <el-button type="text" @click="app.activeTab='icon'">
-                                                    <el-avatar shape="square" fit="fill" size="100" :src="app.icon.value"></el-avatar>
-                                                </el-button>
                                             </el-form-item>
                                             <el-form-item label="打开方式"">
                                                 <el-radio-group v-model="app.target">
@@ -102,19 +102,18 @@ Vue.component("mx-app-deploy",{
                                     <i class="el-icon-picture"></i> 选择图标
                                 </span>
                                 <el-container style="height:100%;">
-                                    <el-main style="height:300px;overflow:auto;padding:10px 0px;background:#666666;">
-                                        <el-radio-group v-model="app.icon.value">
-                                            <el-radio :label="'/fs'+icon.parent+'/'+icon.name+'?type=open&issys='+window.SignedUser_IsAdmin" 
-                                                v-model="app.icon.value"  
-                                                v-for="icon in app.icon.list"
-                                                :ref="'radio_'+icon.id"
-                                                style="margin-left: 20px;">
-                                                <el-button type="default" style="border: unset;width:100px;height:120px;margin:5px;padding:0px;cursor:pointer;background:transparent;" @click="onTriggerRadioClick(icon)"> 
-                                                    <el-image :src="icon | pickIcon" fit="fill" 
-                                                    style="width:48px;">
-                                                    </el-image> 
-                                                </el-button>
-                                            </el-radio>
+                                    <el-main style="height:300px;overflow:auto;padding:10px 0px;background:#444444;">
+                                        <el-radio-group v-model="app.icon.value" class="mx-app-icon">
+                                            <el-button type="default" 
+                                                style="border: unset;width:9em;height:11em;margin:5px;padding:0px;cursor:pointer;background:transparent;" 
+                                                @click="onTriggerRadioClick(icon)"
+                                                :key="icon.id"
+                                                v-for="icon in app.icon.list"> 
+                                                <el-image :src="icon | pickIcon" fit="scale-down" style="width:48px;"></el-image> 
+                                                <p>
+                                                    <el-radio :label="icon | pickLabel" :ref="'radio_'+icon.id"></el-radio>
+                                                </p>
+                                            </el-button>
                                         </el-radio-group>
                                     </el-main>
                                     <el-footer style="padding:20px 0px 50px 0px;display:flex;height:auto;position:releative;">
@@ -144,6 +143,9 @@ Vue.component("mx-app-deploy",{
     filters:{
         pickIcon(icon) {
             return `/fs${icon.parent}/${icon.name}?type=open&issys=${window.SignedUser_IsAdmin}`;
+        },
+        pickLabel(icon){
+            return '/fs'+icon.parent+'/'+icon.name+'?type=open&issys='+window.SignedUser_IsAdmin;
         }
     },
     mounted(){

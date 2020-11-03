@@ -98,12 +98,24 @@
             outline: unset;
         }
 
+        .is-fullscreen{
+            position: absolute;
+            z-index: 30000!important;
+            background-color: rgba(255, 255, 255, .3)!important;
+            margin: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            transition: opacity .3s
+        }
+        
 	</style>
 
 	
 	/*----------  最外层element会自动增加组件同名 class="omdb-editor-component"  ----------*/
 	<template>
-		<el-container>
+        <el-container>
 			<el-header id="editorToolBar" style="padding:0px 10px;height:30px;line-height: 30px;display: flex;">
 				<el-button-group style="width:70%;">
                     <el-tooltip content="另存到文件系统" placement="bottom" open-delay="500">
@@ -202,7 +214,8 @@
                         bValue: "",
                         eValue: ""
                     }
-                }
+                },
+                loading: null
             }
         },
         filters: {
@@ -259,6 +272,15 @@
             });
         },
         methods: {
+            sLoading(){
+                this.loading = this.$loading({
+                    lock: true,
+                    background: 'rgba(0, 0, 0, 0.6)'
+                });
+            },
+            eLoading(){
+                this.loading.close();
+            },
             init() {
                 this.langTools = ace.require("ace/ext/language_tools");
                 this.editor = ace.edit(this.$refs.editor.$el);
@@ -462,8 +484,12 @@
                     _mql = self.editor.getSelectedText();
                 }
 
+                this.sLoading();
+
                 omdbHandler.fetchDataByMqlAsync(_mql).then( (val)=>{
                     let _list = val;
+
+                    this.eLoading();
 
                     if(_list.status === 'ok'){
                         self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].logAppend('info',_list);
@@ -494,6 +520,7 @@
                             type: "info",
                             message: "查询结果为空"
                         });
+
                         return false;
                     }
 
@@ -916,8 +943,12 @@
                     _mql = self.editor.getSelectedText();
                 }
 
+                this.sLoading();
+
                 omdbHandler.fetchDataByMqlAsync(_mql).then( (rtn)=>{
                     let _list = rtn;
+
+                    this.eLoading();
 
                     if(_list.status === 'ok'){
                         // 输出日志
@@ -1073,6 +1104,8 @@
             queryAndSave(){
                 const self = this;
 
+                this.sLoading();
+
                 let _mql = self.editor.getValue();
 
                 if(_.isEmpty(self.editor.getValue())){
@@ -1086,6 +1119,9 @@
                 _mql = _mql.replace(/\n/g,' ').replace(/\t/g,' ').replace(/\\/g,' ');
 
                 omdbHandler.fetchDataByMqlAsync(_mql).then( (val)=>{
+                    
+                    this.eLoading();
+
                     let _list = val;
 
                     let _content = JSON.stringify({mql: _mql, result: {message: _list.message, meta: _list.meta}},null,4).replace(/   /g, ' ');

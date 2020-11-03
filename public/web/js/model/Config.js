@@ -833,118 +833,6 @@ class Config {
                                 })
                             }
                         },
-                        removeNode: function() {
-                            let self = this;
-                            let _key = self.etcd.key;
-    
-                            swal({
-                                title: _key,
-                                text: 'Are you sure,delete it?',
-                                type: 'warning',
-                                showCancelButton: true,
-                                confirmButtonColor: '#3085d6',
-                                cancelButtonColor: '#d33',
-                                confirmButtonText: 'Yes, delete it!'
-                            }).then((result) => {
-                                if (result.value) {
-                                    jQuery.ajax({
-                                        url: '/config/del',
-                                        type: 'POST',
-                                        dataType: 'json',
-                                        data: {
-                                            key:_key
-                                        },
-                                        complete: function(xhr, textStatus) {
-                                            //called when complete
-                                        },
-                                        success: function(data, textStatus, xhr) {
-    
-                                            swal("Deleted!", self.etcd.key, "success");
-                                            
-                                            eventHub.$emit("CONFIG-TREE-REFRESH-EVENT", _key);
-                                        },
-                                        error: function(xhr, textStatus, errorThrown) {
-                                            //called when there is an error
-                                        }
-                                    })
-                                }
-                            })
-                        },
-                        saveNode: function(){
-                            let self = this;
-                            var key = self.etcd.key;
-                            var value = self.editor.getValue();
-                            var ttl = self.etcd.ttl;
-                            
-                            jQuery.ajax({
-                                url: '/config/set',
-                                type: 'POST',
-                                dataType: 'json',
-                                data: {
-                                    key,
-                                    value,
-                                    ttl
-                                },
-                                complete: function(xhr, textStatus) {
-                                    //called when complete
-                                },
-                                success: function(data, textStatus, xhr) {
-    
-                                    swal("success!", self.etcd.key, "success");
-                                    
-                                    eventHub.$emit("CONFIG-TREE-REFRESH-EVENT", key);
-                                },
-                                error: function(xhr, textStatus, errorThrown) {
-                                    //called when there is an error
-                                }
-                            })
-                        },
-                        debug: function () {
-                            let self = this;
-                            
-                            mxLog.consoleName = 'M³ Debug Console' + " Trigger";
-                            mxLog.show();
-    
-                            let debugMe = function () {
-    
-                                let _param = "#/matrix/consolelog/rule: | sort vtime asc  | top 100";
-                                
-                                mxLog.write("");
-    
-                                jQuery.ajax({
-                                    url: '/mxobject/search',
-                                    type: 'POST',
-                                    dataType: 'json',
-                                    data: { 
-                                        cond: _param, 
-                                        flag: false 
-                                    },
-                                    beforeSend:function(xhr){ 
-                                    },
-                                    complete: function(xhr, textStatus) {
-                                        //func.call();
-                                    },
-                                    success: function(data, textStatus, xhr) {
-                                        
-                                        if(_.isEmpty(data.message)) {
-                                          return false;
-                                        }
-    
-                                        let _tmp = _.map(data.message,_.partialRight(_.pick, ['vtime','msg']));
-                                        _.forEach(_tmp,function(v,index) {
-                                            mxLog.writeln("["+moment(v.vtime).format("LLL")+"] " + v.msg); 
-                                        });
-                                    },
-                                    error: function(xhr, textStatus, errorThrown) {
-                                        mxLog.warn(errorThrown);
-                                    }
-                                })   
-                            }
-    
-                            debugMe();
-                            let _sched = later.parse.text('every 15 sec');
-                            let _timer = later.setInterval(debugMe, _sched);
-                        },
                         logClose(){
                             this.splitInst.setSizes([100,0]);
                         },
@@ -1018,7 +906,7 @@ class Config {
                                             <el-aside style="background-color:#f6f6f6!important;overflow:hidden;" ref="leftView">
                                                 <config-tree-component id="config-tree" :zNodes="configTreeNodes" style="height: calc(100vh - 150px);"></config-tree-component>
                                             </el-aside>
-                                            <el-main style="padding:0px;" ref="mainView">                            
+                                            <el-main style="padding:0px;position: relative;" ref="mainView">                            
                                                 <el-tabs v-model="configTabs.activeIndex" type="border-card" closable @tab-remove="configClose" @tab-click="configToggle">
                                                     <el-tab-pane :key="item.name" :name="item.name" v-for="item in configTabs.tabs">
                                                         <span slot="label" v-if="item.dir">
@@ -1054,12 +942,45 @@ class Config {
                                                         <config-manage :id="item.name" :model="item.model" :ref="'configManageRef'+objectHash.sha1(item.name)"></config-manage>
                                                     </el-tab-pane>
                                                 </el-tabs>
+                                                <object data="/fs/assets/images/files/svg/configWorld.svg?type=open&issys=true" 
+                                                    type="image/svg+xml" style="position: absolute;width:40vw;height:40vh;background: #ffffff;top:22.5%;left:20%;"
+                                                    v-show="_.isEmpty(configTabs.tabs)"></object>
                                             </e-main>
                                         </el-container>
                                     </el-main>
                                     <el-footer style="height: 30px;line-height: 30px;padding: 0 10px;">
                                         <i class="el-icon-user"></i> #{window.SignedUser_UserName}#    <i class="el-icon-timer"></i> #{moment().format(mx.global.register.format)}# </Footer>
-                                    </el-footer>     
+                                    </el-footer>
+                                    <el-dialog title="新增配置" :visible.sync="dialog.configNew.show" v-if="dialog.configNew.show" destroy-on-close="true">
+                                        <el-container>
+                                            <el-main style="padding:0px 20px;height:100%;overflow:auto;">
+                                                <el-form label-width="80">
+                                                    <el-form-item label="位置" prop="parent">
+                                                        <el-input v-model="dialog.configNew.parent" placeholder="位置" :disabled="true"></el-input>
+                                                    </el-form-item>
+                                                    <el-form-item label="名称" prop="name">
+                                                        <el-input v-model="dialog.configNew.name" placeholder="配置名称" autofocus="true"></el-input>
+                                                    </el-form-item>
+                                                    <el-form-item :label="dialog.configNew.formItem.ifDir?'目录':'配置'">
+                                                        <el-switch v-model="dialog.configNew.formItem.ifDir" active-color="#13ce66">
+                                                            <span slot="true">是</span>
+                                                            <span slot="false">否</span>
+                                                        </el-switch>
+                                                    </el-form-item>
+                                                    <el-form-item label="TTL" prop="ttl">
+                                                        <el-input v-model="dialog.configNew.formItem.ttl" placeholder="TTL"></el-input>
+                                                    </el-form-item>
+                                                    <el-form-item label="值" prop="value">
+                                                        <el-input v-model="dialog.configNew.formItem.value" type="textarea" placeholder="配置内容"></el-input>
+                                                    </el-form-item>
+                                                </el-form>
+                                            </el-main>
+                                            <el-footer style="text-align:right;">
+                                                <el-button type="default" @click="dialog.configNew.show = false;">取消</el-button>
+                                                <el-button type="primary" @click="onConfigSave" :loading="dialog.configNew.loading">提交</el-button>
+                                            </el-footer>
+                                        </el-container>
+                                    </el-dialog> 
                                 </el-container>`,
                     data: {
                         splitInst: null,
@@ -1069,7 +990,20 @@ class Config {
                         },
                         configTreeNodes:{},
                         configTreeSelectedNode:{},
-
+                        dialog:{
+                            configNew: {
+                                show: false,
+                                parent: '',
+                                name: '',
+                                formItem: {
+                                    key: '',
+                                    value: '',
+                                    ttl: null,
+                                    ifDir: true,
+                                },
+                                loading: false
+                            }
+                        }
                     },
                     created() {
                         eventHub.$on("CONFIG-TREE-CLICK-EVENT", this.configOpen);
@@ -1077,12 +1011,26 @@ class Config {
                     mounted() {
                         
                         this.$nextTick(()=>{
-                            if(window.SignedUser_IsAdmin && window.COMPANY_OSPACE=='matrix'){
-                                this.configTreeNodes = configHandler.configGet("/");
-                            } else {
-                                this.configTreeNodes = configHandler.configGet("/"+window.COMPANY_OSPACE);
-                            }
 
+                            this.initData();
+
+                            this.initSplit();
+                        })
+                        
+                    },
+                    methods: {
+                        initData(){
+                            if(window.SignedUser_IsAdmin && window.COMPANY_OSPACE=='matrix'){
+                                configHandler.configGetAsync("/").then( (rtn)=>{
+                                    this.configTreeNodes = rtn;
+                                } );
+                            } else {
+                                configHandler.configGetAsync("/"+window.COMPANY_OSPACE).then( (rtn)=>{
+                                    this.configTreeNodes = rtn;
+                                } );
+                            }
+                        },
+                        initSplit(){
                             this.splitInst = Split([this.$refs.leftView.$el, this.$refs.mainView.$el], {
                                 sizes: [20, 80],
                                 minSize: [0, 0],
@@ -1090,10 +1038,7 @@ class Config {
                                 cursor: 'col-resize',
                                 direction: 'horizontal'
                             });
-                        })
-                        
-                    },
-                    methods: {
+                        },
                         tabClose(key,tab){
                             const self = this;
 
@@ -1266,108 +1211,67 @@ class Config {
                             });
                         },
                         configNew(){
-                            const self = this;
 
-                            let wnd = null;
-                            try{
-                                if(jsPanel.activePanels.getPanel('jsPanel-configNew')){
-                                    jsPanel.activePanels.getPanel('jsPanel-configNew').close();
-                                }
-                            }catch(error){
-            
+                            // 初始化位置
+                            this.dialog.configNew.parent = this.configTreeSelectedNode.key || '/';
+
+                            this.dialog.configNew.show = true;
+
+                        },
+                        onConfigSave(){
+                            
+
+                            if(_.isEmpty(this.dialog.configNew.name)){
+                                this.$message({
+                                    type: "warning",
+                                    message: "配置名称不能为空！"
+                                })
+                                return false;
                             }
-                            finally{
-                                wnd = maxWindow.winConfig('新增', '<div id="config-new-window"></div>', null,null);
-                            }
 
-                            new Vue({
-                                delimiters: ['#{', '}#'],
-                                template:   `<el-container style="height:100%;">
-                                                <el-main style="padding:0px 20px;height:100%;overflow:auto;">
-                                                    <el-form label-width="80">
-                                                        <el-form-item label="位置" prop="parent">
-                                                            <el-input v-model="parent" placeholder="位置" :disabled="true"></el-input>
-                                                        </el-form-item>
-                                                        <el-form-item label="名称" prop="name">
-                                                            <el-input v-model="name" placeholder="节点名称" autofocus="true"></el-input>
-                                                        </el-form-item>
-                                                        <el-form-item :label="formItem.ifDir?'目录':'节点'">
-                                                            <el-switch v-model="formItem.ifDir" active-color="#13ce66">
-                                                                <span slot="true">是</span>
-                                                                <span slot="false">否</span>
-                                                            </el-switch>
-                                                        </el-form-item>
-                                                        <el-form-item label="TTL" prop="ttl">
-                                                            <el-input v-model="formItem.ttl" placeholder="TTL"></el-input>
-                                                        </el-form-item>
-                                                        <el-form-item label="值" prop="value">
-                                                            <el-input v-model="formItem.value" type="textarea" placeholder="输入值。。。"></el-input>
-                                                        </el-form-item>
-                                                    </el-form>
-                                                </el-main>
-                                                <el-footer style="text-align:right;">
-                                                    <el-button type="default" @click="cancel">取消</el-button>
-                                                    <el-button type="primary" @click="save">保存</el-button>
-                                                </el-footer>
-                                            </el-container>`,
-                                data: {
-                                    parent: '',
-                                    name: '',
-                                    formItem: {
-                                        key: '',
-                                        value: '',
-                                        ttl: null,
-                                        ifDir: true,
-                                    }
-                                },
-                                mounted(){
-                                    // 初始化位置
-                                    this.parent = self.configTreeSelectedNode.key || '/';
-                                },
-                                methods: {
-                                    save(){
+                            this.dialog.configNew.loading = true;
+                            
+                            this.dialog.configNew.formItem.key = [this.dialog.configNew.parent, this.dialog.configNew.name].join("/").replace(/\/\//g,'/');
+                            
+                            const h = this.$createElement;
+                            this.$msgbox({
+                                    title: `确认要添加以下配置`, 
+                                    message: h('span', null, [
+                                        h('p', null, `位置：${this.dialog.configNew.formItem.key}`),
+                                        h('p', null, `值：${_.truncate(this.dialog.configNew.formItem.value)}`),
+                                        h('p', null, `TTL：${ this.dialog.configNew.formItem.ttl ? this.dialog.configNew.formItem.ttl : ''}`)
+                                    ]),
+                                    showCancelButton: true,
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                    type: 'warning'
+                            }).then(() => {
+
+                                configHandler.configAddAsync(this.dialog.configNew.formItem).then( (rtn)=>{
+                                    if(rtn == 1){
+                                        this.$message({
+                                            type: "success",
+                                            message: "保存成功！"
+                                        })
                                         
-                                        this.formItem.key = [this.parent, this.name].join("/").replace(/\/\//g,'/');
+                                        eventHub.$emit("CONFIG-TREE-REFRESH-EVENT", this.dialog.configNew.formItem.key);
                                         
-                                        const h = this.$createElement;
-										this.$msgbox({
-												title: `确认要添加以下配置`, 
-												message: h('span', null, [
-													h('p', null, `位置：${this.formItem.key}`),
-													h('p', null, `值：${_.truncate(this.formItem.value)}`),
-													h('p', null, `TTL：${ this.formItem.ttl ? this.formItem.ttl : ''}`)
-												]),
-												showCancelButton: true,
-												confirmButtonText: '确定',
-												cancelButtonText: '取消',
-												type: 'warning'
-										}).then(() => {
+                                        this.dialog.configNew.show = false;
 
-											let rtn = configHandler.configAdd(this.formItem);
-                                            if(rtn == 1){
-                                                this.$message({
-                                                    type: "success",
-                                                    message: "保存成功！"
-                                                })
-                                                eventHub.$emit("CONFIG-TREE-REFRESH-EVENT", this.formItem.key);
-                                                this.cancel();
-                                            } else {
-                                                this.$message({
-                                                    type: "error",
-                                                    message: "保存失败：" + rtn
-                                                })
-                                            }
-
-										}).catch(() => {
-												
-										}); 
-
-                                    },
-                                    cancel(){
-                                        wnd.close();
+                                    } else {
+                                        this.$message({
+                                            type: "error",
+                                            message: "保存失败：" + rtn
+                                        })
                                     }
-                                }
-                            }).$mount("#config-new-window");
+
+                                    this.dialog.configNew.loading = false;
+                                } );
+
+                            }).catch(() => {
+                                this.dialog.configNew.loading = false;
+                            }); 
+
                         },
                         configUpdate(){
                             
@@ -1387,7 +1291,7 @@ class Config {
                                     message: h('span', null, [
                                         h('p', null, `位置：${item.key}`),
                                         h('p', null, `值：${_.truncate(item.value)}`),
-                                        h('p', null, `TTL：${item.ttl}`)
+                                        h('p', null, `TTL：${ _.isUndefined(item.ttl) ? '' : item.ttl }`)
                                     ]),
                                     showCancelButton: true,
                                     confirmButtonText: '确定',
@@ -1395,19 +1299,20 @@ class Config {
                                     type: 'warning'
                             }).then(() => {
 
-                                let rtn = configHandler.configAdd(item);
-                                if(rtn == 1){
-                                    this.$message({
-                                        type: "success",
-                                        message: "更新成功！"
-                                    })
-                                    eventHub.$emit("CONFIG-TREE-REFRESH-EVENT", item.key);
-                                } else {
-                                    this.$message({
-                                        type: "error",
-                                        message: "更新失败：" + rtn
-                                    })
-                                }
+                                configHandler.configAddAsync(item).then( (rtn)=>{
+                                    if(rtn == 1){
+                                        this.$message({
+                                            type: "success",
+                                            message: "更新成功！"
+                                        })
+                                        eventHub.$emit("CONFIG-TREE-REFRESH-EVENT", item.key);
+                                    } else {
+                                        this.$message({
+                                            type: "error",
+                                            message: "更新失败：" + rtn
+                                        })
+                                    }
+                                } );
 
                             }).catch(() => {
                                     
@@ -1424,7 +1329,7 @@ class Config {
                                     message: h('span', null, [
                                         h('p', null, `位置：${item.key}`),
                                         h('p', null, `值：${_.truncate(item.value)}`),
-                                        h('p', null, `TTL：${item.ttl}`)
+                                        h('p', null, `TTL：${  _.isUndefined(item.ttl) ? '' : item.ttl }`)
                                     ]),
                                     showCancelButton: true,
                                     confirmButtonText: '确定',
@@ -1432,17 +1337,17 @@ class Config {
                                     type: 'warning'
                             }).then(() => {
 
-                                let rtn = configHandler.configDelete(item);
-                                    
-                                if(rtn == 1){
-                                    // 刷新Tree
-                                    eventHub.$emit("CONFIG-TREE-REFRESH-EVENT",item.key);
-                                    // 关闭Tab
-                                    this.configClose(item.key);
-                                    // 重置选择
-                                    this.configTreeSelectedNode = null;
-
-                                }
+                                configHandler.configDeleteAsync(item).then( (rtn)=>{
+                                    if(rtn == 1){
+                                        // 刷新Tree
+                                        eventHub.$emit("CONFIG-TREE-REFRESH-EVENT",item.key);
+                                        // 关闭Tab
+                                        this.configClose(item.key);
+                                        // 重置选择
+                                        this.configTreeSelectedNode = null;
+    
+                                    }
+                                } );
 
                             }).catch(() => {
                                     
