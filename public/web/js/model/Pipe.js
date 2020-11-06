@@ -404,7 +404,9 @@ class Pipe {
                                                                 </el-col>
                                                                 <el-col :span="12" style="text-align:right;">
                                                                     <el-tooltip content="切换视图" open-delay="500" placement="top">
-                                                                        <el-button type="text" icon="el-icon-s-fold" @click="onTogglePanel"></el-button>
+                                                                        <el-button type="text" @click="onTogglePanel">
+                                                                            <span :class="control.tagTree.show?'el-icon-s-fold':'el-icon-s-unfold'" style="font-size:17px;"></span>
+                                                                        </el-button>
                                                                     </el-tooltip>
                                                                     <el-tooltip content="格子视图" placement="top">
                                                                         <el-button type="text" @click="showView='grid'" icon="el-icon-picture">
@@ -492,10 +494,33 @@ class Pipe {
                                                                     </template>
                                                                 </el-table-column>
                                                             </el-table>
-                                                            <object data="/fs/assets/images/files/svg/toe.svg?type=open&issys=true" 
-                                                                type="image/svg+xml" style="position: absolute;width:100%;height:100%;background: #ffffff;top:15%;left:25%;"
-                                                                v-else>
-                                                            </object>
+                                                            <div style="background:#ffffff;padding:20px;height:100%;display:block;text-align:center;" v-else>
+                                                                <h2 style="margin: 0px 0px 40px 0px;">欢迎使用接入管理</h2>
+                                                                <p>
+                                                                    <el-button style="width:100px;height:90px;">
+                                                                        <i class="el-icon-office-building" style="font-size:48px;"></i> <p>数据接入</p>
+                                                                    </el-button>
+                                                                    
+                                                                    <el-button style="width:100px;height:90px;">
+                                                                        <i class="el-icon-postcard" style="font-size:48px;"></i> <p>流程设计</p>
+                                                                    </el-button>
+                                                                
+                                                                    <el-button style="width:100px;height:90px;">
+                                                                        <i class="el-icon-s-data" style="font-size:48px;"></i> <p>执行监控</p>
+                                                                    </el-button>
+                                                                
+                                                                    <el-button style="width:100px;height:90px;">
+                                                                        <i class="el-icon-money" style="font-size:48px;"></i> <p>输出管理</p>
+                                                                    </el-button>
+                                                                </p>
+                                                                <object data="/fs/assets/images/files/svg/configWorld.svg?type=open&issys=true" 
+                                                                    type="image/svg+xml" style="width:40vw;height:40vh;background: #ffffff;">
+                                                                </object>
+                                                                <p>
+                                                                    如有任何意见或建议，请及时反馈给我们。
+                                                                    <el-link href="mailto:m3@wecise.com">Email：m3@wecise.com</el-link>
+                                                                </p>
+                                                            </div>
                                                         </el-main>
                                                         <el-main v-else>
                                                             <el-checkbox-group v-model="dt.selected" class="pipe-grid-node" v-if="!_.isEmpty(dt.rows)">
@@ -513,10 +538,33 @@ class Pipe {
                                                                         <el-checkbox :label="item" :ref="'checkBox_'+item.id"></el-checkbox>
                                                                 </el-button>
                                                             </el-checkbox-group>
-                                                            <object data="/fs/assets/images/files/svg/toe.svg?type=open&issys=true" 
-                                                                type="image/svg+xml" style="position: absolute;width:100%;height:100%;background: #ffffff;top:15%;left:25%;"
-                                                                v-else>
-                                                            </object>
+                                                            <div style="background:#ffffff;padding:20px;height:100%;display:block;text-align:center;" v-else>
+                                                                <h2 style="margin: 0px 0px 40px 0px;">欢迎使用接入管理</h2>
+                                                                <p>
+                                                                    <el-button style="width:100px;height:90px;">
+                                                                        <i class="el-icon-office-building" style="font-size:48px;"></i> <p>数据接入</p>
+                                                                    </el-button>
+                                                                    
+                                                                    <el-button style="width:100px;height:90px;">
+                                                                        <i class="el-icon-postcard" style="font-size:48px;"></i> <p>流程设计</p>
+                                                                    </el-button>
+                                                                
+                                                                    <el-button style="width:100px;height:90px;">
+                                                                        <i class="el-icon-s-data" style="font-size:48px;"></i> <p>执行监控</p>
+                                                                    </el-button>
+                                                                
+                                                                    <el-button style="width:100px;height:90px;">
+                                                                        <i class="el-icon-money" style="font-size:48px;"></i> <p>输出管理</p>
+                                                                    </el-button>
+                                                                </p>
+                                                                <object data="/fs/assets/images/files/svg/configWorld.svg?type=open&issys=true" 
+                                                                    type="image/svg+xml" style="width:40vw;height:40vh;background: #ffffff;">
+                                                                </object>
+                                                                <p>
+                                                                    如有任何意见或建议，请及时反馈给我们。
+                                                                    <el-link href="mailto:m3@wecise.com">Email：m3@wecise.com</el-link>
+                                                                </p>
+                                                            </div>
                                                         </el-main>
                                                         <el-footer style="height:30px;line-height:30px;">
                                                             <el-pagination

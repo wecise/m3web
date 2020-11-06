@@ -194,11 +194,13 @@ class FileSystem {
 
                     let name = me.fileForm.name + "." + me.fileForm.extName;
                     let attr = {remark: me.fileForm.remark, ctime: _.now(), author: window.SignedUser_UserName};
-                    let rtn = fsHandler.fsNew(me.fileForm.extName, me.fileForm.path, name, null, attr);
-                    if(rtn == 1){
-                        loadCallBack();
-                        win.close();
-                    }
+                    
+                    fsHandler.fsNewAsync(me.fileForm.extName, me.fileForm.path, name, null, attr).then( (rtn)=>{
+                        if(rtn == 1){
+                            loadCallBack();
+                            win.close();
+                        }
+                    } );
                 },
                 cancle(){
                     win.close();

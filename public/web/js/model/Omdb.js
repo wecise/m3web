@@ -101,6 +101,315 @@ class Omdb{
     init() {
         const odb = this;
 
+        // Class Tree组件
+        Vue.component("omdb-tree",{
+            delimiters: ['#{', '}#'],
+            data(){
+                return {
+                    defaultProps: {
+                        children: 'children',
+                        label: 'name'
+                    },
+                    treeData: [],
+                    defaultExpandedKeys: [-1],
+                    filterText: ""
+                }
+            },
+            template:   `<el-container style="height:100%;">
+                            <!--el-header style="height:40px;line-height:40px;padding:0px 10px;">
+                                <el-input v-model="filterText" 
+                                    placeholder="搜索" size="mini"
+                                    clearable></el-input>
+                            </el-header-->
+                            <el-main style="padding:0px 5px; height: 100%;">
+                                <el-tree :data="treeData" 
+                                        :props="defaultProps" 
+                                        node-key="cid"
+                                        highlight-current
+                                        auto-expand-parent
+                                        @node-click="onNodeClick"
+                                        :expand-on-click-node="true"
+                                        :default-expanded-keys="defaultExpandedKeys"
+                                        style="background:transparent;"
+                                        ref="tree">
+                                    <span slot-scope="{ node, data }" style="width:100%;height:30px;line-height: 30px;"  @mouseenter="onMouseEnter(data)" @mouseleave="onMouseLeave(data)">
+                                        <!--Class-->
+                                        <span v-if="data.type=='class'">
+                                            <span v-if="data.child">
+                                                <i class="el-icon-folder" style="color:#FFC107;"></i>
+                                                <span>#{ _.last(_.split(node.label,'/')) }# (#{ data.child.length || data.children.length }#)</span>
+                                            </span>
+                                            <span v-else>
+                                                <i class="el-icon-date" style="color:#0088cc;"></i>
+                                                <span>#{ _.last(_.split(node.label,'/')) }#</span>
+                                            </span>
+
+                                            <el-dropdown v-show="data.show" style="float:right;width:14px;margin:0 5px;">
+                                                <span class="el-dropdown-link">
+                                                    <i class="el-icon-more el-icon--right"></i>
+                                                </span>
+                                                <el-dropdown-menu slot="dropdown">
+                                                    <el-dropdown-item @click.native="onClassNew(data)">新建子类</el-dropdown-item>
+                                                    
+                                                    <el-dropdown-item @click.native="onClassFieldNew(data)" divided>新建属性</el-dropdown-item>
+                                                    <el-dropdown-item @click.native="onClassFieldDelete(data)">删除属性</el-dropdown-item>
+                                                    <el-dropdown-item @click.native="onClassIndexNew(data)" divided>新建索引</el-dropdown-item>
+                                                    <el-dropdown-item @click.native="onClassIndexDelete(data,'delete')">删除索引</el-dropdown-item>
+                                                    <el-dropdown-item @click.native="onClassSetup(data,'delete')" divided>属性设置</el-dropdown-item>
+                                                    
+                                                    <el-dropdown-item @click.native="onClassDelete(data)" divided>删除类</el-dropdown-item>
+                                                    <el-dropdown-item @click.native="onClassDeleteData(data, 'delete-data')">删除数据</el-dropdown-item>
+                                                    <el-dropdown-item @click.native="onClassDeleteData(data, 'delete-data-withversion')">删除数据（带版本）</el-dropdown-item>
+                                                    <el-dropdown-item @click.native="onClassDeleteData(data, 'delete-column-data')">删除列数据</el-dropdown-item>
+
+                                                    <el-dropdown-item @click.native="onClassMql(data,'select')" divided>SELECT</el-dropdown-item>
+                                                    <el-dropdown-item @click.native="onClassMql(data,'insert')">INSERT</el-dropdown-item>
+                                                    <el-dropdown-item @click.native="onClassMql(data,'update')">UPDATE</el-dropdown-item>
+                                                    <el-dropdown-item @click.native="onClassMql(data,'delete')">DELETE</el-dropdown-item>
+                                                    
+                                                    <el-dropdown-item @click.native="onClassExport(data)" divided>导出</el-dropdown-item>
+                                                </el-dropdown-menu>
+                                            </el-dropdown>
+                                            <el-button v-show="data.show" type="text" @click.native.stop="onClassConsole(data)" icon="el-icon-s-platform" style="float:right;width:14px;margin:0 5px;"></el-button>
+                                            <el-button v-show="data.show" type="text" @click.native.stop="onClassEdit(data)" icon="el-icon-edit-outline" style="float:right;width:14px;margin:0 5px;"></el-button>
+                                        </span>
+                                        <!--Edge-->
+                                        <span v-else>
+                                            <span v-if="data.child">
+                                                <i class="el-icon-folder" style="color:#FFC107;"></i>
+                                                <span>#{ node.label }# (#{ data.children.length }#)</span>
+                                                <el-dropdown v-show="data.show" style="float:right;width:14px;margin:0 5px;">
+                                                    <span class="el-dropdown-link">
+                                                        <i class="el-icon-more el-icon--right"></i>
+                                                    </span>
+                                                    <el-dropdown-menu slot="dropdown">
+                                                        <el-dropdown-item @click.native="onEdgeDelete(data,'drop-all-edge-type')">删除所有关系</el-dropdown-item>
+                                                        <el-dropdown-item @click.native="onEdgeExport(data)" divided>导出</el-dropdown-item>
+                                                    </el-dropdown-menu>
+                                                </el-dropdown>
+                                                <el-button v-show="data.show" type="text" @click.native.stop="onEdgeNew(data)" icon="el-icon-plus" style="float:right;width:14px;margin:0 5px;"></el-button>
+                                            </span>
+                                            <span v-else>
+                                                <i class="el-icon-share" style="color:#0088cc;"></i>
+                                                <span>#{ node.label }#(#{ data.remedy }#)</span>
+                                                <el-dropdown v-show="data.show" style="float:right;width:14px;margin:0 5px;">
+                                                    <span class="el-dropdown-link">
+                                                        <i class="el-icon-more el-icon--right"></i>
+                                                    </span>
+                                                    <el-dropdown-menu slot="dropdown">
+                                                        <el-dropdown-item @click.native="onEdgeDelete(data,'drop-edge-type')">删除关系</el-dropdown-item>
+                                                    </el-dropdown-menu>
+                                                </el-dropdown>
+                                                <el-button v-show="data.show" type="text" @click.native.stop="onEdgeEdit(data)" icon="el-icon-edit" style="float:right;width:14px;margin:0 5px;"></el-button>
+                                            </span>
+
+                                        </span>
+                                    </span>  
+                                </el-tree>
+                            </el-main>
+                        </el-container>`,
+            watch: {
+                
+            },
+            created(){
+                this.onInit();
+            },
+            mounted(){
+                this.initClassData(this.treeData[0]);
+                this.initEdgeData(this.treeData[1]);
+            },
+            methods: {
+                onInit(){
+                    this.treeData = [
+                        {cid:'-1', pid:null, type: 'class', name: `/${this.$t('omdb.classTree.class')}`, title: this.$t('omdb.classTree.class'), child:true, children:[]},
+                        {cid:'-10', pid:null, type: 'edge', name: `/${this.$t('omdb.classTree.edge')}`, title: this.$t('omdb.classTree.edge'), child:true, children:[]}
+                    ];
+                },
+                initClassData(data){
+				
+                    omdbHandler.classListAsync(data.cid).then( (val)=>{
+                        
+                        if (_.isEmpty(val)) {
+                            return;
+                        }
+                        
+                        let rtn = _.map(val, (v)=>{
+                            return _.merge(v, {type: 'class'});
+                        })
+                        
+                        this.$set(data, 'children', rtn);
+
+                        
+                        if(!this.defaultExpandedKeys[data.cid]){
+                            this.defaultExpandedKeys.push(data.cid);
+                        }
+                        
+                    })
+    
+                },
+                initEdgeData(data){
+				
+                    omdbHandler.fetchDataByMqlAsync('select edge type').then( (val)=>{
+                        
+                        if(_.isEmpty(val)){
+                            return;
+                        }
+                        
+                        let rtn = _.map(val.message, (v)=>{
+                            return _.merge(v, {type: 'edge', cid: objectHash.sha1(v.name)});
+                        });
+                        
+                        this.$set(data, 'children', rtn);
+                    } );
+
+                },
+                onMouseEnter(data){
+                    this.$set(data, 'show', true)
+                    this.$refs.tree.setCurrentKey(data.cid);
+                },
+                onMouseLeave(data){
+                    this.$set(data, 'show', false)
+                },
+                onRefresh(data,index){
+                    
+                },
+                onNodeClick(data){
+                    this.initClassData(data);
+                },
+                // 类新建
+                onClassNew(treeNode){
+                    this.$root.mainTabsAdd({ type: 'omdb-query-console',
+                                                name: treeNode.name.replace(/\//g,"_"),
+                                                title: treeNode.name,
+                                                model: { pattern: 'create-class', node: treeNode, pnode: treeNode.parent }
+                                            });
+                },
+                // 类删除
+                onClassDelete(treeNode){
+                    this.$root.mainTabsAdd({ type: 'omdb-query-console',
+                                                name: treeNode.name.replace(/\//g,"_"),
+                                                title: treeNode.name,
+                                                model: { pattern: 'drop-class', node: treeNode, pnode: treeNode.parent }
+                                            });
+                },
+                // 类数据删除
+                onClassDeleteData(treeNode, type){
+                    this.$root.mainTabsAdd({ type: 'omdb-query-console',
+                                                name: treeNode.name.replace(/\//g,"_"),
+                                                title: treeNode.name,
+                                                model: { pattern: type, node: treeNode, pnode: treeNode.parent }
+                                            });
+                },
+                // 类编辑
+                onClassEdit(treeNode){
+                    
+                    let nodeFieldObj = omdbHandler.classListField(treeNode.cid);
+                    let pNodeFieldObj = omdbHandler.classListField(treeNode.pid==-1?1:treeNode.pid);
+                    
+                    this.$root.mainTabsAdd({ type: 'omdb-class-console',
+                                            name: treeNode.name.replace(/\//g,"_")+'_class',
+                                            title: treeNode.name+'_class',
+                                            model: {pattern: 'select', 
+                                                    node: _.extend(treeNode,{fieldsObj:nodeFieldObj}), 
+                                                    pnode: _.extend(treeNode.parent,{fieldsObj: pNodeFieldObj}) }
+                                        });
+                },
+                // 类查询控制台
+                onClassConsole(treeNode){
+                    this.$root.mainTabsAdd({ type: 'omdb-query-console',
+                                                name: treeNode.name.replace(/\//g,"_"),
+                                                title: treeNode.name,
+                                                model: { pattern: 'select', node: treeNode, pnode: treeNode.parent }
+                                            });
+                },
+                // 类导出
+                onClassExport(treeNode){
+                    this.$root.classDataExport(treeNode.name);
+                },
+                // 类MQL
+                onClassMql(treeNode, type){
+                    this.$root.mainTabsAdd({ type: 'omdb-query-console',
+                                                name: treeNode.name.replace(/\//g,"_"),
+                                                title: treeNode.name,
+                                                model: { pattern: type, node: treeNode, pnode: treeNode.parent }
+                                            });
+                },
+                // 类属性新建
+                onClassFieldNew(treeNode){
+                    this.$root.mainTabsAdd({ type: 'omdb-query-console',
+                                                name: treeNode.name.replace(/\//g,"_"),
+                                                title: treeNode.name,
+                                                model: { pattern: 'alter-add-column', node: treeNode, pnode: treeNode.parent }
+                                            });
+                },
+                // 类属性删除
+                onClassFieldDelete(treeNode){
+                    this.$root.mainTabsAdd({ type: 'omdb-query-console',
+                                                name: treeNode.name.replace(/\//g,"_"),
+                                                title: treeNode.name,
+                                                model: { pattern: 'alter-drop-column', node: treeNode, pnode: treeNode.parent }
+                                            });
+                },
+                // 类索引新建
+                onClassIndexNew(treeNode){
+                    this.$root.mainTabsAdd({ type: 'omdb-query-console',
+                                                name: treeNode.name.replace(/\//g,"_"),
+                                                title: treeNode.name,
+                                                model: { pattern: 'alter-add-index', node: treeNode, pnode: treeNode.parent }
+                                            });
+                },
+                // 类索引删除
+                onClassIndexDelete(treeNode){
+                    this.$root.mainTabsAdd({ type: 'omdb-query-console',
+                                                name: treeNode.name.replace(/\//g,"_"),
+                                                title: treeNode.name,
+                                                model: { pattern: 'alter-drop-index', node: treeNode, pnode: treeNode.parent }
+                                            });
+                },
+                // 类属性设置
+                onClassSetup(treeNode){
+                    this.$root.mainTabsAdd({ type: 'omdb-query-console',
+                                                name: treeNode.name.replace(/\//g,"_"),
+                                                title: treeNode.name,
+                                                model: { pattern: 'alter', node: treeNode, pnode: treeNode.parent }
+                                            });
+                },
+                // 关系新建
+                onEdgeNew(treeNode){
+                    this.$root.mainTabsAdd({ type: 'omdb-query-console',
+                                                name: treeNode.name,
+                                                title: treeNode.name,
+                                                model: { pattern: 'create-edge-type', node: treeNode, pnode: treeNode.parent }
+                                            });
+                },
+                // 关系删除
+                onEdgeDelete(treeNode,type){
+                    
+                    this.$root.mainTabsAdd({ type: 'omdb-query-console',
+                                                name: treeNode.name,
+                                                title: treeNode.name,
+                                                model: { pattern: type, node: treeNode, pnode: treeNode.parent }
+                                            });
+                },
+                // 关系编辑
+                onEdgeEdit(treeNode){
+                    this.$root.mainTabsAdd({ type: 'omdb-query-console',
+                                                name: treeNode.name.replace(/\//g,"_"),
+                                                title: treeNode.name,
+                                                model: { pattern: 'alter-edge', node: treeNode, pnode: treeNode.parent }
+                                            });
+                },
+                // 关系导出
+                onEdgeExport(treeNode){
+                    this.$root.mainTabsAdd({ type: 'omdb-query-console',
+                                                name: treeNode.name.replace(/\//g,"_"),
+                                                title: treeNode.name,
+                                                model: { pattern: 'alter', node: treeNode, pnode: treeNode.parent }
+                                            });
+                }
+            }
+        })
+
         // ClassList Table组件
         Vue.component("omdb-classlist-component",{
             delimiters: ['#{', '}#'],
@@ -1111,10 +1420,10 @@ class Omdb{
             },
             template:   `<el-container style="height:calc(100% - 30px);">
                             <el-header style="height:30px;line-height:30px;" v-if="!_.isEmpty(model.data)">
-                                <el-tooltip content="删除" delay-time="500">
+                                <el-tooltip content="删除" open-delay="800" placement="top">
                                     <el-button type="text" @click="onDelete" icon="el-icon-delete"></el-button>
                                 </el-tooltip>
-                                <el-tooltip content="导出" delay-time="500">
+                                <el-tooltip content="导出" open-delay="900" placement="top">
                                     <el-dropdown @command="onExport">
                                         <span class="el-dropdown-link">
                                             <i class="el-icon-download el-icon--right"></i>
@@ -1141,7 +1450,6 @@ class Omdb{
                                     @row-dblclick="rowDblclick"
                                     @selection-change="onSelectionChange"
                                     fit="true"
-                                    size="mini"
                                     ref="table"
                                     v-if="!_.isEmpty(dt.rows)">
                                     
@@ -1245,7 +1553,7 @@ class Omdb{
                                     </el-table-column>
                                 </el-table>
                                 <div style="padding:20px;" v-else>
-                                    <h3>很抱歉，没有找到相关的记录。</h3>
+                                    <h3><i class="el-icon-info" style="font-size:32px;color:#4caf50;"></i> 没有找到相关的记录。</h3>
                                     <p>温馨提示：  
                                     请检查您的输入是否正确
                                     如有任何意见或建议，请及时反馈给我们。
@@ -1276,7 +1584,7 @@ class Omdb{
                                     <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 插入成功。</h3>
                                 </div>
                                 <div style="padding:20px;" v-else>
-                                    <h3><i class="el-icon-info" style="font-size:32px;color:#4caf50;"></i> 很抱歉，没有找到相关的记录。</h3>
+                                    <h3><i class="el-icon-info" style="font-size:32px;color:#4caf50;"></i> 没有找到相关的记录。</h3>
                                     <p>温馨提示：  
                                     请检查您的输入是否正确
                                     如有任何意见或建议，请及时反馈给我们。
@@ -1462,13 +1770,16 @@ class Omdb{
                         cancelButtonText: '取消',
                         type: 'warning'
                     }).then(() => {
-                        let rtn = fsHandler.callFsJScript("/matrix/omdb/dataDelete.js", encodeURIComponent(JSON.stringify(ids)));
-                        this.dt.rows = _.xor(this.dt.rows, this.dt.selected);
-                        this.dt.selected = [];
-                        this.$message({
-                            message: '删除成功',
-                            type: 'success'
-                        }); 
+                        
+                        fsHandler.callFsJScriptAsync("/matrix/omdb/dataDelete.js", encodeURIComponent(JSON.stringify(ids))).then( (rtn)=>{
+                            this.dt.rows = _.xor(this.dt.rows, this.dt.selected);
+                            this.dt.selected = [];
+                            this.$message({
+                                message: '删除成功',
+                                type: 'success'
+                            }); 
+                        } );
+                        
                     }).catch(() => {
                         
                     });
@@ -1480,13 +1791,12 @@ class Omdb{
                         csvSeparator: ', ',
                         csvUseBOM: true,
                         ignoreColumn: [0,1,2],
-                        fileName: `tableExport_${moment().format("YYYY-MM-DD HH:MM:SS")}`,
+                        fileName: `tableExport_${moment().format("YYYY-MM-DD HH:mm:ss")}`,
                         type: type,
                     };
                     if(type === 'mql'){
                         this.$root.classDataExport(this.model.rootclass);
                     } else if(type === 'png'){
-                        //$(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
                         $(this.$refs.table.$el.querySelector("table.el-table__body")).tableExport(options);
                     } else if(type === 'pdf'){
                         _.extend(options, {
@@ -1704,15 +2014,15 @@ class Omdb{
                     } else if(self.model.pattern === 'alter-drop-key') {
                         mql = "ALTER CLASS " + self.model.node.name + " DROP KEY key_name;\n\n";
                     } else if(self.model.pattern === 'g') {  // edge  query
-                        mql = `g.V(" ").In("${self.model.node.title}").All();`;
+                        mql = `g.V(" ").In("${self.model.node.name}").All();`;
                     } else if(self.model.pattern === 'create-edge-type') {  // edge  new edge type
                         mql = `CREATE EDGE TYPE IF NOT EXISTS type_name 'type_remedy';`;
                     } else if(self.model.pattern === 'drop-edge-type') {  // edge drop edge type
-                        mql = `DROP EDGE TYPE ${self.model.node.title};`;
+                        mql = `DROP EDGE TYPE ${self.model.node.name};`;
                     } else if(self.model.pattern === 'edge-insert') {  // edge  create
-                        mql = `INSERT INTO class_name id="",${self.model.node.title}=[""];`;
+                        mql = `INSERT INTO class_name id="",${self.model.node.name}=[""];`;
                     } else if(self.model.pattern === 'edge-update') {  // edge  update
-                        mql = `UPDATE class_name SET ${self.model.node.title}='' WHERE ID='';`;
+                        mql = `UPDATE class_name SET ${self.model.node.name}='' WHERE ID='';`;
                     } else if(self.model.pattern === 'edge-g') {  // edge query all
                         mql = GLOBAL_CONFIG.global.gremlin;
                     }
@@ -1805,10 +2115,6 @@ class Omdb{
         })
 
         VueLoader.onloaded([
-            "omdb-path-datatables-component",
-            "omdb-output-datatables-component",
-            "omdb-class-datatables-component",
-            "omdb-class-tree-component",
             "omdb-editor-component",
             "omdb-editor-base-component",
             "omdb-graph-component",
@@ -1840,11 +2146,11 @@ class Omdb{
                                                 </el-dropdown>
                                             </el-header>
                                             <el-main style="padding:0px;height:calc(100vh - 108px);overflow:hidden;border-top:1px solid #ffffff;">
-                                                <omdb-class-tree-component :id="id+'-class-tree'"></omdb-class-tree-component>
+                                                <omdb-tree></omdb-tree>
                                             </el-main>
                                         </el-container>
                                     </el-aside>
-                                    <el-main style="padding:0px;overflow:hidden;" ref="mainView">
+                                    <el-main style="padding:0px;overflow:hidden;position:relative;" ref="mainView">
                                         <el-tabs v-model="main.activeIndex" type="border-card" closable @tab-remove="mainTabsRemove" @tab-click="mainTabsClick" v-if="main.tabs.length > 0">
                                             <el-tab-pane
                                                 :key="item.name"
@@ -1869,35 +2175,102 @@ class Omdb{
                                                 <omdb-class-console :id="id+'-class-'+item.name" :model="item.model" v-if="item.type=='omdb-class-console'"  :ref="'omdbClassRef-'+id+'-class-'+item.name""></omdb-class-console>
                                             </el-tab-pane>
                                         </el-tabs>
-                                        <div style="background:#ffffff;padding:20px;height:100%;" v-else>
+                                        <div style="background:#ffffff;padding:5% 20px;height:100%;display:block;text-align:center;" v-else>
                                             <h2 style="margin: 0px 0px 40px 0px;">欢迎使用#{ $t('omdb.title') }#</h2>
-                                            <p style="display:flex;align-items:flex-end;">
+                                            <p>
                                                 <el-button style="width:100px;height:90px;">
                                                     <i class="el-icon-office-building" style="font-size:48px;"></i> <p>类管理</p>
                                                 </el-button>
                                                 <!--el-link style="margin-left: 20px;">文章</el-link>
                                                 <el-link style="margin-left: 20px;">视频</el-link-->
-                                            </p>
-                                            <p style="display:flex;align-items:flex-end;">
+                                            
                                                 <el-button style="width:100px;height:90px;">
                                                     <i class="el-icon-postcard" style="font-size:48px;"></i> <p>属性管理</p>
                                                 </el-button>
-                                            </p>
-                                            <p style="display:flex;align-items:flex-end;">
+                                            
                                                 <el-button style="width:100px;height:90px;">
                                                     <i class="el-icon-s-data" style="font-size:48px;"></i> <p>数据管理</p>
                                                 </el-button>
-                                            </p>
-                                            <p style="display:flex;align-items:flex-end;">
+                                            
                                                 <el-button style="width:100px;height:90px;">
                                                     <i class="el-icon-money" style="font-size:48px;"></i> <p>关系管理</p>
                                                 </el-button>
                                             </p>
-                                            <p style="margin-top:40px;">
+                                            <object data="/fs/assets/images/files/svg/configWorld.svg?type=open&issys=true" 
+                                                type="image/svg+xml" style="width:40vw;height:40vh;background: #ffffff;">
+                                            </object>
+                                            <p>
                                                 如有任何意见或建议，请及时反馈给我们。
                                                 <el-link href="mailto:m3@wecise.com">Email：m3@wecise.com</el-link>
                                             </p>
+                                            
                                         </div>
+                                        <el-dialog title="导出" :visible.sync="dialog.omdbExport.show" v-if="dialog.omdbExport.show" width="60vw">
+                                            <el-container style="height:55vh;">
+                                                <el-header style="height:auto;line-height:40px;min-height:40px;background: #f2f2f2;">
+                                                    <el-checkbox v-model="dialog.omdbExport.model.ifRelation" label="导出关系"></el-checkbox>
+                                                    <el-checkbox v-model="dialog.omdbExport.model.ifData" label="导出数据" style="margin-left:20px;"></el-checkbox>
+                                                    <p v-if="dialog.omdbExport.model.ifData">
+                                                        <el-radio-group v-model="dialog.omdbExport.model.ifAllData">
+                                                            <el-radio :label="true" border>导出所有数据</el-radio>
+                                                            <el-radio :label="false" border>导出部分数据</el-radio>
+                                                        </el-radio-group>
+                                                        <el-input-number v-model="dialog.omdbExport.model.limit" v-if="!dialog.omdbExport.model.ifAllData && dialog.omdbExport.model.ifData != -1" style="width:30%;margin-left:10px;"></el-input-number>  
+                                                    </p>
+                                                    <el-checkbox v-model="dialog.omdbExport.model.ifCheckStrictly" label="节点关联" style="margin-left:20px;float:right;"></el-checkbox>
+                                                </el-header>
+                                                <el-main>
+                                                    <el-tree
+                                                        :data="dialog.omdbExport.classList"
+                                                        ref="classTree"
+                                                        show-checkbox
+                                                        node-key="class"
+                                                        :check-strictly="!dialog.omdbExport.model.ifCheckStrictly"
+                                                        :default-expanded-keys="dialog.omdbExport.defaultExpandedKeys"
+                                                        :props="dialog.omdbExport.defaultProps"
+                                                        check-on-click-node="true"
+                                                        style="background-color:transparent;">
+                                                    </el-tree>
+                                                </el-main>
+                                                <el-footer style="line-height:60px;text-align:center;">
+                                                    <el-button type="default" @click="dialog.omdbExport.show=false;">取消</el-button>
+                                                    <el-button type="primary" @click="onExport('mql')" :loading="dialog.omdbExport['mql'].loading">导出MQL</el-button>
+                                                    <el-button type="primary" @click="onExport('xlsx')" :loading="dialog.omdbExport['xlsx'].loading">导出Excel</el-button>
+                                                </el-footer>
+                                            </el-container>
+                                        </el-dialog>
+                                        <el-dialog title="导入" :visible.sync="dialog.omdbImport.show" v-if="dialog.omdbImport.show" width="60vw">
+                                            <el-container style="height:55vh;">
+                                                <el-main style="padding:10px;" v-if="!dialog.omdbImport.loading">
+                                                    <div v-if="!_.isEmpty(dialog.omdbImport.rtnInfo)">
+                                                        <el-button type="text" icon="el-icon-close" @click="dialog.omdbImport.rtnInfo = null;"></el-button>
+                                                        <section>
+                                                            <code>#{dialog.omdbImport.rtnInfo.message.join(",")}#</code>
+                                                        </section>
+                                                    </div>
+                                                    <el-upload
+                                                        class="upload-demo"
+                                                        drag
+                                                        :auto-upload="false"
+                                                        :on-change="onImportChange"
+                                                        :file-list="dialog.omdbImport.fileList"
+                                                        v-else>
+                                                        <i class="el-icon-upload"></i>
+                                                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                                                        <div class="el-upload__tip" slot="tip">只能上传Mql/Excel文件</div>
+                                                    </el-upload>
+                                                </el-main>
+                                                <el-main style="text-align:center;"  v-else>
+                                                    <p style="padding-top:30px;">
+                                                        <h2>正在导入，请稍后。。。</h2>
+                                                    </p>
+                                                </el-main>
+                                                <el-footer style="line-height:60px;text-align:center;">
+                                                    <el-button type="default" @click="dialog.omdbImport.show=false;">取消</el-button>
+                                                    <el-button type="primary" @click="onImport" :loading="dialog.omdbImport.loading">导入</el-button>
+                                                </el-footer>
+                                            </el-container>
+										</el-dialog>
                                     </el-main>
                                 </el-container>`,
                     data: {
@@ -1905,6 +2278,53 @@ class Omdb{
                         main: {
                             tabs: [],
                             activeIndex: 'query'
+                        },
+                        dialog: {
+                            omdbExport: {
+                                show: false,
+                                classList: null,
+                                defaultExpandedKeys: [],
+                                defaultProps: {
+                                    children: 'children',
+                                    label: 'class'
+                                },
+                                model: {
+                                    ifCheckStrictly: true,
+                                    ifRelation: true,
+                                    ifData: false, 
+                                    ifAllData: false,
+                                    limit: 10,
+                                    recursive: true,
+                                    filetype: 'mql',
+                                    template: true,
+                                    class: '',
+                                    ignoreClass: '/matrix/filesystem'
+                                },
+                                mql:{
+                                    loading: false
+                                },
+                                xlsx: {
+                                    loading: false
+                                }
+                            },
+                            omdbImport: {
+                                show: false,
+                                fileList: [],
+                                rtnInfo: null,
+                                loading: false
+                            }
+                        }
+                    },
+                    watch:{
+                        'dialog.omdbExport.model.ifData'(val,oldVal){
+                            if(!val){
+                                this.dialog.omdbExport.model.limit = 0;
+                            }
+                        },
+                        'dialog.omdbExport.model.ifAllData'(val,oldVal){
+                            if(val){
+                                this.dialog.omdbExport.model.limit = -1;
+                            }
                         }
                     },
                     created(){
@@ -1983,217 +2403,109 @@ class Omdb{
                             }
                         },
                         classDataExport(selectedNode){
-                            const me = this;
-                            let wnd = null;
 
-                            try{
-                                if(jsPanel.activePanels.getPanel('jsPanel-class-template')){
-                                    jsPanel.activePanels.getPanel('jsPanel-class-template').close();
-                                }
-                            } catch(error){
+                            this.dialog.omdbExport.show = true;
 
-                            }
-                            finally{
-                                wnd = maxWindow.winClassTemplate('导出数据结构', `<div id="class-template-export"></div>`, null, null, null);
+                            if(!_.isEmpty(selectedNode)){
+                                this.dialog.omdbExport.model.class = selectedNode;
                             }
 
-                            new Vue({
-                                delimiters: ['#{', '}#'],
-                                data:{
-                                    classList: null,
-                                    defaultProps: {
-                                        children: 'children',
-                                        label: 'class'
-                                    },
-                                    model: {
-                                        ifCheckStrictly: true,
-                                        ifRelation: true,
-                                        ifData: false, 
-                                        ifAllData: false,
-                                        limit: 10,
-                                        recursive: true,
-                                        filetype: 'mql',
-                                        template: true,
-                                        class: '',
-                                        ignoreClass: '/matrix/filesystem'
-                                    }
-                                },
-                                watch: {
-                                    'model.ifData':function(val,oldVal){
-                                        if(!val){
-                                            this.model.limit = 0;
-                                        }
-                                    },
-                                    'model.ifAllData':function(val,oldVal){
-                                        if(val){
-                                            this.model.limit = -1;
-                                        }
-                                    }
-                                },
-                                template: `<el-container style="height:100%;">
-                                                <el-header style="height:auto;line-height:40px;min-height:40px;background: #f2f2f2;">
-                                                    <el-checkbox v-model="model.ifRelation" label="导出关系"></el-checkbox>
-                                                    <el-checkbox v-model="model.ifData" label="导出数据" style="margin-left:20px;"></el-checkbox>
-                                                    <p v-if="model.ifData">
-                                                        <el-radio-group v-model="model.ifAllData">
-                                                            <el-radio :label="true" border>导出所有数据</el-radio>
-                                                            <el-radio :label="false" border>导出部分数据</el-radio>
-                                                        </el-radio-group>
-                                                        <el-input-number v-model="model.limit" v-if="!model.ifAllData && model.ifData != -1" style="width:30%;margin-left:10px;"></el-input-number>  
-                                                    </p>
-                                                    <el-checkbox v-model="model.ifCheckStrictly" label="节点关联" style="margin-left:20px;float:right;"></el-checkbox>
-                                                </el-header>
-                                                <el-main style="padding:10px;">
-                                                    <el-tree
-                                                        :data="classList"
-                                                        ref="classTree"
-                                                        show-checkbox
-                                                        node-key="class"
-                                                        :check-strictly="!model.ifCheckStrictly"
-                                                        :default-expanded-keys="[_.first(classList).id]"
-                                                        :props="defaultProps"
-                                                        check-on-click-node="true"
-                                                        style="background-color:transparent;">
-                                                    </el-tree>
-                                                </el-main>
-                                                <el-footer style="line-height:60px;text-align:center;">
-                                                    <el-button type="default" @click="onCancel">取消</el-button>
-                                                    <el-button type="primary" @click="onExport('mql')">导出MQL</el-button>
-                                                    <el-button type="primary" @click="onExport('xlsx')">导出Excel</el-button>
-                                                </el-footer>
-                                            </el-container>`,
-                                created(){
-                                    if(!_.isEmpty(selectedNode)){
-                                        this.model.class = selectedNode;
-                                    }
+                            fsHandler.callFsJScriptAsync("/matrix/omdb/getClassListForTree.js",encodeURIComponent(selectedNode)).then( (rtn)=>{
+                                
+                                this.dialog.omdbExport.classList = rtn.message;
+                                this.dialog.omdbExport.defaultExpandedKeys = [_.first(this.dialog.omdbExport.classList).id];
 
-                                    fsHandler.callFsJScriptAsync("/matrix/omdb/getClassListForTree.js",encodeURIComponent(selectedNode)).then( (rtn)=>{
-                                        this.classList = rtn.message;
-                                    } ) 
-                                },
-                                mounted(){
-                                    fsHandler.callFsJScriptAsync("/matrix/omdb/getClassList.js",encodeURIComponent(this.model.class)).then( (rtn)=>{
-                                        this.$refs.classTree.setCheckedKeys(rtn.message);
-                                    } ); 
-                                },
-                                methods:{
-                                    onCancel(){
-                                        wnd.close();
-                                    },
-                                    onExport(type){
+                                fsHandler.callFsJScriptAsync("/matrix/omdb/getClassList.js",encodeURIComponent(this.dialog.omdbExport.model.class)).then( (rtn)=>{
+                                    this.$refs.classTree.setCheckedKeys(rtn.message);
+                                } ); 
+                            } ) 
 
-                                        this.model.filetype = type;
+                        },
+                        onExport(type){
+                            
+                            this.dialog.omdbExport.model.filetype = type;
 
-                                        //获取所有Class
-                                        fsHandler.callFsJScriptAsync("/matrix/omdb/getClassList.js",encodeURIComponent(this.model.class)).then( (rtn)=>{
-                                            let allNodes = rtn.message;
+                            this.dialog.omdbExport[type].loading = true;
 
-                                            //checked Class
-                                            let checkedClass = _.map(this.$refs.classTree.getCheckedNodes(),'class');
-                                            
-                                            // 交集
-                                            _.extend(this.model, {ignoreClass: _.concat(this.model.ignoreClass,_.xor(allNodes,checkedClass)) } );
+                            //获取所有Class
+                            fsHandler.callFsJScriptAsync("/matrix/omdb/getClassList.js",encodeURIComponent(this.dialog.omdbExport.model.class)).then( (rtn)=>{
+                                let allNodes = rtn.message;
 
-                                            if(this.model.ifData){
-                                                //this.model.limit = -1;
-                                                this.model.template = false;
-                                            } else {
-                                                this.model.template = true;
-                                            // this.model.limit = 0;
-                                            }
-                                            
-                                            this.$message({
-                                                type: "info",
-                                                message: "导出操作将提交至后台，请稍后。。。"
-                                            })
+                                //checked Class
+                                let checkedClass = _.map(this.$refs.classTree.getCheckedNodes(),'class');
+                                
+                                // 交集
+                                _.extend(this.dialog.omdbExport.model, {ignoreClass: _.concat(this.dialog.omdbExport.model.ignoreClass,_.xor(allNodes,checkedClass)) } );
 
-                                        } );
-
-                                        omdbHandler.classDataExportAsync(this.model).then((rtn)=>{
-                                            wnd.close();
-                                            
-                                            if(rtn == 0){
-
-                                                this.$message({
-                                                    type: "error",
-                                                    message: "导出失败!"
-                                                })  
-                                            }
-                                        });
-                                    
-                                    }
+                                if(this.dialog.omdbExport.model.ifData){
+                                    //this.model.limit = -1;
+                                    this.dialog.omdbExport.model.template = false;
+                                } else {
+                                    this.dialog.omdbExport.model.template = true;
+                                    // this.model.limit = 0;
                                 }
-                            }).$mount("#class-template-export");
+
+                            } );
+
+                            omdbHandler.classDataExportAsync(this.dialog.omdbExport.model).then((rtn)=>{
+                                
+                                if(rtn == 1){
+
+                                    this.$message({
+                                        type: "success",
+                                        message: "导出成功！"
+                                    })  
+
+                                    this.dialog.omdbExport[type].loading = false;
+
+                                    this.dialog.omdbExport.show = false;
+
+                                } else{
+                                    this.$message({
+                                        type: "error",
+                                        message: "导出失败: " + rtn
+                                    })  
+                                }
+
+                            });
                         },
                         classDataImport(){
-                            const me = this;
-                            let wnd = null;
+                            this.dialog.omdbImport.show = true;
+                        },
+                        onImportChange(file) {
+                            this.dialog.omdbImport.fileList = [file.raw];
+                        },
+                        onImport(){
+                            
+                            this.dialog.omdbImport.loading = true;
 
-                            try{
-                                if(jsPanel.activePanels.getPanel('jsPanel-class-template')){
-                                    jsPanel.activePanels.getPanel('jsPanel-class-template').close();
+                            this.$message({
+                                type: "info",
+                                message: "导入操作正在执行，请稍后。。。"
+                            })
+
+                            omdbHandler.classDataImportAsync(this.dialog.omdbImport.fileList[0]).then( (rtn) => {
+                                
+                                this.dialog.omdbImport.rtnInfo = JSON.parse(rtn);
+
+                                if(rtn == 1){
+
+                                    this.$message({
+                                        type: "success",
+                                        message: "导入成功！"
+                                    })  
+
+                                    this.dialog.omdbImport.loading = false;
+
+                                    this.dialog.omdbImport.show = false;
+                                } else{
+                                    this.$message({
+                                        type: "error",
+                                        message: "导入失败: " + rtn
+                                    })  
                                 }
-                            } catch(error){
 
-                            }
-                            finally{
-                                wnd = maxWindow.winClassTemplate('导入数据结构', `<div id="class-template-import"></div>`, null, null, null);
-                            }
-
-                            new Vue({
-                                delimiters: ['#{', '}#'],
-                                data:{
-                                    fileList: [],
-                                    rtnInfo: null
-                                },
-                                template: `<el-container style="height:100%;">
-                                                <el-main style="padding:10px;">
-                                                    <div v-if="!_.isEmpty(rtnInfo)">
-                                                        <el-button type="text" icon="el-icon-close" @click="clearInfo"></el-button>
-                                                        <section>
-                                                            <code>#{rtnInfo.message.join(",")}#</code>
-                                                        </section>
-                                                    </div>
-                                                    <el-upload
-                                                        class="upload-demo"
-                                                        drag
-                                                        :auto-upload="false"
-                                                        :on-change="onChange"
-                                                        :file-list="fileList"
-                                                        v-else>
-                                                        <i class="el-icon-upload"></i>
-                                                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-                                                        <div class="el-upload__tip" slot="tip">只能上传Mql/Excel文件</div>
-                                                    </el-upload>
-                                                </el-main>
-                                                <el-footer style="line-height:60px;text-align:center;">
-                                                    <el-button type="default" @click="onCancel">取消</el-button>
-                                                    <el-button type="primary" @click="onImport">导入</el-button>
-                                                </el-footer>
-                                            </el-container>`,
-                                methods:{
-                                    onChange(file) {
-                                        this.fileList = [file.raw];
-                                    },
-                                    onCancel(){
-                                        wnd.close();
-                                    },
-                                    onImport(){
-                                        
-                                        this.$message({
-                                            type: "info",
-                                            message: "导入操作将提交至后台，请稍后。。。"
-                                        })
-
-                                        omdbHandler.classDataImport(this.fileList[0]).then( (rtn) => {
-                                            this.rtnInfo = JSON.parse(rtn);
-                                        });
-                                    },
-                                    clearInfo(){
-                                        this.rtnInfo = null;
-                                    }
-                                }
-                            }).$mount("#class-template-import");
+                            });
                         },
                         classPropsDirectory(){
                             

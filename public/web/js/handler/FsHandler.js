@@ -418,6 +418,51 @@ class FsHandler {
 
         return rtn;
     };
+
+    async fsContentAsync(path,name){
+        let rtn = null;
+
+        try{
+            let parent = path.replace(/\/\//g,'/');
+            let _url = `/fs${parent}/${name}`;
+
+            if(window.SignedUser_IsAdmin){
+                _url += '?issys=true';
+            }
+
+            await jQuery.ajax({
+                url: _url,
+                type: 'GET',
+                contentType: "application/text; charset=utf-8",
+                dataType: 'text json',
+                async: true,
+                data: {
+                    type: 'file'
+                },
+                beforeSend(xhr) {
+                    
+                },
+                complete(xhr, textStatus) {
+                },
+                success(data, textStatus, xhr) {
+
+                    userHandler.ifSignIn(data);
+
+                    if (_.isEmpty(data.message)) return false;
+
+                    rtn = data.message;
+
+                },
+                error(xhr, textStatus, errorThrown) {
+                    rtn = xhr.responseText;
+                }
+            })
+        } catch(err){
+
+        }
+
+        return rtn;
+    };
     
 
     /*

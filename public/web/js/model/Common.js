@@ -315,9 +315,10 @@ Vue.component("mx-fs-editor",{
                 log: {
                     show: true
                 },
-                preview: {
+                result: {
                     show: true
-                }
+                },
+                activeView: 'result'
             },
             splitInst: null,
             tip: {
@@ -369,8 +370,8 @@ Vue.component("mx-fs-editor",{
                                 </span>
                                 <el-dropdown-menu slot="dropdown">
                                     <el-dropdown-item @click.native="onSaveAndPlay">运行</el-dropdown-item>
-                                    <el-dropdown-item @click.native="toolBar.log.show = !toolBar.log.show" divided>日志</el-dropdown-item>
-                                    <el-dropdown-item @click.native="toolBar.preview.show = !toolBar.preview.show" divided>预览</el-dropdown-item>
+                                    <el-dropdown-item @click.native="onToggleRunningView('log')" divided>执行日志</el-dropdown-item>
+                                    <el-dropdown-item @click.native="onToggleRunningView('result')" divided>执行结果</el-dropdown-item>
                                 </el-dropdown-menu>
                             </el-dropdown>   
 
@@ -394,23 +395,35 @@ Vue.component("mx-fs-editor",{
                         </div>
                         <!-- 工具栏 -->
                         <div>  
-                            <el-tooltip content="左边栏" placement="bottom" open-delay="500">
+                            <el-tooltip content="左边栏" placement="top" open-delay="500">
                                 <el-button type="text" :icon="toolBar.left.show?'el-icon-s-fold':'el-icon-s-unfold'" @click="toolBar.left.show = !toolBar.left.show"></el-button>
                             </el-tooltip>    
                             <span v-if="!_.isEmpty(tabs.list)" style="padding-left:10px;">
-                                <el-tooltip content="重打开" placement="bottom" open-delay="500">
+                                <el-tooltip content="重打开" placement="top" open-delay="500">
                                     <el-button type="text" icon="el-icon-refresh" @click="onReload"></el-button>
                                 </el-tooltip>    
-                                <el-tooltip content="保存" placement="bottom" open-delay="500">
+                                <el-divider direction="vertical"></el-divider>
+                                <el-tooltip content="保存" placement="top" open-delay="500">
                                     <el-button type="text" icon="far fa-save" @click="onSave"></el-button>
                                 </el-tooltip>
-                                <el-tooltip content="另存为" placement="bottom" open-delay="500">
+                                <el-tooltip content="另存为" placement="top" open-delay="500">
                                     <el-button type="text" icon="el-icon-edit-outline" @click="file.dialogSaveAs.visible=true"></el-button>
                                 </el-tooltip>
-                                <el-tooltip content="运行" placement="bottom" open-delay="500">
+                                <el-divider direction="vertical"></el-divider>
+                                <el-tooltip content="执行" placement="top" open-delay="500">
                                     <el-button type="text" icon="el-icon-caret-right" @click="onSaveAndPlay" :loading="tip.loading"></el-button>
                                 </el-tooltip>
-                                <el-tooltip content="主题" open-delay="500">
+                                <el-divider direction="vertical"></el-divider>
+                                <el-tooltip content="执行日志" placement="top" open-delay="500">
+                                    <el-button type="text" icon="el-icon-monitor" @click="onToggleRunningView('log')"></el-button>
+                                </el-tooltip>
+                                <el-tooltip content="执行结果" placement="top" open-delay="500">
+                                    <el-button type="text" icon="el-icon-tickets" @click="onToggleRunningView('result')"></el-button>
+                                </el-tooltip>
+                                <el-tooltip content="预览" placement="top" open-delay="500">
+                                    <el-button type="text" icon="el-icon-platform-eleme" @click="onToggleRunningView('preview')" v-if="tabs.activeNode.ftype=='html'"></el-button>
+                                </el-tooltip>
+                                <el-tooltip content="主题" placement="top" open-delay="500">
                                     <el-button type="text" :class="'M3-EDITOR-THEME-'+tabs.activeIndex" v-show="!_.isEmpty(tabs.list)" style="float:right;">
                                         <i class="fas fa-tshirt"></i>
                                     </el-button>
@@ -429,6 +442,9 @@ Vue.component("mx-fs-editor",{
                                     <h1>欢迎使用${MATRIX_TITLE} 在线编辑器</h1>
                                     <el-button type="default" @click="onNewProject">新建文件夹</el-button>
                                     <el-button type="default" @click="onNewFile">新建文件</el-button>
+                                    <object data="/fs/assets/images/files/svg/configWorld.svg?type=open&issys=true" 
+                                        type="image/svg+xml" style="position: absolute;width:40vw;height:40vh;background: #ffffff;top:22.5%;left:20%;">
+                                    </object>
                                 </el-card>
                                 <el-tabs v-model="tabs.activeIndex" type="border-card" 
                                         style="height:100%;" 
@@ -488,9 +504,9 @@ Vue.component("mx-fs-editor",{
             },
             immediate:true
         },
-        'toolBar.preview.show':{
+        'toolBar.result.show':{
             handler(val,oldVal){
-                localStorage.setItem('M3-EDITOR-PREVIEW', val);
+                localStorage.setItem('M3-EDITOR-RESULT', val);
             }
         },
         'toolBar.log.show':{
@@ -512,7 +528,7 @@ Vue.component("mx-fs-editor",{
         onInitToolBar(){
             this.toolBar.left.show = (localStorage.getItem('M3-EDITOR-LEFTBAR') == 'true');
             _.delay(()=>{
-                this.toolBar.preview.show = (localStorage.getItem('M3-EDITOR-PREVIEW') == 'true');
+                this.toolBar.result.show = (localStorage.getItem('M3-EDITOR-RESULT') == 'true');
                 this.toolBar.log.show = (localStorage.getItem('M3-EDITOR-LOG') == 'true');
             },800)
         },
@@ -552,7 +568,24 @@ Vue.component("mx-fs-editor",{
             }
 
             localStorage.setItem('M3-EDITOR-LEFTBAR',show);
-        },  
+        }, 
+        onToggleRunningView(view){
+            
+            if(view === 'preview'){
+                
+                let url = `/fs${[this.tabs.activeNode.parent,this.tabs.activeNode.name].join("/")}?issys=true&type=open`;
+
+                window.open(url,'_blank');
+                
+                return false;
+            }
+            
+            this.toolBar[view].show = !this.toolBar[view].show;
+
+            if(this.toolBar[view].show) {
+                this.toolBar.activeView = view;
+            }
+        },
         tabAdd(item){
             
             try {
@@ -1300,6 +1333,7 @@ Vue.component("mx-fs-tree",{
     methods: {
         onMouseEnter(item){
             this.$set(item, 'show', true)
+            this.$refs.tree.setCurrentKey(item.key);
         },
         onMouseLeave(item){
             this.$set(item, 'show', false)

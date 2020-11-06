@@ -16,7 +16,7 @@
 			<el-main style="padding: 5px;height: calc(100vh - 175px);">
 				<el-tree 
 					node-key="name"
-					highlight-current="true"
+					highlight-current
 					:default-expand-all="false"
 					:default-expanded-keys="defaultExpandedKeys"
 					:expand-on-click-node="false"
@@ -93,7 +93,8 @@
 				this.nodes = fsHandler.callFsJScript(`${['/matrix'+this.model.parent,this.model.name].join("/")}`).message;
 			},
 			onMouseEnter(data){
-				this.$set(data, 'show', true)
+				this.$set(data, 'show', true);
+				this.$refs.tree.setCurrentKey(data.key);
 			},
 			onMouseLeave(data){
 				this.$set(data, 'show', false)

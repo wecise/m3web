@@ -21,8 +21,6 @@
 
 -->
 {{template "base/head" .}}
-<!-- zTree Core CSS -->
-<link href="{{AppSubUrl}}/web/vendor/zTree/css/systemStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
 
 <style type="text/css">
 
@@ -115,7 +113,7 @@
      /* 首页Split样式 无border */
      .gutter.gutter-horizontal {
         cursor: ew-resize;
-        background-color: rgb(241, 241, 241);
+        background-color: #f2f2f2!important;
         background-image: url(/fs/assets/images/others/png/vSplit.png?type=open&issys=true);
         background-size: 7px;
         background-position-x: 50%;
@@ -127,7 +125,7 @@
 
     .gutter.gutter-vertical {
         cursor: ns-resize;
-        background-color: rgb(241, 241, 241);
+        background-color: #f2f2f2!important;
         background-image: url(/fs/assets/images/others/png/vSplit.png?type=open&issys=true);
         background-size: 7px;
         background-position-x: 50%;
@@ -159,7 +157,6 @@
 <script src="{{AppSubUrl}}/web/js/handler/ConfigHandler.js" type="text/javascript"></script>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/config/dropdown-tree-component.html"></link>
 
 <script>
     $(function(){
