@@ -119,7 +119,10 @@ class Pipe {
                                                 数据源<i class="el-icon-arrow-down el-icon--right"></i>
                                             </el-button>
                                             <el-dropdown-menu slot="dropdown">
-                                                <el-dropdown-item :key="item.id" v-for="(item,idx) in config['source']" :divided="idx>0?true:false">#{item.fileContent.title}#</el-dropdown-item>
+                                                <el-dropdown-item :key="item.id" v-for="(item,idx) in config['source']" :divided="idx>0?true:false" 
+                                                    @click.native="onInitLogSourceBar">
+                                                    #{item.fileContent.title}#
+                                                </el-dropdown-item>
                                             </el-dropdown-menu>
                                         </el-dropdown>
                                         <el-divider direction="vertical"></el-divider>
@@ -156,6 +159,7 @@ class Pipe {
                                             <el-dropdown-item @click.native="control.monitor.show = !control.monitor.show"divided>监控</el-dropdown-item>
                                             </el-dropdown-menu>
                                         </el-dropdown>
+                                        <div ref="sidebar" style="position:absolute;overflow:hidden;top:35px;left:0px;max-height:52px;width:100%;"></div>
                                     </el-header>
                                     <el-main style="border:1px solid #dddddd;padding:0px;">
                                         <el-container style="width:100%;height:100%;position: relative;" ref="container">
@@ -253,6 +257,71 @@ class Pipe {
 
                             }
                         },
+                        addSidebarIcon(graph, sidebar, label, image){
+                            // Function that is executed when the image is dropped on
+                            // the graph. The cell argument points to the cell under
+                            // the mousepointer if there is one.
+                            var funct = function(graph, evt, cell, x, y){
+                                var parent = graph.getDefaultParent();
+                                var model = graph.getModel();
+                                
+                                var v1 = null;
+                                
+                                model.beginUpdate();
+                                try
+                                {
+                                    // NOTE: For non-HTML labels the image must be displayed via the style
+                                    // rather than the label markup, so use 'image=' + image for the style.
+                                    // as follows: v1 = graph.insertVertex(parent, null, label,
+                                    // pt.x, pt.y, 120, 120, 'image=' + image);
+                                    v1 = graph.insertVertex(parent, null, label, x, y, 120, 120);
+                                    v1.setConnectable(false);
+                                    
+                                    // Presets the collapsed size
+                                    v1.geometry.alternateBounds = new mxRectangle(0, 0, 120, 40);
+                                                        
+                                    // Adds the ports at various relative locations
+                                    var port = graph.insertVertex(v1, null, 'Trigger', 0, 0.25, 16, 16,
+                                            'port;image=editors/images/overlays/flash.png;align=right;imageAlign=right;spacingRight=18', true);
+                                    port.geometry.offset = new mxPoint(-6, -8);
+                        
+                                    var port = graph.insertVertex(v1, null, 'Input', 0, 0.75, 16, 16,
+                                            'port;image=editors/images/overlays/check.png;align=right;imageAlign=right;spacingRight=18', true);
+                                    port.geometry.offset = new mxPoint(-6, -4);
+                                    
+                                    var port = graph.insertVertex(v1, null, 'Error', 1, 0.25, 16, 16,
+                                            'port;image=editors/images/overlays/error.png;spacingLeft=18', true);
+                                    port.geometry.offset = new mxPoint(-8, -8);
+
+                                    var port = graph.insertVertex(v1, null, 'Result', 1, 0.75, 16, 16,
+                                            'port;image=editors/images/overlays/information.png;spacingLeft=18', true);
+                                    port.geometry.offset = new mxPoint(-8, -4);
+                                }
+                                finally
+                                {
+                                    model.endUpdate();
+                                }
+                                
+                                graph.setSelectionCell(v1);
+                            }
+                            
+                            // Creates the image which is used as the sidebar icon (drag source)
+                            var img = document.createElement('img');
+                            img.setAttribute('src', image);
+                            img.style.width = '48px';
+                            img.style.height = '48px';
+                            img.title = 'Drag this to the diagram to create a new vertex';
+                            sidebar.appendChild(img);
+                            
+                            var dragElt = document.createElement('div');
+                            dragElt.style.border = 'dashed black 1px';
+                            dragElt.style.width = '120px';
+                            dragElt.style.height = '120px';
+                                                
+                            // Creates the image which is used as the drag icon (preview)
+                            var ds = mxUtils.makeDraggable(img, graph, funct, dragElt, 0, 0, true, true);
+                            ds.setGuidesEnabled(true);
+                        },
                         // 初始化菜单项目
                         onInitConfig(){
                             fsHandler.callFsJScriptAsync("/matrix/pipe/getConfigList.js").then( (rtn)=>{
@@ -262,6 +331,19 @@ class Pipe {
                         // 关闭调试、日志
                         onRemoveConsoleTab(targetName){
                             this.control[targetName].show = !this.control[targetName].show;
+                        },
+                        // 加载数据源可拖拽项目
+                        onInitLogSourceBar(item){
+                            console.log(item)
+                            let graph = this.editor.graph;
+                            let sidebar = this.$refs.sidebar;
+
+                            this.initSidebar(graph, sidebar,
+                                '<h1 style="margin:0px;">Server</h1><br>'+
+                                '<img src="/static/assets/images/files/png/matrix.png" width="48" height="48">'+
+                                '<br>'+
+                                '<input type="text" size="12" value="127.0.0.1"/>',
+                                '/static/assets/images/files/png/matrix.png');
                         },
                         // 添加菜单项
                         addSidebarIcon(graph, sidebar, label, image){

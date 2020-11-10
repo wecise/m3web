@@ -3624,7 +3624,6 @@ class Topological {
                             "topological-timeline-mini",
                             "topological-timeline-chart",
                             "topological-graph-component",
-                            "omdb-path-datatables-component",
                             "event-datatable-component",
                             "event-diagnosis-datatable-component",
                             "event-summary-component",

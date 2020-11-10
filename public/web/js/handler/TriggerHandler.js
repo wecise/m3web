@@ -49,6 +49,40 @@ class TriggerHandler {
         return rtn;
     };
 
+    async triggerListAsync(className){
+
+        let rtn = null;
+
+        try{
+            await jQuery.ajax({
+                url: `/mxobject/trigger?class=${encodeURIComponent(className)}`,
+                dataType: 'json',
+                type: 'GET',
+                async: true,
+                beforeSend(xhr){
+                },
+                complete(xhr, textStatus) {
+                },
+                success(data, status) {
+
+                    userHandler.ifSignIn(data);
+
+                    if (_.isEmpty(data.message)) return rtn;
+
+                    rtn = data.message;
+
+                },
+                error(xhr, textStatus, errorThrown){
+                    rtn = xhr.responseText;
+                }
+            });
+        } catch(err){
+
+        }
+
+        return rtn;
+    };
+
     /*
     *  触发器管理
     *
@@ -88,6 +122,41 @@ class TriggerHandler {
         return rtn;
     };
 
+    async triggerNewAsync(event){
+        let rtn = null;
+
+        try{
+            await jQuery.ajax({
+                url: '/mxobject/trigger',
+                type: 'PUT',
+                dataType: 'json',
+                contentType: 'application/json',
+                async: true,
+                data: JSON.stringify(event),
+                beforeSend(xhr){
+                },
+                complete(xhr, textStatus) {
+                },
+                success(data, status) {
+
+                    userHandler.ifSignIn(data);
+
+                    if( _.lowerCase(data.status) === "ok"){
+                        rtn = 1;
+                    }
+
+                },
+                error(xhr, textStatus, errorThrown) {
+                    rtn = xhr.responseText;
+                }
+            });
+        } catch(err){
+            
+        }
+
+        return rtn;
+    };
+
     /*
     *  触发器管理
     *
@@ -121,6 +190,39 @@ class TriggerHandler {
                 console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
             }
         });
+
+        return rtn;
+    };
+
+    async triggerDeleteAsync(className,name){
+        let rtn = null;
+
+        try{
+            await jQuery.ajax({
+                    url: `/mxobject/trigger?class=${encodeURIComponent(className)}&name=${name}`,
+                    dataType: 'json',
+                    type: 'DELETE',
+                    async: true,
+                    beforeSend:function(xhr){
+                    },
+                    complete: function(xhr, textStatus) {
+                    },
+                    success: function (data, status) {
+
+                        userHandler.ifSignIn(data);
+
+                        if( _.lowerCase(data.status) === "ok"){
+                            rtn = 1;
+                        }
+
+                    },
+                    error: function(xhr, textStatus, errorThrown) {
+                        rtn = xhr.responseText;
+                    }
+                });
+        } catch(err){
+                
+        }
 
         return rtn;
     };

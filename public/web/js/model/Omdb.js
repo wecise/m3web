@@ -104,6 +104,9 @@ class Omdb{
         // Class Tree组件
         Vue.component("omdb-tree",{
             delimiters: ['#{', '}#'],
+            props: {
+                control: Object
+            },
             data(){
                 return {
                     defaultProps: {
@@ -135,13 +138,29 @@ class Omdb{
                                     <span slot-scope="{ node, data }" style="width:100%;height:30px;line-height: 30px;"  @mouseenter="onMouseEnter(data)" @mouseleave="onMouseLeave(data)">
                                         <!--Class-->
                                         <span v-if="data.type=='class'">
-                                            <span v-if="data.child">
+                                            <!--root-->
+                                            <span v-if="data.name=='/'">
                                                 <i class="el-icon-folder" style="color:#FFC107;"></i>
-                                                <span>#{ _.last(_.split(node.label,'/')) }# (#{ data.child.length || data.children.length }#)</span>
+                                                <span v-if="data.autosearch">
+                                                    #{ $t('omdb.classTree.class') }# (#{ data.child.length || data.children.length }#) <span v-if="control.autosearch.show">(A)</span>
+                                                </span>
+                                                <span v-else>#{ $t('omdb.classTree.class') }# (#{ data.child.length || data.children.length }#)</span>
                                             </span>
+                                            <!--dir-->
+                                            <span v-else-if="data.child">
+                                                <i class="el-icon-folder" style="color:#FFC107;"></i>
+                                                <span v-if="data.autosearch">
+                                                    #{ data,control | pickNodeLabel }# (#{ data.child.length || data.children.length }#) <span v-if="control.autosearch.show">(A)</span>
+                                                </span>
+                                                <span v-else>#{ data,control | pickNodeLabel }# (#{ data.child.length || data.children.length }#)</span>
+                                            </span>
+                                            <!--node-->
                                             <span v-else>
                                                 <i class="el-icon-date" style="color:#0088cc;"></i>
-                                                <span>#{ _.last(_.split(node.label,'/')) }#</span>
+                                                <span v-if="data.autosearch">
+                                                    #{ data,control | pickNodeLabel }# <span v-if="control.autosearch.show">(A)</span>
+                                                </span>
+                                                <span v-else>#{ data,control | pickNodeLabel }#</span>
                                             </span>
 
                                             <el-dropdown v-show="data.show" style="float:right;width:14px;margin:0 5px;">
@@ -183,7 +202,8 @@ class Omdb{
                                                         <i class="el-icon-more el-icon--right"></i>
                                                     </span>
                                                     <el-dropdown-menu slot="dropdown">
-                                                        <el-dropdown-item @click.native="onEdgeDelete(data,'drop-all-edge-type')">删除所有关系</el-dropdown-item>
+                                                        <el-dropdown-item @click.native="initEdgeData(data)">刷新</el-dropdown-item>
+                                                        <el-dropdown-item @click.native="onEdgeDelete(data,'drop-all-edge-type')" divided>删除所有关系</el-dropdown-item>
                                                         <el-dropdown-item @click.native="onEdgeExport(data)" divided>导出</el-dropdown-item>
                                                     </el-dropdown-menu>
                                                 </el-dropdown>
@@ -211,6 +231,19 @@ class Omdb{
             watch: {
                 
             },
+            filters: {
+                pickNodeLabel(data,control){
+                    if(control.alias.show){
+                        try{
+                            return data.alias;
+                        } catch(err){
+                            return _.last(_.split(data.name,'/'));    
+                        }
+                    } else {
+                        return _.last(_.split(data.name,'/'));
+                    }
+                }
+            },
             created(){
                 this.onInit();
             },
@@ -221,8 +254,8 @@ class Omdb{
             methods: {
                 onInit(){
                     this.treeData = [
-                        {cid:'-1', pid:null, type: 'class', name: `/${this.$t('omdb.classTree.class')}`, title: this.$t('omdb.classTree.class'), child:true, children:[]},
-                        {cid:'-10', pid:null, type: 'edge', name: `/${this.$t('omdb.classTree.edge')}`, title: this.$t('omdb.classTree.edge'), child:true, children:[]}
+                        {cid:'1', pid:null, class: "/", type: 'class', name: `/`, title: this.$t('omdb.classTree.class'), child:true, children:[]},
+                        {cid:'-10', pid:null, class: null, type: 'edge', name: `/${this.$t('omdb.classTree.edge')}`, title: this.$t('omdb.classTree.edge'), child:true, children:[]}
                     ];
                 },
                 initClassData(data){
@@ -238,7 +271,6 @@ class Omdb{
                         })
                         
                         this.$set(data, 'children', rtn);
-
                         
                         if(!this.defaultExpandedKeys[data.cid]){
                             this.defaultExpandedKeys.push(data.cid);
@@ -255,9 +287,9 @@ class Omdb{
                             return;
                         }
                         
-                        let rtn = _.map(val.message, (v)=>{
+                        let rtn = _.sortBy(_.map(val.message, (v)=>{
                             return _.merge(v, {type: 'edge', cid: objectHash.sha1(v.name)});
-                        });
+                        }),'name');
                         
                         this.$set(data, 'children', rtn);
                     } );
@@ -274,7 +306,11 @@ class Omdb{
                     
                 },
                 onNodeClick(data){
-                    this.initClassData(data);
+                    if(data.type == 'class'){
+                        this.initClassData(data);
+                    } else {
+                        this.initEdgeData(data);
+                    }
                 },
                 // 类新建
                 onClassNew(treeNode){
@@ -438,7 +474,7 @@ class Omdb{
                     immediate:true
                 }
             },
-            template:   `<el-container class="animated fadeIn" style="height:calc(100vh - 295px);">
+            template:   `<el-container class="animated fadeIn" style="height:calc(100% - 70px);">
                             <el-header style="height:30px;line-height:30px;">
                                 <el-tooltip content="导出" delay-time="500">
                                     <el-dropdown @command="onExport">
@@ -456,7 +492,7 @@ class Omdb{
                                     </el-dropdown>
                                 </el-tooltip>
                             </el-header>   
-                            <el-main style="padding:0px;height:100%;">
+                            <el-main style="padding:0px;height:100%;overflow:hidden;">
                                 <el-table
                                     :data="dt.rows"
                                     highlight-current-row="true"
@@ -987,10 +1023,10 @@ class Omdb{
                 model: Object
             },
             template: `<omdb-trigger-editor-component :id="id"
-                                                        :className="model.node.name"
-                                                        :model="editor"
-                                                        showToolsBar="true"
-                                                        showStatusBar="false"></omdb-trigger-editor-component>`,
+                            :className="model.node.name"
+                            :model="editor"
+                            showToolsBar="true"
+                            showStatusBar="false"></omdb-trigger-editor-component>`,
             data(){
                 return {
                     editor: {
@@ -1038,7 +1074,7 @@ class Omdb{
             methods: {
                 init(){
                     
-                    let jsonStr = JSON.stringify(this.model,null,4);//.replace(/   /g, ' ');
+                    let jsonStr = JSON.stringify(this.model,null,4);
 
                      // Editor
                     let editor = ace.edit(this.$refs.editor.$el);
@@ -1109,55 +1145,162 @@ class Omdb{
                                             <el-button slot="append" icon="fas fa-save" @click="onUpdate('alias')"></el-button>
                                         </el-input>
                                     </el-form-item>
+                                    <el-form-item label="TTL">
+                                        <el-input-number v-model="formModel.ttl" controls-position="right" :min="-1">
+                                        </el-input-number>
+                                        <span style="font-size:10px;padding-left:10px;">#{ mx.secondsToDay(formModel.ttl) }#</span>
+                                        <el-button icon="fas fa-save" @click="onUpdate('ttl')" style="float:right;"></el-button>
+                                        <span style="font-size:10px;float:right;padding-right:10px;">数据生命周期(单位：秒)，-1为永久保存，0为不保存</span>
+                                    </el-form-item>
                                     <el-form-item label="备注">
-                                        <el-input v-model="formModel.remedy">
+                                        <el-input v-model="formModel.remedy" clearable>
                                             <el-button slot="append" icon="fas fa-save" @click="onUpdate('remedy')"></el-button>
                                         </el-input>
                                     </el-form-item>
                                 </el-form>
-                                <el-tabs v-model="tabs.activeName" type="card" tab-position="left" @tab-click="onClick" style="border-top:1px solid #dddddd;">
+                                <el-tabs v-model="tabs.activeName" type="card" tab-position="left" 
+                                    @tab-click="onClick" 
+                                    style="border-top:1px solid #dddddd;height:100%;">
                                     <el-tab-pane name="columns">
                                         <span slot="label"><i class="fas fa-columns"></i> 属性</span>
-                                        <omdb-classlist-component :model="dt"></omdb-classlist-component>
+                                        <el-container style="height:calc(100% - 145px);padding:10px;"> 
+                                            <el-header style="height:30px;"> 
+                                                <el-breadcrumb separator="/" style="height:30px;line-height:30px;">
+                                                    <el-breadcrumb-item>
+                                                        <el-button type="text" @click="onChangeClassColumn('/')">基类</el-button>
+                                                    </el-breadcrumb-item>
+                                                    <el-breadcrumb-item  :key="item" v-for="(item,index) in ddlPath" v-if="index > 0">
+                                                        <el-button type="text" @click="onChangeClassColumn(ddlPath.slice(0,index+1).join('/'))">#{item}#</el-button>
+                                                    </el-breadcrumb-item>
+                                                </el-breadcrumb>
+                                            </el-header>
+                                            <el-main style="padding:0px;">
+                                                <omdb-classlist-component :model="dt"></omdb-classlist-component>
+                                            </el-main>
+                                        </el-container>
                                     </el-tab-pane>
                                     <el-tab-pane name="keys">
                                         <span slot="label"><i class="fas fa-key"></i> 主键</span>
-                                        <omdb-editor-base-component :model="keysModel"
-                                                                    showToolsBar="true"
-                                                                    showStatusBar="true">
-                                        </omdb-editor-base-component>
+                                        <el-container style="height:calc(100% - 230px);padding:10px;"> 
+                                            <el-header style="height:30px;"> 
+                                                <el-breadcrumb separator="/" style="height:30px;line-height:30px;">
+                                                    <el-breadcrumb-item>
+                                                        <el-button type="text">基类</el-button>
+                                                    </el-breadcrumb-item>
+                                                    <el-breadcrumb-item  :key="item" v-for="(item,index) in ddlPath" v-if="index > 0">
+                                                        <el-button type="text">#{item}#</el-button>
+                                                    </el-breadcrumb-item>
+                                                </el-breadcrumb>
+                                            </el-header>
+                                            <el-main style="padding:0px;">
+                                                <omdb-editor-base-component :model="keysModel"
+                                                                            showToolsBar="true"
+                                                                            showStatusBar="true">
+                                                </omdb-editor-base-component>
+                                            </el-main>
+                                        </el-container>
                                     </el-tab-pane>
                                     <el-tab-pane name="indexes">
                                         <span slot="label"><i class="fas fa-indent"></i> 索引</span>
-                                        <omdb-editor-base-component :model="indexesModel"
-                                                                    showToolsBar="true"
-                                                                    showStatusBar="true">
-                                        </omdb-editor-base-component>
+                                        <el-container style="height:calc(100% - 230px);padding:10px;"> 
+                                            <el-header style="height:30px;"> 
+                                                <el-breadcrumb separator="/" style="height:30px;line-height:30px;">
+                                                    <el-breadcrumb-item>
+                                                        <el-button type="text">基类</el-button>
+                                                    </el-breadcrumb-item>
+                                                    <el-breadcrumb-item  :key="item" v-for="(item,index) in ddlPath" v-if="index > 0">
+                                                        <el-button type="text">#{item}#</el-button>
+                                                    </el-breadcrumb-item>
+                                                </el-breadcrumb>
+                                            </el-header>
+                                            <el-main style="padding:0px;">
+                                                <omdb-editor-base-component :model="indexesModel"
+                                                                            showToolsBar="true"
+                                                                            showStatusBar="true">
+                                                </omdb-editor-base-component>
+                                            </el-main>
+                                        </el-container>
                                     </el-tab-pane>
                                     <el-tab-pane name="subClass">
                                         <span slot="label"><i class="fas fa-cube"></i> 子类</span>
-                                        <omdb-editor-base-component :model="subClassModel"
-                                                                    showToolsBar="true"
-                                                                    showStatusBar="true">
-                                        </omdb-editor-base-component>
+                                        <el-container style="height:calc(100% - 230px);padding:10px;"> 
+                                            <el-header style="height:30px;"> 
+                                                <el-breadcrumb separator="/" style="height:30px;line-height:30px;">
+                                                    <el-breadcrumb-item>
+                                                        <el-button type="text">基类</el-button>
+                                                    </el-breadcrumb-item>
+                                                    <el-breadcrumb-item  :key="item" v-for="(item,index) in ddlPath" v-if="index > 0">
+                                                        <el-button type="text">#{item}#</el-button>
+                                                    </el-breadcrumb-item>
+                                                </el-breadcrumb>
+                                            </el-header>
+                                            <el-main style="padding:0px;">
+                                                <omdb-editor-base-component :model="subClassModel"
+                                                                            showToolsBar="true"
+                                                                            showStatusBar="true">
+                                                </omdb-editor-base-component>
+                                            </el-main>
+                                        </el-container>
                                     </el-tab-pane>
                                     <el-tab-pane name="options">
                                         <span slot="label"><i class="fas fa-cog"></i> 设置</span>
-                                        <omdb-editor-base-component :model="optionsModel"
-                                                                    showToolsBar="true"
-                                                                    showStatusBar="true">
-                                        </omdb-editor-base-component>
+                                        <el-container style="height:calc(100% - 230px);padding:10px;"> 
+                                            <el-header style="height:30px;"> 
+                                                <el-breadcrumb separator="/" style="height:30px;line-height:30px;">
+                                                    <el-breadcrumb-item>
+                                                        <el-button type="text">基类</el-button>
+                                                    </el-breadcrumb-item>
+                                                    <el-breadcrumb-item  :key="item" v-for="(item,index) in ddlPath" v-if="index > 0">
+                                                        <el-button type="text">#{item}#</el-button>
+                                                    </el-breadcrumb-item>
+                                                </el-breadcrumb>
+                                            </el-header>
+                                            <el-main style="padding:0px;">
+                                                <omdb-editor-base-component :model="optionsModel"
+                                                                            showToolsBar="true"
+                                                                            showStatusBar="true">
+                                                </omdb-editor-base-component>
+                                            </el-main>
+                                        </el-container>
                                     </el-tab-pane>
                                     <el-tab-pane name="ddl">
                                         <span slot="label"><i class="fas fa-table"></i> DDL</span>
-                                        <omdb-editor-base-component :model="ddlModel"
-                                                                    showToolsBar="true"
-                                                                    showStatusBar="true">
-                                        </omdb-editor-base-component>
+                                        <el-container style="height:calc(100% - 230px);padding:10px;"> 
+                                            <el-header style="height:30px;"> 
+                                                <el-breadcrumb separator="/" style="height:30px;line-height:30px;">
+                                                    <el-breadcrumb-item>
+                                                        <el-button type="text" @click="onChangeClassDDL('/')">基类</el-button>
+                                                    </el-breadcrumb-item>
+                                                    <el-breadcrumb-item  :key="item" v-for="(item,index) in ddlPath" v-if="index > 0">
+                                                        <el-button type="text" @click="onChangeClassDDL(ddlPath.slice(0,index+1).join('/'))">#{item}#</el-button>
+                                                    </el-breadcrumb-item>
+                                                </el-breadcrumb>
+                                            </el-header>
+                                            <el-main style="padding:0px;">
+                                                <omdb-editor-base-component :model="ddlModel"
+                                                                            showToolsBar="true"
+                                                                            showStatusBar="true">
+                                                </omdb-editor-base-component>
+                                            </el-main>
+                                        </el-container>
                                     </el-tab-pane>
                                     <el-tab-pane name="trigger">
                                         <span slot="label"><i class="fas fa-stopwatch"></i> 触发器</span>
-                                        <omdb-trigger-console :id="id+'-trigger'" :model="model"></omdb-trigger-console>
+                                        <el-container style="height:calc(100% - 200px);padding:10px;"> 
+                                            <el-header style="height:30px;"> 
+                                                <el-breadcrumb separator="/" style="height:30px;line-height:30px;">
+                                                    <el-breadcrumb-item>
+                                                        <el-button type="text">基类</el-button>
+                                                    </el-breadcrumb-item>
+                                                    <el-breadcrumb-item  :key="item" v-for="(item,index) in ddlPath" v-if="index > 0">
+                                                        <el-button type="text">#{item}#</el-button>
+                                                    </el-breadcrumb-item>
+                                                </el-breadcrumb>
+                                            </el-header>
+                                            <el-main style="padding:0px;">
+                                                <omdb-trigger-console :id="id+'-trigger'" :model="model"></omdb-trigger-console>
+                                            </el-main>
+                                        </el-container>
                                     </el-tab-pane>
                                 </el-tabs>
                             </el-main>
@@ -1216,9 +1359,14 @@ class Omdb{
                     }
                 }
             },
+            computed: {
+                ddlPath(){
+                    return this.formModel.name.split("/");
+                }
+            },
             created(){
                 // columns
-                this.initColumns();
+                this.initColumns(this.model);
 
                 // keys
                 this.initKeys();
@@ -1230,19 +1378,21 @@ class Omdb{
                 
             },
             methods: {
-                initColumns(){
+                initColumns(model){
+                    let node = model.node;
+                    let pnode = model.pnode;
                     
-                    if(!_.isEmpty(this.model.node.fieldsObj) && !_.isEmpty(this.model.pnode.fieldsObj)) {
+                    if(!_.isEmpty(node.fieldsObj) && !_.isEmpty(pnode.fieldsObj)) {
 
-                        let _node = _.cloneDeep(this.model.node.fieldsObj);
-                        let _pnode = _.cloneDeep(this.model.pnode.fieldsObj);
+                        let _node = _.cloneDeep(node.fieldsObj);
+                        let _pnode = _.cloneDeep(pnode.fieldsObj);
         
-                        if(this.model.node.fieldsObj == this.model.pnode.fieldsObj) {
-                            this.dt.rows = _.map(this.model.node.fieldsObj, (v)=>{
+                        if(node.fieldsObj == pnode.fieldsObj) {
+                            this.dt.rows = _.map(node.fieldsObj, (v)=>{
                                 return _.merge(v, {icon: 'parent'});
                             });
                         } else {
-                            let _diff =  _.differenceWith(this.model.node.fieldsObj, this.model.pnode.fieldsObj, (v1,v2)=>{return v1.name === v2.name;});
+                            let _diff =  _.differenceWith(node.fieldsObj, pnode.fieldsObj, (v1,v2)=>{return v1.name === v2.name;});
         
                             if(_.isEmpty(_diff)){
                                 this.dt.rows = _.map(_node, (v)=> {
@@ -1254,13 +1404,13 @@ class Omdb{
                             }
                         }
                     } else{
-                        this.dt.rows = _.map(this.model.node.fieldsObj, (v)=> {
+                        this.dt.rows = _.map(node.fieldsObj, (v)=> {
                             return _.merge(v, {icon: 'parent'});
                         });
                     }
         
                     this.dt.rows = _.map(_.uniqBy(this.dt.rows,'name'),(v)=>{
-                        if(_.indexOf(this.model.node.keys,v.name) > -1){
+                        if(_.indexOf(node.keys,v.name) > -1){
                             _.extend(v,{iskey:1});
                         }
                         return v;
@@ -1292,7 +1442,7 @@ class Omdb{
                                                 return cellValue===1?'是':'否';
                                             }
                                         },
-                                        {"field": "note", "title": "备注", width: 80},
+                                        {"field": "note", "title": "备注"},
                                         {"field": "mtime", "title": "时间", width: 160, render: function (row,column,cellValue,index) {
                                                 return moment(cellValue).format("YYYY-MM-DD HH:MM:SS.SSS");
                                             }
@@ -1306,11 +1456,32 @@ class Omdb{
     
                     this.dt.columns = _.uniqBy(this.dt.columns, 'field');
                                     
-                    this.dt.result = this.model.node;
+                    this.dt.result = node;
                     
-                    _.delay(()=>{
-                        eventHub.$emit(`LAYOUT-DATATABLE-RESIZE-EVENT`);
-                    },1500)
+                },
+                onChangeClassColumn(className){
+                    
+                    fsHandler.callFsJScriptAsync("/matrix/omdb/getClassIdByName.js", encodeURIComponent(className)).then( (rtn)=>{
+                        
+                        let id = rtn.message;
+
+                        /* omdbHandler.classTreeAsync(id).then( (rtn)=>{
+                            console.log(2323,rtn)
+                        } )
+                        
+                        omdbHandler.classListAsync(id).then( (node)=>{
+                            console.log(node)
+                            let nodeObj = omdbHandler.classListField(node.cid);
+                            let pNodeObj = omdbHandler.classListField(node.pid==-1?1:node.pid);
+
+                            let model = {node: {fieldsObj:nodeObj}, pnode: {fieldsObj:pNodeObj} };
+                            
+                            this.initColumns(model);
+
+                        } ) */
+
+                    } );
+                    
                 },
                 initKeys: function(){
                     let rtn = omdbHandler.classList(-1)[0];
@@ -1320,35 +1491,34 @@ class Omdb{
                     this.formModel = this.model.node;
                 },
                 onClick(tab, event){
-                    const self = this;
                     const splitTab = "\t| ";
                     const endWord = "\n";
                     const spaceWord = function(n){return n<=20?_.fill(Array(20 - n)," ").join(""):"" ;};
                     const headerWord = _.fill(Array(100),"-").join("");
 
                     if(tab.name == 'keys'){
-                        self.keysModel.newInput = _.concat([`Name${spaceWord(4)}${splitTab}Type`,headerWord],_.map(self.model.node.keys,function(v){
+                        this.keysModel.newInput = _.concat([`Name${spaceWord(4)}${splitTab}Type`,headerWord],_.map(this.model.node.keys,(v)=>{
                             return `${v}${spaceWord(v.length)}${splitTab}Primary Key`;
                         })).join(endWord);
                     } else if(tab.name == 'indexes'){
-                        self.indexesModel.newInput = _.concat([`Name${spaceWord(4)}${splitTab}Query`,headerWord],_.map(_.filter(self.model.node.fieldsObj,function(v){
+                        this.indexesModel.newInput = _.concat([`Name${spaceWord(4)}${splitTab}Query`,headerWord],_.map(_.filter(this.model.node.fieldsObj,(v)=>{
                             return v.isindex == 1;
-                        }),function(w){
+                        }),(w)=>{
                             return `${w.name}${spaceWord(w.name.length)}${splitTab}CREATE INDEX ${w.name} ON ${window.COMPANY_OSPACE}(${w.name});`;
                         })).join(endWord);
                     } else if(tab.name == 'subClass'){
-                        self.subClassModel.newInput = _.concat([`Name[${self.model.node.child.length}]`,headerWord],_.map(self.model.node.child,function(v){
+                        this.subClassModel.newInput = _.concat([`Name[${this.model.node.child.length}]`,headerWord],_.map(this.model.node.child,(v)=>{
                             return `${v}`;
                         })).join(endWord);
                     } else if(tab.name == 'options'){
-                        self.dt.keys = _.without(self.dt.keys,'child','fields');
-                        self.optionsModel.newInput = _.concat([`Name${spaceWord(4)}${splitTab}Value`,headerWord],_.map(self.dt.keys,function(v){
-                            let value = self.model.node[v];
+                        this.dt.keys = _.without(this.dt.keys,'child','fields');
+                        this.optionsModel.newInput = _.concat([`Name${spaceWord(4)}${splitTab}Value`,headerWord],_.map(this.dt.keys,(v)=>{
+                            let value = this.model.node[v];
 
                             if(v === 'mtime'){
-                                value = moment(self.model.node[v]).format("LLL");
+                                value = moment(this.model.node[v]).format("LLL");
                             } else if(v === 'keymethod'){
-                                if(self.model.node[v] === 1){
+                                if(this.model.node[v] === 1){
                                     value = 'uuid';
                                 } else {
                                     value = 'md5';
@@ -1358,14 +1528,31 @@ class Omdb{
                             return `${v}${spaceWord(v.length)}${splitTab}${value}`;
                         })).join(endWord);;
                     } else if(tab.name == 'ddl'){
-                        omdbHandler.classToDDLAsync(self.model.node.name).then( (rtn)=>{
-                            self.ddlModel.newInput = rtn;
+                        omdbHandler.classToDDLAsync(this.model.node.name).then( (rtn)=>{
+                            this.ddlModel.newInput = rtn;
                         } );
                     }
                 },
+                onChangeClassDDL(className){
+                    omdbHandler.classToDDLAsync(className).then( (rtn)=>{
+                        this.ddlModel.newInput = rtn;
+                    } );
+                },
                 onUpdate(column){
                     let item = {action:'update', class: this.formModel.name, name: column, value: this.formModel[column]};
-                    let rtn = fsHandler.callFsJScript("/matrix/omdb/updateClass.js",encodeURIComponent(JSON.stringify(item))).message;
+                    fsHandler.callFsJScriptAsync("/matrix/omdb/updateClass.js",encodeURIComponent(JSON.stringify(item))).then( (rtn)=>{
+                        if(rtn.status == 'ok'){
+                            this.$message({
+                                type: "success",
+                                message: "更新成功"
+                            })
+                        } else {
+                            this.$message({
+                                type: "error",
+                                message: "更新失败：" + rtn.message
+                            })
+                        }
+                    } );
                 }
             }  
         })
@@ -1419,7 +1606,7 @@ class Omdb{
                 model: Object
             },
             template:   `<el-container style="height:calc(100% - 30px);">
-                            <el-header style="height:30px;line-height:30px;" v-if="!_.isEmpty(model.data)">
+                            <el-header style="height:30px;line-height:30px;" v-if="!_.isEmpty(model.data) && _.includes(['select'],model.type)">
                                 <el-tooltip content="删除" open-delay="800" placement="top">
                                     <el-button type="text" @click="onDelete" icon="el-icon-delete"></el-button>
                                 </el-tooltip>
@@ -1439,7 +1626,8 @@ class Omdb{
                                 </el-tooltip>
 
                             </el-header>
-                            <el-main style="height:100%;padding:0px;" v-if="!_.isEmpty(model.data)">
+                            
+                            <el-main style="height:100%;padding:0px;" v-if="!_.isEmpty(model.data) && _.includes(['select'],model.type)">
                                 <el-table :data="dt.rows" 
                                     stripe
                                     border
@@ -1447,7 +1635,7 @@ class Omdb{
                                     height="100%"
                                     :row-class-name="rowClassName"
                                     :header-cell-style="headerRender"
-                                    @row-dblclick="rowDblclick"
+                                    @cell-dblclick="onCellDblclick"
                                     @selection-change="onSelectionChange"
                                     fit="true"
                                     ref="table"
@@ -1553,42 +1741,52 @@ class Omdb{
                                     </el-table-column>
                                 </el-table>
                                 <div style="padding:20px;" v-else>
-                                    <h3><i class="el-icon-info" style="font-size:32px;color:#4caf50;"></i> 没有找到相关的记录。</h3>
+                                    <h3><i class="el-icon-info" style="font-size:32px;color:#4caf50;"></i> 没有找到相关的记录</h3>
                                     <p>温馨提示：  
                                     请检查您的输入是否正确
                                     如有任何意见或建议，请及时反馈给我们。
                                     </p>
+                                    <p>耗时：#{model.consume}#</p>
                                 </div>
                             </el-main>
                             <!-- 异常信息提示 -->
                             <el-main style="height:100%;padding:0px;" v-else>
                                 <div style="padding:20px;" v-if="model.type=='create-class'">
-                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 创建类成功。</h3>
+                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 创建类成功</h3>
                                 </div>
                                 <div style="padding:20px;" v-else-if="model.type=='drop-class'">
-                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 删除类成功。</h3>
+                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 删除类成功</h3>
                                 </div>
                                 <div style="padding:20px;" v-else-if="model.type=='delete'">
-                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 删除数据成功。</h3>
+                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 删除数据成功</h3>
+                                </div>
+                                <div style="padding:20px;" v-else-if="model.type=='create edge'">
+                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 创建关系成功</h3>
                                 </div>
                                 <div style="padding:20px;" v-else-if="model.type=='create-edge-type'">
-                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 创建关系成功。</h3>
+                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 创建关系类型成功</h3>
                                 </div>
                                 <div style="padding:20px;" v-else-if="model.type=='drop-edge-type'">
-                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 删除关系成功。</h3>
+                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 删除关系成功</h3>
                                 </div>
                                 <div style="padding:20px;" v-else-if="model.type=='alter-class'">
-                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 更新类成功。</h3>
+                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 更新类成功</h3>
                                 </div>
                                 <div style="padding:20px;" v-else-if="model.type=='insert-class'">
-                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 插入成功。</h3>
+                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 插入成功</h3>
+                                </div>
+                                <div style="padding:20px;" v-else-if="model.type=='error'">
+                                    <h3><i class="el-icon-info" style="font-size:32px;color:#ff0000;"></i> 操作失败</h3>
+                                    <p>消息：#{model.data}#</p>
+                                    <p>耗时：#{model.consume}#</p>
                                 </div>
                                 <div style="padding:20px;" v-else>
-                                    <h3><i class="el-icon-info" style="font-size:32px;color:#4caf50;"></i> 没有找到相关的记录。</h3>
+                                    <h3><i class="el-icon-info" style="font-size:32px;color:#4caf50;"></i> 没有找到相关的记录</h3>
                                     <p>温馨提示：  
                                     请检查您的输入是否正确
                                     如有任何意见或建议，请及时反馈给我们。
                                     </p>
+                                    <p>耗时：#{model.consume}#</p>
                                 </div>
                             </el-main>
                             <el-footer  style="height:30px;line-height:30px;">
@@ -1744,7 +1942,22 @@ class Omdb{
                         return 'text-align:center;';
                     }
                 },
-                rowDblclick(row, column, event){
+                onCellDblclick(row, column, cell, event){
+                    
+                    $(cell).focus();
+                    $(cell).select();
+
+                    try {
+                        let flag = document.execCommand('copy');
+                        if(flag){
+                            this.$message({
+                                type: "info",
+                                message: "已复制"
+                            });
+                        } 
+                    } catch (err) {
+                        
+                    }
                     
                 },
                 onSelectionChange(val) {
@@ -2013,10 +2226,23 @@ class Omdb{
                         mql = "ALTER CLASS " + self.model.node.name + " ADD KEY key_name;\n\n";
                     } else if(self.model.pattern === 'alter-drop-key') {
                         mql = "ALTER CLASS " + self.model.node.name + " DROP KEY key_name;\n\n";
-                    } else if(self.model.pattern === 'g') {  // edge  query
+                    } else if(self.model.pattern === 'g') { 
                         mql = `g.V(" ").In("${self.model.node.name}").All();`;
-                    } else if(self.model.pattern === 'create-edge-type') {  // edge  new edge type
+                    } else if(self.model.pattern === 'create-edge-type') { 
                         mql = `CREATE EDGE TYPE IF NOT EXISTS type_name 'type_remedy';`;
+                    } else if(self.model.pattern === 'drop-all-edge-type') { 
+                        
+                        omdbHandler.fetchDataByMqlAsync('select edge type').then( (rtn)=>{
+                            
+                            if(_.isEmpty(rtn.message)){
+                                self.editorModel.newInput = "";
+                            }
+                            
+                            self.editorModel.newInput =  _.map(_.sortBy(rtn.message,'name'), (v)=>{
+                                                            return `DROP EDGE TYPE ${v.name}`;
+                                                        }).join(";\r");
+                        } );
+                        
                     } else if(self.model.pattern === 'drop-edge-type') {  // edge drop edge type
                         mql = `DROP EDGE TYPE ${self.model.node.name};`;
                     } else if(self.model.pattern === 'edge-insert') {  // edge  create
@@ -2045,7 +2271,6 @@ class Omdb{
                         direction: 'vertical',
                         onDragEnd:function(sz) {
                             localStorage.setItem(`OMDB-SPLIT-SIZES-${_.upperCase(self.id)}`,sz);
-                            eventHub.$emit(`LAYOUT-DATATABLE-RESIZE-EVENT`,sz[1]);
                         }
                     });
                 },
@@ -2065,34 +2290,27 @@ class Omdb{
 
                 },
                 mainTabsAdd(node){
-                    const self = this;
                     
                     // 已经打开
-                    if(_.find(self.main.tabs,{name: node.name})){
-                        self.mainTabsRemove(node.name);
+                    if(_.find(this.main.tabs,{name: node.name})){
+                        this.mainTabsRemove(node.name);
 
                         _.delay(()=>{
-                            self.main.tabs.push(node);
-                            self.main.activeIndex = node.name;
+                            this.main.tabs.push(node);
+                            this.main.activeIndex = node.name;
                         },50)
                     } else {
-                        self.main.tabs.push(node);
-                        self.main.activeIndex = node.name;
+                        this.main.tabs.push(node);
+                        this.main.activeIndex = node.name;
                     }
 
-                    _.delay(()=>{
-                        eventHub.$emit("LAYOUT-DATATABLE-RESIZE-EVENT",self.main.splitInst.getSizes()[1]);
-                    },500)
-
-                    
 
                 },
                 mainTabsRemove(targetName){
-                    const self = this;
                     
                     try{
-                        let tabs = self.main.tabs;
-                        let activeIndex = self.main.activeIndex;
+                        let tabs = this.main.tabs;
+                        let activeIndex = this.main.activeIndex;
                         if (activeIndex === targetName) {
                         tabs.forEach((tab, index) => {
                             if (tab.name === targetName) {
@@ -2104,8 +2322,8 @@ class Omdb{
                         });
                         }
                         
-                        self.main.tabs = tabs.filter(tab => tab.name !== targetName);
-                        self.main.activeIndex = activeIndex;
+                        this.main.tabs = tabs.filter(tab => tab.name !== targetName);
+                        this.main.activeIndex = activeIndex;
                         
                     } catch(err){
                         
@@ -2139,14 +2357,26 @@ class Omdb{
                                                         <i class="fas fa-angle-down"></i>
                                                     </span>
                                                     <el-dropdown-menu slot="dropdown">
-                                                        <el-dropdown-item @click.native="classDataExport('/matrix')"><i class="fas fa-file-export"></i> #{ $t('omdb.actions.export') }#</el-dropdown-item>
-                                                        <el-dropdown-item @click.native="classDataImport"><i class="fas fa-file-import"></i> #{ $t('omdb.actions.import') }#</el-dropdown-item>
-                                                        <el-dropdown-item @click.native="classPropsDirectory"><i class="el-icon-notebook-2"></i> #{ $t('omdb.actions.directory') }#</el-dropdown-item>
+                                                        <el-dropdown-item @click.native="classDataExport('/matrix')">#{ $t('omdb.actions.export') }#</el-dropdown-item>
+                                                        <el-dropdown-item @click.native="classDataImport">#{ $t('omdb.actions.import') }#</el-dropdown-item>
+                                                        <el-dropdown-item @click.native="classPropsDirectory" divided>#{ $t('omdb.actions.directory') }#</el-dropdown-item>
+                                                        <el-dropdown-item divided>
+                                                            显示别名(Alias)：<el-switch
+                                                                v-model="control.alias.show"
+                                                                active-color="#13ce66"
+                                                                inactive-color="#dddddd">
+                                                        </el-dropdown-item>
+                                                        <el-dropdown-item divided>
+                                                            搜索标记(Autosearch)：<el-switch
+                                                                v-model="control.autosearch.show"
+                                                                active-color="#13ce66"
+                                                                inactive-color="#dddddd">
+                                                        </el-dropdown-item>
                                                     </el-dropdown-menu>
                                                 </el-dropdown>
                                             </el-header>
                                             <el-main style="padding:0px;height:calc(100vh - 108px);overflow:hidden;border-top:1px solid #ffffff;">
-                                                <omdb-tree></omdb-tree>
+                                                <omdb-tree :control="control"></omdb-tree>
                                             </el-main>
                                         </el-container>
                                     </el-aside>
@@ -2312,6 +2542,14 @@ class Omdb{
                                 fileList: [],
                                 rtnInfo: null,
                                 loading: false
+                            }
+                        },
+                        control: {
+                            alias: {
+                                show: false
+                            },
+                            autosearch: {
+                                show: false
                             }
                         }
                     },

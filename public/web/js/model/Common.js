@@ -438,14 +438,27 @@ Vue.component("mx-fs-editor",{
                         </el-aside>
                         <el-container style="height: 100%;" ref="mainView">
                             <el-main style="padding:0px;overflow:hidden;">
-                                <el-card v-if="_.isEmpty(tabs.list)">
-                                    <h1>欢迎使用${MATRIX_TITLE} 在线编辑器</h1>
-                                    <el-button type="default" @click="onNewProject">新建文件夹</el-button>
-                                    <el-button type="default" @click="onNewFile">新建文件</el-button>
+                                <div style="background:#ffffff;padding:20px;height:100%;display:block;text-align:center;" v-if="_.isEmpty(tabs.list)">
+                                    <h2 style="margin: 0px 0px 40px 0px;">欢迎使用${MATRIX_TITLE} 在线编辑器</h2>
+                                    <p>
+                                        
+                                        <el-button style="width:100px;height:90px;" @click="onNewProject">
+                                            <i class="el-icon-folder-opened" style="font-size:48px;"></i> <p>新建文件夹</p>
+                                        </el-button>
+
+                                        <el-button style="width:100px;height:90px;" @click="onNewFile">
+                                            <i class="el-icon-document" style="font-size:48px;"></i> <p>新建文件</p>
+                                        </el-button>
+                                    
+                                    </p>
                                     <object data="/fs/assets/images/files/svg/configWorld.svg?type=open&issys=true" 
-                                        type="image/svg+xml" style="position: absolute;width:40vw;height:40vh;background: #ffffff;top:22.5%;left:20%;">
+                                        type="image/svg+xml" style="width:25vw;height:25vh;background: #ffffff;">
                                     </object>
-                                </el-card>
+                                    <p>
+                                        如有任何意见或建议，请及时反馈给我们。
+                                        <el-link href="mailto:m3@wecise.com">Email：m3@wecise.com</el-link>
+                                    </p>
+                                </div>
                                 <el-tabs v-model="tabs.activeIndex" type="border-card" 
                                         style="height:100%;" 
                                         closable 
@@ -645,8 +658,13 @@ Vue.component("mx-fs-editor",{
             fileSystem.fileNewTo(this.tree.root,window.fsSelectedItem,this.load);
         },
         onNewFile(){
-            let node = _.find(this.tabs.list,{name:this.tabs.activeIndex}).model;
-            fileSystem.fileNew(node.parent,this.load);
+            try{
+                let node = _.find(this.tabs.list,{ name:this.tabs.activeIndex} ).model;
+                fileSystem.fileNew(node.parent,this.load);
+            } catch(err){
+                fileSystem.fileNew("/script",this.load);
+            }
+            
         },
         onCloseTab(){
             if(!_.isEmpty(this.tabs.activeIndex)){

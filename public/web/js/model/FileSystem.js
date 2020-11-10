@@ -36,7 +36,7 @@ class FileSystem {
         new Vue({
             delimiters: ['#{', '}#'],
             data:{
-                classList: fsHandler.callFsJScript("/matrix/fs/fs_list.js",encodeURIComponent(JSON.stringify({path:app,onlyDir:true}))).message,
+                classList: null,
                 defaultProps: {
                     children: 'children',
                     label: 'alias'
@@ -88,6 +88,11 @@ class FileSystem {
                             </el-footer>
                         </el-container>`,
             created(){
+                
+                fsHandler.callFsJScriptAsync("/matrix/fs/fs_list.js",encodeURIComponent(JSON.stringify({path:app,onlyDir:true}))).then( (rtn)=>{
+                    this.classList = rtn.message;
+                } );
+                
                 // 默认创建目录
                 _.extend(this.node,{fullname: app});
             },
@@ -112,19 +117,20 @@ class FileSystem {
                         let type = 'dir';
                         let attr = {remark: '', ctime: _.now(), author: window.SignedUser_UserName};
         
-                        let rtn = fsHandler.fsNew(type, this.node.fullname, this.form.name, null, attr);
+                        fsHandler.fsNewAsync(type, this.node.fullname, this.form.name, null, attr).then( (rtn)=>{
+                            if(rtn == 1){
+                                this.$message({
+                                    message: "创建成功 " + this.node.name,
+                                    type: 'success'
+                                });
+                                // 刷新Tree
+                                eventHub.$emit("DEVOPS-TREE-REFRESH-EVENT");
+                                // callBack
+                                loadCallBack;
+                                wnd.close();
+                            }
+                        } );
         
-                        if(rtn == 1){
-                            this.$message({
-                                message: "创建成功 " + this.node.name,
-                                type: 'success'
-                            });
-                            // 刷新Tree
-                            eventHub.$emit("DEVOPS-TREE-REFRESH-EVENT");
-                            // callBack
-                            loadCallBack;
-                            wnd.close();
-                        }
                     }
                     catch(error){}
                 }
@@ -188,7 +194,7 @@ class FileSystem {
                     const me = this;
 
                     if(!me.fileForm.name) {
-                        alertify.log("请输入名称！");
+                        this.$message("请输入名称！");
                         return false;
                     }
 

@@ -92,22 +92,22 @@
         
         /*----------  最外层element会自动增加组件同名 class="omdb-editor-base-component"  ----------*/
         <template>
-            <el-container>
+            <el-container style="height:100%;">
                 <el-header style="height:30px;line-height:30px;background:#f6f6f6;">
                     <el-button-group>
                         <el-tooltip content="复制" placement="bottom" open-delay="500">
                             <el-button type="text" class="copy" @click="onCopy"><i class="fas fa-copy"></i></el-button>
                         </el-tooltip>
-                        <el-tooltip content="新建" placement="bottom" open-delay="500">
+                        <!--el-tooltip content="新建" placement="bottom" open-delay="500">
                             <el-button type="text"><i class="fas fa-plus"></i></el-button>
                         </el-tooltip>
                         <el-tooltip content="删除" placement="bottom" open-delay="500">
                             <el-button type="text"><i class="fas fa-trash"></i></el-button>
-                        </el-tooltip>
+                        </el-tooltip-->
                     </el-button-group>
                 </el-header>
                 <el-main id="editor" style="padding:0px;" ref="editor"></el-main>
-                <el-footer id="statusBar" style="padding:0px 10px;height:30px;line-height: 30px;" ref="statusBar"></el-footer>
+                <el-footer id="statusBar" style="padding:0px 10px;height:30px;line-height: 30px;display:none;" ref="statusBar"></el-footer>
             </el-container>
         </template>
     
@@ -135,7 +135,7 @@
             },
             watch: {
                 'model.newInput': {
-                    handler:function(val,oldVal){
+                    handler(val,oldVal){
                         this.editor.setValue(val);
                     },
                     deep:true

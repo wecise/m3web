@@ -108,12 +108,12 @@ class OmdbHandler  {
             dataType: 'json',
             type: 'GET',
             async: false,
-            beforeSend:function(xhr){
-                // // Pace.restart();
+            beforeSend(xhr){
+                
             },
-            complete: function(xhr, textStatus) {
+            complete(xhr, textStatus) {
             },
-            success: function(data, textStatus, xhr) {
+            success(data, textStatus, xhr) {
 
                 userHandler.ifSignIn(data);
 
@@ -121,7 +121,7 @@ class OmdbHandler  {
                     rtn = data.message;
                 }
             },
-            error: function(xhr, textStatus, errorThrown) {
+            error(xhr, textStatus, errorThrown) {
                 console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
             }
         })
@@ -146,12 +146,12 @@ class OmdbHandler  {
                 id: event
             },
             async: false,
-            beforeSend:function(xhr){
-                // // Pace.restart();
+            beforeSend(xhr){
+                
             },
-            complete: function(xhr, textStatus) {
+            complete(xhr, textStatus) {
             },
-            success: function(data, textStatus, xhr) {
+            success(data, textStatus, xhr) {
 
                 userHandler.ifSignIn(data);
 
@@ -159,10 +159,45 @@ class OmdbHandler  {
                     rtn = data.message;
                 }
             },
-            error: function(xhr, textStatus, errorThrown) {
+            error(xhr, textStatus, errorThrown) {
                 console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
             }
         })
+        return rtn;
+    };
+
+    async classTreeAsync(event){
+        let rtn = null;
+        
+        try{
+            await jQuery.ajax({
+                url: "/mxobject/schema/class/tree",
+                dataType: 'json',
+                type: 'GET',
+                data: {
+                    id: event
+                },
+                async: true,
+                beforeSend(xhr){
+                    
+                },
+                complete(xhr, textStatus) {
+                },
+                success(data, textStatus, xhr) {
+
+                    userHandler.ifSignIn(data);
+
+                    if (!_.isEmpty(data.message)){
+                        rtn = data.message;
+                    }
+                },
+                error(xhr, textStatus, errorThrown) {
+                    console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
+                }
+            })
+        } catch(err){
+            
+        }
         return rtn;
     };
 
@@ -528,7 +563,8 @@ class OmdbHandler  {
     async fetchDataByMqlAsync(param) {
 
         let rtn = null;
-        
+        let stime = _.now();
+
         try {
             await jQuery.ajax({
                 url: "/mxobject/mql",
@@ -543,7 +579,14 @@ class OmdbHandler  {
                     
                 },
                 complete(xhr, textStatus) {
-                    
+                    //消耗时间
+                    let now = _.now();
+                    let timeDiff = moment(now).diff(moment(stime), "millisecond");
+                    if(timeDiff > 1000){
+                        _.extend(rtn, { consume: moment(now).diff(moment(stime), "seconds") + ' 秒' }); 
+                    } else {
+                        _.extend(rtn, { consume: timeDiff + ' 毫秒' }); 
+                    }
                 },
                 success(data, status) {
 
@@ -551,6 +594,7 @@ class OmdbHandler  {
 
                     // MQL for CRUD
                     if(_.lowerCase(data.status) == "ok"){
+                        
                         rtn = data;
 
                         auditLogHandler.writeLog("omdb:console", "Execute mql: " + param, 0);

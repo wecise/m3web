@@ -118,42 +118,45 @@
         <el-container>
 			<el-header id="editorToolBar" style="padding:0px 10px;height:30px;line-height: 30px;display: flex;">
 				<el-button-group style="width:70%;">
-                    <el-tooltip content="另存到文件系统" placement="bottom" open-delay="500">
+                    <el-tooltip content="另存到文件系统" placement="bottom" open-delay="800">
                         <el-button type="text" class="saveas" @click="saveToFs"><i class="fas fa-save"></i></el-button>
                     </el-tooltip>
-                    <el-tooltip content="加载" placement="bottom" open-delay="500">
+                    <el-tooltip content="加载" placement="bottom" open-delay="800">
                         <el-button type="text" class="load" @click="loadFromFs"><i class="fas fa-arrow-circle-down"></i></el-button>
                     </el-tooltip>
-                    <el-tooltip content="复制" placement="bottom" open-delay="500">
+                    <el-tooltip content="复制" placement="bottom" open-delay="800">
                         <el-button type="text" class="copy" @click="copyIt"><i class="fas fa-copy"></i></el-button>
                     </el-tooltip>
-                    <el-tooltip content="粘贴" placement="bottom" open-delay="500">
+                    <el-tooltip content="粘贴" placement="bottom" open-delay="800">
                         <el-button type="text"  class="paste" @click="pasteIt"><i class="fas fa-paste"></i></el-button>
                     </el-tooltip>
-					<el-tooltip content="全选" placement="bottom" open-delay="500">
+					<el-tooltip content="全选" placement="bottom" open-delay="800">
                         <el-button type="text"  class="selectAll" @click="selectAll"><i class="fas fa-check"></i></el-button>
                     </el-tooltip>
-                    <el-tooltip content="清空" placement="bottom" open-delay="500">
+                    <el-tooltip content="清空" placement="bottom" open-delay="800">
                         <el-button type="text"  class="clear" @click="clearIt"><i class="fas fa-trash"></i></el-button>
                     </el-tooltip>
-                    <el-tooltip content="执行输出为表格" placement="bottom" open-delay="500">
+                    <el-tooltip content="执行输出为表格" placement="bottom" open-delay="800">
                         <el-button type="text"  class="query" @click="query"><i class="fas fa-play"></i></el-button>
                     </el-tooltip>
-                    <!--el-tooltip content="执行输出为新表格" placement="bottom" open-delay="500">
+                    <!--el-tooltip content="执行输出为新表格" placement="bottom" open-delay="800">
                         <el-button type="text"  class="query" @click="queryPlus"><i class="fas fa-play-circle"></i></el-button>
                     </el-tooltip-->
-                    <el-tooltip content="执行输出为JSON" placement="bottom" open-delay="500">
+                    <el-tooltip content="执行输出为JSON" placement="bottom" open-delay="800">
                         <el-button type="text"  class="queryByJson" @click="queryByJson"><i class="fas fa-file-code"></i></el-button>
                     </el-tooltip>
-					<el-tooltip content="在新窗口执行" placement="bottom" open-delay="500">
+					<el-tooltip content="在新窗口执行" placement="bottom" open-delay="800">
                         <!--<el-button type="text"  class="queryPlus" @click="queryPlus"><i class="fa fa-play"></i>+</el-button>-->
                     </el-tooltip>
-                    <el-tooltip content="执行并保存到文件" placement="bottom" open-delay="500">
+                    <el-tooltip content="执行并保存到文件" placement="bottom" open-delay="800">
                         <el-button type="text"  class="queryAndSave" @click="queryAndSave"><i class="fas fa-file-export"></i></el-button>
                     </el-tooltip>
                 </el-button-group>
                 <el-button-group style="width:30%;text-align: right;">
-                    <el-tooltip content="主题" placement="bottom" open-delay="500">
+                    <el-tooltip content="帮助"" placement="bottom" open-delay="800">
+                        <el-button type="text" @click="window.open('/matrix/notes','_blank')" icon="el-icon-question"></el-button>
+                    </el-tooltip>
+                    <el-tooltip content="主题" placement="bottom" open-delay="800">
                         <el-button type="text" :class="'pull-right editor-select-theme-'+objectHash.sha1(id)"><i class="fas fa-tshirt"></i></el-button>
                     </el-tooltip>
                     <el-button type="text" :icon="control.ifFullScreen | pickScreenStyle" style="float:right;" @click="onFullScreen"></el-button>
@@ -444,21 +447,24 @@
                 }
 	        },
 	        copyIt(){
-		        const self = this;
+		        
+                let clipboard = new Clipboard(".copy", {
+                                    text: (trigger)=> {
+                                        this.$message("已复制");
+                                        return this.editor.getValue();
+                                    }
+                                });
 
-                new Clipboard(".copy", {
-                    text: function(trigger) {
-                        alertify.log("已复制");
-                        return self.editor.getValue();
-                    }
-                });
+                _.delay(()=>{
+                    clipboard.destroy();
+                },500)
 
 	        },
             pasteIt(){
                 const self = this;
 
                 document.execCommand("paste");
-                alertify.log("已粘贴");
+                this.$message("已粘贴");
             },
 	        selectAll(){
                 const self = this;
@@ -469,7 +475,7 @@
                 const self = this;
 
                 self.editor.setValue();
-                alertify.log("已清空");
+                this.$message("已清空");
             },
             query(){
                 const self = this;
@@ -501,14 +507,14 @@
                             showClose: true
                         })
                         
-                        // self.result = { id:self.id, bid: self.bid, type: 'table-update', data: [], columns: [], rootclass:""};
+                        self.result = { id:self.id, bid: self.bid, type: _list.status, data: _list.message, columns: [], rootclass:"", consume: _list.consume};
                         // 更新当前实例
-                        /* self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
+                        self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
                                                                             type: 'omdb-query-output-console',
                                                                             name: self.id+'-output-table',
-                                                                            title: `结果_TABLE_${moment().format("LT")}`,
+                                                                            title: `结果(耗时:${_list.consume})`,
                                                                             model: self.result
-                                                                        }); */
+                                                                        });
 
                         // 输出日志
                         self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].logAppend('error',_list);
@@ -532,12 +538,12 @@
                         });
                         eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'create-class', node: null});
                         
-                        self.result = { id:self.id, bid: self.bid, type: 'create-class', data: [], columns: [], rootclass: null };
+                        self.result = { id:self.id, bid: self.bid, type: 'create-class', data: [], columns: [], rootclass: null, consume: _list.consume};
 
                         self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
                                                                             type: 'omdb-query-output-console',
                                                                             name: self.id+'-output-table',
-                                                                            title: `结果_TABLE_${moment().format("LT")}`,
+                                                                            title: `结果(耗时:${_list.consume})`,
                                                                             model: self.result
                                                                         });
                         return false;
@@ -550,12 +556,12 @@
                         });
                         eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'drop-class', node: null});
                         
-                        self.result = { id:self.id, bid: self.bid, type: 'drop-class', data: [], columns: [], rootclass: null };
+                        self.result = { id:self.id, bid: self.bid, type: 'drop-class', data: [], columns: [], rootclass: null, consume: _list.consume };
 
                         self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
                                                                             type: 'omdb-query-output-console',
                                                                             name: self.id+'-output-table',
-                                                                            title: `结果_${moment().format("LT")}`,
+                                                                            title: `结果(耗时:${_list.consume})`,
                                                                             model: self.result
                                                                         });
                         return false;
@@ -568,12 +574,12 @@
                         });
                         eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'delete', node: null});
                         
-                        self.result = { id:self.id, bid: self.bid, type: 'delete', data: [], columns: [], rootclass: null };
+                        self.result = { id:self.id, bid: self.bid, type: 'delete', data: [], columns: [], rootclass: null, consume: _list.consume };
 
                         self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
                                                                             type: 'omdb-query-output-console',
                                                                             name: self.id+'-output-table',
-                                                                            title: `结果_${moment().format("LT")}`,
+                                                                            title: `结果(耗时:${_list.consume})`,
                                                                             model: self.result
                                                                         });
                         return false;
@@ -586,12 +592,12 @@
                         });
                         eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'create-edge-type', node: null});
 
-                        self.result = { id:self.id, bid: self.bid, type: 'create-edge-type', data: [], columns: [], rootclass: null };
+                        self.result = { id:self.id, bid: self.bid, type: 'create-edge-type', data: [], columns: [], rootclass: null, consume: _list.consume};
 
                         self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
                                                                             type: 'omdb-query-output-console',
                                                                             name: self.id+'-output-table',
-                                                                            title: `结果_${moment().format("LT")}`,
+                                                                            title: `结果(耗时:${_list.consume})`,
                                                                             model: self.result
                                                                         });
                         return false;
@@ -604,12 +610,12 @@
                         });
                         eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'drop-edge-type', node: null});
 
-                        self.result = { id:self.id, bid: self.bid, type: 'drop-edge-type', data: [], columns: [], rootclass: null };
+                        self.result = { id:self.id, bid: self.bid, type: 'drop-edge-type', data: [], columns: [], rootclass: null, consume: _list.consume };
 
                         self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
                                                                             type: 'omdb-query-output-console',
                                                                             name: self.id+'-output-table',
-                                                                            title: `结果_${moment().format("LT")}`,
+                                                                            title: `结果(耗时:${_list.consume})`,
                                                                             model: self.result
                                                                         });
                         return false;
@@ -622,12 +628,12 @@
                         });
                         eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'alter-class', node: null});
 
-                        self.result = { id:self.id, bid: self.bid, type: 'alter-class', data: [], columns: [], rootclass: null };
+                        self.result = { id:self.id, bid: self.bid, type: 'alter-class', data: [], columns: [], rootclass: null, consume: _list.consume };
 
                         self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
                                                                             type: 'omdb-query-output-console',
                                                                             name: self.id+'-output-table',
-                                                                            title: `结果_${moment().format("LT")}`,
+                                                                            title: `结果(耗时:${_list.consume})`,
                                                                             model: self.result
                                                                         });
                         return false;
@@ -640,12 +646,12 @@
                         });
                         eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'insert-class', node: null});
                         
-                        self.result = { id:self.id, bid: self.bid, type: 'insert-class', data: [], columns: [], rootclass: null };
+                        self.result = { id:self.id, bid: self.bid, type: 'insert-class', data: [], columns: [], rootclass: null, consume: _list.consume };
                         
                         self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
                                                                             type: 'omdb-query-output-console',
                                                                             name: self.id+'-output-table',
-                                                                            title: `结果_${moment().format("LT")}`,
+                                                                            title: `结果(耗时:${_list.consume})`,
                                                                             model: self.result
                                                                         });
                         return false;
@@ -666,7 +672,7 @@
                             self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
                                                                 type: 'omdb-query-graph-console',
                                                                 name: self.id+'-graph',
-                                                                title: `结果_GRAPH_${moment().format("LT")}`,
+                                                                title: `结果(耗时:${_list.consume})`,
                                                                 model: _data[0].graph
                                                             });
                             return false;
@@ -676,7 +682,7 @@
                             self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
                                                                             type: 'omdb-query-graph-console',
                                                                             name: self.id+'-graph',
-                                                                            title: `结果_GRAPH_${moment().format("LT")}`,
+                                                                            title: `结果(耗时:${_list.consume})`,
                                                                             model: {nodes:[],edges:[]}
                                                                         });
                             return false;
@@ -689,7 +695,7 @@
                         self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
                                                                             type: 'omdb-query-graph-console',
                                                                             name: self.id+'-graph',
-                                                                            title: `结果_GRAPH_${moment().format("LT")}`,
+                                                                            title: `结果(耗时:${_list.consume})`,
                                                                             model: _data[0].graph
                                                                         });
 
@@ -734,14 +740,14 @@
                     }
                     // 正常Table显示 
                     else {
-                        self.result = { id:self.id, bid: self.bid, type: 'table-update', data: _data, columns: _columns, rootclass: _list.meta.rootclass};
+                        self.result = { id:self.id, bid: self.bid, type: _list.meta.type, data: _data, columns: _columns, rootclass: _list.meta.rootclass, consume: _list.consume};
                     }
 
                     // 更新当前实例
                     self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
                                                                             type: 'omdb-query-output-console',
                                                                             name: self.id+'-output-table',
-                                                                            title: `结果_TABLE_${moment().format("LT")}`,
+                                                                            title: `结果(耗时:${_list.consume})`,
                                                                             model: self.result
                                                                         });
                 } );

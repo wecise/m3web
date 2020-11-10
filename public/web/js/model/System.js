@@ -3112,7 +3112,7 @@ class System {
 								let fullname = group.isldap?`U${row.fullname}`:`G${row.fullname}`
 								group.member.push(fullname);
 								
-								userHandler.updateGroupPermissions(group);
+								userHandler.updateGroupPermissionsAsync(group);
 							})
 						}
 					}
@@ -5313,11 +5313,9 @@ class System {
 									});
 
 									// 清除对象_group中的角色组信息
-									fsHandler.callFsJScriptAsync("/matrix/system/clearRoleGroupInstAfterDeleteRoleGroup.js",encodeURIComponent(row.fullname));
-									
-									_.delay(()=>{
+									fsHandler.callFsJScriptAsync("/matrix/system/clearRoleGroupInstAfterDeleteRoleGroup.js",encodeURIComponent(row.fullname)).then( ()=>{
 										this.onRefresh();
-									},500)
+									} );
 									
                                 } else {
 									this.$message({
@@ -5347,19 +5345,21 @@ class System {
 						// 更新角色组合用户关联
 						onUpdatePermission(row){
 							
-							let rtn = userHandler.updateGroupPermissions(row);
-							if(rtn == 1){
-								this.$message({
-									type: "success",
-									message: "更新成功！"
-								})
-								this.dialog.ldap.show = false;
-							} else {
-								this.$message({
-									type: "error",
-									message: "更新失败！"
-								})
-							}
+							userHandler.updateGroupPermissionsAsync(row).then( (rtn)=>{
+								if(rtn == 1){
+									this.$message({
+										type: "success",
+										message: "更新成功！"
+									})
+									this.dialog.ldap.show = false;
+								} else {
+									this.$message({
+										type: "error",
+										message: "更新失败！"
+									})
+								}
+							} );
+							
 						},
 						// 更新角色组的用户
 						onSetRoleGroupByLdap(row,event){

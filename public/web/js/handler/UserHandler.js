@@ -466,41 +466,44 @@ class UserHandler{
     };
 
     /* Update group permissions */
-    updateGroupPermissions(event) {
+    async updateGroupPermissionsAsync(event) {
         let rtn = null;
 
+        try{
+            await jQuery.ajax({
+                url: `/admin/perms/group`,
+                dataType: 'json',
+                type: 'PUT',
+                contentType: "application/json; charset=utf-8",
+                async: true,
+                data: JSON.stringify({name:event.name, parent:event.parent, member:event.member}),
+                beforeSend:function(xhr){
+                },
+                complete: function(xhr, textStatus) {
+                    
+                },
+                success: function (data, status) {
 
-        jQuery.ajax({
-            url: `/admin/perms/group`,
-            dataType: 'json',
-            type: 'PUT',
-            contentType: "application/json; charset=utf-8",
-            async: false,
-            data: JSON.stringify({name:event.name, parent:event.parent, member:event.member}),
-            beforeSend:function(xhr){
-            },
-            complete: function(xhr, textStatus) {
-                
-            },
-            success: function (data, status) {
+                    userHandler.ifSignIn(data);
 
-                userHandler.ifSignIn(data);
+                    if( _.lowerCase(data.status) == "ok"){
+                        rtn = 1;
 
-                if( _.lowerCase(data.status) == "ok"){
-                    rtn = 1;
+                        // Audit
+                        auditLogHandler.writeLog("Ussystem:permissioner", "Update group permissions: " + event.name + " 【" +  event.member + "】", 0);
+                    }
+
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    rtn = xhr.responseText;
 
                     // Audit
-                    auditLogHandler.writeLog("Ussystem:permissioner", "Update group permissions: " + event.name + " 【" +  event.member + "】", 0);
+                    auditLogHandler.writeLog("system:permission", "Update group permissions: " + event.name + " 【" +  event.member + "】", 1);
                 }
-
-            },
-            error: function(xhr, textStatus, errorThrown) {
-                rtn = xhr.responseText;
-
-                // Audit
-                auditLogHandler.writeLog("system:permission", "Update group permissions: " + event.name + " 【" +  event.member + "】", 1);
-            }
-        });
+            });
+        } catch(err){
+            
+        }
         return rtn;
     };
 

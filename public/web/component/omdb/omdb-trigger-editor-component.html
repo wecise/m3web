@@ -32,44 +32,73 @@
 	/*----------  最外层element会自动增加组件同名 class="omdb-trigger-editor-component"  ----------*/
 	<template>
 		<el-container>
-			<el-header :id="id+'_editorToolBar'" style="height:30px;line-height: 30px;padding:0px 5px;">
-				<el-button-group style="width:100%;">
-                    <el-tooltip content="选择触发器" placement="bottom" open-delay="500">
-                        <el-button type="text" :id="id+'_trigger_list_contextmenu'" style="padding-left:10px;font-weight: 600;">
-						    ${selected.name} <i class="fas fa-angle-down"></i>
+			<el-header :id="id+'_editorToolBar'" style="height: 35px;line-height: 35px;padding: 0px 10px;background: #f6f6f6;">
+				<el-button-group style="width:100%;" v-if="!_.isEmpty(selected) && !_.isEmpty(list)">
+                    <el-dropdown v-if="list" :hide-on-click="true">
+                        <span class="el-dropdown-link">
+                            <span v-if="_.isEmpty(selected)">选择触发器</span>
+                            <span v-else>${selected.name}</span>
+                            <i class="el-icon-arrow-down el-icon--right"></i>
+                        </span>
+                        <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item :key="item.name" v-for="item in list" @click.native="onChangeTrigger(item)">
+                                <el-button type="text" style="text-align: left;">
+                                    <span class="el-icon-document" style="font-size:38px;text-align: center;display: block;"></span>
+                                    <p style="text-align: center;">${item.name}</p>
+                                    <p style="font-size: 10px;color:#999999;">创建时间：${moment(item.time).format(mx.global.register.format)}</p>
+                                    <p style="font-size: 10px;color:#999999;">脚本大小：${_.size(item.script)}</p>
+                                </el-button>
+                            </el-dropdown-item>
+                        </el-dropdown-menu>
+                    </el-dropdown>
+
+                    <el-divider direction="vertical"></el-divider>
+                    <el-tooltip content="新建触发器" placement="bottom" open-delay="800">
+                        <el-button type="text" @click="add" icon="el-icon-plus">
+                        </el-button>
+                    </el-tooltip>
+
+                    <el-divider direction="vertical"></el-divider>
+                    
+                    <el-tooltip content="删除触发器" placement="bottom" open-delay="800">
+                        <el-button type="text" @click="remove" icon="el-icon-delete">
                         </el-button>
                     </el-tooltip>
                     
-                    <el-tooltip content="新建触发器" placement="bottom" open-delay="500">
-                        <el-button type="text" @click="add">
-                            <i class="fas fa-plus"></i>
+                    <el-divider direction="vertical"></el-divider>
+                    
+                    <el-tooltip content="保存触发器" placement="bottom" open-delay="800">
+                        <el-button type="text" @click="save" icon="fas fa-save">
                         </el-button>
                     </el-tooltip>
-                    <el-tooltip content="删除触发器" placement="bottom" open-delay="500">
-                        <el-button type="text" @click="remove" >
-                            <i class="fas fa-trash"></i>
-                        </el-button>
-                    </el-tooltip>
-                    <el-tooltip content="保存触发器" placement="bottom" open-delay="500">
-                        <el-button type="text" @click="save">
-                            <i class="fas fa-save"></i>
-                        </el-button>
-                    </el-tooltip>
+                    
+                    <el-divider direction="vertical"></el-divider>
+
                     <el-switch v-model="selected.disable"
                             inactive-color="#13ce66"
                             active-color="#dddddd"
                             active-value="true"
                             inactive-value="false"
                             @change="changeStatus"
-                            v-if="list.length > 0">
+                            v-if="!_.isEmpty(selected)">
                     </el-switch>
-                    <el-tooltip content="选择主题" placement="bottom" open-delay="500">
+
+                    <el-tooltip content="选择主题" placement="bottom" open-delay="800">
                         <el-button type="text" :class="'editor-select-theme-'+objectHash.sha1(className)" style="float:right;"><i class="fas fa-tshirt"></i></el-button>
                     </el-tooltip>
+
+                </el-button-group>
+                <el-button-group style="width:100%;" v-else>
+                    
+                    <el-tooltip content="新建触发器" placement="bottom" open-delay="800">
+                        <el-button type="text" @click="add" icon="el-icon-plus">
+                        </el-button>
+                    </el-tooltip>
+
 				</el-button-group>
 			</el-header>
 			<el-main :id="id" style="padding:0px;" ref="editor"></el-main>
-			<el-footer :id="id+'_statusBar'" style="height:30px;line-height: 30px;"></el-footer>
+			<el-footer :id="id+'_statusBar'" style="height:30px;line-height: 30px;" ref="statusBar"></el-footer>
 		</el-container>
 	</template>
 
@@ -84,7 +113,7 @@
             showToolsBar: Boolean,
 			showStatusBar: Boolean
         },
-        data: function(){
+        data(){
             return {
                 editor: null,
                 result: null,
@@ -103,10 +132,6 @@
             this.$nextTick(()=>{
                 this.init();
                 this.initData();
-                _.delay(()=>{
-	                this.initMenu();
-	                this.initToolTip();
-                },500)
             })
         },
         watch: {
@@ -125,10 +150,6 @@
         },
         computed:{
             selectedTitle(){
-                _.delay(()=>{
-                    this.initToolTip()
-                },1500);
-
                 return this.selected.disable == 'true' ? '启用中。。。' : '禁用中。。。';
             }
         },
@@ -178,89 +199,75 @@
                     this.editor.setOptions(this.model.options);
                 } 
             },
-            setTheme: function(){
-                const self = this;
-
-                let localTheme = localStorage.getItem(`editor-select-theme-${objectHash.sha1(self.className)}`);
+            setTheme(){
+                
+                let localTheme = localStorage.getItem(`editor-select-theme-${objectHash.sha1(this.className)}`);
 
                 if(localTheme){
-                    self.editor.setTheme("ace/theme/" + localTheme);
+                    this.editor.setTheme("ace/theme/" + localTheme);
                     return false;
                 }
 
-                if(_.isEmpty(self.model.theme)){
-                	self.editor.setTheme("ace/theme/tomorrow");
+                if(_.isEmpty(this.model.theme)){
+                	this.editor.setTheme("ace/theme/tomorrow");
                 } else {
-                	self.editor.setTheme("ace/theme/"+self.model.theme);
+                	this.editor.setTheme("ace/theme/"+this.model.theme);
                 }
                 
             },
-            setMode: function(){
-                const self = this;
-
-                if(_.isEmpty(self.model.mode)){
-                	self.editor.getSession().setMode("ace/mode/lua");
+            setMode(){
+                if(_.isEmpty(this.model.mode)){
+                	this.editor.getSession().setMode("ace/mode/lua");
                 } else {
-                	self.editor.getSession().setMode("ace/mode/"+ self.model.mode);
+                	this.editor.getSession().setMode("ace/mode/"+ this.model.mode);
                 }
-                
             },
-            getSelected: function(){
-                const self = this;
-                let temp = self.editor.getSelectedText();
+            onChangeTrigger(item){
+                this.selected = item;
+            },
+            getSelected(){
+                
+                let temp = this.editor.getSelectedText();
 
                 if(_.isEmpty(temp)){
-                    self.inputText = self.editor.getValue();
+                    this.inputText = this.editor.getValue();
                 } else {
-                    self.inputText = temp;
+                    this.inputText = temp;
                 }
             },
-            toggleToolsBar: function(){
-                const self = this;
-
-                if(self.showToolsBar){
+            toggleToolsBar(){
+                if(this.showToolsBar){
                     $(".toolsBar").show();
                 } else {
                     $(".toolsBar").hide();
                 }
             },
-	        toggleStatusBar: function(){
-                const self = this;
-
+	        toggleStatusBar(){
                 if(self.showStatusBar) {
                     let StatusBar = ace.require("ace/ext/statusbar").StatusBar;
-                    let statusBar = new StatusBar(self.editor, document.getElementById(`${self.id}_statusBar`));
+                    let statusBar = new StatusBar(this.editor, document.getElementById(this.$refs.statusBar.$el.id));
                 }
 	        },
-	        copyIt: function(){
-		        const self = this;
-
-                new Clipboard(".copy", {
-                    text: function(trigger) {
-                        alertify.log("已复制");
-                        return self.editor.getValue();
+	        copyIt(){
+		        new Clipboard(".copy", {
+                    text: (trigger)=> {
+                        this.$message("已复制");
+                        return this.editor.getValue();
                     }
                 });
-
 	        },
-            pasteIt: function(){
-                const self = this;
-
+            pasteIt(){
                 document.execCommand("paste");
-                alertify.log("已粘贴");
+                this.$message("已粘贴");
             },
-	        selectAll: function(){
-                const self = this;
-
-                self.editor.selection.selectAll();
+	        selectAll(){
+                this.editor.selection.selectAll();
             },
-            clearIt: function(){
-                const self = this;
-
-                self.editor.setValue();
-                alertify.log("已清空");
+            clearIt(){
+                this.editor.setValue();
+                this.$message("已清空");
             },
-            initTheme: function(){
+            initTheme(){
                 const self = this;
                 let id = objectHash.sha1(self.className);
 
@@ -322,7 +329,7 @@
                 });
             },
             // 触发器数据结构化整理
-            treatNode: function(event){
+            treatNode(event){
                 return _.map(event.script,function(v,k){
                     let attr = {disable:false};
 
@@ -335,169 +342,150 @@
                     return _.merge(attr,{name:k,script:event.script[k],class:event.class,vtime:event.vtime});
                 });
             },
-	        initData: function(){
-                const self = this;
+	        initData(){
+                
+                triggerHandler.triggerListAsync(this.className).then( (rtn)=>{
+                    
+                    let list = [];
 
-                let rtn = triggerHandler.triggerList(self.className);
+                    if(!_.isEmpty(rtn)){
+                        list = this.treatNode(rtn[0]);
+                    }
 
-                let list = [];
-
-                if(!_.isEmpty(rtn)){
-                    list = self.treatNode(rtn[0]);
-                }
-
-                if(!_.isEmpty(list)){
-                    self.list = _.map(list,function(v,k){
-                        return   {
-                            name: _.trim(v.name),
-                            disable: v.disable,
-                            time: v.vtime,
-                            class: v.class,
-	                        script: v.script
-                        }
-                    });
-
-                    self.selected = _.head(_.orderBy(self.list,['name'],['asc']));
-                }
-
-            },
-            initMenu:function(){
-                const self = this;
-
-                $.contextMenu({
-                    selector: `#${self.id}_trigger_list_contextmenu`,
-                    /*position: function(opt, x, y){
-                        //opt.$menu.position({ of: this, offset: "0 5"});
-                    },*/
-                    trigger: 'left',
-                    hideOnSecondTrigger: true,
-                    className: `animated slideIn`,
-                    build: function($trigger, e) {
-
-                        let items = {};
-
-                        _.forEach(self.list,function(v,k){
-                            _.merge(items, {[v.name]:{name:v.name, icon: "fas fa-toggle-on", item: v}});
+                    if(!_.isEmpty(list)){
+                        this.list = _.map(list,(v,k)=>{
+                            return   {
+                                name: _.trim(v.name),
+                                disable: v.disable,
+                                time: v.vtime,
+                                class: v.class,
+                                script: v.script
+                            }
                         });
 
-                        return {
-                            callback: function(key, options) {
-                                self.selected = _.groupBy(self.list,'name')[key][0];
-                            },
-                            items: items,
-                        }
-                    },
-                    events: {
-                        show: function(opt) {
-
-                            let $this = this;
-
-
-                        },
-                        hide: function(opt) {
-
-                            let $this = this;
-
-
-
-                        }
+                        this.selected = _.head(_.orderBy(this.list,['name'],['asc']));
                     }
-                });
-            },
-            initToolTip: function(){
-                $("[data-tooltip='tooltip']").tooltip('destroy').tooltip({
-                    container: 'body',
-                    trigger : 'hover',
-                    template: `<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>`
-                });
+                } );
 
             },
-            toggle: function(item) {
-                const self = this;
+            add(){
+                
+                this.$prompt('新增触发器', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消'
+                }).then(({ value }) => {
 
-                self.selected = item;
-            },
-            add: function() {
-                const self = this;
-
-                alertify.prompt("新增触发器", function (e, str) {
-                    if (e) {
-                        let _rtn = triggerHandler.triggerNew({class: self.className, name: _.trim(str), script:''});
-
-                        if(_rtn === 1) {
-                            self.refresh(str);
-                        }
-                    } else {
-
+                    if(_.isEmpty(value)){
+                        this.$message({
+                            type: 'info',
+                            message: '请输入触发器名称！'
+                        });
+                        return false;
                     }
-                }, "触发器名称");
-                $(".alertify-prompt .alertify-message").css('height','5vh');
+
+                    triggerHandler.triggerNewAsync({class: this.className, name: _.trim(value), script:''}).then( (rtn)=>{
+                        
+                        if(rtn == 1) {
+                            this.$message({
+                                type: 'success',
+                                message: '新建触发器成功'
+                            });
+                            this.refresh(value);
+                        }else {
+                            this.$message({
+                                type: 'error',
+                                message: '新建触发器失败 ' + rtn
+                            });
+                        }
+                    } );
+
+
+                }).catch(() => {
+                
+                });
+
             },
             save() {
-                const self = this;
+                
+                let script = this.editor.getValue();
 
-                let script = self.editor.getValue();
+                triggerHandler.triggerNewAsync({class: this.className, name: this.selected.name, script: script, attr:{disable: `${this.selected.disable}`}}).then( (rtn)=>{
+                    if(rtn == 1) {
+                        this.$message({
+                                type: 'success',
+                                message: '保存触发器成功'
+                            });
+                        this.refresh(this.selected.name);
+                    } else {
+                        this.$message({
+                            type: 'error',
+                            message: '保存触发器失败 ' + rtn
+                        });
+                    }
+                } );
 
-                let _rtn = triggerHandler.triggerNew({class: self.className, name: self.selected.name, script: script, attr:{disable: `${self.selected.disable}`}});
-
-                if(_rtn === 1) {
-                    self.refresh(self.selected.name);
-                }
             },
             changeStatus(value){
-                const self = this;
+                
+                let script = this.editor.getValue();
 
-                console.log(1,self.selected.disable,value)
-
-                let script = self.editor.getValue();
-
-                let _rtn = triggerHandler.triggerNew({class: self.className, name: self.selected.name, script: script, attr:{disable: `${self.selected.disable}`}});
-
-                if(_rtn === 1) {
-                    self.refresh(self.selected.name);
-                }
+                triggerHandler.triggerNewAsync({class: this.className, name: this.selected.name, script: script, attr:{disable: `${this.selected.disable}`}}).then( (rtn)=>{
+                    if(rtn === 1) {
+                        this.refresh(this.selected.name);
+                    }
+                } );
+                
             },
             refresh(name) {
-                const self = this;
+                
+                triggerHandler.triggerListAsync(this.className).then( (rtn)=>{
+                    if(!_.isEmpty(rtn)){
+                        this.list = _.map(this.treatNode(rtn[0]),(v,k)=>{
+                            return   {
+                                name: v.name,
+                                disable: v.disable,
+                                time: v.vtime,
+                                class: v.class,
+                                script: v.script
+                            }
+                        });
 
+                        this.selected = _.groupBy(_.orderBy(this.list,['name'],['asc']),'name')[name][0];
 
-                let rtn = triggerHandler.triggerList(self.className);
+                    } else {
+                        this.list = [];
+                        this.selected = { name: ""};
+                    }
 
-                if(!_.isEmpty(rtn)){
-                    self.list = _.map(self.treatNode(rtn[0]),function(v,k){
-                        return   {
-                            name: v.name,
-                            disable: v.disable,
-                            time: v.vtime,
-                            class: v.class,
-	                        script: v.script
-                        }
-                    });
-
-                    self.selected = _.groupBy(_.orderBy(self.list,['name'],['asc']),'name')[name][0];
-
-                } else {
-                    self.list = [];
-                    self.selected = { name: ""};
-                }
-
-                self.initToolTip();
+                } );
 
             },
-            remove: function() {
-                const self = this;
-
-                alertify.confirm(`确认删除触发器：${self.selected.name}`, function(e) {
-                    if(e) {
-                        let _rtn = triggerHandler.triggerDelete(self.className, self.selected.name);
-
-                        if(_rtn === 1){
-                            let name = self.list.length>0 ? _.head(self.list).name : null
-                            self.refresh(name);
+            remove() {
+                
+                this.$confirm(`确认删除触发器：${this.selected.name}`, '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    
+                    triggerHandler.triggerDeleteAsync(this.className, this.selected.name).then( (rtn)=>{
+                        if(rtn == 1){
+                            this.$message({
+                                type: 'success',
+                                message: '删除触发器成功'
+                            });
+                            let name = this.list.length>0 ? _.head(this.list).name : null
+                            this.refresh(name);
+                        } else{
+                            this.$message({
+                                type: 'error',
+                                message: '删除触发器失败 ' + rtn
+                            });
                         }
-                    } else {
-                        // user clicked "cancel"
-                    }
+                    } );
+                    
+                }).catch(() => {
+                    
                 });
 
             }

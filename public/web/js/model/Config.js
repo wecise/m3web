@@ -87,7 +87,7 @@ class Config {
                                                 :props="defaultProps" 
                                                 node-key="key"
                                                 highlight-current
-                                                auto-expand-parent
+                                                accordion
                                                 @node-click="onNodeClick"
                                                 :filter-node-method="onNodeFilter"
                                                 :expand-on-click-node="true"
@@ -110,11 +110,11 @@ class Config {
                                                         </span>
                                                         <el-dropdown-menu slot="dropdown">
                                                             <el-dropdown-item @click.native="onRefresh(data)"icon="el-icon-refresh">刷新</el-dropdown-item>
-                                                            <el-dropdown-item @click.native="onNewFile(data,$event)"icon="el-icon-plus" divided>新建</el-dropdown-item>
-                                                            <el-dropdown-item @click.native="onNewDir(data,$event)"icon="el-icon-folder-add">新建目录</el-dropdown-item>
-                                                            <el-dropdown-item @click.native="onEditFile(data,$event)"icon="el-icon-edit-outline" divided>编辑</el-dropdown-item>
-                                                            <el-dropdown-item @click.native="onExport(data,$event)"icon="el-icon-download" divided>导出</el-dropdown-item>
-                                                            <el-dropdown-item @click.native="onDelete(data,$event)" icon="el-icon-delete" divided>删除</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onNewFile(data)"icon="el-icon-plus" divided>新建</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onNewDir(data)"icon="el-icon-folder-add">新建目录</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onEditFile(data)"icon="el-icon-edit-outline" divided>编辑</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onExport(data)"icon="el-icon-download" divided>导出</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onDelete(data)" icon="el-icon-delete" divided>删除</el-dropdown-item>
                                                         </el-dropdown-menu>
                                                     </el-dropdown>
                                                 </span>
@@ -126,16 +126,18 @@ class Config {
                                                             <i class="el-icon-more el-icon--right"></i>
                                                         </span>
                                                         <el-dropdown-menu slot="dropdown">
-                                                            <el-dropdown-item @click.native="onDelete(data,$event)" icon="el-icon-delete">删除</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onNewFile(data)"icon="el-icon-plus">新建</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onNewDir(data)"icon="el-icon-folder-add">新建目录</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onDelete(data)" icon="el-icon-delete" divided>删除</el-dropdown-item>
                                                         </el-dropdown-menu>
                                                     </el-dropdown>
                                                     <el-tooltip content="编辑" open-delay="800">
-                                                        <el-button v-show="data.show" type="text" @click.stop="onEditFile(data,$event)" icon="el-icon-edit-outline" style="float:right;width:14px;margin:0 5px;"></el-button>
+                                                        <el-button v-show="data.show" type="text" @click.stop="onEditFile(data)" icon="el-icon-edit-outline" style="float:right;width:14px;margin:0 5px;"></el-button>
                                                     </el-tooltip>
                                                 </span>
                                             </span>  
                                         </el-tree>
-                                        <el-dialog title="新增配置" :visible.sync="dialog.configNew.show" v-if="dialog.configNew.show" destroy-on-close="true">
+                                        <el-dialog :title="dialog.configNew.formItem.ifDir?'新增目录':'新增配置'" :visible.sync="dialog.configNew.show" v-if="dialog.configNew.show" destroy-on-close="true">
                                             <el-container>
                                                 <el-main style="padding:0px 20px;height:100%;overflow:auto;">
                                                     <el-form label-width="80">
@@ -143,13 +145,13 @@ class Config {
                                                             <el-input v-model="dialog.configNew.parent" placeholder="位置" :disabled="true"></el-input>
                                                         </el-form-item>
                                                         <el-form-item label="名称" prop="name">
-                                                            <el-input v-model="dialog.configNew.name" placeholder="配置名称" autofocus="true"></el-input>
+                                                            <el-input v-model="dialog.configNew.name" :placeholder="dialog.configNew.formItem.ifDir?'目录名称':'配置名称'" autofocus="true"></el-input>
                                                         </el-form-item>
                                                         <el-form-item :label="dialog.configNew.formItem.ifDir?'目录':'配置'">
-                                                            <el-switch v-model="dialog.configNew.formItem.ifDir" active-color="#13ce66">
-                                                                <span slot="true">是</span>
-                                                                <span slot="false">否</span>
-                                                            </el-switch>
+                                                            <el-switch v-model="dialog.configNew.formItem.ifDir"
+                                                                active-color="#13ce66"
+                                                                :active-value="true"
+                                                                :inactive-value="false"></el-switch>
                                                         </el-form-item>
                                                         <el-form-item label="TTL" prop="ttl">
                                                             <el-input v-model="dialog.configNew.formItem.ttl" placeholder="TTL"></el-input>
@@ -169,11 +171,6 @@ class Config {
                                 </el-container>`,
                     created(){
                         this.initData();
-                    },
-                    mounted() {
-                        this.$nextTick(()=>{
-                            
-                        })
                     },
                     methods: {
                         initData(){
@@ -199,6 +196,11 @@ class Config {
                             
                             return data.key.indexOf(value) !== -1;
                         },
+                        onCollapseAll(){
+                            _.forEach(this.$refs.tree.store._getAllNodes(), (v,k)=>{
+                                this.$set(v, 'expanded', false);
+                            })
+                        },                      
                         onRefresh(data){
                             configHandler.configGetAsync(data.key).then( (rtn)=>{
                                 this.$set(data, 'nodes', rtn.nodes);
@@ -245,29 +247,30 @@ class Config {
                             }); 
 
                         },
-                        onNewFile(data, index){
+                        onNewFile(data){
 
+                            this.dialog.configNew.formItem.ifDir = false;
                             this.dialog.configNew.data = data;
                             this.dialog.configNew.parent = data.key || '/';
-                            this.dialog.configNew.formItem.isDir = false;
-
-                            this.dialog.configNew.show = true;
-                        },
-                        onNewDir(data, index){
                             
+                            this.dialog.configNew.show = true;
+                            
+                        },
+                        onNewDir(data){
+                            
+                            this.dialog.configNew.formItem.ifDir = true;
                             this.dialog.configNew.data = data;
                             this.dialog.configNew.parent = data.key || '/';
-                            this.dialog.configNew.formItem.isDir = true;
 
                             this.dialog.configNew.show = true;
                         },
-                        onEditFile(data, index){
+                        onEditFile(data){
 
                             configHandler.configGetAsync(data.key).then( (rtn)=>{
                                 this.$root.configOpen(rtn);
                             } );
                         },
-                        onExport(data, index){
+                        onExport(data){
                             
                             this.$confirm(`确认要导出 ${data.key} 下的配置?`, '提示', {
                                 confirmButtonText: '确定',
@@ -943,7 +946,7 @@ class Config {
                                     <el-main style="padding:0px;">
                                         <el-container style="height:100%;">
                                             <el-aside style="background-color:#f2f2f2!important;overflow:hidden;" ref="leftView" v-show="control.configTree.show">
-                                                <config-tree></config-tree>
+                                                <config-tree ref="configTree"></config-tree>
                                             </el-aside>
                                             <el-container ref="mainView">
                                                 <el-header style="height: 35px;line-height: 35px;background:#f2f2f2;border-bottom:1px solid #dddddd; padding: 0px 10px 0px 0px;">
@@ -1008,21 +1011,31 @@ class Config {
                                                     <div style="background:#ffffff;padding:20px;height:100%;display:block;text-align:center;" v-else>
                                                         <h2 style="margin: 0px 0px 40px 0px;">欢迎使用配置管理</h2>
                                                         <p>
-                                                            <el-button style="width:100px;height:90px;">
+                                                            
+                                                            <el-button style="width:100px;height:90px;" @click="onToggleKey('etc')">
+                                                                <i class="el-icon-money" style="font-size:48px;"></i> <p>全局配置</p>
+                                                            </el-button>
+
+                                                            <el-button style="width:100px;height:90px;" @click="onToggleKey('hosts')">
                                                                 <i class="el-icon-office-building" style="font-size:48px;"></i> <p>服务器组管理</p>
                                                             </el-button>
                                                             
-                                                            <el-button style="width:100px;height:90px;">
+                                                            <el-button style="width:100px;height:90px;" @click="onToggleKey('jobs')">
                                                                 <i class="el-icon-postcard" style="font-size:48px;"></i> <p>作业定义</p>
                                                             </el-button>
                                                         
-                                                            <el-button style="width:100px;height:90px;">
+                                                            <el-button style="width:100px;height:90px;" @click="onToggleKey('rules')">
                                                                 <i class="el-icon-s-data" style="font-size:48px;"></i> <p>规则管理</p>
                                                             </el-button>
-                                                        
-                                                            <el-button style="width:100px;height:90px;">
-                                                                <i class="el-icon-money" style="font-size:48px;"></i> <p>系统配置</p>
+
+                                                            <el-button style="width:100px;height:90px;" @click="onToggleKey('locks')">
+                                                                <i class="el-icon-lock" style="font-size:48px;"></i> <p>全局锁</p>
                                                             </el-button>
+
+                                                            <el-button style="width:100px;height:90px;" @click="onToggleKey('notify')">
+                                                                <i class="el-icon-warning-outline" style="font-size:48px;"></i> <p>通知设置</p>
+                                                            </el-button>
+                                                        
                                                         </p>
                                                         <object data="/fs/assets/images/files/svg/configWorld.svg?type=open&issys=true" 
                                                             type="image/svg+xml" style="width:40vw;height:40vh;background: #ffffff;">
@@ -1032,6 +1045,7 @@ class Config {
                                                             <el-link href="mailto:m3@wecise.com">Email：m3@wecise.com</el-link>
                                                         </p>
                                                     </div>
+
                                                 </e-main>
                                             </el-container>
                                         </el-container>
@@ -1084,6 +1098,16 @@ class Config {
                                 cursor: 'col-resize',
                                 direction: 'horizontal'
                             });
+                        },
+                        onToggleKey(key){
+                            
+                            this.control.configTree.show = true;
+                            
+                            let keyPath = ["",window.COMPANY_OSPACE,key].join("/");
+                            
+                            this.$refs.configTree.defaultExpandedKeys.push(keyPath);
+                            this.$refs.configTree.onCollapseAll();
+                            this.$refs.configTree.$refs.tree.setCurrentKey(keyPath);
                         },
                         onTogglePanel(){
 							this.control.configTree.show = !this.control.configTree.show;

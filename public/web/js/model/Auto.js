@@ -15,7 +15,7 @@ class Auto {
     constructor() {
         
     }
-
+    
     init(){
         // 集成接入
         let cfg = mx.urlParams['cfg'] ? _.attempt(JSON.parse.bind(null, decodeURIComponent(mx.urlParams['cfg']))) : null;

@@ -90,6 +90,36 @@ class Matrix {
         return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
     }
 
+    // 日子转换
+    secondsToDay(seconds) {
+        let units = ['秒', '小时', '天', '月', '年'];
+        let step = 60;
+
+        if (seconds == -1) return '永久保存';
+        if (seconds == 0) return '不保存';
+        
+        if(seconds <= 60 * 60){
+            return _.round(moment.duration(seconds, 'seconds').asSeconds(), 1) + units[0];
+        }
+
+        if(seconds > 60 * 60 && seconds <= 60 * 60 * 24){
+            return _.round(moment.duration(seconds, 'seconds').asHours(), 1) + units[1];
+        }
+
+        if(seconds > 60 * 60 * 24 && seconds <= 60 * 60 * 24 * 30){
+            return _.round(moment.duration(seconds, 'seconds').asDays(), 1) + units[2];
+        }
+
+        if(seconds > 60 * 60 * 24 * 30 &&  seconds <= 60 * 60 * 24 * 30 * 12){
+            return _.round(moment.duration(seconds, 'seconds').asMonths(), 1) + units[3];
+        }
+
+        if(seconds > 60 * 60 * 24 * 30 * 12){
+            return _.round(moment.duration(seconds, 'seconds').asYears(), 1) + units[4];
+        }
+     
+    }
+
     // 设置Logo
     setLogo(){
         $("#company_logo").ready(function(){

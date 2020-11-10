@@ -87,7 +87,8 @@ class Home extends Matrix {
                                                                                 <el-dropdown-item :command="{cmd:'groupAction', targetGroup: groupItem.name, data:subItem}" v-for="groupItem in _.xor(apps.template,[item])">#{ $t('home.actions.moveTo') }#【#{groupItem.title}#】</el-dropdown-item>
                                                                                 <el-dropdown-item :command="{cmd:'groupAction', targetGroup: '', data:subItem}">#{ $t('home.actions.moveToDesktop') }#</el-dropdown-item>
                                                                                 <el-dropdown-item :command="{cmd:'uninstall',data:subItem}" divided>#{ $t('home.actions.uninstall') }#</el-dropdown-item>
-                                                                                <el-dropdown-item :command="{cmd:'share',data:subItem}" divided>#{ $t('home.actions.share') }#</el-dropdown-item>
+                                                                                <el-dropdown-item :command="{cmd:'appKeeper',data:subItem}" divided>#{ $t('home.actions.appKeeper') }#</el-dropdown-item>
+                                                                                <!--el-dropdown-item :command="{cmd:'share',data:item}" divided>#{ $t('home.actions.share') }#</el-dropdown-item-->
                                                                             </el-dropdown-menu>
                                                                         </el-dropdown>
                                                                     </p>
@@ -122,7 +123,8 @@ class Home extends Matrix {
                                                             <el-dropdown-item divided disabled>#{ $t('home.group.groupTitle') }#</el-dropdown-item>
                                                             <el-dropdown-item :command="{cmd:'groupAction', targetGroup: groupItem.name, data:item}" v-for="groupItem in apps.template">#{ $t('home.actions.moveTo') }#【#{groupItem.title}#】组</el-dropdown-item>
                                                             <el-dropdown-item :command="{cmd:'uninstall',data:item}" divided>#{ $t('home.actions.uninstall') }#</el-dropdown-item>
-                                                            <el-dropdown-item :command="{cmd:'share',data:item}" divided>#{ $t('home.actions.share') }#</el-dropdown-item>
+                                                            <el-dropdown-item :command="{cmd:'appKeeper',data:item}" divided>#{ $t('home.actions.appKeeper') }#</el-dropdown-item>
+                                                            <!--el-dropdown-item :command="{cmd:'share',data:item}" divided>#{ $t('home.actions.share') }#</el-dropdown-item-->
                                                         </el-dropdown-menu>
                                                     </el-dropdown>
                                                 </el-button>
@@ -347,6 +349,9 @@ class Home extends Matrix {
                                 this.group.editDialog.show = true;
                                 this.group.editDialog.form.title = "";
                                 this.group.editDialog.form.icon = _.sample(this.group.iconList).name;
+                            } else if(cmd.type === 'appKeeper'){
+                                this.dialog.appDeploy.item = cmd.data;
+                                this.dialog.appDeploy.show = true;
                             } else {
                                 this.dialog.appDeploy.show = true;
                             }
@@ -368,9 +373,10 @@ class Home extends Matrix {
                             } else if(item.cmd === "share"){
                                 sideBar.appShare(item.data);
                             } else if(item.cmd === "groupAction"){
-                                console.log(item)
                                 _.extend(item.data.groups,{group: item.targetGroup });
                                 this.toggleGroup(item.data);
+                            } else if(item.cmd === 'appKeeper'){
+                                this.onPlusCommand({type: item.cmd, data:item.data});
                             }
                         },
                         onGroupCommand(item){
