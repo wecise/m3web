@@ -101,7 +101,7 @@ class Pipe {
                         }
                     },
                     template:   `<el-container style="height: calc(100% - 70px);">
-                                    <el-header style="height:50px;line-height:50px;">
+                                    <el-header style="height:auto;padding:0px;">
                                         <el-dropdown>
                                             <el-button type="text" icon="el-dropdown-link">
                                                 编辑 <i class="el-icon-arrow-down el-icon--right"></i>
@@ -120,7 +120,7 @@ class Pipe {
                                             </el-button>
                                             <el-dropdown-menu slot="dropdown">
                                                 <el-dropdown-item :key="item.id" v-for="(item,idx) in config['source']" :divided="idx>0?true:false" 
-                                                    @click.native="onInitLogSourceBar">
+                                                    @click.native="onInitLogSourceBar(item)">
                                                     #{item.fileContent.title}#
                                                 </el-dropdown-item>
                                             </el-dropdown-menu>
@@ -159,7 +159,7 @@ class Pipe {
                                             <el-dropdown-item @click.native="control.monitor.show = !control.monitor.show"divided>监控</el-dropdown-item>
                                             </el-dropdown-menu>
                                         </el-dropdown>
-                                        <div ref="sidebar" style="position:absolute;overflow:hidden;top:35px;left:0px;max-height:52px;width:100%;"></div>
+                                        <div style="overflow:hidden;width:100%;height: auto;padding: 20px;" ref="sidebar"></div>
                                     </el-header>
                                     <el-main style="border:1px solid #dddddd;padding:0px;">
                                         <el-container style="width:100%;height:100%;position: relative;" ref="container">
@@ -199,46 +199,188 @@ class Pipe {
                             } else {
                                 
                                 let container = document.getElementById(this.$refs.graphContainer.$el.id);
+                                let sidebar = document.getElementById(this.$refs.sidebar);
                                 
                                 // Workaround for Internet Explorer ignoring certain CSS directives
                                 if (mxClient.IS_QUIRKS) {
                                     document.body.style.overflow = 'hidden';
                                     new mxDivResizer(container);
+                                    new mxDivResizer(sidebar);
                                 }
 
                                 // 初始化Graph
-                                let editor = new mxEditor();
-                                let graph = new mxGraph(container);
+                                this.editor = new mxEditor();
+                                var graph = this.editor.graph;
+                                var model = graph.getModel();
+
+                                // Disable highlight of cells when dragging from toolbar
+                                graph.setDropEnabled(false);
+
+                                // Uses the port icon while connections are previewed
+                                graph.connectionHandler.getConnectImage = function(state)
+                                {
+                                    return new mxImage(state.style[mxConstants.STYLE_IMAGE], 16, 16);
+                                };
+
+                                // Centers the port icon on the target port
+                                graph.connectionHandler.targetConnectImage = true;
+
+                                // Does not allow dangling edges
+                                graph.setAllowDanglingEdges(false);
 
                                 // Sets the graph container and configures the editor
-                                editor.setGraphContainer(container);
+                                this.editor.setGraphContainer(container);
 
+                                var group = new mxCell('Group', new mxGeometry(), 'group');
+                                group.setVertex(true);
+                                group.setConnectable(false);
+                                this.editor.defaultGroup = group;
+                                this.editor.groupBorderSize = 20;
+
+                                // Disables drag-and-drop into non-swimlanes.
+                                graph.isValidDropTarget = function(cell, cells, evt)
+                                {
+                                    return this.isSwimlane(cell);
+                                };
+                                
+                                // Disables drilling into non-swimlanes.
+                                graph.isValidRoot = function(cell)
+                                {
+                                    return this.isValidDropTarget(cell);
+                                }
+
+                                // Does not allow selection of locked cells
+                                graph.isCellSelectable = function(cell)
+                                {
+                                    return !this.isCellLocked(cell);
+                                };
+
+                                // Returns a shorter label if the cell is collapsed and no
+                                // label for expanded groups
+                                graph.getLabel = function(cell)
+                                {
+                                    var tmp = mxGraph.prototype.getLabel.apply(this, arguments); // "supercall"
+                                    
+                                    if (this.isCellLocked(cell))
+                                    {
+                                        // Returns an empty label but makes sure an HTML
+                                        // element is created for the label (for event
+                                        // processing wrt the parent label)
+                                        return '';
+                                    }
+                                    else if (this.isCellCollapsed(cell))
+                                    {
+                                        var index = tmp.indexOf('</h1>');
+                                        
+                                        if (index > 0)
+                                        {
+                                            tmp = tmp.substring(0, index+5);
+                                        }
+                                    }
+                                    
+                                    return tmp;
+                                }
+
+                                // Disables HTML labels for swimlanes to avoid conflict
+                                // for the event processing on the child cells. HTML
+                                // labels consume events before underlying cells get the
+                                // chance to process those events.
+                                //
+                                // NOTE: Use of HTML labels is only recommended if the specific
+                                // features of such labels are required, such as special label
+                                // styles or interactive form fields. Otherwise non-HTML labels
+                                // should be used by not overidding the following function.
+                                // See also: configureStylesheet.
+                                graph.isHtmlLabel = function(cell)
+                                {
+                                    return !this.isSwimlane(cell);
+                                }
+
+                                // Enables new connections
+                                graph.setConnectable(true);
 
                                 // 鼠标框选
-                                new mxRubberband(editor.graph);
-
-                                // Sets global styles
-                                var style = graph.getStylesheet().getDefaultEdgeStyle();
-                                style[mxConstants.STYLE_EDGE] = mxEdgeStyle.EntityRelation;
-                                style[mxConstants.STYLE_ROUNDED] = true;
-                                style[mxConstants.EDGE_SELECTION_STROKEWIDTH] = 3;
-                                style[mxConstants.STYLE_LABEL_BACKGROUNDCOLOR] = 'transparent';
-                                style[mxConstants.STYLE_LABEL_PADDING] = 5;
-                                style[mxConstants.STYLE_LABEL_BACKGROUNDCOLOR] = 'backcolor';
-
-                                style = graph.getStylesheet().getDefaultVertexStyle();
-                                style[mxConstants.STYLE_FILLCOLOR] = '#2f8ee7';
-                                style[mxConstants.STYLE_FONTCOLOR] = '#333333';
-                                style[mxConstants.STYLE_FONTSIZE] = '14';
-                                style[mxConstants.STYLE_SHAPE] = 'swimlane';
-                                style[mxConstants.STYLE_SPACING] = '10';
-                                style[mxConstants.STYLE_STARTSIZE] = 30;
-                                style[mxConstants.STYLE_GRADIENTCOLOR] = '#419efe';
-                                style[mxConstants.VERTEX_SELECTION_STROKEWIDTH] = 3;
-                                style[mxConstants.VERTEX_SELECTION_COLOR] = '#ff0000';
-
-                                this.initGraph(editor,graph);
+                                new mxRubberband(graph);
+                                
+                                // Adds all required styles to the graph (see below)
+				                this.configureStylesheet(graph);
                             }
+                        },
+                        configureStylesheet(graph){
+                            var style = new Object();
+                            style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_RECTANGLE;
+                            style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
+                            style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
+                            style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_MIDDLE;
+                            style[mxConstants.STYLE_GRADIENTCOLOR] = '#41B9F5';
+                            style[mxConstants.STYLE_FILLCOLOR] = '#8CCDF5';
+                            style[mxConstants.STYLE_STROKECOLOR] = '#1B78C8';
+                            style[mxConstants.STYLE_FONTCOLOR] = '#000000';
+                            style[mxConstants.STYLE_ROUNDED] = true;
+                            style[mxConstants.STYLE_OPACITY] = '80';
+                            style[mxConstants.STYLE_FONTSIZE] = '12';
+                            style[mxConstants.STYLE_FONTSTYLE] = 0;
+                            style[mxConstants.STYLE_IMAGE_WIDTH] = '48';
+                            style[mxConstants.STYLE_IMAGE_HEIGHT] = '48';
+                            graph.getStylesheet().putDefaultVertexStyle(style);
+
+                            // NOTE: Alternative vertex style for non-HTML labels should be as
+                            // follows. This repaces the above style for HTML labels.
+                            /*var style = new Object();
+                            style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_LABEL;
+                            style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
+                            style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_TOP;
+                            style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
+                            style[mxConstants.STYLE_IMAGE_ALIGN] = mxConstants.ALIGN_CENTER;
+                            style[mxConstants.STYLE_IMAGE_VERTICAL_ALIGN] = mxConstants.ALIGN_TOP;
+                            style[mxConstants.STYLE_SPACING_TOP] = '56';
+                            style[mxConstants.STYLE_GRADIENTCOLOR] = '#7d85df';
+                            style[mxConstants.STYLE_STROKECOLOR] = '#5d65df';
+                            style[mxConstants.STYLE_FILLCOLOR] = '#adc5ff';
+                            style[mxConstants.STYLE_FONTCOLOR] = '#1d258f';
+                            style[mxConstants.STYLE_FONTFAMILY] = 'Verdana';
+                            style[mxConstants.STYLE_FONTSIZE] = '12';
+                            style[mxConstants.STYLE_FONTSTYLE] = '1';
+                            style[mxConstants.STYLE_ROUNDED] = '1';
+                            style[mxConstants.STYLE_IMAGE_WIDTH] = '48';
+                            style[mxConstants.STYLE_IMAGE_HEIGHT] = '48';
+                            style[mxConstants.STYLE_OPACITY] = '80';
+                            graph.getStylesheet().putDefaultVertexStyle(style);*/
+
+                            style = new Object();
+                            style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_SWIMLANE;
+                            style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
+                            style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
+                            style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_TOP;
+                            style[mxConstants.STYLE_FILLCOLOR] = '#FF9103';
+                            style[mxConstants.STYLE_GRADIENTCOLOR] = '#F8C48B';
+                            style[mxConstants.STYLE_STROKECOLOR] = '#E86A00';
+                            style[mxConstants.STYLE_FONTCOLOR] = '#000000';
+                            style[mxConstants.STYLE_ROUNDED] = true;
+                            style[mxConstants.STYLE_OPACITY] = '80';
+                            style[mxConstants.STYLE_STARTSIZE] = '30';
+                            style[mxConstants.STYLE_FONTSIZE] = '16';
+                            style[mxConstants.STYLE_FONTSTYLE] = 1;
+                            graph.getStylesheet().putCellStyle('group', style);
+                            
+                            style = new Object();
+                            style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_IMAGE;
+                            style[mxConstants.STYLE_FONTCOLOR] = '#774400';
+                            style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
+                            style[mxConstants.STYLE_PERIMETER_SPACING] = '6';
+                            style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_LEFT;
+                            style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_MIDDLE;
+                            style[mxConstants.STYLE_FONTSIZE] = '10';
+                            style[mxConstants.STYLE_FONTSTYLE] = 2;
+                            style[mxConstants.STYLE_IMAGE_WIDTH] = '16';
+                            style[mxConstants.STYLE_IMAGE_HEIGHT] = '16';
+                            graph.getStylesheet().putCellStyle('port', style);
+                            
+                            style = graph.getStylesheet().getDefaultEdgeStyle();
+                            style[mxConstants.STYLE_LABEL_BACKGROUNDCOLOR] = '#FFFFFF';
+                            style[mxConstants.STYLE_STROKEWIDTH] = '2';
+                            style[mxConstants.STYLE_ROUNDED] = true;
+                            style[mxConstants.STYLE_EDGE] = mxEdgeStyle.EntityRelation;
                         },
                         // 初始化画布
                         initGraph(editor,graph){
@@ -257,71 +399,6 @@ class Pipe {
 
                             }
                         },
-                        addSidebarIcon(graph, sidebar, label, image){
-                            // Function that is executed when the image is dropped on
-                            // the graph. The cell argument points to the cell under
-                            // the mousepointer if there is one.
-                            var funct = function(graph, evt, cell, x, y){
-                                var parent = graph.getDefaultParent();
-                                var model = graph.getModel();
-                                
-                                var v1 = null;
-                                
-                                model.beginUpdate();
-                                try
-                                {
-                                    // NOTE: For non-HTML labels the image must be displayed via the style
-                                    // rather than the label markup, so use 'image=' + image for the style.
-                                    // as follows: v1 = graph.insertVertex(parent, null, label,
-                                    // pt.x, pt.y, 120, 120, 'image=' + image);
-                                    v1 = graph.insertVertex(parent, null, label, x, y, 120, 120);
-                                    v1.setConnectable(false);
-                                    
-                                    // Presets the collapsed size
-                                    v1.geometry.alternateBounds = new mxRectangle(0, 0, 120, 40);
-                                                        
-                                    // Adds the ports at various relative locations
-                                    var port = graph.insertVertex(v1, null, 'Trigger', 0, 0.25, 16, 16,
-                                            'port;image=editors/images/overlays/flash.png;align=right;imageAlign=right;spacingRight=18', true);
-                                    port.geometry.offset = new mxPoint(-6, -8);
-                        
-                                    var port = graph.insertVertex(v1, null, 'Input', 0, 0.75, 16, 16,
-                                            'port;image=editors/images/overlays/check.png;align=right;imageAlign=right;spacingRight=18', true);
-                                    port.geometry.offset = new mxPoint(-6, -4);
-                                    
-                                    var port = graph.insertVertex(v1, null, 'Error', 1, 0.25, 16, 16,
-                                            'port;image=editors/images/overlays/error.png;spacingLeft=18', true);
-                                    port.geometry.offset = new mxPoint(-8, -8);
-
-                                    var port = graph.insertVertex(v1, null, 'Result', 1, 0.75, 16, 16,
-                                            'port;image=editors/images/overlays/information.png;spacingLeft=18', true);
-                                    port.geometry.offset = new mxPoint(-8, -4);
-                                }
-                                finally
-                                {
-                                    model.endUpdate();
-                                }
-                                
-                                graph.setSelectionCell(v1);
-                            }
-                            
-                            // Creates the image which is used as the sidebar icon (drag source)
-                            var img = document.createElement('img');
-                            img.setAttribute('src', image);
-                            img.style.width = '48px';
-                            img.style.height = '48px';
-                            img.title = 'Drag this to the diagram to create a new vertex';
-                            sidebar.appendChild(img);
-                            
-                            var dragElt = document.createElement('div');
-                            dragElt.style.border = 'dashed black 1px';
-                            dragElt.style.width = '120px';
-                            dragElt.style.height = '120px';
-                                                
-                            // Creates the image which is used as the drag icon (preview)
-                            var ds = mxUtils.makeDraggable(img, graph, funct, dragElt, 0, 0, true, true);
-                            ds.setGuidesEnabled(true);
-                        },
                         // 初始化菜单项目
                         onInitConfig(){
                             fsHandler.callFsJScriptAsync("/matrix/pipe/getConfigList.js").then( (rtn)=>{
@@ -334,16 +411,15 @@ class Pipe {
                         },
                         // 加载数据源可拖拽项目
                         onInitLogSourceBar(item){
-                            console.log(item)
-                            let graph = this.editor.graph;
-                            let sidebar = this.$refs.sidebar;
+                            
+                            var graph = this.editor.graph;
+                            var sidebar = this.$refs.sidebar;
 
-                            this.initSidebar(graph, sidebar,
-                                '<h1 style="margin:0px;">Server</h1><br>'+
-                                '<img src="/static/assets/images/files/png/matrix.png" width="48" height="48">'+
-                                '<br>'+
-                                '<input type="text" size="12" value="127.0.0.1"/>',
-                                '/static/assets/images/files/png/matrix.png');
+                            this.addSidebarIcon(graph, sidebar,
+                                `<h1 style="margin:0px;">日志</h1>
+                                <span class="el-icon-document" style="font-size:32px;"></span>
+                                <p>${item.name}</p>`,
+                                '/static/assets/images/graph/tools/gear.png');
                         },
                         // 添加菜单项
                         addSidebarIcon(graph, sidebar, label, image){
@@ -369,20 +445,20 @@ class Pipe {
                                     v1.geometry.alternateBounds = new mxRectangle(0, 0, 120, 40);
                                                         
                                     // Adds the ports at various relative locations
-                                    var port = graph.insertVertex(v1, null, 'Trigger', 0, 0.25, 16, 16,
-                                            'port;image=editors/images/overlays/flash.png;align=right;imageAlign=right;spacingRight=18', true);
+                                    var port = graph.insertVertex(v1, null, '配置', 0, 0.25, 16, 16,
+                                            'port;image=/static/assets/images/graph/tools/gear.png;align=right;imageAlign=right;spacingRight=18', true);
                                     port.geometry.offset = new mxPoint(-6, -8);
                         
-                                    var port = graph.insertVertex(v1, null, 'Input', 0, 0.75, 16, 16,
-                                            'port;image=editors/images/overlays/check.png;align=right;imageAlign=right;spacingRight=18', true);
+                                    var port = graph.insertVertex(v1, null, '输入', 0, 0.75, 16, 16,
+                                            'port;image=/static/assets/images/graph/tools/group.png;align=right;imageAlign=right;spacingRight=18', true);
                                     port.geometry.offset = new mxPoint(-6, -4);
                                     
-                                    var port = graph.insertVertex(v1, null, 'Error', 1, 0.25, 16, 16,
-                                            'port;image=editors/images/overlays/error.png;spacingLeft=18', true);
+                                    var port = graph.insertVertex(v1, null, '新建', 1, 0.25, 16, 16,
+                                            'port;image=/static/assets/images/graph/tools/plus.png;spacingLeft=18', true);
                                     port.geometry.offset = new mxPoint(-8, -8);
 
-                                    var port = graph.insertVertex(v1, null, 'Result', 1, 0.75, 16, 16,
-                                            'port;image=editors/images/overlays/information.png;spacingLeft=18', true);
+                                    var port = graph.insertVertex(v1, null, '复制', 1, 0.75, 16, 16,
+                                            'port;image=/static/assets/images/graph/tools/copy.png;spacingLeft=18', true);
                                     port.geometry.offset = new mxPoint(-8, -4);
 
                                 } finally {
@@ -395,15 +471,15 @@ class Pipe {
                             // Creates the image which is used as the sidebar icon (drag source)
                             var img = document.createElement('img');
                             img.setAttribute('src', image);
-                            img.style.width = '48px';
-                            img.style.height = '48px';
+                            img.style.width = '24px';
+                            img.style.height = '24px';
                             img.title = 'Drag this to the diagram to create a new vertex';
                             sidebar.appendChild(img);
                             
                             var dragElt = document.createElement('div');
                             dragElt.style.border = 'dashed black 1px';
-                            dragElt.style.width = '120px';
-                            dragElt.style.height = '120px';
+                            dragElt.style.width = '60px';
+                            dragElt.style.height = '60px';
                                                 
                             // Creates the image which is used as the drag icon (preview)
                             var ds = mxUtils.makeDraggable(img, graph, funct, dragElt, 0, 0, true, true);

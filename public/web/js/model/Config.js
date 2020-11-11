@@ -793,8 +793,10 @@ class Config {
                             this.editor.on("input", ()=> {
                                     
                                 if(this.changed) {
-                                    //this.changed = false;
-                                    //this.$emit('update:change',this.changed);
+                                    
+                                    if(!_.includes(this.$root.control.save.lis, this.model.key)){
+                                        this.$root.control.save.list.push(this.model.key);
+                                    }
                                 }
 
                             });
@@ -807,15 +809,19 @@ class Config {
                             });
 
                             /* 根据mode获取snippets */
-                            try{
+                            try {
                                 let snippetManager = ace.require("ace/snippets").snippetManager;
                                 let className = _.trim(_.split(_.first(this.model.value.match(/^--class.*/mgi)),"=",2)[1]);    
-                                let term = encodeURIComponent(JSON.stringify( {mode:this.mode, class:className} ));
                                 
-                                fsHandler.callFsJScriptAsync("/matrix/config/snippets.js",term).then( (val)=>{
-                                    let snippetText = val.message;
-                                    snippetManager.register(snippetText, this.mode);
-                                } );
+                                if(!_.isEmpty(className)){
+                                    let term = encodeURIComponent(JSON.stringify( {mode:this.mode, class:className} ));
+
+                                    fsHandler.callFsJScriptAsync("/matrix/config/snippets.js",term).then( (val)=>{
+                                        let snippetText = val.message;
+                                        snippetManager.register(snippetText, this.mode);
+                                    } );
+                                }
+
                             } catch(err){
 
                             }
@@ -975,7 +981,8 @@ class Config {
                                                     <el-tabs v-model="configTabs.activeIndex" type="border-card" closable @tab-remove="configClose" v-if="!_.isEmpty(configTabs.tabs)">
                                                         <el-tab-pane :key="item.name" :name="item.name" v-for="item in configTabs.tabs">
                                                             <span slot="label" v-if="item.dir">
-                                                                <i class="fas fa-folder" style="color:rgb(64, 158, 255);"></i> #{item.title}#
+                                                                <i class="el-icon-folder-opened" style="color:#ff0000;" v-if="_.includes(control.save.list,item.name)"></i>
+                                                                <i class="el-icon-folder-opened" style="color:#409eff;" v-else></i> #{item.title}#
                                                                 <el-dropdown trigger="click">
                                                                     <span class="el-dropdown-link">
                                                                         <i class="el-icon-arrow-down"></i>
@@ -990,7 +997,8 @@ class Config {
                                                                 </el-dropdown>
                                                             </span>
                                                             <span slot="label" v-else>
-                                                                <i class="fas fa-file-invoice" style="color:rgb(64, 158, 255);"></i> #{item.title}#
+                                                                <i class="el-icon-document" style="color:#ff0000;" v-if="_.includes(control.save.list,item.name)"></i>
+                                                                <i class="el-icon-document" style="color:#409eff;" v-else></i> #{item.title}#
                                                                 <el-dropdown trigger="click">
                                                                     <span class="el-dropdown-link">
                                                                         <i class="el-icon-arrow-down"></i>
@@ -1066,7 +1074,8 @@ class Config {
                                 show: false
                             },
                             save: {
-                                show: false
+                                show: false,
+                                list: []
                             }
                         },
                         configTreeSelectedNode:{}
@@ -1198,21 +1207,49 @@ class Config {
                             }
                         },
                         configClose(targetName){
-                            let tabs = this.configTabs.tabs;
-                            let activeIndex = this.configTabs.activeIndex;
-                            if (activeIndex === targetName) {
-                              tabs.forEach((tab, index) => {
-                                if (tab.name === targetName) {
-                                  let nextTab = tabs[index + 1] || tabs[index - 1];
-                                  if (nextTab) {
-                                    activeIndex = nextTab.name;
-                                  }
+                            const self = this;
+
+                            let closeFun = function(){
+                                let tabs = self.configTabs.tabs;
+                                let activeIndex = self.configTabs.activeIndex;
+                                if (activeIndex === targetName) {
+                                tabs.forEach((tab, index) => {
+                                    if (tab.name === targetName) {
+                                    let nextTab = tabs[index + 1] || tabs[index - 1];
+                                    if (nextTab) {
+                                        activeIndex = nextTab.name;
+                                    }
+                                    }
+                                });
                                 }
-                              });
+                                
+                                self.configTabs.activeIndex = activeIndex;
+                                self.configTabs.tabs = tabs.filter(tab => tab.name !== targetName);
+
+                                // 重置是否编辑状态
+                                self.control.save.list = _.xor(self.control.save.list, [targetName]);
                             }
+
+                            if(_.includes(this.control.save.list, targetName)) {
+
+                                this.$confirm(`${targetName} 已修改，确认是否保存`, '提示', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                    type: 'warning'
+                                }).then(() => {
+                                    
+                                    this.onConfigSave();
+                                    
+                                }).catch(() => {
+                                    
+                                    closeFun();
+                                    
+                                });
+                            } else {
+                                closeFun();
+                            }
+
                             
-                            this.configTabs.activeIndex = activeIndex;
-                            this.configTabs.tabs = tabs.filter(tab => tab.name !== targetName);
                         },
                         initTheme: function(){
                             let id = objectHash.sha1(this.configTabs.activeIndex);
@@ -1319,6 +1356,9 @@ class Config {
                                         })
                                         
                                         eventHub.$emit("CONFIG-TREE-REFRESH-EVENT", this.dialog.configNew.formItem.key);
+
+                                        // 重置是否编辑状态
+                                        this.control.save.list = _.xor(this.control.save.list, [this.dialog.configNew.formItem.key]);
                                         
                                         this.dialog.configNew.show = false;
 
@@ -1372,6 +1412,9 @@ class Config {
 
                                         this.control.save.show = false;
 
+                                        // 重置是否编辑状态
+                                        this.control.save.list = _.xor(this.control.save.list, [item.key]);
+
                                         eventHub.$emit("CONFIG-TREE-REFRESH-EVENT", item.key);
                                     } else {
                                         this.$message({
@@ -1412,6 +1455,9 @@ class Config {
                                         this.configClose(item.key);
                                         // 重置选择
                                         this.configTreeSelectedNode = null;
+
+                                        // 重置是否编辑状态
+                                        this.control.save.list = _.xor(this.control.save.list, [item.key]);
     
                                     }
                                 } );
