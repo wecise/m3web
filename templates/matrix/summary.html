@@ -34,7 +34,9 @@
 
 </style>
 
-<div id="app"></div>
+<main id="content" class="content">
+    <div id="app"></div>
+</main>
 
 <script src="{{AppSubUrl}}/web/js/model/Robot.js"></script>
 <script src="{{AppSubUrl}}/web/js/model/Summary.js"></script>
@@ -46,9 +48,11 @@
 
 
 <script>
-	
-	let mxSummary = new Summary();
-	mxSummary.init();
+	$(function() {
+		let mxSummary = new Summary();
+		mxSummary.init();
+		mxSummary.mount("#app");
+	})
 
 </script>
 

@@ -3,11 +3,103 @@
 	/*----------  最外层element会自动增加组件同名 class="portal-view"  ----------*/
 	<template>
 		<el-container>
-            <el-header>
-                <h3>#{title}#</h3>
+            <el-header style="height:40px;line-height: 40px;padding:0px;">
+                <h4 style="margin: 0px;">#{title}#</h4>
             </el-header>
-            <el-main>
-                
+			<el-main style="padding:0px;overflow: hidden;">
+				<el-row :gutter="20">  
+					<el-col :span="24" style="padding:20px;box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);background-color: #ffffff;">
+						<h5 style="margin: 10px;">M³ 产品</h5>
+						<div style="display: flex;float: left;flex-wrap: wrap;">
+							<div @click="onForward(item.url)" 
+								:key="item.name" v-for="item in model.m3"
+								style="cursor: pointer;width: 32.3%;min-width: 320px;height:8em;margin: 0 .5% 30px;background: #eff4f6;display: flex;float: left;">
+									<span style="padding:30px 20px;">
+										<el-image :src="item.icon" style="width:34px;filter: grayscale(100%) brightness(45%) sepia(100%) hue-rotate(-180deg) saturate(700%) contrast(0.8);"></el-image>
+									</span>
+									<div style="text-align: left;padding:0 10px;">
+										<h4>
+											<span v-if="window.MATRIX_LANG == 'zh-CN'">#{item.cnname}#</span>
+											<span v-else>#{item.enname}#</span>
+										</h4>
+										<p style="font-size:10px;color:#888888;">
+											#{item.desc}#
+										</p>
+									</div>
+								</span>
+							</div>
+						</div>
+					</el-col>
+
+					<el-col :span="24" style="margin-top: 20px;padding:20px;box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);background-color: #ffffff;">
+						<h5 style="margin: 10px;">已发布小应用</h5>
+						<div style="display: flex;float: left;">
+							<div @click="onForward(item.url)" 
+								:key="item.name" v-for="item in model.app"
+								style="cursor: pointer;width: 32.3%;min-width: 320px;height:8em;margin: 0 .5% 30px;background: #eff4f6;display: flex;float: left;">
+									<span style="padding:30px 20px;">
+										<el-image :src="item.icon" style="width:34px;filter: grayscale(100%) brightness(45%) sepia(100%) hue-rotate(-180deg) saturate(700%) contrast(0.8);"></el-image>
+									</span>
+									<div style="text-align: left;padding:0 10px;">
+										<h4>
+											<span v-if="window.MATRIX_LANG == 'zh-CN'">#{item.cnname}#</span>
+											<span v-else>#{item.enname}#</span>
+										</h4>
+										<p style="font-size:10px;color:#888888;">
+											#{item.desc}#
+										</p>
+									</div>
+								</span>
+							</div>
+						</div>
+					</el-col>
+					<!--
+					<el-col :span="24" style="margin-top: 20px;padding:20px;box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);background-color: #ffffff;">
+						<h5 style="margin: 10px;">规则服务概览</h5>
+						<div style="display: flex;float: left;">
+							<div @click="onForward(item.url)" 
+								:key="item.name" v-for="item in model.rule"
+								:style="'cursor: pointer;width: 32.3%;min-width: 320px;height:8em;margin: 0 .5% 30px;display: flex;float: left;background: '+item.background +';color:#ffffff;'">
+									<span style="padding:10px;">
+										<el-image :src="item.icon"></el-image>
+									</span>
+									<div style="text-align: left;padding:0 10px;">
+										<h4>
+											<span v-if="window.MATRIX_LANG == 'zh-CN'">#{item.cnname}#</span>
+											<span v-else>#{item.enname}#</span>
+										</h4>
+										<p style="font-size:34px;margin: 0px;font-weight: 900;">
+											#{item.count}#
+										</p>
+									</div>
+								</span>
+							</div>
+						</div>
+					</el-col>
+					-->
+					<el-col :span="24" style="margin-top: 20px;padding:20px;box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);background-color: #ffffff;">
+						<h5 style="margin: 10px;">接口服务概览</h5>
+						<div style="display: flex;float: left;">
+							<div @click="onForward(item.url)" 
+								:key="item.name" v-for="item in model.api"
+								:style="'cursor: pointer;width: 32.3%;min-width: 320px;height:8em;margin: 0 .5% 30px;display: flex;float: left;background: '+item.background +';color:#ffffff;'">
+									<span style="padding:10px;">
+										<el-image :src="item.icon"></el-image>
+									</span>
+									<div style="text-align: left;padding:0 10px;">
+										<h4>
+											<span v-if="window.MATRIX_LANG == 'zh-CN'">#{item.cnname}#</span>
+											<span v-else>#{item.enname}#</span>
+										</h4>
+										<p style="font-size:34px;margin: 0px;font-weight: 900;">
+											#{item.count}#
+										</p>
+									</div>
+								</span>
+							</div>
+						</div>
+					</el-col>
+				</el-row>
             </el-main>
             <el-footer>
 
@@ -23,13 +115,27 @@
         	title: String
 		},
 		data(){
-          	return {
-                
+
+			return {
+                model: null
 			}
 		},
-        
+        created(){
+			this.initSummary();
+
+			setInterval(()=>{
+				this.initSummary();
+			}, 30 * 1000)
+		},
 		methods: {
-            
+            onForward(url){
+				window.open(url,'_parent');
+			},
+			initSummary(){
+				fsHandler.callFsJScriptAsync("/matrix/summary/getSummary.js",null).then( (rtn)=>{
+					this.model = rtn.message;
+				} )
+			}
 		}
 	
 	}

@@ -14,6 +14,7 @@ class SideBar {
     constructor() {
         this.app = null;
         this.topbar = null;
+        this.footbar = null;
     }
 
     // 左边栏切换
@@ -239,7 +240,7 @@ class SideBar {
                     }
                     
                 },
-                refresh: function(){
+                refresh(){
                     this.model = [];
                     this.init();
                 },
@@ -292,79 +293,6 @@ class SideBar {
                     }catch(err){
 
                     }
-                },
-                contextMenu(el){
-                    const self = this;
-
-                    $.contextMenu("destroy").contextMenu({
-                        selector: el,
-                        trigger: 'right',
-                        autoHide: true,
-                        delay: 10,
-                        hideOnSecondTrigger: true,
-                        build: function($trigger, e) {
-                            
-                            let item = null;
-                            try{
-                                let id = e.target.attributes.getNamedItem('data-item').value;
-                                item = _.find(self.model,{id:id});
-
-                                return {
-                                    callback: function(key, opt) {
-                                        if(_.includes(key,"walking")){
-                                            inst.appRunning(item);
-                                        } else if(_.includes(key,"running")){
-                                            inst.appRunningPlus(item);
-                                        } else if(_.includes(key,"uninstall")){
-                                            inst.appUninstall(self,item);
-                                        } else if(_.includes(key,"home")){
-                                            inst.appAsHome(item);
-                                        } else if(_.includes(key,"allUserHome")){ 
-                                            sideBar.appAsHomeForAllUser(item.data);
-                                        } else if(_.includes(key,"share")){
-                                            inst.appShare(item);
-                                        }
-                                    },
-                                    items: {
-                                        "m10_walking": {
-                                            "name": "当前窗口运行",
-                                            "icon": "fas fa-walking"
-                                        },
-                                        "m20_running": {
-                                            "name": "打开新窗口运行",
-                                            "icon": "fas fa-running"
-                                        },
-                                        "m30":"----------",
-                                        "m40_home": {
-                                            "name": '设为首页', 
-                                            "icon": "fas fa-home"
-                                        },
-                                        "m50":"----------",
-                                        "m60_uninstall": {
-                                            "name": "卸载应用",
-                                            "icon": "fas fa-trash"
-                                        },
-                                        "m70":"----------",
-                                        "m80_share": {
-                                            "name": "分享",
-                                            "icon": "fas fa-share"
-                                        }
-                                    }
-                                }
-                            } catch(err){
-                                return [];
-                            }
-                            
-                        },
-                        events: {
-                            show: function(opt) {
-                                let $this = this;
-                            },
-                            hide: function(opt) {
-                                let $this = this;
-                            }
-                        }
-                    });
                 }
             }
         }
@@ -752,7 +680,7 @@ class SideBar {
                         }
                     }
                 },
-                initWnd: function(){
+                initWnd(){
 
                     setTimeout(() => {
                         this.wnd = maxWindow.winApps(`应用市场`, `<div id="nav-menu-level1" style="width:100%;height:100%;"></div>`, null, 'apps-container');
@@ -760,7 +688,7 @@ class SideBar {
                     }, 50);
 
                 },
-                refresh: function(){
+                refresh(){
                     this.init();
                 },
                 onToggle(){
@@ -868,10 +796,14 @@ class SideBar {
     }
 
     init(){
-        this.topbar = new Vue(this.topBar()).$mount("#header");
-        this.app = new Vue(this.sideMenu()).$mount("#aside");
-        this.footbar = new Vue(this.footBar()).$mount("#footer");
-        this.robot();
+        try{
+            this.topbar = new Vue(this.topBar()).$mount("#header");
+            this.app = new Vue(this.sideMenu()).$mount("#aside");
+            this.footbar = new Vue(this.footBar()).$mount("#footer");
+            this.robot();
+        } catch(err){
+          
+        }
     }
 
     appRunning(event){
@@ -976,10 +908,9 @@ class SideBar {
             if(jsPanel.activePanels.getPanel('jsPanel-appShare')){
                 jsPanel.activePanels.getPanel('jsPanel-appShare').close();
             }
-        }catch(error){
+        } catch(error){
 
-        }
-        finally{
+        } finally{
             wnd = maxWindow.winAppShare( `<i class="fas fa-share"></i> 分享`, `<div id="app-share-container"></div>`, null, 'content');
         }
     
@@ -1104,8 +1035,7 @@ class SideBar {
 
 }
 
-var sideBar = new SideBar();
-
-document.addEventListener('DOMContentLoaded', function(){
+document.addEventListener('DOMContentLoaded', ()=>{
+    var sideBar = new SideBar();
     sideBar.init();
 }, false);

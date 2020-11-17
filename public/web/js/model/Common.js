@@ -298,6 +298,12 @@ Vue.component("mx-fs-editor",{
                 activeIndex: '',
                 activeNode: null
             },
+            control: {
+                save: {
+                    disabled: true,
+                    list: []
+                }
+            },
             tree: {
                 root: "/"
             },
@@ -364,7 +370,7 @@ Vue.component("mx-fs-editor",{
                                 </el-dropdown-menu>
                             </el-dropdown>
                             
-                            <el-dropdown style="padding-right: 10px;cursor:pointer;" trigger="click">
+                            <el-dropdown style="padding-right: 10px;cursor:pointer;" trigger="click" v-if="!_.isEmpty(tabs.activeNode) && tabs.activeNode.ftype=='js'">
                                 <span class="el-dropdown-link">
                                     运行
                                 </span>
@@ -410,19 +416,21 @@ Vue.component("mx-fs-editor",{
                                     <el-button type="text" icon="el-icon-edit-outline" @click="file.dialogSaveAs.visible=true"></el-button>
                                 </el-tooltip>
                                 <el-divider direction="vertical"></el-divider>
-                                <el-tooltip content="执行" placement="top" open-delay="500">
-                                    <el-button type="text" icon="el-icon-caret-right" @click="onSaveAndPlay" :loading="tip.loading"></el-button>
-                                </el-tooltip>
-                                <el-divider direction="vertical"></el-divider>
-                                <el-tooltip content="执行日志" placement="top" open-delay="500">
-                                    <el-button type="text" icon="el-icon-monitor" @click="onToggleRunningView('log')"></el-button>
-                                </el-tooltip>
-                                <el-tooltip content="执行结果" placement="top" open-delay="500">
-                                    <el-button type="text" icon="el-icon-tickets" @click="onToggleRunningView('result')"></el-button>
-                                </el-tooltip>
-                                <el-tooltip content="预览" placement="top" open-delay="500">
-                                    <el-button type="text" icon="el-icon-platform-eleme" @click="onToggleRunningView('preview')" v-if="tabs.activeNode.ftype=='html'"></el-button>
-                                </el-tooltip>
+                                <span  v-if="!_.isEmpty(tabs.activeNode) && tabs.activeNode.ftype=='js'">
+                                    <el-tooltip content="执行" placement="top" open-delay="500">
+                                        <el-button type="text" icon="el-icon-caret-right" @click="onSaveAndPlay" :loading="tip.loading"></el-button>
+                                    </el-tooltip>
+                                    <el-divider direction="vertical"></el-divider>
+                                    <el-tooltip content="执行日志" placement="top" open-delay="500">
+                                        <el-button type="text" icon="el-icon-monitor" @click="onToggleRunningView('log')"></el-button>
+                                    </el-tooltip>
+                                    <el-tooltip content="执行结果" placement="top" open-delay="500">
+                                        <el-button type="text" icon="el-icon-tickets" @click="onToggleRunningView('result')"></el-button>
+                                    </el-tooltip>
+                                    <el-tooltip content="预览" placement="top" open-delay="500">
+                                        <el-button type="text" icon="el-icon-platform-eleme" @click="onToggleRunningView('preview')" v-if="tabs.activeNode.ftype=='html'"></el-button>
+                                    </el-tooltip>
+                                </span>
                                 <el-tooltip content="主题" placement="top" open-delay="500">
                                     <el-button type="text" :class="'M3-EDITOR-THEME-'+tabs.activeIndex" v-show="!_.isEmpty(tabs.list)" style="float:right;">
                                         <i class="fas fa-tshirt"></i>
@@ -434,7 +442,7 @@ Vue.component("mx-fs-editor",{
                     </el-header>
                     <el-container style="height: 100%;min-height:300px;border-top:1px solid #fff;">
                         <el-aside style="width:200px;background-color:#f2f2f2;overflow:hidden;" ref="leftView">
-                            <mx-fs-tree :root="tree.root" v-if="!_.isEmpty(tabs.activeNode)"></mx-fs-tree>
+                            <mx-fs-tree :root="tree.root" v-if="!_.isEmpty(tabs.activeNode)" ref="fsTree"></mx-fs-tree>
                         </el-aside>
                         <el-container style="height: 100%;" ref="mainView">
                             <el-main style="padding:0px;overflow:hidden;">
@@ -442,6 +450,10 @@ Vue.component("mx-fs-editor",{
                                     <h2 style="margin: 0px 0px 40px 0px;">欢迎使用${MATRIX_TITLE} 在线编辑器</h2>
                                     <p>
                                         
+                                        <el-button style="width:100px;height:90px;" @click="onOpenFile">
+                                            <i class="el-icon-document" style="font-size:48px;"></i> <p>打开文件</p>
+                                        </el-button>
+                                    
                                         <el-button style="width:100px;height:90px;" @click="onNewProject">
                                             <i class="el-icon-folder-opened" style="font-size:48px;"></i> <p>新建文件夹</p>
                                         </el-button>
@@ -572,12 +584,15 @@ Vue.component("mx-fs-editor",{
             });
         },
         onToggleLeftBar(show){
-            if(show){
-                this.splitInst.setSizes([20,80]);
-                $(this.$refs.leftView.$el).show();
-            } else {
-                this.splitInst.setSizes([0,100]);
-                $(this.$refs.leftView.$el).hide();
+            
+            if(this.splitInst) {
+                if(show){
+                    this.splitInst.setSizes([20,80]);
+                    $(this.$refs.leftView.$el).show();
+                } else {
+                    this.splitInst.setSizes([0,100]);
+                    $(this.$refs.leftView.$el).hide();
+                }
             }
 
             localStorage.setItem('M3-EDITOR-LEFTBAR',show);
@@ -654,6 +669,9 @@ Vue.component("mx-fs-editor",{
         load(){
             eventHub.$emit("FS-NODE-LOAD-EVENT");
         },
+        onOpenFile(){
+            console.log(this.$refs.fsTree)
+        },
         onNewProject(){
             fileSystem.fileNewTo(this.tree.root,window.fsSelectedItem,this.load);
         },
@@ -664,7 +682,6 @@ Vue.component("mx-fs-editor",{
             } catch(err){
                 fileSystem.fileNew("/script",this.load);
             }
-            
         },
         onCloseTab(){
             if(!_.isEmpty(this.tabs.activeIndex)){
@@ -682,11 +699,14 @@ Vue.component("mx-fs-editor",{
         onReload(){
             let node = _.find(this.tabs.list,{name:this.tabs.activeIndex}).model;
             let editor = ace.edit('editor-' + this.tabs.activeIndex);
-            let rtn = fsHandler.fsContent(node.parent,node.name);
+            
+            fsHandler.fsContentAsync(node.parent,node.name).then( (rtn)=>{
+                if(editor){
+                    editor.setValue(rtn);
+                }
+            } );
 
-            if(editor){
-                editor.setValue(rtn);
-            }
+            
         },
         onUndo(){
             let editor = ace.edit('editor-'+this.tabs.activeIndex);
@@ -817,36 +837,36 @@ Vue.component("mx-fs-editor",{
 
             // 先保存
             // this.onSave();
-            _.delay(()=>{
-                // 后运行 depend ftype: js/html
-                if(_.includes(['html','html'],this.tabs.activeNode.ftype)){
-                    eventHub.$emit(`FS-EDITOR-RUN-EVENT-${this.tabs.activeIndex}`, `/fs${[this.tabs.activeNode.parent,this.tabs.activeNode.name].join("/")}?issys=true&type=open`);
-                    _.forEach(this.tabs.list,(v)=>{
-                        if(v.name == this.tabs.activeIndex){
-                            _.extend(v.model,{output: `/fs${[this.tabs.activeNode.parent,this.tabs.activeNode.name].join("/")}?issys=true&type=open`});
-                        }
-                    })
-                } else {
-
-                    try {
-                        
-                        fsHandler.callFsJScriptAsync([this.tabs.activeNode.parent, this.tabs.activeNode.name].join("/").replace(/\/script\//g, "/"), '').then( (rtn)=>{
-                            _.forEach(this.tabs.list,(v)=>{
-                                if(v.name == this.tabs.activeIndex){
-                                    _.extend(v.model,{output:rtn});
-                                }
-                            })
-
-                            this.tip.loading = false;
-                            this.tip.message = "";
-                        } );
-                        
-                    } catch(err) {
-                        console.log(err)
-                        _.extend(_.find(this.tabs.list,{name:this.tabs.activeIndex}).model, {output:err});
+            
+            // 后运行 depend ftype: js/html
+            if(_.includes(['html','html'],this.tabs.activeNode.ftype)){
+                eventHub.$emit(`FS-EDITOR-RUN-EVENT-${this.tabs.activeIndex}`, `/fs${[this.tabs.activeNode.parent,this.tabs.activeNode.name].join("/")}?issys=true&type=open`);
+                _.forEach(this.tabs.list,(v)=>{
+                    if(v.name == this.tabs.activeIndex){
+                        _.extend(v.model,{output: `/fs${[this.tabs.activeNode.parent,this.tabs.activeNode.name].join("/")}?issys=true&type=open`});
                     }
+                })
+            } else {
+
+                try {
+                    
+                    fsHandler.callFsJScriptAsync([this.tabs.activeNode.parent, this.tabs.activeNode.name].join("/").replace(/\/script\//g, "/"), '').then( (rtn)=>{
+                        
+                        _.forEach(this.tabs.list,(v)=>{
+                            if(v.name == this.tabs.activeIndex){
+                                _.extend(v.model,{output:rtn});
+                            }
+                        })
+
+                        this.tip.loading = false;
+                        this.tip.message = "";
+                    } );
+                    
+                } catch(err) {
+                    console.log(err)
+                    _.extend(_.find(this.tabs.list,{name:this.tabs.activeIndex}).model, {output:err});
                 }
-            },500)
+            }
             
         },
         onDeploy(){

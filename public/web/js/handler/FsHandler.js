@@ -735,7 +735,6 @@ class FsHandler {
         
         let parent = path.replace(/\/\//g,'/');
         let _url = `/fs${parent}/${name}?type=attr`;
-        console.log(path,_url)
 
         if(window.SignedUser_IsAdmin){
             _url += '&issys=true';
@@ -1122,6 +1121,8 @@ class FsHandler {
     async callFsJScriptAsync(name,term){
 
         let rtn = null;
+        let stime = _.now();
+
         try{
                 
 
@@ -1141,23 +1142,36 @@ class FsHandler {
                 async: true,
                 dataType: 'json',
                 contentType: false,
-                beforeSend: function(xhr) {
-                    // 忽略
-                    if(!_.includes(term,'aiStatusGet')){
-                        // Pace.restart();
+                beforeSend(xhr) {
+                    
+                },
+                complete(xhr, textStatus) {
+                    //消耗时间
+                    let now = _.now();
+                    let timeDiff = moment(now).diff(moment(stime), "millisecond");
+                    if(timeDiff > 1000){
+                        _.extend(rtn, { consume: moment(now).diff(moment(stime), "seconds") + ' 秒' }); 
+                    } else {
+                        _.extend(rtn, { consume: timeDiff + ' 毫秒' }); 
                     }
                 },
-                complete: function(xhr, textStatus) {
-                },
-                success: function(data, textStatus, xhr) {
+                success(data, textStatus, xhr) {
 
                     userHandler.ifSignIn(data);
 
                     rtn = data;
+
+                    // 调用次数
+                    //fsHandler.updateCount(name);
+
+                    // 审计日志
+                    //auditLogHandler.writeLog("system:filesystem", "Call api: " + name, 0);
                 },
-                error: function(xhr, textStatus, errorThrown) {
+                error(xhr, textStatus, errorThrown) {
                     rtn = xhr.responseText;
-                    console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
+                    
+                    // 审计日志
+                    //auditLogHandler.writeLog("system:filesystem", "Call api: " + name, 1);
                 }
             });
         } catch(err){
@@ -1166,6 +1180,12 @@ class FsHandler {
 
         return rtn;
     };
+
+    // updateCount(fullname){
+    //     fsHandler.callFsJScriptAsync("/matrix/summary/updateCount.js", encodeURIComponent(fullname)).then( (rtn)=>{
+
+    //     } )
+    // }
 
     /*
     *   获取一个文件内容
@@ -1180,18 +1200,18 @@ class FsHandler {
         jQuery.ajax({
             url: url,
             async:false,
-            beforeSend: function(xhr) {
-                // Pace.restart();
+            beforeSend(xhr) {
+                
             },
-            complete: function(xhr, textStatus) {
+            complete(xhr, textStatus) {
             },
-            success: function(data, textStatus, xhr) {
+            success(data, textStatus, xhr) {
 
                 userHandler.ifSignIn(data);
 
                 rtn = data.data;
             },
-            error: function(xhr, textStatus, errorThrown) {
+            error(xhr, textStatus, errorThrown) {
                 console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
             }
         });

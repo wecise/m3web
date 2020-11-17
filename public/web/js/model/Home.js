@@ -277,7 +277,7 @@ class Home extends Matrix {
                     filters:{
                         pickIcon:function(icon){
                             if(!_.isEmpty(icon)){
-                                return `${window.ASSETS_ICON}/apps/png/${icon}?type=download&issys=${window.SignedUser_IsAdmin}`;
+                                return `${window.ASSETS_ICON}/apps/png/${icon}?type=open&issys=${window.SignedUser_IsAdmin}`;
                             }
                         }
                     },

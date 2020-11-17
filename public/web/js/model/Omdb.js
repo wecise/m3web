@@ -2039,13 +2039,13 @@ class Omdb{
                 model: Object
             },
             template: `<el-container style="height:calc(100vh - 110px);">
-                            <el-header style="padding:0px;height:40%;" ref="topView">
+                            <el-header :style="'padding:0px;height:'+main.headerHeight+'%;'" ref="topView">
                                 <omdb-editor-component :id="id" :bid="id"
                                                         :model="editorModel"
                                                         showToolsBar="true"
                                                         showStatusBar="true"></omdb-editor-component>
                             </el-header>
-                            <el-main style="padding:0px;height:60%;overflow:hidden;" ref="mainView">
+                            <el-main :style="'padding:0px;height:'+main.mainHeight+'%;overflow:hidden;'" ref="mainView">
                                 <el-tabs v-model="main.activeIndex" type="border-card" closable @tab-remove="mainTabsRemove" @tab-click="mainTabsClick"  style="height:100%;">
                                     <el-tab-pane
                                         :key="item.name"
@@ -2074,7 +2074,9 @@ class Omdb{
                                 {title: '日志', name: `log`, type: 'omdb-log-console', model: []}
                             ],
                         activeIndex: 'log',
-                        splitInst: null
+                        splitInst: null,
+                        headerHeight: '40',
+                        mainHeight: '60'
                     },
                     editorModel: {
                         oldInput: "",
@@ -2111,16 +2113,12 @@ class Omdb{
             },
             methods: {
                 init(){
-                    const self = this;
+                    
+                    this.initSplit();
 
-                    /* layout */
-                    _.delay(()=>{
-                        self.layout();
-                    },1000)
+                    if(_.isEmpty(this.model.node)) return false;
 
-                    if(_.isEmpty(self.model.node)) return false;
-
-                    let colms = _.without(self.model.node.fields,"_tokens") || self.model.node.fields;
+                    let colms = _.without(this.model.node.fields,"_tokens") || this.model.node.fields;
 
                     let cls = "";
                     if(_.isEmpty(colms)){
@@ -2130,36 +2128,36 @@ class Omdb{
                     }
                     let mql = "";
 
-                    if(self.model.pattern === 'data') {
-                        mql = `SELECT\n\t ${cls} \nFROM\n\t ${self.model.node.name} limit 50`;
-                    } else if(self.model.pattern === 'select') {
-                        mql = "SELECT\n\t " + cls + "\nFROM\n\t " + self.model.node.name;
-                    } else if(self.model.pattern === 'select-edge') {
-                        mql = "SELECT\n\t " + cls + "\nFROM\n\t " + self.model.node.name.split("[")[0];
-                    } else if(self.model.pattern === 'insert') {
-                        mql = "INSERT INTO " + self.model.node.name + "\n" + _.map(self.model.node.fields, function(v){return `${v}=''`;}).join(", ") + ";";
-                    } else if(self.model.pattern === 'update') {
-                        mql = "UPDATE " + self.model.node.name + "\nSET " + _.map(self.model.node.fields,function(v){return v+"=''";}).join(",") + "\nWHERE ";
-                    } else if(self.model.pattern === 'delete') {
-                        mql = "DELETE FROM\n\t " + self.model.node.name;
-                    }  else if(self.model.pattern === 'delete-data') {
-                        mql = "DELETE FROM\n\t " + self.model.node.name + " limit -1";
-                    }  else if(self.model.pattern === 'delete-data-withversion') {
-                        mql = "DELETE FROM\n\t " + self.model.node.name + " with version";
-                    }  else if(self.model.pattern === 'delete-column-data') {
-                        mql = "DELETE column_name FROM " + self.model.node.name;
-                    }  else if(self.model.pattern === 'ddl') {
+                    if(this.model.pattern === 'data') {
+                        mql = `SELECT\n\t ${cls} \nFROM\n\t ${this.model.node.name} limit 50`;
+                    } else if(this.model.pattern === 'select') {
+                        mql = "SELECT\n\t " + cls + "\nFROM\n\t " + this.model.node.name;
+                    } else if(this.model.pattern === 'select-edge') {
+                        mql = "SELECT\n\t " + cls + "\nFROM\n\t " + this.model.node.name.split("[")[0];
+                    } else if(this.model.pattern === 'insert') {
+                        mql = "INSERT INTO " + this.model.node.name + "\n" + _.map(this.model.node.fields, function(v){return `${v}=''`;}).join(", ") + ";";
+                    } else if(this.model.pattern === 'update') {
+                        mql = "UPDATE " + this.model.node.name + "\nSET " + _.map(this.model.node.fields,function(v){return v+"=''";}).join(",") + "\nWHERE ";
+                    } else if(this.model.pattern === 'delete') {
+                        mql = "DELETE FROM\n\t " + this.model.node.name;
+                    }  else if(this.model.pattern === 'delete-data') {
+                        mql = "DELETE FROM\n\t " + this.model.node.name + " limit -1";
+                    }  else if(this.model.pattern === 'delete-data-withversion') {
+                        mql = "DELETE FROM\n\t " + this.model.node.name + " with version";
+                    }  else if(this.model.pattern === 'delete-column-data') {
+                        mql = "DELETE column_name FROM " + this.model.node.name;
+                    }  else if(this.model.pattern === 'ddl') {
 
-                        mql = "#DDL\nCREATE CLASS IF NOT EXISTS " + self.model.node.name + " (\n\t" + _.map(self.model.node.fieldsObj, function(v){ return `${v.name}  ${v.ftype}  '${v.title}'`;}).join(",\n\t") + "\n\tindexes(" + _.map(_.filter(self.model.node.fieldsObj,function(v){return v.isindex == 1;}),'name').join(",") + ")\n\tkeys(" + self.model.node.keys.join(",") + ")\n);";
+                        mql = "#DDL\nCREATE CLASS IF NOT EXISTS " + this.model.node.name + " (\n\t" + _.map(this.model.node.fieldsObj, (v)=>{ return `${v.name}  ${v.ftype}  '${v.title}'`;}).join(",\n\t") + "\n\tindexes(" + _.map(_.filter(this.model.node.fieldsObj,(v)=>{return v.isindex == 1;}),'name').join(",") + ")\n\tkeys(" + this.model.node.keys.join(",") + ")\n);";
 
-                        _.forEach(self.keys,function(v){
+                        _.forEach(this.keys,(v)=>{
 
                             if(_.includes(v,'time')) {
-                                mql += `\n\n#${_.startCase(v)}\n${v}=${moment(self.model.node[v]).format("LLL")}`;
+                                mql += `\n\n#${_.startCase(v)}\n${v}=${moment(this.model.node[v]).format("LLL")}`;
                                 return;
                             }
 
-                            let _value = self.model.node[v];
+                            let _value = this.model.node[v];
 
                             if(_value === 1){
                                 _value = true;
@@ -2178,21 +2176,21 @@ class Omdb{
                             mql += `\n\n#${_.startCase(v)}\n${v}=${_value}`.replace(/keymode/gi,"largepartition").replace(/keymethod/gi,"key");
                         })
 
-                    } else if(self.model.pattern === 'create-class') {
+                    } else if(this.model.pattern === 'create-class') {
                         let _modelName = `new_${_.now()}`
-                        mql = `CREATE CLASS IF NOT EXISTS  ${self.model.node.name}/${_modelName}(\n\tfield1\tdate\t"日期",\n\tfield2\ttimestamp\t"时间戳",\n\tfield3\tint\t     "整形值",\n\tfield4\tfloat\t"浮点值",\n\tfield5\tenum {\n\t"1000":["item1", "item1描述"],\n\t"1001":["item2", "item2描述"]}\t"枚举值",\n\tfield6\tvarchar\t"字符串",\n\tkeys(field1,field2,field3,field4,field6),\n\tindex(field1,field2,field3,field4,field6)\n)with ttl=366 day , autosearch=true , alias='${_modelName}', nickname='${_modelName}';`;
+                        mql = `CREATE CLASS IF NOT EXISTS  ${this.model.node.name}/${_modelName}(\n\tfield1\tdate\t"日期",\n\tfield2\ttimestamp\t"时间戳",\n\tfield3\tint\t     "整形值",\n\tfield4\tfloat\t"浮点值",\n\tfield5\tenum {\n\t"1000":["item1", "item1描述"],\n\t"1001":["item2", "item2描述"]}\t"枚举值",\n\tfield6\tvarchar\t"字符串",\n\tkeys(field1,field2,field3,field4,field6),\n\tindex(field1,field2,field3,field4,field6)\n)with ttl=366 day , autosearch=true , alias='${_modelName}', nickname='${_modelName}';`;
                         mql = _.replace(mql, "//", "/");
-                    } else if(self.model.pattern === 'drop-class') {
-                        mql = "DROP CLASS IF EXISTS " + self.model.node.name + ";";
-                    } else if(self.model.pattern === 'alter') {
+                    } else if(this.model.pattern === 'drop-class') {
+                        mql = "DROP CLASS IF EXISTS " + this.model.node.name + ";";
+                    } else if(this.model.pattern === 'alter') {
                         mql = `#设置类属性`;
 
-                        let _keys = _.remove(self.keys, function(v){
+                        let _keys = _.remove(this.keys, (v)=>{
                             return !_.includes(['cid','pid','fields','keys','mtime','fieldsObj','child', 'loption', 'subclass','vtimebase','tags', 'name'],v)
                         })
 
-                        _.forEach(_keys,function(v){
-                            let _value = self.model.node[v];
+                        _.forEach(_keys,(v)=>{
+                            let _value = this.model.node[v];
 
                             if(_value === 1){
                                 _value = true;
@@ -2209,79 +2207,77 @@ class Omdb{
                             }
 
                             if(_.includes(['alias','keymethod','remedy'],v)){
-                                mql += `\n\n#${_.startCase(v)}\nALTER CLASS ${self.model.node.name} SET ${v}='${_value}';`.replace(/keymode/gi,"largepartition").replace(/keymethod/gi,"key");
+                                mql += `\n\n#${_.startCase(v)}\nALTER CLASS ${this.model.node.name} SET ${v}='${_value}';`.replace(/keymode/gi,"largepartition").replace(/keymethod/gi,"key");
                             } else {
-                                mql += `\n\n#${_.startCase(v)}\nALTER CLASS ${self.model.node.name} SET ${v}=${_value};`.replace(/keymode/gi,"largepartition").replace(/keymethod/gi,"key");
+                                mql += `\n\n#${_.startCase(v)}\nALTER CLASS ${this.model.node.name} SET ${v}=${_value};`.replace(/keymode/gi,"largepartition").replace(/keymethod/gi,"key");
                             }
                         })
-                    } else if(self.model.pattern === 'alter-add-column') {
-                        mql = "ALTER CLASS " + self.model.node.name + " ADD COLUMN column_name type;\n\n";
-                    } else if(self.model.pattern === 'alter-drop-column') {
-                        mql = "ALTER CLASS " + self.model.node.name + " DROP COLUMN column_name;\n\n";
-                    } else if(self.model.pattern === 'alter-add-index') {
-                        mql = "ALTER CLASS " + self.model.node.name + " ADD INDEX index_name type;\n\n";
-                    } else if(self.model.pattern === 'alter-drop-index') {
-                        mql = "ALTER CLASS " + self.model.node.name + " DROP INDEX index_name type;\n\n";
-                    } else if(self.model.pattern === 'alter-add-key') {
-                        mql = "ALTER CLASS " + self.model.node.name + " ADD KEY key_name;\n\n";
-                    } else if(self.model.pattern === 'alter-drop-key') {
-                        mql = "ALTER CLASS " + self.model.node.name + " DROP KEY key_name;\n\n";
-                    } else if(self.model.pattern === 'g') { 
-                        mql = `g.V(" ").In("${self.model.node.name}").All();`;
-                    } else if(self.model.pattern === 'create-edge-type') { 
+                    } else if(this.model.pattern === 'alter-add-column') {
+                        mql = "ALTER CLASS " + this.model.node.name + " ADD COLUMN column_name type;\n\n";
+                    } else if(this.model.pattern === 'alter-drop-column') {
+                        mql = "ALTER CLASS " + this.model.node.name + " DROP COLUMN column_name;\n\n";
+                    } else if(this.model.pattern === 'alter-add-index') {
+                        mql = "ALTER CLASS " + this.model.node.name + " ADD INDEX index_name type;\n\n";
+                    } else if(this.model.pattern === 'alter-drop-index') {
+                        mql = "ALTER CLASS " + this.model.node.name + " DROP INDEX index_name type;\n\n";
+                    } else if(this.model.pattern === 'alter-add-key') {
+                        mql = "ALTER CLASS " + this.model.node.name + " ADD KEY key_name;\n\n";
+                    } else if(this.model.pattern === 'alter-drop-key') {
+                        mql = "ALTER CLASS " + this.model.node.name + " DROP KEY key_name;\n\n";
+                    } else if(this.model.pattern === 'g') { 
+                        mql = `g.V(" ").In("${this.model.node.name}").All();`;
+                    } else if(this.model.pattern === 'create-edge-type') { 
                         mql = `CREATE EDGE TYPE IF NOT EXISTS type_name 'type_remedy';`;
-                    } else if(self.model.pattern === 'drop-all-edge-type') { 
+                    } else if(this.model.pattern === 'drop-all-edge-type') { 
                         
                         omdbHandler.fetchDataByMqlAsync('select edge type').then( (rtn)=>{
                             
                             if(_.isEmpty(rtn.message)){
-                                self.editorModel.newInput = "";
+                                this.editorModel.newInput = "";
                             }
                             
-                            self.editorModel.newInput =  _.map(_.sortBy(rtn.message,'name'), (v)=>{
+                            this.editorModel.newInput =  _.map(_.sortBy(rtn.message,'name'), (v)=>{
                                                             return `DROP EDGE TYPE ${v.name}`;
                                                         }).join(";\r");
                         } );
                         
-                    } else if(self.model.pattern === 'drop-edge-type') {  // edge drop edge type
-                        mql = `DROP EDGE TYPE ${self.model.node.name};`;
-                    } else if(self.model.pattern === 'edge-insert') {  // edge  create
-                        mql = `INSERT INTO class_name id="",${self.model.node.name}=[""];`;
-                    } else if(self.model.pattern === 'edge-update') {  // edge  update
-                        mql = `UPDATE class_name SET ${self.model.node.name}='' WHERE ID='';`;
-                    } else if(self.model.pattern === 'edge-g') {  // edge query all
+                    } else if(this.model.pattern === 'drop-edge-type') {  // edge drop edge type
+                        mql = `DROP EDGE TYPE ${this.model.node.name};`;
+                    } else if(this.model.pattern === 'edge-insert') {  // edge  create
+                        mql = `INSERT INTO class_name id="",${this.model.node.name}=[""];`;
+                    } else if(this.model.pattern === 'edge-update') {  // edge  update
+                        mql = `UPDATE class_name SET ${this.model.node.name}='' WHERE ID='';`;
+                    } else if(this.model.pattern === 'edge-g') {  // edge query all
                         mql = GLOBAL_CONFIG.global.gremlin;
                     }
 
-                    self.editorModel.newInput = mql;
+                    this.editorModel.newInput = mql;
                 },
                 initKeys(){
                     let rtn = omdbHandler.classList(-1)[0];
                     this.keys = _.sortBy(_.keys(rtn));
                 },
-                layout(){
-                    
-                    let sizes = [40,60];
+                initSplit(){
                     
                     this.main.splitInst = Split([this.$refs.topView.$el, this.$refs.mainView.$el], {
-                        sizes: sizes,
+                        sizes: [40,60],
                         minSize: [0, 0],
                         gutterSize: 5,
                         cursor: 'col-resize',
                         direction: 'vertical',
-                        onDragEnd:function(sz) {
-                            localStorage.setItem(`OMDB-SPLIT-SIZES-${_.upperCase(self.id)}`,sz);
+                        onDragEnd:(sizes)=> {
+                            this.main.headerHeight = sizes[0];
+                            this.main.mainHeight = sizes[1];
                         }
                     });
                 },
                 logAppend(level,list){
-                    const self = this;
                     
-                    let log = _.find(self.main.tabs,{name:'log'});
+                    let log = _.find(this.main.tabs,{name:'log'});
                     
                     if(_.isEmpty(log)){
-                        self.main.tabs.push({title: '日志', name: `log`, type: 'omdb-log-console', model: []});
-                        log = _.find(self.main.tabs,{name:'log'});   
+                        this.main.tabs.push({title: '日志', name: `log`, type: 'omdb-log-console', model: []});
+                        log = _.find(this.main.tabs,{name:'log'});   
                     }
                     
                     log.model.push({level:level,msg:list});

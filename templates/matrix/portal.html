@@ -28,11 +28,11 @@
 <style>
 
     body {
-        overflow: hidden;
+        overflow: auto;
     }
 
     #content.content {
-		padding: 5px 5px 0px 5px!important;
+		padding: 10px 10px 10px 10px!important;
 		margin-left:0!important;
 	}
 
@@ -62,12 +62,12 @@
     VueLoader.onloaded(["portal-view"],function() {
 
         $(function() {
-
+            moment.locale(window.MATRIX_LANG);
             new Vue({
                 delimiters: ['${', '}'],
                 template:  '<portal-view :title="title"></portal-view>',
                 data: {
-                    title: "我的门户"
+                    title: `今天是 ${moment().format("LLLL")}，欢迎回来。`
                 }
             }).$mount("#app");
 

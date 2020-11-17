@@ -43,7 +43,7 @@ class Pipe {
                                         <el-table
                                             :data="dt.rows" style="width: 100%" height="250">
                                             <el-table-column prop="vtime" label="时间" width="150"></el-table-column>
-                                            <el-table-column prop="msg" label="摘要" width="120"></el-table-column>
+                                            <el-table-column prop="msg" label="摘要"></el-table-column>
                                             <el-table-column prop="severity" label="级别" width="120"></el-table-column>
                                         </el-table>
                                     </el-main>
@@ -68,7 +68,7 @@ class Pipe {
                                         <el-table
                                             :data="dt.rows" style="width: 100%" height="250">
                                             <el-table-column prop="vtime" label="时间" width="150"></el-table-column>
-                                            <el-table-column prop="msg" label="摘要" width="120"></el-table-column>
+                                            <el-table-column prop="msg" label="摘要"></el-table-column>
                                             <el-table-column prop="severity" label="级别" width="120"></el-table-column>
                                         </el-table>
                                     </el-main>
@@ -85,6 +85,11 @@ class Pipe {
                         return {
                             editor: null,
                             config: null,
+                            layout: {
+                                default: "tree_horizontal",
+                                inst: null,
+                                edgeStyle: 4
+                            },
                             control: {
                                 split: null,
                                 log: {
@@ -92,11 +97,19 @@ class Pipe {
                                 },
                                 monitor: {
                                     show: false
-                                } 
+                                },
+                                outline: {
+                                    show: false
+                                }
                             },
                             console: {
                                 tabs: [],
                                 activeName: "log"
+                            },
+                            dialog:{
+                                cellSetup: {
+                                    show: false
+                                }
                             }
                         }
                     },
@@ -107,72 +120,151 @@ class Pipe {
                                                 编辑 <i class="el-icon-arrow-down el-icon--right"></i>
                                             </el-button>
                                             <el-dropdown-menu slot="dropdown">
-                                            <el-dropdown-item>日志</el-dropdown-item>
-                                            <el-dropdown-item divided>REST</el-dropdown-item>
-                                            <el-dropdown-item divided>文件</el-dropdown-item>
-                                            <el-dropdown-item disabled divided>数据库</el-dropdown-item>
+                                            <el-dropdown-item @click.native="onSave">保存</el-dropdown-item>
+                                            <el-dropdown-item @click.native="onSave">另存为</el-dropdown-item>
+                                            <el-dropdown-item  @click.native="onDeleate" divided>删除</el-dropdown-item>
+                                            <el-dropdown-item  @click.native="onClose" divided>关闭</el-dropdown-item>
                                             </el-dropdown-menu>
                                         </el-dropdown>
                                         <el-divider direction="vertical"></el-divider>
-                                        <el-dropdown v-if="config">
-                                            <el-button type="text" icon="el-dropdown-link">
-                                                数据源<i class="el-icon-arrow-down el-icon--right"></i>
-                                            </el-button>
-                                            <el-dropdown-menu slot="dropdown">
-                                                <el-dropdown-item :key="item.id" v-for="(item,idx) in config['source']" :divided="idx>0?true:false" 
-                                                    @click.native="onInitLogSourceBar(item)">
-                                                    #{item.fileContent.title}#
-                                                </el-dropdown-item>
-                                            </el-dropdown-menu>
-                                        </el-dropdown>
+                                        <el-tooltip content="数据源" open-delay="800" placement="top">
+                                            <el-popover
+                                                title="选择数据源"
+                                                placement="right-start"
+                                                trigger="click"
+                                                :popper-options="{ boundariesElement: 'body', gpuAcceleration: false }"
+                                                @show="onSideBarShow(config['source'],'sourceBar')"
+                                                popper-class="info-popper"
+                                                style="width:auto;">
+                                                <el-container style="height:12em;">
+                                                    <el-main style="display:flex;" ref="sourceBar">
+                                                        
+                                                    </el-main>
+                                                </el-container>
+                                                <el-button slot="reference" type="text">数据源</el-button>
+                                            </el-popover>
+                                        </el-tooltip>
                                         <el-divider direction="vertical"></el-divider>
-                                        <el-dropdown v-if="config">
-                                            <el-button type="text" icon="el-dropdown-link">
-                                                处理规则<i class="el-icon-arrow-down el-icon--right"></i>
-                                            </el-button>
-                                            <el-dropdown-menu slot="dropdown">
-                                            <el-dropdown-item>日志</el-dropdown-item>
-                                            <el-dropdown-item divided>REST</el-dropdown-item>
-                                            <el-dropdown-item divided>文件</el-dropdown-item>
-                                            <el-dropdown-item disabled divided>数据库</el-dropdown-item>
-                                            </el-dropdown-menu>
-                                        </el-dropdown>
+                                        <el-tooltip content="数据转换" open-delay="800" placement="top">
+                                            <el-popover
+                                                title="选择数据转换"
+                                                placement="right-start"
+                                                width="400"
+                                                trigger="click"
+                                                :popper-options="{ boundariesElement: 'body', gpuAcceleration: false }"
+                                                @show="onSideBarShow(config['covert'],'covertBar')"
+                                                popper-class="info-popper">
+                                                <el-container>
+                                                    <el-main ref="covertBar">
+                                                        
+                                                    </el-main>
+                                                </el-container>
+                                                <el-button slot="reference" type="text">数据转换</el-button>
+                                            </el-popover>
+                                        </el-tooltip>
                                         <el-divider direction="vertical"></el-divider>
-                                        <el-dropdown v-if="config">
-                                            <el-button type="text" icon="el-dropdown-link">
-                                                导出规则<i class="el-icon-arrow-down el-icon--right"></i>
-                                            </el-button>
-                                            <el-dropdown-menu slot="dropdown">
-                                            <el-dropdown-item>日志</el-dropdown-item>
-                                            <el-dropdown-item divided>REST</el-dropdown-item>
-                                            <el-dropdown-item divided>文件</el-dropdown-item>
-                                            <el-dropdown-item disabled divided>数据库</el-dropdown-item>
-                                            </el-dropdown-menu>
-                                        </el-dropdown>
+                                        <el-tooltip content="数据操作" open-delay="800" placement="top">
+                                            <el-popover
+                                                title="选择数据操作"
+                                                placement="right-start"
+                                                width="400"
+                                                trigger="click"
+                                                :popper-options="{ boundariesElement: 'body', gpuAcceleration: false }"
+                                                @show="onSideBarShow(config['operate'],'operateBar')"
+                                                popper-class="info-popper">
+                                                <el-container>
+                                                    <el-main ref="operateBar">
+                                                        
+                                                    </el-main>
+                                                </el-container>
+                                                <el-button slot="reference" type="text">数据操作</el-button>
+                                            </el-popover>
+                                        </el-tooltip>
+                                        <el-divider direction="vertical"></el-divider>
+                                        <el-tooltip content="定时器" open-delay="800" placement="top">
+                                            <el-popover
+                                                title="选择定时器"
+                                                placement="right-start"
+                                                width="400"
+                                                trigger="click"
+                                                :popper-options="{ boundariesElement: 'body', gpuAcceleration: false }"
+                                                @show="onSideBarShow(config['cron'],'cronBar')"
+                                                popper-class="info-popper">
+                                                <el-container>
+                                                    <el-main ref="cronBar">
+                                                        
+                                                    </el-main>
+                                                </el-container>
+                                                <el-button slot="reference" type="text">定时器</el-button>
+                                            </el-popover>
+                                        </el-tooltip>
                                         <el-divider direction="vertical"></el-divider>
                                         <el-dropdown>
                                             <el-button type="text" icon="el-dropdown-link">
                                                 视图 <i class="el-icon-arrow-down el-icon--right"></i>
                                             </el-button>
                                             <el-dropdown-menu slot="dropdown">
-                                            <el-dropdown-item @click.native="control.log.show = !control.log.show">日志</el-dropdown-item>
-                                            <el-dropdown-item @click.native="control.monitor.show = !control.monitor.show"divided>监控</el-dropdown-item>
+                                            <el-dropdown-item @click.native="onToggleView('log')">日志</el-dropdown-item>
+                                            <el-dropdown-item @click.native="onToggleView('monitor')" divided>监控</el-dropdown-item>
+                                            <el-dropdown-item @click.native="onToggleView('outline')" divided>预览</el-dropdown-item>
                                             </el-dropdown-menu>
                                         </el-dropdown>
-                                        <div style="overflow:hidden;width:100%;height: auto;padding: 20px;" ref="sidebar"></div>
+                                        
+                                        <div ref="toolbar">
+                                            
+                                            <el-tooltip content="保存" open-delay="800" placement="top">
+                                                <el-button type="text" @click="onSave">
+                                                    <span class="far fa-save" style="font-size:14px;"><span>
+                                                </el-button>
+                                            </el-tooltip>
+                                            
+                                            <el-tooltip content="放大" open-delay="800" placement="top">
+                                                <el-button type="text"  @click="onZoomIn">
+                                                    <i class="el-icon-zoom-in" style="font-size:14px;">
+                                                </el-button>
+                                            </el-tooltip>
+                                            
+                                            <el-tooltip content="缩小" open-delay="800" placement="top">
+                                                <el-button type="text"  @click="onZoomOut">
+                                                    <i class="el-icon-zoom-out" style="font-size:14px;">
+                                                </el-button>
+                                            </el-tooltip>
+                                            
+                                            <el-tooltip content="自适应大小"" open-delay="800" placement="top">
+                                                <el-button type="text"  @click="onFit">
+                                                    <i class="el-icon-rank" style="font-size:14px;">
+                                                </el-button>
+                                            </el-tooltip>
+
+                                            <el-tooltip content="收起所有" open-delay="800" placement="top">
+                                                <el-button type="text" @click="editor.execute('collapseAll')">
+                                                    <i class="el-icon-menu" style="font-size:14px;">
+                                                </el-button>
+                                            </el-tooltip>
+                                            
+                                            <el-tooltip content="展开所有" open-delay="800" placement="top">
+                                                <el-button type="text" @click="editor.execute('expandAll')">
+                                                    <i class="el-icon-s-grid" style="font-size:14px;">
+                                                </el-button>
+                                            </el-tooltip>
+                                            
+                                            <el-tooltip content="执行" open-delay="800" placement="top">
+                                                <el-button type="text" @click="onExecute">
+                                                    <span class="el-icon-caret-right" style="font-size:14px;color:#8BC34A;"></span>
+                                                </el-button>
+                                            </el-tooltip>
+                                        </div>
+
                                     </el-header>
-                                    <el-main style="border:1px solid #dddddd;padding:0px;">
-                                        <el-container style="width:100%;height:100%;position: relative;" ref="container">
-                                            <el-header style="height:35px;line-height: 35px;padding:0px;position: relative;display:none;">
-                                                
-                                            </el-header>
-                                            <el-main :id="model.id" ref="graphContainer" 
-                                                style="width:100vw;height:100vh;min-width:100vw;position:releative;overflow:hidden;padding:0px;">
-                                            </el-main>
-                                        </el-container>
+                                    <el-main :id="model.id" ref="graphContainer" 
+                                        style="width:100vw;height:100vh;min-width:100vw;position:releative;overflow:hidden;padding:0px;">
                                     </el-main>
+                                    <div ref="outlineContainer"
+                                        style="position:absolute;overflow:hidden;top:20px;right:20px;width:200px;height:140px;background:transparent;box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);"
+                                        v-show="control.outline.show">
+                                    </div>
                                     <el-footer v-if="control.log.show || control.monitor.show" style="height: 200px;padding: 0px;">
-                                        <el-tabs v-model="console.activeName" closable @tab-remove="onRemoveConsoleTab">
+                                        <el-tabs v-model="console.activeName" closable @tab-remove="onRemoveConsoleTab" type="border-card">
                                             <el-tab-pane label="日志" name="log" v-if="control.log.show">
                                                 <log-console></log-console>
                                             </el-tab-pane>
@@ -181,31 +273,41 @@ class Pipe {
                                             </el-tab-pane>
                                         </el-tabs>
                                     </el-footer>
+                                    <el-dialog title="属性" :visible.sync="dialog.cellSetup.show" v-if="dialog.cellSetup.show" width="40vw">
+                                        <el-container style="width:100%;height:100%">
+                                            <el-main style="padding:0px;overflow:hidden;">
+                                                <div v-html="dialog.cellSetup.content"></div>
+                                            </el-main>
+                                        </el-container>
+                                    </el-dialog>
                                 </el-container>`,
                     created(){
                         // 初始化配置
                         this.onInitConfig();
                     },
                     mounted(){
+                        
                         // 初始化画布
-                        this.init();
+                        let container = this.$refs.graphContainer.$el;
+                        let outline = this.$refs.outlineContainer.$el;
+                        this.init(container,outline);
+
+                        // 初始化滚轮图缩放事件监听
+                        //this.addScrollListener(container, this.wheelHandle);
                     },
                     methods:{
                         // 初始化图容器
-                        init() {
+                        init(container, outline) {
                             
                             if (!mxClient.isBrowserSupported()){
                                 mxUtils.error('Browser is not supported!', 200, false);
                             } else {
                                 
-                                let container = document.getElementById(this.$refs.graphContainer.$el.id);
-                                let sidebar = document.getElementById(this.$refs.sidebar);
-                                
                                 // Workaround for Internet Explorer ignoring certain CSS directives
                                 if (mxClient.IS_QUIRKS) {
                                     document.body.style.overflow = 'hidden';
                                     new mxDivResizer(container);
-                                    new mxDivResizer(sidebar);
+                                    new mxDivResizer(outline);
                                 }
 
                                 // 初始化Graph
@@ -213,8 +315,30 @@ class Pipe {
                                 var graph = this.editor.graph;
                                 var model = graph.getModel();
 
+                                // Disables some global features
+                                graph.setConnectable(true);
+                                graph.setCellsDisconnectable(false);
+                                graph.setCellsCloneable(false);
+                                graph.swimlaneNesting = false;
+                                graph.dropEnabled = true;
+                                // 容器大小自适应 
+                                graph.setResizeContainer(false);
+
+
+                                // Clones the source if new connection has no target
+                                graph.connectionHandler.setCreateTarget(true);
+                                
+                                // Forces use of default edge in mxConnectionHandler
+                                graph.connectionHandler.factoryMethod = null;
+
+                                // Only tables are resizable
+                                graph.isCellResizable = function(cell) {
+                                    return this.isSwimlane(cell);
+                                };
+                                
+                                
                                 // Disable highlight of cells when dragging from toolbar
-                                graph.setDropEnabled(false);
+                                graph.setDropEnabled(true);
 
                                 // Uses the port icon while connections are previewed
                                 graph.connectionHandler.getConnectImage = function(state)
@@ -299,13 +423,367 @@ class Pipe {
                                 // Enables new connections
                                 graph.setConnectable(true);
 
+                                // 首先禁用浏览器右键菜单
+                                mxEvent.disableContextMenu(this.$el);
+                                // 右键菜单
+                                graph.popupMenuHandler.factoryMethod = (menu, cell, evt)=>{
+                                    this.createPopupMenu(this.editor, graph, menu, cell, evt);
+                                };
+
                                 // 鼠标框选
                                 new mxRubberband(graph);
-                                
+
                                 // Adds all required styles to the graph (see below)
-				                this.configureStylesheet(graph);
+                                this.configureStylesheet(graph);
+
+                                // Defines Delete action
+                                this.editor.addAction('deleteAll',(editor,cell)=>{
+                                    this.onDeleteAllCells(true);
+                                })
+                                
+                                // 图事件绑定
+                                this.initGraphEvent(graph);
+
+                                // 加载图内容
+                                this.initGraph(graph);
+
                             }
                         },
+                        // 图事件绑定
+                        initGraphEvent(graph){
+                            // 事件ADD_CELLS
+                            graph.addListener(mxEvent.ADD_CELLS, (sender, evt)=> {
+                                    
+                                let parent = evt.getProperty("parent");
+                    
+                                if (parent != null) {
+                                    console.log(parent.getId())
+                                }
+
+                                evt.consume();
+                            });
+
+                            // 节点双节事件
+                            graph.dblClick = (evt, cell)=> {
+                                // Do not fire a DOUBLE_CLICK event here as mxEditor will
+                                // consume the event and start the in-place editor.
+                                console.log(cell, this)
+                                if (!mxEvent.isConsumed(evt) && cell != null) {
+                                    
+                                    this.dialog.cellSetup.show = true;
+                                    this.dialog.cellSetup.content = graph.convertValueToString(cell);
+
+                                }
+                                // Disables any default behaviour for the double click
+                                mxEvent.consume(evt);
+                            };
+
+                        },
+                        // 加载画布内容
+                        initGraph(graph){
+                            let term = encodeURIComponent(JSON.stringify( this.model ));
+
+                            fsHandler.callFsJScriptAsync("/matrix/pipe/getPipeContentByName.js", term).then( (rtn)=>{
+                                let doc = mxUtils.parseXml(rtn.message);
+                                let codec = new mxCodec(doc);
+                                codec.decode(doc.documentElement, graph.getModel());
+                            } )
+                        
+                        },
+                        // 初始化菜单项目
+                        onInitConfig(){
+                            fsHandler.callFsJScriptAsync("/matrix/pipe/getConfigList.js").then( (rtn)=>{
+                                this.config = rtn.message;
+                            } );
+                        },
+                        // 初始化滚轮图缩放
+                        addScrollListener(element, wheelHandle) {
+                            if (typeof element != 'object') return;
+                            if (typeof wheelHandle != 'function') return;
+            
+                            // 监测浏览器
+                            if (typeof arguments.callee.browser == 'undefined') {
+                                var user = navigator.userAgent;
+                                var b = {};
+                                b.opera = user.indexOf("Opera") > -1 && typeof window.opera == "object";
+                                b.khtml = (user.indexOf("KHTML") > -1 || user.indexOf("AppleWebKit") > -1 || user.indexOf("Konqueror") > -1) && !b.opera;
+                                b.ie = user.indexOf("MSIE") > -1 && !b.opera;
+                                b.gecko = user.indexOf("Gecko") > -1 && !b.khtml;
+                                arguments.callee.browser = b;
+                            }
+                            if (element == window)
+                                element = document;
+                            if (arguments.callee.browser.ie)
+                                element.attachEvent('onmousewheel', wheelHandle);
+                            else
+                                element.addEventListener(arguments.callee.browser.gecko ? 'DOMMouseScroll' : 'mousewheel', wheelHandle, false);
+                        },
+                        // 初始化滚轮图缩放
+                        wheelHandle(e) {
+                            var upcheck;
+            
+                            if (e.wheelDelta) {
+                                upcheck = e.wheelDelta > 0 ? 1 : 0;
+                            } else {
+                                upcheck = e.detail < 0 ? 1 : 0;
+                            }
+                            if (upcheck) {
+                                this.editor.graph.zoomIn();
+                            }
+                            else {
+                                this.editor.graph.zoomOut();
+                            }
+            
+                            if (window.event) {
+                                e.returnValue = false;
+                                window.event.cancelBubble = true;
+                            } else {
+                                e.preventDefault();
+                                e.stopPropagation();
+                            }
+                        },
+                        // 图视图切换  日志、监控、预览
+                        onToggleView(view){
+                            
+                            if(view == 'outline'){
+
+                                this.control.outline.show = !this.control.outline.show;
+
+                                if(this.control.outline.show){
+                                    new mxOutline(this.editor.graph, this.$refs.outlineContainer);
+                                }
+
+                            } else {
+                                this.control[view].show = !this.control[view].show;
+                                this.console.activeName = view;
+                            }
+                        },
+                        // 右键菜单
+                        createPopupMenu(editor, graph, menu, cell, evt) {
+                            if (cell != null) {
+
+                                menu.addItem('删除', null, function(){
+                                    editor.execute('delete', cell);
+                                });
+                                menu.addSeparator();
+                            }
+
+                            menu.addItem('撤销', null, function(){
+                                editor.execute('undo', cell);
+                            });
+                            
+                            menu.addItem('重做', null, function(){
+                                editor.execute('redo', cell);
+                            });
+
+                            menu.addSeparator();
+
+                            menu.addItem('清空', null, function(){
+                                editor.execute('deleteAll');
+                            });
+                            
+                            menu.addSeparator();
+                                 
+                            var submenuLayout = menu.addItem('布局', null, null);
+
+                            var submenuLayoutHierarchical = menu.addItem('分层布局', null, null,submenuLayout);
+                            menu.addItem('上下', null, ()=>{
+                                this.layout.default = 'hierarchical_vertical';
+                                this.executeLayout();
+                            }, submenuLayoutHierarchical);
+                            menu.addItem('左右', null, ()=>{
+                                this.layout.default = 'hierarchical_horizontal';
+                                this.executeLayout();
+                            }, submenuLayoutHierarchical);
+            
+                            
+                            var submenuLayoutTree = menu.addItem('树形布局', null, null,submenuLayout);
+
+                            menu.addItem('上下', null, ()=>{
+                                this.layout.default = 'tree_vertical';
+                                this.executeLayout();
+                            }, submenuLayoutTree);
+                            menu.addItem('左右', null, ()=>{
+                                this.layout.default = 'tree_horizontal';
+                                this.executeLayout();
+                            }, submenuLayoutTree);
+
+                            menu.addItem('随机布局', null, ()=>{
+                                this.layout.default = 'organic';
+                                this.executeLayout();
+                            }, submenuLayout);
+                            menu.addItem('圆形布局', null, ()=>{
+                                this.layout.default = 'circle';
+                                this.executeLayout();
+                            }, submenuLayout);
+                        },
+                        // 图布局
+                        executeLayout(){
+                            let graph = this.editor.graph;
+                            let parent = graph.getDefaultParent();
+                            let layout = this.layout;
+                            
+                            // 布局定义
+                            if(layout.default === 'hierarchical_vertical'){
+                                // Layout hierarchical
+                                graph.getModel().beginUpdate();
+                                try {
+                                    layout.inst = new mxHierarchicalLayout(graph, mxConstants.DIRECTION_NORTH);
+                                    layout.inst.edgeStyle = layout.edgeStyle;
+                                    layout.inst.intraCellSpacing = 80;
+                                    layout.inst.interRankCellSpacing = 80;
+                                    
+                                    var selectionCells = graph.getSelectionCells();
+                                    layout.inst.execute(parent, null);//selectionCells.length == 0 ? null : selectionCells);
+            
+                                } catch (e) {
+                                    throw e;
+                                } finally {
+                                    var morph = new mxMorphing(graph);  
+                                    morph.addListener(mxEvent.DONE, function(){  
+                                        graph.getModel().endUpdate();  
+                                    });  
+                                        
+                                    morph.startAnimation();  
+                                }
+                                
+                            } else if(layout.default === 'hierarchical_horizontal'){
+                                // Layout hierarchical
+                                graph.getModel().beginUpdate();
+                                try {
+                                    layout.inst = new mxHierarchicalLayout(graph, mxConstants.DIRECTION_WEST);
+                                    layout.inst.edgeStyle = layout.edgeStyle;
+                                    layout.inst.intraCellSpacing = 80;
+                                    layout.inst.interRankCellSpacing = 80;
+                                    
+                                    var selectionCells = graph.getSelectionCells();
+                                    layout.inst.execute(parent, null);// selectionCells.length == 0 ? null : selectionCells);
+                                } catch (e) {
+                                    throw e;
+                                } finally {
+                                    var morph = new mxMorphing(graph);  
+                                    morph.addListener(mxEvent.DONE, function(){  
+                                        graph.getModel().endUpdate();  
+                                    });  
+                                        
+                                    morph.startAnimation();  
+                                }
+                                
+                            } else if(layout.default === 'organic'){
+                                // Layout Organic
+                                graph.getModel().beginUpdate();
+                                try {
+                                    layout.inst = new mxFastOrganicLayout(graph);
+                                    layout.inst.forceConstant = 140;
+                                    //layout.inst.execute(parent);
+            
+                                    var selectionCells = graph.getSelectionCells();
+                                    layout.inst.execute(parent,null);// selectionCells.length == 0 ? null : selectionCells);
+                                } catch (e) {
+                                    throw e;
+                                } finally {
+                                    graph.getModel().endUpdate();
+                                }
+                                
+                            } else if(layout.default === 'tree_vertical'){
+                                /* Layout tree vertical */
+                                graph.getModel().beginUpdate();
+                                try {
+                                    var tmp = graph.getSelectionCell();
+                                    var roots = null;
+                                    var cells = [tmp];
+                                    
+                                    if ( tmp == null || graph.getModel().getChildCount(tmp) == 0 ) {
+                                        if (graph.getModel().getEdgeCount(tmp) == 0){
+                                            roots = graph.findTreeRoots(parent);
+                                        }
+                                    } else {
+                                        roots = graph.findTreeRoots(tmp);
+                                    }
+            
+                                    if ( roots != null && roots.length > 0 ) {
+                                        cells = roots;
+                                    }
+                                    
+                                    if( cells.length > 0 ) {
+                                        _.forEach(cells,(v)=>{
+                                            layout.inst = new mxCompactTreeLayout(graph, false);
+                                            layout.inst.edgeRouting = false;
+                                            layout.inst.levelDistance = 30;
+                                            layout.inst.execute(parent, v);
+                                        })
+                                    }
+            
+                                } catch (e) {
+                                    throw e;
+                                } finally {
+                                    var morph = new mxMorphing(graph);  
+                                    morph.addListener(mxEvent.DONE, function(){  
+                                        graph.getModel().endUpdate();  
+                                    });  
+                                        
+                                    morph.startAnimation();  
+                                }
+                            } else if(layout.default === 'tree_horizontal'){
+                                /* Layout tree horizontal */
+                                graph.getModel().beginUpdate();
+                                try {
+                                    var tmp = graph.getSelectionCell();
+                                    var roots = null;
+                                    var cells = [tmp];
+                                    
+                                    if (tmp == null || graph.getModel().getChildCount(tmp) == 0){
+                                        if (graph.getModel().getEdgeCount(tmp) == 0){
+                                            roots = graph.findTreeRoots(parent);
+                                        }
+                                    } else {
+                                        roots = graph.findTreeRoots(tmp);
+                                    }
+            
+                                    if (roots != null && roots.length > 0){
+                                        cells = roots;
+                                    }
+                                    
+                                    if( cells.length > 0 ) {
+                                        _.forEach(cells,(v)=>{
+                                            layout.inst = new mxCompactTreeLayout(graph, true);
+                                            layout.inst.edgeRouting = false;
+                                            layout.inst.levelDistance = 30;
+                                            layout.inst.execute(parent, v);
+                                        })
+                                    }
+                                    
+                                } catch (e) {
+                                    throw e;
+                                } finally {
+                                    var morph = new mxMorphing(graph);  
+                                    morph.addListener(mxEvent.DONE, function(){  
+                                        graph.getModel().endUpdate();  
+                                    });  
+                                        
+                                    morph.startAnimation();  
+                                }
+                            } else {
+                                /* Layout Circle */
+                                graph.getModel().beginUpdate();
+                                try {
+                                    layout.inst = new mxCircleLayout(graph);
+                                    //layout.inst.execute(parent);
+                                    var selectionCells = graph.getSelectionCells();
+                                    layout.inst.execute(parent, null);//selectionCells.length == 0 ? null : selectionCells);
+                                } catch (e) {
+                                    throw e;
+                                } finally {
+                                    graph.getModel().endUpdate();
+                                }
+                            }
+                            
+                            // 缓存最后一次布局
+                            localStorage.setItem("PIPE-GRAPH-LAYOUT",layout.default);
+            
+                            
+                        },            
+                        // 图节点样式
                         configureStylesheet(graph){
                             var style = new Object();
                             style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_RECTANGLE;
@@ -323,29 +801,6 @@ class Pipe {
                             style[mxConstants.STYLE_IMAGE_WIDTH] = '48';
                             style[mxConstants.STYLE_IMAGE_HEIGHT] = '48';
                             graph.getStylesheet().putDefaultVertexStyle(style);
-
-                            // NOTE: Alternative vertex style for non-HTML labels should be as
-                            // follows. This repaces the above style for HTML labels.
-                            /*var style = new Object();
-                            style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_LABEL;
-                            style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
-                            style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_TOP;
-                            style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
-                            style[mxConstants.STYLE_IMAGE_ALIGN] = mxConstants.ALIGN_CENTER;
-                            style[mxConstants.STYLE_IMAGE_VERTICAL_ALIGN] = mxConstants.ALIGN_TOP;
-                            style[mxConstants.STYLE_SPACING_TOP] = '56';
-                            style[mxConstants.STYLE_GRADIENTCOLOR] = '#7d85df';
-                            style[mxConstants.STYLE_STROKECOLOR] = '#5d65df';
-                            style[mxConstants.STYLE_FILLCOLOR] = '#adc5ff';
-                            style[mxConstants.STYLE_FONTCOLOR] = '#1d258f';
-                            style[mxConstants.STYLE_FONTFAMILY] = 'Verdana';
-                            style[mxConstants.STYLE_FONTSIZE] = '12';
-                            style[mxConstants.STYLE_FONTSTYLE] = '1';
-                            style[mxConstants.STYLE_ROUNDED] = '1';
-                            style[mxConstants.STYLE_IMAGE_WIDTH] = '48';
-                            style[mxConstants.STYLE_IMAGE_HEIGHT] = '48';
-                            style[mxConstants.STYLE_OPACITY] = '80';
-                            graph.getStylesheet().putDefaultVertexStyle(style);*/
 
                             style = new Object();
                             style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_SWIMLANE;
@@ -382,47 +837,29 @@ class Pipe {
                             style[mxConstants.STYLE_ROUNDED] = true;
                             style[mxConstants.STYLE_EDGE] = mxEdgeStyle.EntityRelation;
                         },
-                        // 初始化画布
-                        initGraph(editor,graph){
-                            
-                            graph.getModel().beginUpdate();
-                            
-                            try{
-                                let parent = graph.getDefaultParent();
-                                let v1 = graph.insertVertex(parent, null, 'Hello,', 20, 20, 80, 30);
-                                let v2 = graph.insertVertex(parent, null, 'World!', 200, 150, 80, 30);
-                                let e1 = graph.insertEdge(parent, null, '', v1, v2);
-                                
-                            }
-                            finally {
-                                graph.getModel().endUpdate();    
-
-                            }
-                        },
-                        // 初始化菜单项目
-                        onInitConfig(){
-                            fsHandler.callFsJScriptAsync("/matrix/pipe/getConfigList.js").then( (rtn)=>{
-                                this.config = rtn.message;
-                            } );
-                        },
                         // 关闭调试、日志
                         onRemoveConsoleTab(targetName){
                             this.control[targetName].show = !this.control[targetName].show;
                         },
-                        // 加载数据源可拖拽项目
-                        onInitLogSourceBar(item){
+                        // 加载可拖拽项目
+                        onSideBarShow(item,sidebar){
+                            let graph = this.editor.graph;
+                            let sourcebar = this.$refs[sidebar].$el;
                             
-                            var graph = this.editor.graph;
-                            var sidebar = this.$refs.sidebar;
+                            $(sourcebar).empty();
 
-                            this.addSidebarIcon(graph, sidebar,
-                                `<h1 style="margin:0px;">日志</h1>
-                                <span class="el-icon-document" style="font-size:32px;"></span>
-                                <p>${item.name}</p>`,
-                                '/static/assets/images/graph/tools/gear.png');
+                            _.forEach(item, (v)=>{
+                                this.addSidebarIcon(
+                                    graph, 
+                                    sourcebar,
+                                    `<h1 style="margin:0px;">${v.fileContent.title}</h1><img src="${v.fileContent.icon.url}" style="width:38px;padding:10px;"></img>`,
+                                    v.fileContent.icon.url || '/static/assets/images/graph/pipe/matrix.png',
+                                    v);
+                            })
                         },
                         // 添加菜单项
-                        addSidebarIcon(graph, sidebar, label, image){
+                        addSidebarIcon(graph, sidebar, label, image, data){
+                            
                             // Function that is executed when the image is dropped on
                             // the graph. The cell argument points to the cell under
                             // the mousepointer if there is one.
@@ -431,6 +868,7 @@ class Pipe {
                                 var model = graph.getModel();
                                 
                                 var v1 = null;
+                                var id = data.fileContent.name + `:${_.now()}`;
                                 
                                 model.beginUpdate();
                                 try {
@@ -438,7 +876,7 @@ class Pipe {
                                     // rather than the label markup, so use 'image=' + image for the style.
                                     // as follows: v1 = graph.insertVertex(parent, null, label,
                                     // pt.x, pt.y, 120, 120, 'image=' + image);
-                                    v1 = graph.insertVertex(parent, null, label, x, y, 120, 120);
+                                    v1 = graph.insertVertex(parent, id, label, x, y, 120, 120);
                                     v1.setConnectable(false);
                                     
                                     // Presets the collapsed size
@@ -450,15 +888,15 @@ class Pipe {
                                     port.geometry.offset = new mxPoint(-6, -8);
                         
                                     var port = graph.insertVertex(v1, null, '输入', 0, 0.75, 16, 16,
-                                            'port;image=/static/assets/images/graph/tools/group.png;align=right;imageAlign=right;spacingRight=18', true);
+                                            'port;image=/static/assets/images/graph/pipe/input.png;align=right;imageAlign=right;spacingRight=18', true);
                                     port.geometry.offset = new mxPoint(-6, -4);
                                     
-                                    var port = graph.insertVertex(v1, null, '新建', 1, 0.25, 16, 16,
-                                            'port;image=/static/assets/images/graph/tools/plus.png;spacingLeft=18', true);
+                                    var port = graph.insertVertex(v1, null, '关闭', 1, 0.25, 16, 16,
+                                            'port;image=/static/assets/images/graph/tools/close.png;spacingLeft=18', true);
                                     port.geometry.offset = new mxPoint(-8, -8);
 
-                                    var port = graph.insertVertex(v1, null, '复制', 1, 0.75, 16, 16,
-                                            'port;image=/static/assets/images/graph/tools/copy.png;spacingLeft=18', true);
+                                    var port = graph.insertVertex(v1, null, '输出', 1, 0.75, 16, 16,
+                                            'port;image=/static/assets/images/graph/pipe/output.png;spacingLeft=18', true);
                                     port.geometry.offset = new mxPoint(-8, -4);
 
                                 } finally {
@@ -469,12 +907,26 @@ class Pipe {
                             }
                             
                             // Creates the image which is used as the sidebar icon (drag source)
+                            var btn = document.createElement('button');
+                            btn.className = 'el-button--default el-button--small el-button';  
+                            btn.style.margin = '10px';
+                            btn.style.padding = '10px';
+                            btn.title = '拖拽到画图进行设计';
+
+
                             var img = document.createElement('img');
                             img.setAttribute('src', image);
-                            img.style.width = '24px';
-                            img.style.height = '24px';
-                            img.title = 'Drag this to the diagram to create a new vertex';
-                            sidebar.appendChild(img);
+                            img.style.width = '34px';
+                            img.style.height = '34px';
+                            btn.appendChild(img);
+
+                            var p = document.createElement('p');
+                            var t = document.createTextNode(data.fileContent.title);
+                            p.appendChild(t);
+                            btn.appendChild(p);
+
+
+                            sidebar.appendChild(btn);
                             
                             var dragElt = document.createElement('div');
                             dragElt.style.border = 'dashed black 1px';
@@ -484,8 +936,78 @@ class Pipe {
                             // Creates the image which is used as the drag icon (preview)
                             var ds = mxUtils.makeDraggable(img, graph, funct, dragElt, 0, 0, true, true);
                             ds.setGuidesEnabled(true);
-                        }
+                        },
+                        // 图保存
+                        onSave(){
+                            console.log(this.model);
+                            
+                            let encoder = new mxCodec();
+                            let node = encoder.encode(this.editor.graph.getModel());
+                            let content = mxUtils.getPrettyXml(node);
+                            let term = encodeURIComponent(JSON.stringify( { content:content, model:this.model } ));
+                                
+                            fsHandler.callFsJScriptAsync("/matrix/pipe/savePipe.js", term).then( (rtn)=>{
+                                this.$message({
+                                    type: "success",
+                                    message: "保存成功"
+                                })
+                            } );
+                        },
+                        // 图另存为
+                        onSaveAs(){
 
+                        },
+                        // 图某节点删除
+                        onDelete(){
+
+                        },
+                        // 图所有节点删除
+                        onDeleteAllCells(includeEdges){
+                
+                            // Cancels interactive operations
+                            let graph = this.editor.graph;
+                            graph.escape();
+                            
+                            let cells = graph.getChildVertices(graph.getDefaultParent());
+                            if (cells != null && cells.length > 0){
+                                var parents = graph.model.getParents(cells);
+                                graph.removeCells(cells, includeEdges);
+                                
+                                // Selects parents for easier editing of groups
+                                if (parents != null){
+                                    var select = [];
+                                    
+                                    for (var i = 0; i < parents.length; i++){
+                                        if (graph.model.contains(parents[i]) &&
+                                            (graph.model.isVertex(parents[i]) ||
+                                            graph.model.isEdge(parents[i]))){
+                                            select.push(parents[i]);
+                                        }
+                                    }
+                                    graph.setSelectionCells(select);
+                                }
+                            }
+                        },
+                        // 图关闭
+                        onClose(){
+
+                        },
+                        // 图运行
+                        onExecute(){
+
+                        },
+                        // 图放大
+                        onZoomIn(){
+                            this.editor.graph.zoomIn();
+                        },
+                        // 图缩小
+                        onZoomOut(){
+                            this.editor.graph.zoomOut();
+                        },
+                        // 图自适应大小
+                        onFit(){
+                            this.editor.execute("fit");
+                        }
                     }
                 })
 
@@ -519,7 +1041,8 @@ class Pipe {
                             main: {
                                 tabs: [],
                                 activeName: "table-view"
-                            }
+                            },
+                            splitInst: null
                         }
                     },
                     watch: {
@@ -807,7 +1330,8 @@ class Pipe {
                             this.$refs['checkBox_'+item.id][0].$el.click();
                         },
                         initData(){
-                            fsHandler.callFsJScriptAsync("/matrix/pipe/getPipeList.js").then((val)=>{
+                            
+                            fsHandler.callFsJScriptAsync("/matrix/pipe/getPipeList.js").then( (val)=>{
                                 let rtn = val.message;
 
                                 this.dt.rows = rtn.rows;

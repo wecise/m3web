@@ -66,7 +66,7 @@ class Config {
                                             clearable></el-input>
 
                                             <el-dropdown placement="top-start" trigger="click">
-                                                <el-tooltip content="导出、导入" open-delay="500">
+                                                <el-tooltip content="导出、导入" open-delay="800">
                                                     <el-button type="text" icon="el-icon-menu" style="color:#333333;"></el-button>
                                                 </el-tooltip>
                                                 <el-dropdown-menu slot="dropdown">
@@ -137,7 +137,9 @@ class Config {
                                                 </span>
                                             </span>  
                                         </el-tree>
-                                        <el-dialog :title="dialog.configNew.formItem.ifDir?'新增目录':'新增配置'" :visible.sync="dialog.configNew.show" v-if="dialog.configNew.show" destroy-on-close="true">
+                                        <el-dialog :title="dialog.configNew.formItem.ifDir?'新增目录':'新增配置'" 
+                                            :visible.sync="dialog.configNew.show" 
+                                            v-if="dialog.configNew.show">
                                             <el-container>
                                                 <el-main style="padding:0px 20px;height:100%;overflow:auto;">
                                                     <el-form label-width="80">
@@ -270,6 +272,17 @@ class Config {
                                 this.$root.configOpen(rtn);
                             } );
                         },
+                        onResetConfig(){
+                            
+                            this.dialog.configNew.parent = '';
+                            this.dialog.configNew.name = '';
+                            this.dialog.configNew.data = null;
+                            this.dialog.configNew.formItem.key = '';
+                            this.dialog.configNew.formItem.value = '';
+                            this.dialog.configNew.formItem.ttl = null;
+                            this.dialog.configNew.formItem.ifDir = true;
+
+                        },
                         onExport(data){
                             
                             this.$confirm(`确认要导出 ${data.key} 下的配置?`, '提示', {
@@ -322,8 +335,11 @@ class Config {
                                         
                                         // 刷新
                                         this.onRefresh(this.dialog.configNew.data);
+
+                                        this.onResetConfig();
                                         
                                         this.dialog.configNew.show = false;
+
 
                                     } else {
                                         this.$message({
@@ -351,15 +367,15 @@ class Config {
                         id: String   
                     },
                     template:   `<el-container>
-                                    <el-header style="height:30px;line-height:30px;padding:0px;">
-                                        <el-tooltip content="清空" open-delay="500" placement="top">
+                                    <el-header style="height:30px;line-height:30px;">
+                                        <el-tooltip content="清空" open-delay="800" placement="top">
                                             <el-button type="text" @click="onReset"><i class="fas fa-trash"></i></el-button>
                                         </el-tooltip>
-                                        <el-tooltip content="重新加载" open-delay="500" placement="top">
+                                        <el-tooltip content="重新加载" open-delay="800" placement="top">
                                             <el-button type="text" @click="onLoad"><i class="fas fa-sync"></i></el-button>
                                         </el-tooltip>
                                     </el-header>
-                                    <el-main>
+                                    <el-main style="padding: 20px;">
                                         <el-table :data="rows" style="width: 100%" max-height="200" stripe :default-sort="{prop: 'vtime', order: 'descending'}" 
                                                 :row-class-name="rowClassName"
                                                 :header-cell-style="headerRender"
@@ -448,15 +464,15 @@ class Config {
                     props: {
                         rule: String
                     },
-                    template:   `<el-container>
+                    template:   `<el-container style="height:100%;">
                                     <el-header style="height:30px;line-height:30px;text-align:right;">
-                                        <el-tooltip content="重置测试内容" open-delay="500">
+                                        <el-tooltip content="重置测试内容" open-delay="800">
                                             <el-button type="text" @click="onReset" icon="el-icon-refresh"></el-button>
                                         </el-tooltip>
-                                        <el-tooltip content="发送测试内容" open-delay="500">
+                                        <el-tooltip content="发送测试内容" open-delay="800">
                                             <el-button type="text" @click="onSubmit" icon="el-icon-s-promotion"></el-button>
                                         </el-tooltip>
-                                        <el-tooltip content="文件类型" open-delay="500">
+                                        <el-tooltip content="文件类型" open-delay="800">
                                             <el-dropdown @command="onHandleCommand" trigger="click" style="margin-left:10px;">
                                                 <span class="el-dropdown-link">
                                                     <i class="el-icon-document"></i>
@@ -467,8 +483,8 @@ class Config {
                                             </el-dropdown>
                                         </el-tooltip>
                                     </el-header>
-                                    <el-main>
-                                        <pre ref="debugEditor" style="min-height:18vh;"></pre>
+                                    <el-main style="padding: 20px;">
+                                        <pre ref="debugEditor" style="height: calc(100% - 60px);background: #f2f2f2;"></pre>
                                     </el-main>
                                 </el-container>`,
                     data(){
@@ -558,18 +574,18 @@ class Config {
                         model: Object
                     },
                     template:   `<el-container>
-                                    <el-header style="height:30px;line-height:30px;padding:0px;">
-                                        <el-tooltip content="清空" open-delay="500">
+                                    <el-header style="height:30px;line-height:30px;">
+                                        <el-tooltip content="清空" open-delay="800">
                                             <el-button type="text" @click="onReset"><i class="fas fa-trash"></i></el-button>
                                         </el-tooltip>
-                                        <el-tooltip content="重新加载" open-delay="500">
+                                        <el-tooltip content="重新加载" open-delay="800">
                                             <el-button type="text" @click="onLoad"><i class="fas fa-sync"></i></el-button>
                                         </el-tooltip>
-                                        <el-tooltip content="默认只删除对象数据，勾选此项同时删除版本数据。" open-delay="500">
+                                        <el-tooltip content="默认只删除对象数据，勾选此项同时删除版本数据。" open-delay="800">
                                             <el-checkbox v-model="ifDeleteVersionData" style="height: 35px;line-height: 35px;float:right;">删除版本数据</el-checkbox>
                                         </el-tooltip>
                                     </el-header>
-                                    <el-main>
+                                    <el-main style="padding: 20px;height:100%;">
                                         <el-table :data="rows" 
                                                 style="width: 100%" 
                                                 height="100%"
@@ -676,11 +692,11 @@ class Config {
                         model: Object
                     },
                     template: ` <el-container style="height:calc(100vh - 174px);">
-                                    <el-main ref="mainView">
+                                    <el-main ref="mainView" :style="'height:'+mainHeight+'%;'">
                                         <div class="config-value" ref="editorContainer" :model="model" style="border:none;border-top:1px solid #f5f5f5;border-bottom:1px solid #f5f5f5;height:100%"></div>
                                         <div class="config-status-footer" ref="editorStatus" style="line-height: 30px;padding: 0px 15px;background: #f2f2f2;"></div>
                                     </el-main>
-                                    <el-footer style="padding:0px;height:200px;" ref="footerView">
+                                    <el-footer :style="'padding:0px;height:'+footerHeight+'%;'" ref="footerView">
                                         <el-tabs v-model="debug.tabs.activeIndex" type="border-card" closable @tab-remove="logClose" @tab-click="handleClick">
                                             <el-tab-pane name="log" style="padding:10px;">
                                                 <span slot="label">日志 <i class="el-icon-date"></i></span>
@@ -709,6 +725,8 @@ class Config {
                             },
                             cid: "",
                             splitInst: null,
+                            mainHeight: '80',
+                            footerHeight: '20',
                             ifLog: false,
                             debug:{
                                 tabs: {
@@ -934,6 +952,10 @@ class Config {
                                 gutterSize: 5,
                                 cursor: 'col-resize',
                                 direction: 'vertical',
+                                onDragEnd:(sizes)=> {
+                                    this.mainHeight = sizes[0];
+                                    this.footerHeight = sizes[1];
+                                }
                             });
                         },
                         logClose(){
@@ -957,19 +979,19 @@ class Config {
                                             <el-container ref="mainView">
                                                 <el-header style="height: 35px;line-height: 35px;background:#f2f2f2;border-bottom:1px solid #dddddd; padding: 0px 10px 0px 0px;">
                                                     
-                                                    <el-tooltip content="切换视图" open-delay="500" placement="top">
+                                                    <el-tooltip content="切换视图" open-delay="800" placement="top">
                                                         <el-button type="text" @click="onTogglePanel">
                                                             <span :class="control.configTree.show?'el-icon-s-fold':'el-icon-s-unfold'" style="font-size:17px;"></span>
                                                         </el-button>
                                                     </el-tooltip>
 
-                                                    <el-tooltip content="保存" open-delay="500">
+                                                    <el-tooltip content="保存" open-delay="800">
                                                         <el-button type="text" @click="configUpdate" v-if="control.save.show && !_.isEmpty(configTabs.tabs)">
                                                             <i class="far fa-save" style="color:#009688;font-size:15px;"><i>
                                                         </el-button>
                                                     </el-tooltip>
                                                     
-                                                    <el-tooltip content="主题" open-delay="500">
+                                                    <el-tooltip content="主题" open-delay="800">
                                                         <el-button type="text" 
                                                             :class="'editor-select-theme-'+objectHash.sha1(configTabs.activeIndex)" 
                                                             v-show="!_.isEmpty(configTabs.tabs)" 

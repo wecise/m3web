@@ -530,7 +530,7 @@
                                     </el-button>
                                 </el-checkbox-group>`,
                     filters: {
-                        pickName: function(item){
+                        pickName(item){
     
                             if (_.isEmpty(item)) return '';
     
@@ -544,7 +544,7 @@
     
                             return _name;
                         },
-                        pickIcon: function(item){
+                        pickIcon(item){
                             // extend || ...
                             if( item.fullname === '/extend' ){
                                 return `${window.ASSETS_ICON}/files/png/dir-lock.png?type=open&issys=${window.SignedUser_IsAdmin}`;
@@ -559,7 +559,7 @@
                             }
     
                         },
-                        pickTags: function(item){
+                        pickTags(item){
     
                             if(item.tags){
                                 return item.tags.join(",");
@@ -567,12 +567,12 @@
                                 return "";
                             }
                         },
-                        pickAuthor: function(item){
+                        pickAuthor(item){
                             if (!_.isEmpty(item.attr) || !_.isEqual(item.attr, 'null')) {
                                 return _.attempt(JSON.parse.bind(null, item.attr)).author;
                             }
                         },
-                        pickRemark: function(item){
+                        pickRemark(item){
                             if (!_.isEmpty(item.attr) || !_.isEqual(item.attr, 'null')) {
                                 return _.attempt(JSON.parse.bind(null, item.attr)).remark;
                             }
@@ -670,7 +670,7 @@
                                     </el-checkbox-group>
                                 </div>`,
                     filters: {
-                        pickName: function(item){
+                        pickName(item){
     
                             if (_.isEmpty(item)) return '';
     
@@ -684,7 +684,7 @@
     
                             return _name;
                         },
-                        pickIcon: function(item){
+                        pickIcon(item){
                             // extend || ...
                             if( item.fullname === '/extend' ){
                                 return `${window.ASSETS_ICON}/files/png/dir-lock.png?type=open&issys=${window.SignedUser_IsAdmin}`;
@@ -699,7 +699,7 @@
                             }
     
                         },
-                        pickTags: function(item){
+                        pickTags(item){
     
                             if(item.tags){
                                 return item.tags.join(",");
@@ -707,12 +707,12 @@
                                 return "";
                             }
                         },
-                        pickAuthor: function(item){
+                        pickAuthor(item){
                             if (!_.isEmpty(item.attr) || !_.isEqual(item.attr, 'null')) {
                                 return _.attempt(JSON.parse.bind(null, item.attr)).author;
                             }
                         },
-                        pickRemark: function(item){
+                        pickRemark(item){
                             if (!_.isEmpty(item.attr) || !_.isEqual(item.attr, 'null')) {
                                 return _.attempt(JSON.parse.bind(null, item.attr)).remark;
                             }
@@ -1198,6 +1198,7 @@
                 })
 
                 Vue.component("fs-editor-view",{
+                    delimiters: ['#{', '}#'],
                     props:{
                         id: String,
                         item: Object,
@@ -1216,24 +1217,26 @@
                                     output:{}
                                 }
                             },
-                            splitInst: null
+                            splitInst: null,
+                            mainHeight: '80',
+                            footerHeight: '20'
                         }
                     },
                     template: `<el-container style="height:100%;min-height:300px;width:100%;">
-                                    <el-main style="padding:1px 0px 0px 0px;overflow:hidden;width:100%;height:100%;" ref="mainView">
+                                    <el-main :style="'padding:1px 0px 0px 0px;overflow:hidden;width:100%;height:'+mainHeight+'%;'" ref="mainView">
                                         <fs-editor-component :id="'editor-'+id" :bid="'output-'+id"
                                             :model="model"
                                             showToolsBar="false"
                                             showStatusBar="false"></fs-editor-component>
                                     </el-main>
-                                    <el-footer style="background-color:#ddd;overflow:hidden;padding:0px;width:100%;height:20%;" ref="footerView" v-show="toolBar.log.show || toolBar.result.show">
+                                    <el-footer :style="'background-color:#ddd;overflow:hidden;padding:0px;width:100%;height:'+footerHeight+'%;'" ref="footerView" v-show="toolBar.log.show || toolBar.result.show">
                                         <el-tabs v-model="toolBar.activeView" type="border-card" style="height:100%;" closable @tab-remove="onRemoveTab">
                                             <el-tab-pane name="log" style="height:100%;" v-show="toolBar.log.show">
                                                 <span slot="label">执行日志</span>
                                                 <fs-editor-log-console :id="item.fullname" v-if="!_.isEmpty(item)"></fs-editor-log-console> 
                                             </el-tab-pane>
                                             <el-tab-pane name="result" style="height:100%;overflow:auto;padding-top: 1px;" v-show="toolBar.result.show">
-                                                <span slot="label">执行结果</span>
+                                                <span slot="label">#{ item | pickResultTitle }#</span>
                                                 <fs-editor-view-by-html :id="'output-'+id" :output="item" v-if="item.ftype=='html'" style="height:100%;"></fs-editor-view-by-html>
                                                 <fs-editor-view-by-other :id="'output-'+id" :output="item" style="height:100%;" v-else></fs-editor-view-by-other>
                                             </el-tab-pane>
@@ -1250,11 +1253,22 @@
                             immediate:true
                         }
                     },
+                    filters: {
+                        pickResultTitle(item){
+                            console.log(item)
+                            if(_.isEmpty(item.output)){
+                                return '执行结果';
+                            } else {
+                                return `执行结果(耗时:${item.output.consume})`;
+                            }
+                            
+                        }
+                    },
                     mounted() {
                         // 临时
-                        setInterval(()=>{
+                        //setInterval(()=>{
                             _.extend(this.model,{  mode: this.getMode() });
-                        },5000)
+                        //},5000)
 
                         this.init();
                         this.initSplit();
@@ -1273,7 +1287,8 @@
                                 cursor: 'row-resize',
                                 direction: 'vertical',
                                 onDragEnd:(sizes)=> {
-                                    
+                                    this.mainHeight = sizes[0];
+                                    this.footerHeight = sizes[1];
                                 }
                             });
                         },

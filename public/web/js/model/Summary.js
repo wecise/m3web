@@ -36,7 +36,7 @@ class Summary {
                             valueTween: 0
                         }
                     },
-                    template:   `<div style="height:100%;padding:20px;text-align: center;background:#f2f2f2;margin:5px;">
+                    template:   `<div style="height:100%;padding:20px;text-align: center;background:#ffffff;margin:5px;">
                                     <span style="color:rgb(153, 153, 153);">#{title}#</span>
                                     <h1 style="font-size:32px;">#{valueTween}# <span style="color:rgb(153, 153, 153);font-size:x-small;">#{unit}#</span></h1>
                                 </div>`,
@@ -58,7 +58,7 @@ class Summary {
                         value: Array,
                         unit: Array
                     },
-                    template:   `<div style="height:100%;padding:20px;text-align: center;background:#f2f2f2;margin:5px;">
+                    template:   `<div style="height:100%;padding:20px;text-align: center;background:#ffffff;margin:5px;">
                                     <span style="color:rgb(153, 153, 153);">#{title[0]}#</span>
                                     <h1 style="font-size:32px;margin:5px;">#{value[0]}# <span style="color:rgb(153, 153, 153);font-size:x-small;">#{unit[0]}#</span></h1>
                                     <span style="color:rgb(153, 153, 153);">#{title[1]}#</span>
@@ -80,7 +80,7 @@ class Summary {
                             valueTween: 0
                         }
                     },
-                    template:   `<div style="height:100%;text-align: center;background:#f2f2f2;">
+                    template:   `<div style="height:100%;text-align: center;background:#ffffff;">
                                     <span style="color:rgb(153, 153, 153);">#{title}#</span>
                                     <h1 style="font-size:32px;">#{valueTween}# <span style="color:rgb(153, 153, 153);font-size:x-small;">#{unit}#</span></h1>
                                 </div>`,
@@ -102,7 +102,7 @@ class Summary {
                         title: String,
                         height: String,
                     },
-                    template: `<div style="width:100%;background:#f2f2f2;height:100%;"></div>`,
+                    template: `<div style="width:45vw;background:#ffffff;height:250px;"></div>`,
                     data(){
                         return {
                             chart: null,
@@ -282,7 +282,7 @@ class Summary {
                         title: String,
                         height: String,
                     },
-                    template: `<div :style="'width:100%;background:#f2f2f2;height:'+height"></div>`,
+                    template: `<div :style="'width:100%;background:#ffffff;height:'+height"></div>`,
                     data(){
                         return {
                             chart: null,
@@ -464,7 +464,7 @@ class Summary {
                         title: String,
                         height: String
                     },
-                    template: `<div style="'width:100%;background:#f2f2f2;height:100%;"></div>`,
+                    template: `<div style="width:45vw;background:#ffffff;height:250px;"></div>`,
                     data(){
                         return {
                             
@@ -570,200 +570,196 @@ class Summary {
                     }
                 })
 
-                mxSummary.app = new Vue({
-                    delimiters: ['#{', '}#'],
-                    data:{
-                        title: ['占用空间','磁盘使用率'],
-                        value: [300,40],
-                        unit: ['TB','%'],
-                        control: {
-                            show: false
-                        },
-                        model: null
-                    },
-                    template:   `<el-container id="content" class="content" style="height:calc(100vh - 80px);">
-                                    
-                                    <el-main style="padding:10px 0px;" ref="mainView" v-if="model">
-                                        
-                                        <el-button type="text" icon="el-icon-plus" style="position:absolute;z-index:1000;top:55px;right:25px;" @click="control.show=!control.show"></el-button>
-                                        
-                                        <div class="d-none d-md-block" style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);background:#f2f2f2;height:75vh;position:absolute;top:60px;left:70px;z-index:100;" v-show="control.show">
-                                            
-                                            <div class="newWidget grid-stack-item" data-gs-width="2" data-gs-height="2">
-                                                <div class="grid-stack-item-content">
-                                                    <div>
-                                                        <el-image src="/fs/assets/images/product_screenshot/new.png?type=open&issys=true" style="width:200px;"></el-image>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div style="font-size: 18px;padding: 0px 20px;">数据概览</div>
-                                        <div class="grid-stack grid-container" data-gs-animate="yes" style="background:#f2f2f2;margin:0 20px;" v-if="model.byDay">
-                                            <div class="grid-stack-item" data-gs-width="2" data-gs-height="2">
-                                                <div class="grid-stack-item-content" style="overflow:hidden;">
-                                                    <larger-number title="数据吞吐量"
-                                                        :value="model.byDay.throughput"
-                                                        unit="条/秒">
-                                                    </larger-number>
-                                                </div>
-                                            </div>
-                                            <div class="grid-stack-item" data-gs-width="2" data-gs-height="2">
-                                                <div class="grid-stack-item-content" style="overflow:hidden;">
-                                                    <larger-number title="数据响应时间(avg)"
-                                                        :value="model.byDay.span_avg"
-                                                        unit="毫秒">
-                                                    </larger-number>
-                                                </div>
-                                            </div>
-
-                                            <div class="grid-stack-item" data-gs-width="2" data-gs-height="2">
-                                                <div class="grid-stack-item-content" style="overflow:hidden;">
-                                                    <larger-number title="数据响应时间(max)"
-                                                        :value="model.byDay.span_max"
-                                                        unit="毫秒">
-                                                    </larger-number>
-                                                </div>
-                                            </div>
-
-                                            <div class="grid-stack-item" data-gs-width="2" data-gs-height="2">
-                                                <div class="grid-stack-item-content" style="overflow:hidden;">
-                                                    <larger-number title="数据响应时间(min)"
-                                                        :value="model.byDay.span_min"
-                                                        unit="毫秒">
-                                                    </larger-number>
-                                                </div>
-                                            </div>
-                                            <div class="grid-stack-item" data-gs-width="2" data-gs-height="2">
-                                                <div class="grid-stack-item-content" style="overflow:hidden;">
-                                                    <larger-number title="数据总量(当日)"
-                                                        :value="model.byDay.all_volume | pickValue"
-                                                        :unit="model.byDay.all_volume | pickUnit">
-                                                    </larger-number>
-                                                </div>
-                                            </div>
-                                            <!--div class="grid-stack-item" data-gs-width="2" data-gs-height="2">
-                                                <div class="grid-stack-item-content" style="overflow:hidden;">
-                                                    <larger-number title="磁盘大小"
-                                                        :value="model.byDay.disk_volume | pickValue"
-                                                        :unit="model.byDay.disk_volume | pickUnit">
-                                                    </larger-number>
-                                                </div>
-                                            </div-->
-                                            <div class="grid-stack-item" data-gs-width="2" data-gs-height="2">
-                                                <div class="grid-stack-item-content" style="overflow:hidden;">
-                                                    <larger-number title="磁盘利用率"
-                                                        :value="model.byDay.disk_volume_percent | pickValue"
-                                                        unit="%">
-                                                    </larger-number>
-                                                </div>
-                                            </div>
-                                            <div class="grid-stack-item" data-gs-width="6" data-gs-height="3">
-                                                <div class="grid-stack-item-content" style="overflow:hidden;">
-                                                    <pie-chart title="当日" :model="model.byApi" height="160px"></pie-chart>
-                                                </div>
-                                            </div>
-                                            <div class="grid-stack-item" data-gs-width="6" data-gs-height="3">
-                                                <div class="grid-stack-item-content" style="overflow:hidden;">
-                                                    <curve-chart-byday title="当日趋势" height="160px" :model="model.byDay" ref="curveChart"></curve-chart-byday>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div style="font-size: 18px;padding: 0px 20px;">按接口统计</div>
-                                        
-                                        <div class="grid-stack grid-container" 
-                                            data-gs-animate="yes" 
-                                            v-for="(item,api) in model.byApi" 
-                                            style="background:#f2f2f2;margin:0px 20px;border-top:1px solid #fff;"  v-if="model.byApi">
-                                            <div class="grid-stack-item" data-gs-width="12" data-gs-height="3">
-                                                <div class="grid-stack-item-content" style="overflow:hidden;">
-                                                    <h5 style="margin:0px;padding:10px 20px;">#{_.upperCase(api)}#</h5>
-                                                    <el-row :gutter="0" style="display:flex;align-items:center;">
-                                                        <el-col :span="3">
-                                                            <larger-column-number :title="item.volume.title"
-                                                                :value="item.volume.value"
-                                                                unit="笔/秒">
-                                                            </larger-column-number>
-                                                        </el-col>
-                                                        <el-col :span="3" v-for="kpi in item.summary">
-                                                            <larger-column-number :title="kpi.title,api|pickTitle"
-                                                                :value="kpi.value"
-                                                                unit="毫秒">
-                                                            </larger-column-number>
-                                                        </el-col>
-                                                        <el-col :span="12">
-                                                            <curve-chart-byapi title="当日趋势" height="180px" :model="model.byApi[api]" ref="curveChart"></curve-chart-byapi>
-                                                        </el-col>
-                                                    </el-row>
-                                                </div>
-                                            </div>
-                                        </div>
-                                       
-                                    </el-main>
-                                </el-container>`,
-                    filters: {
-                        pickValue(val){
-                            return mx.bytesToSize(val).split(" ")[0];
-                        },
-                        pickUnit(val){
-                            return mx.bytesToSize(val).split(" ")[1];
-                        },
-                        pickTitle(title,api){
-                            return `${title}`;
-                        }
-                    },
-                    created(){
-                        
-                        this.initData();
-
-                        setInterval(()=>{
-                            this.initData();
-                        },5000)
-                    },
-                    mounted() {
-                        this.$nextTick().then(()=>{
-                            this.init();
-                        })
-                    },
-                    methods: {
-                        initData(){
-                            fsHandler.callFsJScriptAsync("/matrix/summary/getSummary.js",null).then( (rtn)=>{
-                                this.model = rtn.message;
-                            } );
-                        },
-                        init(){
-                            
-                            if(!this.mode) return false;
-
-                            let grid = GridStack.initAll({
-                                resizable: {
-                                    handles: 'e, se, s, sw, w'
-                                },
-                                float: true,
-                                acceptWidgets: '.newWidget'
-                            });
-                            grid[0].on('gsresizestop', (event, elem)=> {
-                                eventHub.$emit("WINDOW-RESIZE-EVENT");
-                            });
-                            grid[1].on('gsresizestop', (event, elem)=> {
-                                eventHub.$emit("WINDOW-RESIZE-EVENT");
-                            });
-
-                            $('.newWidget').draggable({
-                                revert: 'invalid',
-                                scroll: false,
-                                appendTo: 'body',
-                                helper: 'clone'
-                            });
-
-                        }
-                    }
-                }).$mount("#app");
 
             })
 
         })
 
+    }
+
+    mount(el){
+        let main = {
+            delimiters: ['#{', '}#'],
+            data:{
+                title: ['占用空间','磁盘使用率'],
+                value: [300,40],
+                unit: ['TB','%'],
+                control: {
+                    show: false
+                },
+                model: null,
+                loading: false
+            },
+            template:   `<el-container style="height:calc(100vh - 80px);">
+                            
+                            <el-main style="padding:10px 0px;" ref="mainView" v-if="model" :loading="loading">
+                                
+                                <el-button type="text" icon="el-icon-plus" style="position:absolute;z-index:1000;top:55px;right:25px;" @click="control.show=!control.show"></el-button>
+                                
+                                <div class="d-none d-md-block" style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);background:#ffffff;height:75vh;position:absolute;top:60px;left:70px;z-index:100;" v-show="control.show">
+                                    
+                                    <div class="newWidget grid-stack-item" data-gs-width="2" data-gs-height="2">
+                                        <div class="grid-stack-item-content">
+                                            <div>
+                                                <el-image src="/static/assets/images/product_screenshot/new.png" style="width:200px;"></el-image>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <h3 style="margin:20px;">数据概览</h3>
+                                
+                                <div class="grid-container" data-gs-animate="yes" style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);background:#ffffff;margin:0 20px;display:flex;flex-wrap:wrap;" v-if="model.byDay">
+                                    <div class="grid-stack-item" data-gs-width="2" data-gs-height="2">
+                                        <div class="grid-stack-item-content" style="overflow:hidden;">
+                                            <larger-number title="数据吞吐量"
+                                                :value="model.byDay.throughput"
+                                                unit="条/秒">
+                                            </larger-number>
+                                        </div>
+                                    </div>
+                                    <div class="grid-stack-item" data-gs-width="2" data-gs-height="2">
+                                        <div class="grid-stack-item-content" style="overflow:hidden;">
+                                            <larger-number title="数据响应时间(avg)"
+                                                :value="model.byDay.span_avg"
+                                                unit="毫秒">
+                                            </larger-number>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid-stack-item" data-gs-width="2" data-gs-height="2">
+                                        <div class="grid-stack-item-content" style="overflow:hidden;">
+                                            <larger-number title="数据响应时间(max)"
+                                                :value="model.byDay.span_max"
+                                                unit="毫秒">
+                                            </larger-number>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid-stack-item" data-gs-width="2" data-gs-height="2">
+                                        <div class="grid-stack-item-content" style="overflow:hidden;">
+                                            <larger-number title="数据响应时间(min)"
+                                                :value="model.byDay.span_min"
+                                                unit="毫秒">
+                                            </larger-number>
+                                        </div>
+                                    </div>
+                                    <div class="grid-stack-item" data-gs-width="2" data-gs-height="2">
+                                        <div class="grid-stack-item-content" style="overflow:hidden;">
+                                            <larger-number title="数据总量(当日)"
+                                                :value="model.byDay.all_volume | pickValue"
+                                                :unit="model.byDay.all_volume | pickUnit">
+                                            </larger-number>
+                                        </div>
+                                    </div>
+                                    <!--div class="grid-stack-item" data-gs-width="2" data-gs-height="2">
+                                        <div class="grid-stack-item-content" style="overflow:hidden;">
+                                            <larger-number title="磁盘大小"
+                                                :value="model.byDay.disk_volume | pickValue"
+                                                :unit="model.byDay.disk_volume | pickUnit">
+                                            </larger-number>
+                                        </div>
+                                    </div-->
+                                    <div class="grid-stack-item" data-gs-width="2" data-gs-height="2">
+                                        <div class="grid-stack-item-content" style="overflow:hidden;">
+                                            <larger-number title="磁盘利用率"
+                                                :value="model.byDay.disk_volume_percent | pickValue"
+                                                unit="%">
+                                            </larger-number>
+                                        </div>
+                                    </div>
+                                    <div class="grid-stack-item" data-gs-width="6" data-gs-height="3">
+                                        <div class="grid-stack-item-content" style="overflow:hidden;">
+                                            <pie-chart title="当日" :model="model.byApi" height="160px"></pie-chart>
+                                        </div>
+                                    </div>
+                                    <div class="grid-stack-item" data-gs-width="6" data-gs-height="3">
+                                        <div class="grid-stack-item-content" style="overflow:hidden;">
+                                            <curve-chart-byday title="当日趋势" height="160px" :model="model.byDay" ref="curveChart"></curve-chart-byday>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <h3 style="margin:20px;">按接口统计</h3>
+
+                                <div class="grid-container" 
+                                    data-gs-animate="yes" 
+                                    v-for="(item,api) in model.byApi" 
+                                    style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);background:#ffffff;margin:10px 20px;"  v-if="model.byApi">
+                                    <div class="grid-stack-item" data-gs-width="12" data-gs-height="3">
+                                        <div class="grid-stack-item-content" style="overflow:hidden;">
+                                            
+                                            <h5 style="margin:0px;padding:10px 20px;">#{_.upperCase(api)}#</h5>
+                                            
+                                            <el-row :gutter="0" style="display:flex;align-items:center;">
+                                                <el-col :span="3">
+                                                    <larger-column-number :title="item.volume.title"
+                                                        :value="item.volume.value"
+                                                        unit="笔/秒">
+                                                    </larger-column-number>
+                                                </el-col>
+                                                <el-col :span="3" v-for="kpi in item.summary">
+                                                    <larger-column-number :title="kpi.title,api|pickTitle"
+                                                        :value="kpi.value"
+                                                        unit="毫秒">
+                                                    </larger-column-number>
+                                                </el-col>
+                                                <el-col :span="12">
+                                                    <curve-chart-byapi title="当日趋势" height="180px" :model="model.byApi[api]" ref="curveChart"></curve-chart-byapi>
+                                                </el-col>
+                                            </el-row>
+                                        </div>
+                                    </div>
+                                </div>
+                               
+                            </el-main>
+                        </el-container>`,
+            filters: {
+                pickValue(val){
+                    return mx.bytesToSize(val).split(" ")[0];
+                },
+                pickUnit(val){
+                    return mx.bytesToSize(val).split(" ")[1];
+                },
+                pickTitle(title,api){
+                    return `${title}`;
+                }
+            },
+            created(){
+                
+                this.initData();
+                
+                setTimeout(()=>{
+                    this.initData();
+                },15000)
+
+            },
+            mounted() {
+                this.$nextTick().then(()=>{
+                    this.init();
+                })
+            },
+            methods: {
+                initData(){
+                    this.loading = true;
+
+                    fsHandler.callFsJScriptAsync("/matrix/summary/getDataSummary.js").then( (rtn)=>{
+                        this.$set(this, 'model',rtn.message);
+                        this.loading = false;
+                    } );
+                },
+                init(){
+                    
+                    if(!this.mode) return false;
+
+                    let grid = GridStack.init();
+                    
+
+                }
+            }
+        };
+        
+        this.app = new Vue(main).$mount(el);
     }
 
 }

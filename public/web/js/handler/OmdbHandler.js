@@ -445,12 +445,12 @@ class OmdbHandler  {
             data: {
                 mql: _mql
             },
-            beforeSend:function(xhr){
-                // // Pace.restart();
+            beforeSend(xhr){
+                
             },
-            complete: function(xhr, textStatus) {
+            complete(xhr, textStatus) {
             },
-            success: function (data, status) {
+            success(data, status) {
 
                 userHandler.ifSignIn(data);
 
@@ -460,7 +460,7 @@ class OmdbHandler  {
                 }
 
             },
-            error: function(xhr, textStatus, errorThrown){
+            error(xhr, textStatus, errorThrown){
                 rtn = 0;
                 alertify.error("插入失败" + " " + xhr.responseText);
                 console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
@@ -489,7 +489,7 @@ class OmdbHandler  {
                 meta: true
             },
             beforeSend: function(xhr) {
-                // Pace.restart();
+                
             },
             complete: function(xhr, textStatus) {
             },

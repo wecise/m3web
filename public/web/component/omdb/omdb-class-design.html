@@ -1816,10 +1816,12 @@
                         this.doc = this.$refs.dfsOpen.node;
                     }
                     
-                    let xml = fsHandler.fsContent(this.doc.parent, this.doc.name);
-                    let doc = mxUtils.parseXml(xml);
-                    let codec = new mxCodec(doc);
-                    codec.decode(doc.documentElement, this.editor.graph.getModel());
+                    fsHandler.fsContentAsync(this.doc.parent, this.doc.name).then( (xml)=>{
+                        let doc = mxUtils.parseXml(xml);
+                        let codec = new mxCodec(doc);
+                        codec.decode(doc.documentElement, this.editor.graph.getModel());
+                    } );
+                    
                 } catch(err){
                     console.error(err);
                 } finally {
@@ -1848,17 +1850,20 @@
                 
                 let parent = this.$refs.dfsSaveas.node.fullname;
                 let name = this.$refs.dfsSaveas.fileName;
-                let rtn = fsHandler.fsNew('file',parent, name, xml, attr);
-                if(rtn == 1){
-                    this.$message({
-                        type:"success",
-                        message: "保存成功！"
-                    })
-                    
-                    this.doc = {parent:parent, name:name, fullname: [parent,name].join("/")};
-                }
+                
+                fsHandler.fsNewAsync('file',parent, name, xml, attr).then( (rtn)=>{
+                    if(rtn == 1){
+                        this.$message({
+                            type:"success",
+                            message: "保存成功！"
+                        })
+                        
+                        this.doc = {parent:parent, name:name, fullname: [parent,name].join("/")};
+                    }
 
-                this.dialogSaveAs.visible = false;
+                    this.dialogSaveAs.visible = false;
+                } );
+
             },
             onExecute(){
                 let editor = ace.edit(this.$refs.dialogInfoEditor.$el);
@@ -1876,35 +1881,36 @@
                         center: true
                         }).then(() => {
 
-                            let rtn = omdbHandler.fetchDataByMql(mql);
+                            omdbHandler.fetchDataByMqlAsync(mql).then( (rtn)=>{
+                                // output
+                                if(rtn.status === 'ok'){
+                                    
+                                    // MQL for  CRUD
+                                    if(rtn.meta.type === 'create'){
+                                        this.$message({
+                                            type: "success",
+                                            message: "类创建成功"
+                                        });
+                                        return false;
+                                    }
+
+                                    if(rtn.meta.type === 'alter'){
+                                        this.$message({
+                                            type: "success",
+                                            message: "属性修改成功"
+                                        });
+                                        return false;
+                                    }
+
+                                } else {
+                                    this.$message({
+                                        type: "error",
+                                        message: rtn.message,
+                                        showClose: true
+                                    })
+                                }
+                            } );
                             
-                            // output
-                            if(rtn.status === 'ok'){
-                                
-                                // MQL for  CRUD
-                                if(rtn.meta.type === 'create'){
-                                    this.$message({
-                                        type: "success",
-                                        message: "类创建成功"
-                                    });
-                                    return false;
-                                }
-
-                                if(rtn.meta.type === 'alter'){
-                                    this.$message({
-                                        type: "success",
-                                        message: "属性修改成功"
-                                    });
-                                    return false;
-                                }
-
-                            } else {
-                                this.$message({
-                                    type: "error",
-                                    message: rtn.message,
-                                    showClose: true
-                                })
-                            }
                         }).catch(() => {
                         
                         });
@@ -1916,13 +1922,15 @@
                     let node = enc.encode(this.editor.graph.getModel());
                     let xml = mxUtils.getPrettyXml(node);
                     let attr = _.extend(this.doc, {});
-                    let rtn = fsHandler.fsNew('file',this.doc.parent, this.doc.name, xml, attr);
-                    if(rtn == 1){
-                        this.$message({
-                            type:"success",
-                            message: "保存成功！"
-                        })
-                    }
+
+                    fsHandler.fsNewAsync('file',this.doc.parent, this.doc.name, xml, attr).then( (rtn)=>{
+                        if(rtn == 1){
+                            this.$message({
+                                type:"success",
+                                message: "保存成功！"
+                            })
+                        }
+                    } );
                 } else {
                     // this.$message({
                     //     type: "info",
@@ -1944,23 +1952,25 @@
                         cancelButtonText: '取消',
                         type: 'warning'
                     }).then(() => {
-                        let rtn = fsHandler.fsDelete(this.doc.parent,this.doc.name);
+
+                        fsHandler.fsDeleteAsync(this.doc.parent,this.doc.name).then( (rtn)=>{
+                            if (rtn == 1){
+                                this.$message({
+                                    type: "success",
+                                    message: "删除成功！"
+                                });
+                                this.deleteCells(true);
+                                this.doc = null;
+                                localStorage.setItem("CLASS-DESIGN-OPEN-FILE",'');
+                                this.summaryInfo();
+                            } else {
+                                this.$message({
+                                    type: "error",
+                                    message: "删除失败 " + rtn.message
+                                })
+                            } 
+                        } );
     
-                        if (rtn == 1){
-                            this.$message({
-                                type: "success",
-                                message: "删除成功！"
-                            });
-                            this.deleteCells(true);
-                            this.doc = null;
-                            localStorage.setItem("CLASS-DESIGN-OPEN-FILE",'');
-                            this.summaryInfo();
-                        } else {
-                            this.$message({
-                                type: "error",
-                                message: "删除失败 " + rtn.message
-                            })
-                        } 
                     }).catch(() => {
                         
                     });
