@@ -1034,8 +1034,7 @@ class SideBar {
     }
 
 }
-
+var sideBar = new SideBar();
 document.addEventListener('DOMContentLoaded', ()=>{
-    var sideBar = new SideBar();
     sideBar.init();
 }, false);
