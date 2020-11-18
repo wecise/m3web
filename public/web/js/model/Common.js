@@ -2677,7 +2677,9 @@ Vue.component("mx-classkeys-string-cascader",{
     },
     methods: {
         initData(){
-            this.options = fsHandler.callFsJScript("/matrix/ai/baseline/getClassStringKeysByClassName.js",encodeURIComponent(this.root)).message;
+            fsHandler.callFsJScriptAsync("/matrix/ai/baseline/getClassStringKeysByClassName.js",encodeURIComponent(this.root)).then( (rtn)=>{
+                this.options = rtn.message;
+            } );
         },
         onChange(val){
             this.selected = val;
@@ -2741,7 +2743,9 @@ Vue.component("mx-class-entity-select",{
     methods: {
         initData(){
             let term = encodeURIComponent(JSON.stringify({class: this.root, term:''}));
-            this.entity.list = fsHandler.callFsJScript("/matrix/ai/baseline/getEntityListByClassName.js",term).message;
+            fsHandler.callFsJScriptAsync("/matrix/ai/baseline/getEntityListByClassName.js",term).then( (rtn)=>{
+                this.entity.list = rtn.message;
+            } );
         },
         onFilter(query, item) {
             return item.value.indexOf(query) > -1;
@@ -2776,7 +2780,9 @@ Vue.component("mx-server-transfer",{
     },
     methods: {
         initData(){
-            this.serverList = fsHandler.callFsJScript("/matrix/ai/getServerList.js",null).message;
+            fsHandler.callFsJScriptAsync("/matrix/ai/getServerList.js",null).then( (rtn)=>{
+                this.serverList = rtn.message;
+            } );
 
             this.selected =  _.map(this.model,'host');
             

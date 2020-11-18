@@ -297,10 +297,14 @@ class Probe extends Matrix {
                         let rtn = null;
 
                         if(_.isEmpty(this.all.term)){
-                            this.all.list = fsHandler.callFsJScript("/matrix/depot/getServerList.js").message.rows;
+                            fsHandler.callFsJScriptAsync("/matrix/depot/getServerList.js").then( (rtn)=>{
+                                this.all.list = rtn.message.rows;
+                            } );
                             
                         } else {
-                            this.all.list = fsHandler.callFsJScript("/matrix/depot/getServerList.js", encodeURIComponent(this.all.term) ).message.rows;
+                            fsHandler.callFsJScriptAsync("/matrix/depot/getServerList.js", encodeURIComponent(this.all.term) ).then( (rtn)=>{
+                                this.all.list = rtn.message.rows;
+                            } );
                         }
 
                         // 赋值给source
@@ -1324,8 +1328,11 @@ class Probe extends Matrix {
                         }
                     },
                     getServerList(){
-                        let rtn = fsHandler.callFsJScript("/matrix/depot/getServerList.js").message;
-                        this.$set(this.servers,'list', rtn);
+                        fsHandler.callFsJScriptAsync("/matrix/depot/getServerList.js").then( (val)=>{
+                            let rtn = val.message;
+
+                            this.$set(this.servers,'list', rtn);
+                        } );
                     },
                     pickFiles(row){
                         

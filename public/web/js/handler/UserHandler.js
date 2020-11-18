@@ -426,6 +426,45 @@ class UserHandler{
         return rtn;
     };
 
+    async addGroupPermissionsAsync(event) {
+        let rtn = null;
+
+        try{
+            await jQuery.ajax({
+                url: "/admin/perms/group",
+                dataType: 'json',
+                type: 'POST',
+                async: true,
+                data: { name:  event.name, parent: event.parent, member: event.member },
+                beforeSend(xhr){
+                },
+                complete(xhr, textStatus) {
+                },
+                success(data, status) {
+                    
+                    userHandler.ifSignIn(data);
+
+                    if( _.lowerCase(data.status) == "ok"){
+                        rtn = 1;
+
+                        // Audit
+                        auditLogHandler.writeLog("system:permission", "Add group permissions: " + event.name + " 【" +  event.member + "】", 0);
+                    }
+
+                },
+                error(xhr, textStatus, errorThrown) {
+                    rtn = xhr.responseText;
+
+                    // Audit
+                    auditLogHandler.writeLog("system:permission", "Add group permissions: " + event.name + " 【" +  event.member + "】", 1);
+                }
+            });
+        } catch(err){
+            
+        }
+        return rtn;
+    };
+
     /* Delete group permissions */
     deleteGroupPermissions(event,token) {
         let rtn = null;
@@ -477,12 +516,11 @@ class UserHandler{
                 contentType: "application/json; charset=utf-8",
                 async: true,
                 data: JSON.stringify({name:event.name, parent:event.parent, member:event.member}),
-                beforeSend:function(xhr){
+                beforeSend(xhr){
                 },
-                complete: function(xhr, textStatus) {
-                    
+                complete(xhr, textStatus) {                    
                 },
-                success: function (data, status) {
+                success(data, status) {
 
                     userHandler.ifSignIn(data);
 
@@ -490,11 +528,11 @@ class UserHandler{
                         rtn = 1;
 
                         // Audit
-                        auditLogHandler.writeLog("Ussystem:permissioner", "Update group permissions: " + event.name + " 【" +  event.member + "】", 0);
+                        auditLogHandler.writeLog("ssystem:permissioner", "Update group permissions: " + event.name + " 【" +  event.member + "】", 0);
                     }
 
                 },
-                error: function(xhr, textStatus, errorThrown) {
+                error(xhr, textStatus, errorThrown) {
                     rtn = xhr.responseText;
 
                     // Audit
@@ -755,12 +793,12 @@ class UserHandler{
             dataType: 'json',
             type: 'GET',
             async: false,
-            beforeSend:function(xhr){
+            beforeSend(xhr){
             },
-            complete: function(xhr, textStatus) {
+            complete(xhr, textStatus) {
                 
             },
-            success: function (data, status) {
+            success(data, status) {
 
                 userHandler.ifSignIn(data);
 
@@ -772,7 +810,7 @@ class UserHandler{
                 }
 
             },
-            error: function(xhr, textStatus, errorThrown) {
+            error(xhr, textStatus, errorThrown) {
                 rtn = xhr.responseText;
 
                 // Audit
@@ -791,12 +829,12 @@ class UserHandler{
             dataType: 'json',
             type: 'GET',
             async: false,
-            beforeSend:function(xhr){
+            beforeSend(xhr){
             },
-            complete: function(xhr, textStatus) {
+            complete(xhr, textStatus) {
                 
             },
-            success: function (data, status) {
+            success(data, status) {
 
                 userHandler.ifSignIn(data);
 
@@ -808,7 +846,7 @@ class UserHandler{
                 }
 
             },
-            error: function(xhr, textStatus, errorThrown) {
+            error(xhr, textStatus, errorThrown) {
                 rtn = xhr.responseText;
 
                 // Audit
@@ -819,116 +857,131 @@ class UserHandler{
     };
 
      /* Set api permissions groups */
-     setApiPermissionsGroups(event) {
+     async setApiPermissionsGroupsAsync(event) {
         let rtn = null;
 
-        let form = new FormData();
+        try{
+            let form = new FormData();
 
-        _.forEach(event.roleGroups, (v)=>{
-            form.append("group", v);
-        })
+            _.forEach(event.roleGroups, (v)=>{
+                form.append("group", v);
+            })
 
-        jQuery.ajax({
-            url: `/admin/perms/api/${event.name}/group`,
-            dataType: 'json',
-            type: 'PUT',
-            processData: false,
-            contentType: false,
-            mimeType: "multipart/form-data",
-            async: false,
-            data: form,
-            beforeSend:function(xhr){
-            },
-            complete: function(xhr, textStatus) {
-                
-            },
-            success: function (data, status) {
+            await jQuery.ajax({
+                url: `/admin/perms/api/${event.name}/group`,
+                dataType: 'json',
+                type: 'PUT',
+                processData: false,
+                contentType: false,
+                mimeType: "multipart/form-data",
+                async: true,
+                data: form,
+                beforeSend(xhr){
+                },
+                complete(xhr, textStatus) {
+                    
+                },
+                success(data, status) {
 
-                userHandler.ifSignIn(data);
+                    userHandler.ifSignIn(data);
 
-                if( _.lowerCase(data.status) == "ok"){
-                    rtn = 1;
+                    if( _.lowerCase(data.status) == "ok"){
+                        rtn = 1;
+
+                        // Audit
+                        auditLogHandler.writeLog("system:permission", "Add api permissions Group: " + event.name, 0);
+                    }
+
+                },
+                error(xhr, textStatus, errorThrown) {
+                    rtn = xhr.responseText;
 
                     // Audit
-                    auditLogHandler.writeLog("system:permission", "Add api permissions Group: " + event.name, 0);
+                    auditLogHandler.writeLog("system:permission", "Add api permissions Group: " + event.name, 1);
                 }
+            });
+        } catch(err){
 
-            },
-            error: function(xhr, textStatus, errorThrown) {
-                rtn = xhr.responseText;
+        }
 
-                // Audit
-                auditLogHandler.writeLog("system:permission", "Add api permissions Group: " + event.name, 1);
-            }
-        });
         return rtn;
     };
 
     /* Set api permissions groups */
-    deleteApiPermissionsGroups(event) {
+    async deleteApiPermissionsGroupsAsync(event) {
         let rtn = null;
 
-        let groups = _.map(event.roleGroups, (v)=>{
-            return `group=${v}`;
-        }).join("&");
+        try{
+            let groups = _.map(event.roleGroups, (v)=>{
+                return `group=${v}`;
+            }).join("&");
 
-        jQuery.ajax({
-            url: `/admin/perms/api/${event.name}/group?${groups}`,
-            dataType: 'json',
-            type: 'DELETE',
-            async: false,
-            beforeSend:function(xhr){
-            },
-            complete: function(xhr, textStatus) {
-                
-            },
-            success: function (data, status) {
+            await jQuery.ajax({
+                url: `/admin/perms/api/${event.name}/group?${groups}`,
+                dataType: 'json',
+                type: 'DELETE',
+                async: true,
+                beforeSend(xhr){
+                },
+                complete(xhr, textStatus) {
+                    
+                },
+                success(data, status) {
 
-                userHandler.ifSignIn(data);
+                    userHandler.ifSignIn(data);
 
-                if( _.lowerCase(data.status) == "ok"){
-                    rtn = 1;
+                    if( _.lowerCase(data.status) == "ok"){
+                        rtn = 1;
+
+                        // Audit
+                        auditLogHandler.writeLog("system:permission", "Delete api permissions Group: " + event.name, 0);
+                    }
+
+                },
+                error(xhr, textStatus, errorThrown) {
+                    rtn = xhr.responseText;
 
                     // Audit
-                    auditLogHandler.writeLog("system:permission", "Delete api permissions Group: " + event.name, 0);
+                    auditLogHandler.writeLog("system:permission", "Delete api permissions Group: " + event.name, 1);
                 }
+            });
+        } catch(err){
 
-            },
-            error: function(xhr, textStatus, errorThrown) {
-                rtn = xhr.responseText;
+        }
 
-                // Audit
-                auditLogHandler.writeLog("system:permission", "Delete api permissions Group: " + event.name, 1);
-            }
-        });
         return rtn;
     };
 
     /* Refresh App Cache When CURD for /matrix/portal/tools */
-    refreshAppCache() {
+    async refreshAppCache() {
         
-        jQuery.ajax({
-            url: '/admin/perms/app/refresh',
-            dataType: 'json',
-            type: 'GET',
-            beforeSend:function(xhr){
-            },
-            complete: function(xhr, textStatus) {
-                // Audit
-                auditLogHandler.writeLog("system:permission", "Refresh app Cache", 0);
-            },
-            success: function (data, status) {
-                userHandler.ifSignIn(data);
-            },
-            error: function(xhr, textStatus, errorThrown) {
-                // Audit
-                auditLogHandler.writeLog("system:permission", "Refresh app Cache", 1);
-            }
-        });
-        
-    };
+        try {
+            await jQuery.ajax({
+                url: '/admin/perms/app/refresh',
+                dataType: 'json',
+                type: 'GET',
+                async: true,
+                beforeSend(xhr){
+                },
+                complete(xhr, textStatus) {
+                    
+                },
+                success(data, status) {
+                    userHandler.ifSignIn(data);
 
-    
+                    // Audit
+                    auditLogHandler.writeLog("system:permission", "Refresh app Cache", 0);
+                },
+                error(xhr, textStatus, errorThrown) {
+                    // Audit
+                    auditLogHandler.writeLog("system:permission", "Refresh app Cache", 1);
+                }
+            });
+        } catch(err){
+
+        }
+
+    }
 }
 
 var userHandler = new UserHandler();

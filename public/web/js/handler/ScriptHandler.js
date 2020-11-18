@@ -196,15 +196,16 @@ class ScriptHandler {
             dataType: 'json',
             type: 'GET',
             async: false,
-            beforeSend:function(xhr){
+            beforeSend(xhr){
             },
-            complete: function(xhr, textStatus) {
+            complete(xhr, textStatus) {
             },
-            success: function (data, status) {
+            success(data, status) {
 
                 userHandler.ifSignIn(data);
 
                 if( _.lowerCase(data.status) == "ok"){
+                    
                     rtn = data.message;
 
                     // Audit
@@ -212,12 +213,14 @@ class ScriptHandler {
                 }
 
             },
-            error: function(xhr, textStatus, errorThrown){
+            error(xhr, textStatus, errorThrown){
                 rtn = xhr.responseText;
+
                 // Audit
                 auditLogHandler.writeLog("collection:rule", "Get info: " + event.name + " " + event.version, 1);
             }
         });
+        
         return rtn;
     };
 

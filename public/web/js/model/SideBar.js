@@ -177,7 +177,7 @@ class SideBar {
                         </el-container>`,
             filters:{
                 pickIcon(icon){
-                    return `${window.ASSETS_ICON}/apps/png/${icon}?type=open&issys=${window.SignedUser_IsAdmin}`;
+                    return `${window.ASSETS_APP_ICON}/${icon}${window.ASSETS_POSTFIX}`;
                 }
             },
             created(){
@@ -377,7 +377,7 @@ class SideBar {
             },
             filters:{
                 pickIcon:function(icon){
-                    return `${window.ASSETS_ICON}/apps/png/${icon}?type=open&issys=${window.SignedUser_IsAdmin}`;
+                    return `${window.ASSETS_APP_ICON}/${icon}${window.ASSETS_POSTFIX}`;
                 }
             },
             methods: {
@@ -503,13 +503,13 @@ class SideBar {
     sideMenu(){
         const inst = this;
 
-        return{
+        return {
             i18n,
             delimiters: ['#{', '}#'],
             data: {
                 model: null,
-                preFixIcon: `${window.ASSETS_ICON}/apps/png/`,
-                postFixIcon: `?type=open&issys=${window.SignedUser_IsAdmin}`,
+                preFixIcon: `${window.ASSETS_APP_ICON}/`,
+                postFixIcon: `${window.ASSETS_POSTFIX}`,
                 isCollapse: true,
                 defaultActive: '/matrix/home',
                 appConfig: [],
@@ -636,15 +636,15 @@ class SideBar {
                 this.defaultActive = window.location.pathname;
             },
             filters:{
-                pickIcon:function(icon){
-                    return `${window.ASSETS_ICON}/apps/png/${icon}?type=open&issys=${window.SignedUser_IsAdmin}`;
+                pickIcon(icon){
+                    return `${window.ASSETS_APP_ICON}/${icon}${window.ASSETS_POSTFIX}`;
                 }
             },
             methods: {
                 init(){
                     fsHandler.callFsJScriptAsync("/matrix/user/user.js",window.SignedUser_UserName).then( (val)=>{
                         let rtn = val.message;
-
+                        
                         this.model = {
                             list: _.map(rtn.appListSelected,(v)=>{
                                     let _page = _.last(mx.getPage().split("/"));

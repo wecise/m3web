@@ -2513,6 +2513,7 @@ class System {
 											// 禁止admin权限操作
 											if(v.fullname == '/admin'){
 												disabled = true;
+												this.selectedNodes.push(v.fullname);
 											}
 
 											// LDAP 当前组织不能删除
@@ -4189,20 +4190,21 @@ class System {
 
 							if(_.isEmpty(val)){
 								_.forEach(this.dt.rows, (v,index)=>{
-									userHandler.deleteApiPermissionsGroups({name:v.name, roleGroups: _.map([this.roleGroup],'fullname') });
+									
+									userHandler.deleteApiPermissionsGroupsAsync({name:v.name, roleGroups: _.map([this.roleGroup],'fullname') });
 
 									// 删除角色组
 									let term = encodeURIComponent( JSON.stringify( { roleGroup: [this.roleGroup], data: [ _.extend(v, {checked:false} )] } ) );
-									fsHandler.callFsJScript("/matrix/system/updateGroupByApi.js", term);
+									fsHandler.callFsJScriptAsync("/matrix/system/updateGroupByApi.js", term);
 									
 								})	
 							} else {
 								_.forEach(val, (v,index)=>{
-									userHandler.setApiPermissionsGroups({name:v.name, roleGroups: _.map([this.roleGroup],'fullname') });
+									userHandler.setApiPermissionsGroupsAsync({name:v.name, roleGroups: _.map([this.roleGroup],'fullname') });
 
 									// 更新角色组
 									let term = encodeURIComponent( JSON.stringify( { roleGroup: [this.roleGroup], data: [ _.extend(v, {checked:true} )] } ) );
-									fsHandler.callFsJScript("/matrix/system/updateGroupByApi.js", term);
+									fsHandler.callFsJScriptAsync("/matrix/system/updateGroupByApi.js", term);
 								})
 							}
 							
@@ -4271,22 +4273,23 @@ class System {
 						},
 						onUpdateRoleGroup(row,index){
 							
-							let rtn = userHandler.setApiPermissionsGroups(row);
-							if(rtn === 1){
+							userHandler.setApiPermissionsGroupsAsync(row).then( (rtn)=>{
+								if(rtn === 1){
 								
-								this.$message({
-									type: 'success',
-									message: `${row.name} 角色组设置成功！`
-								});
-
-								this.initData();
-
-							} else {
-								this.$message({
-									type: 'error',
-									message: `${row.name} 角色组设置失败！`
-								});
-							}
+									this.$message({
+										type: 'success',
+										message: `${row.name} 角色组设置成功！`
+									});
+	
+									this.initData();
+	
+								} else {
+									this.$message({
+										type: 'error',
+										message: `${row.name} 角色组设置失败！`
+									});
+								}
+							} );
 						}
 					}
 				})
@@ -4661,20 +4664,22 @@ class System {
 											return false;
 										}
 
-										let rtn = userHandler.addGroupPermissions(this.role);
-
-										if(rtn == 1){
-											this.$message({
-												type: 'success',
-												message: `角色组: ${this.role.name} 添加成功！`
-											});
-											
-											_.delay(()=>{
+										userHandler.addGroupPermissionsAsync(this.role).then( (rtn)=>{
+											if(rtn == 1){
+												this.$message({
+													type: 'success',
+													message: `角色组: ${this.role.name} 添加成功！`
+												});
+												
 												self.onRefresh();
 												wnd.close();
-											},500);
-
-										}
+											} else {
+												this.$message({
+													type: 'error',
+													message: `角色组: ${this.role.name} 添加失败 ` + rtn
+												});
+											}
+										} );
 
 									}
 								}
@@ -4787,7 +4792,7 @@ class System {
 											node-key="fullname"
 											default-expand-all
 											highlight-current
-											:data="tree.nodes" 
+											:data="tree.nodes"
 											:props="tree.defaultProps" 
 											@node-click="onNodeClick"
 											@node-expand="onNodeExpand"
@@ -4970,7 +4975,7 @@ class System {
 																<h4>用户成员</h4>
 																<ldap-manage-select root="/" 
 																	:rowData="dialog.ldap.row" 
-																	@update:selectedLdap="onSetRoleGroupByLdap(dialog.ldap.row,$event)">
+																	@update:selectedLdap="onSetRoleGroupByLdap(dialog.ldap.row, $event)">
 																</ldap-manage-select>
 															</el-col>
 														</el-row>
@@ -5029,7 +5034,6 @@ class System {
 								this.info.push(`共 ${this.dt.rows.length} 项`);
 								this.info.push(`已选择 ${this.dt.selected.length} 项`);
 								this.info.push(moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
-								this.$refs.table.doLayout();
 							},
 							deep:true,
 							immediate:true
@@ -5046,11 +5050,9 @@ class System {
 					},
 					methods: {	
 						onPageSizeChange(val) {
-                            console.log(1,val)
                             this.dt.pagination.pageSize = val;
                         },
                         onCurrentPageChange(val) {
-                            console.log(2,val)
                             this.dt.pagination.currentPage = val;
                         },				
 						initSplit(){
@@ -5069,7 +5071,7 @@ class System {
 								if($(".el-table-column--selection",this.$el).is(':visible')){
 									_.delay(()=>{
 										//this.$refs.table.setCurrentRow(this.dt.rows[0]);
-										this.$refs.table.doLayout();
+										//this.$refs.table.doLayout();
 									},1000)
 								} else {
 									setTimeout(doLayout,50);
@@ -5268,20 +5270,24 @@ class System {
 											return false;
 										}
 
-										let rtn = userHandler.addGroupPermissions(this.role);
-
-										if(rtn == 1){
-											this.$message({
-												type: 'success',
-												message: `角色组: ${this.role.name} 添加成功！`
-											});
-											
-											_.delay(()=>{
+										userHandler.addGroupPermissionsAsync(this.role).then( (rtn)=>{
+											if(rtn == 1){
+												
+												this.$message({
+													type: 'success',
+													message: `角色组: ${this.role.name} 添加成功！`
+												});
+												
 												self.onRefresh();
 												wnd.close();
-											},500);
+											} else {
+												this.$message({
+													type: 'error',
+													message: `角色组: ${this.role.name} 添加失败 ` + rtn
+												});
+											}
+										} );
 
-										}
 
 									}
 								}
@@ -5328,7 +5334,9 @@ class System {
                             });
 						},
 						initNodes() {
-							this.tree.nodes = fsHandler.callFsJScript("/matrix/system/getRoleGroupTree.js",null).message;
+							fsHandler.callFsJScriptAsync("/matrix/system/getRoleGroupTree.js",null).then( (rtn)=>{
+								this.tree.nodes = rtn.message;
+							} );
 						},
 						onNodeClick(node){
 							this.onForward(row.fullname);
@@ -5355,8 +5363,9 @@ class System {
 								} else {
 									this.$message({
 										type: "error",
-										message: "更新失败！"
+										message: "更新失败 " + rtn
 									})
+									//this.initData();
 								}
 							} );
 							
@@ -5365,6 +5374,9 @@ class System {
 						onSetRoleGroupByLdap(row,event){
 							
 							_.forEach(event,(v)=>{
+								
+								if(_.isUndefined(v)) return;
+
 								if(v.checked){
 									row.member.push( 'U'+v.fullname );
 								} else {

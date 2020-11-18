@@ -62,21 +62,23 @@ class  JobHandler {
             type: 'POST',
             async:false,
             data: job,
-            beforeSend:function(xhr){},
-            complete: function(xhr, textStatus) {},
-            success: function (data, status) {
+            beforeSend(xhr){},
+            complete(xhr, textStatus) {},
+            success(data, status) {
 
                 userHandler.ifSignIn(data);
 
                 rtn = data;
 
             },
-            error: function(xhr, textStatus, errorThrown){
-                rtn = xhr.responseJSON;
+            error(xhr, textStatus, errorThrown){
+                rtn = xhr.responseText;
             }
         });
+        
         return rtn;
     };
+    
 
     /*
     *   作业管理

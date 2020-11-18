@@ -585,6 +585,24 @@
                         return false;
                     }
 
+                    if(_.includes(['update'],_list.meta.type)){
+                        this.$message({
+                            type: "success",
+                            message: "更新数据成功"
+                        });
+                        eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'update', node: null});
+                        
+                        self.result = { id:self.id, bid: self.bid, type: 'update', data: [], columns: [], rootclass: null, consume: _list.consume };
+
+                        self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
+                                                                            type: 'omdb-query-output-console',
+                                                                            name: self.id+'-output-table',
+                                                                            title: `结果(耗时:${_list.consume})`,
+                                                                            model: self.result
+                                                                        });
+                        return false;
+                    }
+
                     if(_.includes(['create edgetype'],_list.meta.type)){
                         this.$message({
                             type: "success",

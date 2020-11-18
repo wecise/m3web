@@ -752,7 +752,7 @@ class Summary {
                     
                     if(!this.mode) return false;
 
-                    let grid = GridStack.init();
+                    //let grid = GridStack.init();
                     
 
                 }

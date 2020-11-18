@@ -1753,27 +1753,39 @@ class Omdb{
                             <el-main style="height:100%;padding:0px;" v-else>
                                 <div style="padding:20px;" v-if="model.type=='create-class'">
                                     <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 创建类成功</h3>
+                                    <p>耗时：#{model.consume}#</p>
                                 </div>
                                 <div style="padding:20px;" v-else-if="model.type=='drop-class'">
                                     <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 删除类成功</h3>
+                                    <p>耗时：#{model.consume}#</p>
+                                </div>
+                                <div style="padding:20px;" v-else-if="model.type=='insert-class'">
+                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 插入数据成功</h3>
+                                    <p>耗时：#{model.consume}#</p>
                                 </div>
                                 <div style="padding:20px;" v-else-if="model.type=='delete'">
                                     <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 删除数据成功</h3>
+                                    <p>耗时：#{model.consume}#</p>
+                                </div>
+                                <div style="padding:20px;" v-else-if="model.type=='update'">
+                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 更新数据成功</h3>
+                                    <p>耗时：#{model.consume}#</p>
                                 </div>
                                 <div style="padding:20px;" v-else-if="model.type=='create edge'">
                                     <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 创建关系成功</h3>
+                                    <p>耗时：#{model.consume}#</p>
                                 </div>
                                 <div style="padding:20px;" v-else-if="model.type=='create-edge-type'">
                                     <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 创建关系类型成功</h3>
+                                    <p>耗时：#{model.consume}#</p>
                                 </div>
                                 <div style="padding:20px;" v-else-if="model.type=='drop-edge-type'">
                                     <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 删除关系成功</h3>
+                                    <p>耗时：#{model.consume}#</p>
                                 </div>
                                 <div style="padding:20px;" v-else-if="model.type=='alter-class'">
-                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 更新类成功</h3>
-                                </div>
-                                <div style="padding:20px;" v-else-if="model.type=='insert-class'">
-                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 插入成功</h3>
+                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 更新类属性成功</h3>
+                                    <p>耗时：#{model.consume}#</p>
                                 </div>
                                 <div style="padding:20px;" v-else-if="model.type=='error'">
                                     <h3><i class="el-icon-info" style="font-size:32px;color:#ff0000;"></i> 操作失败</h3>

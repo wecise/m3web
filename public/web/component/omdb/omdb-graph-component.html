@@ -271,8 +271,7 @@
                     // 开始绘图
                     self.model.graph.graph.getModel().beginUpdate();
                     
-                    console.log("Nodes="+allNodes.length, "Edges="+allEdges.length);
-
+                    
                     // 绘制节点
                     _.forEach(allNodes,function(v){
 
@@ -293,7 +292,7 @@
                         }
 
                         let node = self.model.graph.graph.insertVertex(self.model.graph.parent, v.id, _name, 50, 50, 120, 50,
-                            `shape=image;html=1;image=${window.ASSETS_ICON}/entity/png/${_type}.png?type=download&issys=${window.SignedUser_IsAdmin};verticalLabelPosition=bottom;verticalAlign=top;`);
+                            `shape=image;html=1;image=${window.ASSETS_ENTITY_ICON}/${_type}.png${window.ASSETS_POSTFIX};verticalLabelPosition=bottom;verticalAlign=top;`);
 
 
                         _.extend(self.model.graph.nodes,{[v.id]:node});
@@ -301,13 +300,13 @@
 
                         //add
                         if(v.type && v.type === 'add'){
-                            let overlay = new mxCellOverlay(new mxImage(`/fs/assets/images/apps/png/flag/add.png?issys=true&type=download`,24,24), "新增", mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
+                            let overlay = new mxCellOverlay(new mxImage(`${window.ASSETS_APP_ICON}/flag/add.png${window.ASSETS_POSTFIX}`,24,24), "新增", mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
                             self.model.graph.graph.addCellOverlay(node, overlay);
                         }
 
                         //delete
                         if(v.type && v.type === 'del'){
-                            let overlay = new mxCellOverlay(new mxImage(`/fs/assets/images/apps/png/flag/delete.png?issys=true&type=download`,24,24), "删除", mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
+                            let overlay = new mxCellOverlay(new mxImage(`${window.ASSETS_APP_ICON}/flag/delete.png${window.ASSETS_POSTFIX}`,24,24), "删除", mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
                             self.model.graph.graph.addCellOverlay(node, overlay);
                         }
 
@@ -601,7 +600,7 @@
 	                    let parent = `/opt/creative/${window.SignedUser_UserName}`;
 	                    let ftype = 'imap';
 	                    let name = `${str}.${ftype}`;
-	                    let attr = {remark: null, ctime: _.now(), author: window.SignedUser_UserName, type: 'imap', icon: `${window.ASSETS_ICON}/files/png/imap.png?type=download&issys=${window.SignedUser_IsAdmin}`};
+	                    let attr = {remark: null, ctime: _.now(), author: window.SignedUser_UserName, type: 'imap', icon: `${window.ASSETS_FILES_ICON}/imap.png${window.ASSETS_POSTFIX}`};
                         let rtn = fsHandler.fsNew('file', parent, name, xml, attr);
 	                    if(rtn == 1){
 
@@ -627,14 +626,14 @@
 
                 let tb = new mxToolbar(content);
 
-                tb.addItem('{{.i18n.Tr "creative-saveas"}}', `${window.ASSETS_ICON}/tools/png/saveas.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
+                tb.addItem('{{.i18n.Tr "creative-saveas"}}', `${window.ASSETS_TOOLS_ICON}/saveas.png${window.ASSETS_POSTFIX}`,function(evt)
                 {
                     self.saveas();
 
                 },null,'tools-item');
 
 
-                tb.addItem('{{.i18n.Tr "creative-tools-refresh"}}', `${window.ASSETS_ICON}/tools/png/refresh.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
+                tb.addItem('{{.i18n.Tr "creative-tools-refresh"}}', `${window.ASSETS_TOOLS_ICON}/refresh.png${window.ASSETS_POSTFIX}`,function(evt)
                 {
                     $(self.$el).find("#container").empty();
 
@@ -642,17 +641,17 @@
 
                 },null,'tools-item');
 
-                tb.addItem('{{.i18n.Tr "creative-tools-zoom_in"}}', `${window.ASSETS_ICON}/tools/png/zoom_out.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
+                tb.addItem('{{.i18n.Tr "creative-tools-zoom_in"}}', `${window.ASSETS_TOOLS_ICON}/zoom_out.png${window.ASSETS_POSTFIX}`,function(evt)
                 {
                     self.model.graph.graph.zoomIn();
                 },null,'tools-item');
 
-                tb.addItem('{{.i18n.Tr "creative-tools-zoom_out"}}', `${window.ASSETS_ICON}/tools/png/zoom_in.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
+                tb.addItem('{{.i18n.Tr "creative-tools-zoom_out"}}', `${window.ASSETS_TOOLS_ICON}/zoom_in.png${window.ASSETS_POSTFIX}`,function(evt)
                 {
                     self.model.graph.graph.zoomOut();
                 },null,'tools-item');
 
-                tb.addItem('{{.i18n.Tr "creative-tools-print"}}', `${window.ASSETS_ICON}/tools/png/print.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
+                tb.addItem('{{.i18n.Tr "creative-tools-print"}}', `${window.ASSETS_TOOLS_ICON}/print.png${window.ASSETS_POSTFIX}`,function(evt)
                 {
                     var scale = mxUtils.getScaleForPageCount(1, self.model.graph.graph);
                     var preview = new mxPrintPreview(self.model.graph.graph, scale);
@@ -660,13 +659,13 @@
 
                 },null,'tools-item');
 
-                tb.addItem('{{.i18n.Tr "creative-tools-fullscreen"}}', `${window.ASSETS_ICON}/tools/png/fullscreen.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
+                tb.addItem('{{.i18n.Tr "creative-tools-fullscreen"}}', `${window.ASSETS_TOOLS_ICON}/fullscreen.png${window.ASSETS_POSTFIX}`,function(evt)
                 {
                     mx.fullScreen();
 
                 },null,'tools-item');
 
-                tb.addItem('{{.i18n.Tr "creative-tools-direction"}}', `${window.ASSETS_ICON}/tools/png/direction.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
+                tb.addItem('{{.i18n.Tr "creative-tools-direction"}}', `${window.ASSETS_TOOLS_ICON}/direction.png${window.ASSETS_POSTFIX}`,function(evt)
                 {
                     self.model.graph.graph.getModel().beginUpdate();
 
@@ -694,7 +693,7 @@
 
                 },null,'tools-item-direction');
 
-                tb.addItem('{{.i18n.Tr "creative-tools-path"}}', `${window.ASSETS_ICON}/tools/png/path.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
+                tb.addItem('{{.i18n.Tr "creative-tools-path"}}', `${window.ASSETS_TOOLS_ICON}/path.png${window.ASSETS_POSTFIX}`,function(evt)
                 {
                     self.path();
 

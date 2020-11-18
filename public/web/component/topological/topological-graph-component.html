@@ -946,7 +946,7 @@
         },
         filters: {
             genFileName(event){
-                return `${window.ASSETS_ICON}/tools/png/${event}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
+                return `${window.ASSETS_TOOLS_ICON}/${event}.png${window.ASSETS_POSTFIX}`;
             },
             pickScreenStyle(evt){
                 if(evt){
@@ -972,9 +972,9 @@
             },
             pickLineStyleImage(item){
                 try{
-                    return `${window.ASSETS_ICON}/graph/tools/line/${item.name}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
+                    return `${window.ASSETS_GRAPH_ICON}/tools/line/${item.name}.png${window.ASSETS_POSTFIX}`;
                 } catch(err){
-                    return `${window.ASSETS_ICON}/graph/tools/line/straight.png?type=open&issys=${window.SignedUser_IsAdmin}`;
+                    return `${window.ASSETS_GRAPH_ICON}/tools/line/straight.png${window.ASSETS_POSTFIX}`;
                 }
             }
         },
@@ -1096,11 +1096,11 @@
 
             // Sets the collapse and expand icons. The values below are the default
             // values, but this is how to replace them if you need to.
-            mxGraph.prototype.collapsedImage = new mxImage('/fs/assets/images/graph/tools/collapsed.gif?type=open&issys=true', 9, 9);
-            mxGraph.prototype.expandedImage = new mxImage('/fs/assets/images/graph/tools/expanded.gif?type=open&issys=true', 9, 9);
+            mxGraph.prototype.collapsedImage = new mxImage(`${window.ASSETS_GRAPH_ICON}/tools/collapsed.gif${window.ASSETS_POSTFIX}`, 9, 9);
+            mxGraph.prototype.expandedImage = new mxImage(`${window.ASSETS_GRAPH_ICON}/tools/expanded.gif${window.ASSETS_POSTFIX}`, 9, 9);
             
             // Adds connect icon to selected vertex
-			var connectorSrc = '/fs/assets/images/tools/png/handle-connect.png?type=open&issys=true';
+			var connectorSrc = `${window.ASSETS_TOOLS_ICON}/handle-connect.png${window.ASSETS_POSTFIX}`;
             var vertexHandlerInit = mxVertexHandler.prototype.init;
 			mxVertexHandler.prototype.init = function(){
 				// TODO: Use 4 sizers, move outside of shape
@@ -1924,7 +1924,7 @@
 
                             // 选择节点渲染模式：icon/shape
                             let node = null;
-                            let imageUrl = `${window.ASSETS_ICON}/entity/png/${_type}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
+                            let imageUrl = `${window.ASSETS_ENTITY_ICON}/${_type}.png${window.ASSETS_POSTFIX}`;
 
                             // icon渲染
                             if(this.model.control.ifIcon){
@@ -2064,7 +2064,7 @@
 
                             // 选择节点渲染模式：icon/shape
                             let node = null;
-                            let imageUrl = `${window.ASSETS_ICON}/entity/png/${_type}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
+                            let imageUrl = `${window.ASSETS_ENTITY_ICON}/${_type}.png?type=open${window.ASSETS_POSTFIX}`;
 
                             // icon渲染
                             if(this.model.control.ifIcon){
@@ -2274,7 +2274,7 @@
                             // normal
                             // 选择节点渲染模式：icon/shape
                             let node = null;
-                            let imageUrl = `${window.ASSETS_ICON}/entity/png/${_type}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
+                            let imageUrl = `${window.ASSETS_ENTITY_ICON}/${_type}.png${window.ASSETS_POSTFIX}`;
                             
                             // icon渲染
                             if(this.model.control.ifIcon){
@@ -2297,13 +2297,13 @@
 
                             //add
                             if(v.type && v.type === 'add'){
-                                let overlay = new mxCellOverlay(new mxImage(`/fs/assets/images/apps/png/flag/add.png?issys=true&type=open`,24,24), "新增", mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
+                                let overlay = new mxCellOverlay(new mxImage(`${window.ASSETS_APP_ICON}/flag/add.png${window.ASSETS_POSTFIX}`,24,24), "新增", mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
                                 graph.addCellOverlay(node, overlay);
                             }
 
                             //delete
                             if(v.type && v.type === 'del'){
-                                let overlay = new mxCellOverlay(new mxImage(`/fs/assets/images/apps/png/flag/delete.png?issys=true&type=open`,24,24), "删除", mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
+                                let overlay = new mxCellOverlay(new mxImage(`${window.ASSETS_APP_ICON}/flag/delete.png${window.ASSETS_POSTFIX}`,24,24), "删除", mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
                                 graph.addCellOverlay(node, overlay);
                             }
 
@@ -2379,7 +2379,7 @@
                         if (cell != null) {
                                 
                             this.model.editor.graph.removeCellOverlays(cell);
-                            let overlay = new mxCellOverlay(new mxImage(`/fs/assets/images/others/png/${this.global.count}.png?issys=true&type=open`,20,20), '', mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(10,10));
+                            let overlay = new mxCellOverlay(new mxImage(`${window.ASSETS_OTHERS_ICON}/${this.global.count}.png${window.ASSETS_POSTFIX}`,20,20), '', mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(10,10));
                             this.model.editor.graph.addCellOverlay(cell, overlay);
 
                             // 定位cell
@@ -2498,7 +2498,7 @@
                         // normal
                         // 选择节点渲染模式：icon/shape
                         let node = null;
-                        let imageUrl = `${window.ASSETS_ICON}/entity/png/${_type}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
+                        let imageUrl = `${window.ASSETS_ENTITY_ICON}/${_type}.png${window.ASSETS_POSTFIX}`;
                         
                         // icon渲染
                         if(this.model.control.ifIcon){
@@ -2521,13 +2521,13 @@
 
                         //add
                         if(v.type && v.type === 'add'){
-                            let overlay = new mxCellOverlay(new mxImage(`/fs/assets/images/apps/png/flag/add.png?issys=true&type=open`,24,24), "新增", mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
+                            let overlay = new mxCellOverlay(new mxImage(`${window.APPS_POSTFIX}/flag/add.png${window.ASSETS_POSTFIX}`,24,24), "新增", mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
                             graph.addCellOverlay(node, overlay);
                         }
 
                         //delete
                         if(v.type && v.type === 'del'){
-                            let overlay = new mxCellOverlay(new mxImage(`/fs/assets/images/apps/png/flag/delete.png?issys=true&type=open`,24,24), "删除", mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
+                            let overlay = new mxCellOverlay(new mxImage(`${window.APPS_POSTFIX}/flag/delete.png${window.ASSETS_POSTFIX}`,24,24), "删除", mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
                             graph.addCellOverlay(node, overlay);
                         }
 
@@ -2603,7 +2603,7 @@
                     if (cell != null) {
                             
                         this.model.editor.graph.removeCellOverlays(cell);
-                        let overlay = new mxCellOverlay(new mxImage(`/fs/assets/images/others/png/${this.global.count}.png?issys=true&type=open`,20,20), '', mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(10,10));
+                        let overlay = new mxCellOverlay(new mxImage(`${window.ASSETS_OTHERS_ICON}/${this.global.count}.png${window.ASSETS_POSTFIX}`,20,20), '', mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(10,10));
                         this.model.editor.graph.addCellOverlay(cell, overlay);
 
                         // 定位cell
@@ -2966,7 +2966,7 @@
             },
             createOverlayByTip(image, tooltip) {
                             
-                let overlay = new mxCellOverlay(new mxImage(`/fs/assets/images/apps/png/severity/${image}.png?issys=true&type=open`,24,24), tooltip, mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
+                let overlay = new mxCellOverlay(new mxImage(`${window.ASSETS_APP_ICON}/severity/${image}.png${window.ASSETS_POSTFIX}`,24,24), tooltip, mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
                 
                 return overlay;
             },
@@ -3298,7 +3298,7 @@
                                         // normal
                                         // 选择节点渲染模式：icon/shape
                                         let node = null;
-                                        let imageUrl = `${window.ASSETS_ICON}/entity/png/${type}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
+                                        let imageUrl = `${window.ASSETS_ENTITY_ICON}/${type}.png${window.ASSETS_POSTFIX}`;
                                         
                                         // icon渲染
                                         if(self.model.control.ifIcon){
@@ -3349,7 +3349,7 @@
                         
                         // Tip img
                         let size = 24;
-                        var imgTip = mxUtils.createImage('/fs/assets/images/tools/png/tip.png?type=open&issys=true');
+                        var imgTip = mxUtils.createImage(`${window.ASSETS_TOOLS_ICON}/tip.png${window.ASSETS_POSTFIX}`);
                         imgTip.setAttribute('title', '备注');
                         imgTip.style.position = 'absolute';
                         imgTip.style.cursor = 'pointer';
@@ -3379,7 +3379,7 @@
                         this.images.push(imgTip);
 
                         // Info img
-                        var imgInfo = mxUtils.createImage('/fs/assets/images/tools/png/info.png?type=open&issys=true');
+                        var imgInfo = mxUtils.createImage(`${window.ASSETS_TOOLS_ICON}/info.png${window.ASSETS_POSTFIX}`);
                         imgInfo.setAttribute('title', '信息');
                         imgInfo.style.position = 'absolute';
                         imgInfo.style.cursor = 'pointer';
@@ -3614,7 +3614,7 @@
 	                    let parent = '/opt/creative/admin';
 	                    let ftype = 'imap';
 	                    let name = `${str}.${ftype}`;
-	                    let attr = {remark: null, ctime: _.now(), author: window.SignedUser_UserName, type: 'imap', icon: `${window.ASSETS_ICON}/files/png/imap.png?type=open&issys=${window.SignedUser_IsAdmin}`};
+	                    let attr = {remark: null, ctime: _.now(), author: window.SignedUser_UserName, type: 'imap', icon: `${window.ASSETS_FILES_ICON}/imap.png${window.ASSETS_POSTFIX}`};
                         let rtn = fsHandler.fsNew('file', parent, name, xml, attr);
 	                    if(rtn == 1){
 
@@ -3830,7 +3830,7 @@
 
                     if( this.graphData['diff'] && 'add' in this.graphData['diff'] ){
                         _.forEach(this.graphData['diff']['add']['nodes'], (v)=>{
-                            let overlay = new mxCellOverlay(new mxImage(`/fs/assets/images/apps/png/flag/add.png?issys=true&type=open`,24,24), "新增", mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
+                            let overlay = new mxCellOverlay(new mxImage(`${window.ASSETS_APP_ICON}/flag/add.png${window.ASSETS_POSTFIX}`,24,24), "新增", mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
                             let cell = this.model.editor.graph.getModel().getCell(v.id);
                             this.model.editor.graph.addCellOverlay(cell, overlay);
                         })
@@ -3845,7 +3845,7 @@
                     if( this.graphData['diff'] && 'del' in this.graphData['diff'] ){
 
                         _.forEach(this.graphData['diff']['del']['nodes'], (v)=>{
-                            let overlay = new mxCellOverlay(new mxImage(`/fs/assets/images/apps/png/flag/delete.png?issys=true&type=open`,24,24), "删除", mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
+                            let overlay = new mxCellOverlay(new mxImage(`${window.ASSETS_APP_ICON}/flag/delete.png${window.ASSETS_POSTFIX}`,24,24), "删除", mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
                             let cell = this.model.editor.graph.getModel().getCell(v.id);
                             this.model.editor.graph.addCellOverlay(cell, overlay);
                         })
@@ -3979,7 +3979,7 @@
                     // normal
                     let type = tNode.key.split(":")[0];
                     let node = this.model.editor.graph.insertVertex(this.model.graph.parent, tNode.key, tNode.label, 50, 50, 120, 50,
-                                `shape=image;html=1;image=${window.ASSETS_ICON}/entity/png/${type}.png?type=open&issys=${window.SignedUser_IsAdmin};verticalLabelPosition=bottom;verticalAlign=top;`);
+                                `shape=image;html=1;image=${window.ASSETS_ENTITY_ICON}/${type}.png${window.ASSETS_POSTFIX};verticalLabelPosition=bottom;verticalAlign=top;`);
                     
                     // node directory
                     _.extend(this.model.graph.nodes,{[tNode.key]:node});
@@ -4167,7 +4167,7 @@
                     _.forEach(vertices, (v)=>{
                         let style = this.model.editor.graph.getModel().getStyle(v);
                         let type = _.head(v.id.split(":")) || 'matrix';
-                        let imageUrl = `${window.ASSETS_ICON}/entity/png/${type}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
+                        let imageUrl = `${window.ASSETS_ENTITY_ICON}/${type}.png${window.ASSETS_POSTFIX}`;
                         
                         // 图标
                         if(this.model.control.ifIcon){
@@ -4260,7 +4260,7 @@
                     // normal
                     // 选择节点渲染模式：icon/shape
                     let node = null;
-                    let imageUrl = `${window.ASSETS_ICON}/entity/png/${_type}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
+                    let imageUrl = `${window.ASSETS_ENTITY_ICON}/${_type}.png${window.ASSETS_POSTFIX}`;
                     
                     // icon渲染
                     if(this.model.control.ifIcon){
@@ -4545,7 +4545,7 @@
             addEntityNoteHandler(){
                 // 根据实体ID定义该实体note存储位置
                 this.entity.dialogNoteForEntity.model.note.parent = "/storage/entity/notes/" + this.entity.dialogNoteForEntity.model.id;
-                this.entity.dialogNoteForEntity.model.note.name = "note_" + moment().format("YYYY-MM-DD HH:MM:SS")+".md";
+                this.entity.dialogNoteForEntity.model.note.name = "note_" + moment().format("YYYY-MM-DD HH:mm:SS")+".md";
                 // 文件存在
                 try{
                     let rtn = fsHandler.fsCheck(this.entity.dialogNoteForEntity.model.note.parent,this.entity.dialogNoteForEntity.model.note.name); 
@@ -4584,7 +4584,7 @@
 
                         let ftype = "html";
                         let attr = {remark: "", ctime: _.now(), author: window.SignedUser_UserName, type: ftype};
-                        let name = '报告_' + moment().format("YYYY-MM-DD HH:MM:SS");
+                        let name = '报告_' + moment().format("YYYY-MM-DD HH:mm:SS");
                         let html = `<!DOCTYPE html>
                                     <html>
                                         <head>

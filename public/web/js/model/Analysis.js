@@ -803,14 +803,14 @@ class Analysis {
 
                             // Drag View
                             _.delay(()=>{
-                                let grid = GridStack.init({
+                                /* let grid = GridStack.init({
                                     resizable: {
                                         handles: 'e, se, s, sw, w'
                                     },
                                 });
                                 grid.on('gsresizestop', function(event, elem) {
                                     eventHub.$emit("WINDOW-RESIZE-EVENT");
-                                });
+                                }); */
                             },500)
                         })
                     },

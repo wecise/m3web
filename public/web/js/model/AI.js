@@ -245,7 +245,7 @@ class AI {
                     template: `<el-container :id="id" style="height:100%;">
                                     <el-header style="line-height:40px;height:40px;text-align:right;">
                                         <el-tooltip content="保存规则">
-                                            <el-button type="text" @click="onSave" icon="el-icon-position"></el-button>
+                                            <el-button type="text" @click="onSave" icon="far fa-save"></el-button>
                                         </el-tooltip>
                                         <el-tooltip content="删除规则">
                                             <el-button type="text" @click="onDelete" icon="el-icon-delete"></el-button>
@@ -682,8 +682,8 @@ class AI {
     
                                 } else {
                                     this.$message({
-                                        type: 'warning',
-                                        message: '保存失败:' + rt.message
+                                        type: 'error',
+                                        message: '保存失败:' + rt
                                     })
                                 }
                             } );
@@ -768,7 +768,7 @@ class AI {
                     template:   `<el-container :id="id" style="height:100%;" v-if="model.content">
                                     <el-header style="line-height:40px;height:40px;text-align:right;">
                                         <el-tooltip content="保存规则">
-                                            <el-button type="text" @click="save" icon="el-icon-position"></el-button>
+                                            <el-button type="text" @click="save" icon="far fa-save"></el-button>
                                         </el-tooltip>
                                         <el-tooltip content="删除规则">
                                             <el-button type="text" @click="remove" icon="el-icon-delete"></el-button>
@@ -916,7 +916,7 @@ class AI {
                     template:   `<el-container :id="id" style="height:100%;">
                                     <el-header style="line-height:40px;height:40px;text-align:right;">
                                         <el-tooltip content="保存规则">
-                                            <el-button type="text" @click="save"icon="el-icon-position"></el-button>
+                                            <el-button type="text" @click="save"icon="far fa-save"></el-button>
                                         </el-tooltip>
                                         <el-tooltip content="删除规则">
                                             <el-button type="text"  @click="remove" icon="el-icon-delete"></el-button>
@@ -1064,7 +1064,7 @@ class AI {
                     template:   `<el-container :id="id" style="height:100%;">
                                     <el-header style="line-height:40px;height:40px;text-align:right;">
                                         <el-tooltip content="保存规则">
-                                            <el-button type="text"  @click="save"icon="el-icon-position"></el-button>
+                                            <el-button type="text"  @click="save"icon="far fa-save"></el-button>
                                         </el-tooltip>
                                         <el-tooltip content="删除规则">
                                             <el-button type="text" @click="remove" icon="el-icon-delete"></el-button>
@@ -1212,7 +1212,7 @@ class AI {
                     template:   `<el-container :id="id" style="height:100%;">
                                     <el-header style="line-height:40px;height:40px;text-align:right;">
                                         <el-tooltip content="保存规则">
-                                            <el-button type="text" @click="save"icon="el-icon-position"></el-button>
+                                            <el-button type="text" @click="save"icon="far fa-save"></el-button>
                                         </el-tooltip>
                                         <el-tooltip content="删除规则">
                                             <el-button type="text" @click="remove" icon="el-icon-delete"></el-button>
@@ -1360,7 +1360,7 @@ class AI {
                     template:   `<el-container :id="id" style="height:100%;">
                                     <el-header style="line-height:40px;height:40px;text-align:right;">
                                         <el-tooltip content="保存规则">
-                                            <el-button type="text" @click="save"icon="el-icon-position"></el-button>
+                                            <el-button type="text" @click="save"icon="far fa-save"></el-button>
                                         </el-tooltip>
                                         <el-tooltip content="删除规则">
                                             <el-button type="text" @click="remove" icon="el-icon-delete"></el-button>
@@ -1590,7 +1590,7 @@ class AI {
                     template:   `<el-container :id="id" style="height:100%;">
                                     <el-header style="line-height:40px;height:40px;text-align:right;">
                                         <el-tooltip content="保存规则">
-                                            <el-button type="text" @click="onSave" icon="el-icon-position"></el-button>
+                                            <el-button type="text" @click="onSave" icon="far fa-save"></el-button>
                                         </el-tooltip>
                                         <el-tooltip content="删除规则">
                                             <el-button type="text" @click="onDelete" icon="el-icon-delete"></el-button>

@@ -451,13 +451,14 @@ class Pipe {
                         },
                         // 图事件绑定
                         initGraphEvent(graph){
-                            // 事件ADD_CELLS
+                            // ADD_CELLS
                             graph.addListener(mxEvent.ADD_CELLS, (sender, evt)=> {
                                     
                                 let parent = evt.getProperty("parent");
                     
                                 if (parent != null) {
-                                    console.log(parent.getId())
+                                    // 生成一个配置实例
+                                    this.newInstance(this.model, parent.getId());
                                 }
 
                                 evt.consume();
@@ -868,7 +869,11 @@ class Pipe {
                                 var model = graph.getModel();
                                 
                                 var v1 = null;
-                                var id = data.fileContent.name + `:${_.now()}`;
+                                
+                                // 节点ID
+                                console.log(data)
+                                var source = data.fullname.replace(/.json/,'');
+                                var id = [source, `${_.now()}`].join(":");
                                 
                                 model.beginUpdate();
                                 try {
@@ -1007,6 +1012,15 @@ class Pipe {
                         // 图自适应大小
                         onFit(){
                             this.editor.execute("fit");
+                        },
+                        // 生成配置实例
+                        newInstance(model, id){
+                            let term = encodeURIComponent( JSON.stringify( { model:model, id:id } ) );
+                            fsHandler.callFsJScriptAsync("/matrix/pipe/newInstance.js", term);
+                        },
+                        // 删除配置实例
+                        deleteInstance(id){
+                            fsHandler.callFsJScriptAsync("/matrix/pipe/deleteInstance.js", encodeURIComponent(id));
                         }
                     }
                 })
