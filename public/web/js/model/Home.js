@@ -323,7 +323,7 @@ class Home extends Matrix {
 
                                 this.$message({
                                     type: "info",
-                                    message: this.$t('home.tip.searchTip')
+                                    message: this.$t('home.tip.search')
                                 });
                                 
                                 return false;
