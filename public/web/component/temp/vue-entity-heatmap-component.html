@@ -1,0 +1,245 @@
+<code>
+
+	<style>
+		/*----------  style  ----------*/
+		
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="vue-entity-heatmap-component"  ----------*/
+	<template>
+		<div style='width:100%;height:480px;margin:0px 0px;padding:0px 0px;'></div>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="vue-entity-heatmap-component">
+	{
+		
+	    delimiters: ['${', '}'],
+	    props: {
+	        model: Array,
+	        preset: Object, // search preset
+	        preconfig: Object // config for columns, time
+	    },
+	    data: function () {
+	        return {
+	            chart: Object,
+	            option: {
+	                        tooltip: {
+	                            position: 'top'
+	                        },
+	                        animation: true,
+	                        grid: {
+	                            height: '80%',
+	                            x: '10%',
+	                            y: '10%'
+	                        },
+	                        xAxis: {
+	                            type: 'category',
+	                            data: [],
+	                            splitArea: {
+	                                show: true
+	                            }
+	                        },
+	                        yAxis: {
+	                            type: 'category',
+	                            data: [],
+	                            splitArea: {
+	                                show: true
+	                            }
+	                        },
+	                        visualMap: {
+	                            show:false,
+	                            min: '0',
+	                            max: '10',
+	                            calculable: true,
+	                            orient: 'horizontal',
+	                            left: 'center',
+	                            bottom: '10%',
+	                            itemWidth: '20px',
+	                            itemHeight: '10px',
+	                            inRange:{
+	                                color: ['#009933', '#F0AD4E', '#FF0000']
+	                            }
+	                        },
+	                        series: [{
+	                            name: 'Event',
+	                            type: 'heatmap',
+	                            data: [],
+	                            label: {
+	                                normal: {
+	                                    show: true
+	                                }
+	                            },
+	                            itemStyle: {
+	                                emphasis: {
+	                                    shadowBlur: 10,
+	                                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+	                                }
+	                            }
+	                        }]
+	                    }
+	        }
+	    },
+	    watch: {
+	        model:{
+	            handler: function(val,oldVal){
+	                        var self  = this;
+
+	                        _.delay(function(){
+	                        	self.refresh(val);
+	                        },1000);
+	                     },
+	            deep:true
+	        }
+	    },
+	    created:function(){
+	        var self = this;
+
+	        eventHub.$on("chart-resize-event", self.resize);
+	    },
+	    mounted: function() {
+	        var self = this;
+
+	        self.$nextTick(function(){
+
+	        	_.delay(function(){
+	            	self.init();
+	            },1000);
+	            
+	        })
+	    },
+	    methods: {
+	        init: function(event){
+	            var self = this;
+
+	            self.chart = echarts.init(self.$el);
+	            self.chart.setOption(self.option);
+
+	            self.chart.on("click", function (param) {
+	                if (typeof param.seriesIndex == 'undefined') {      
+	                   return;      
+	                }      
+	                if (param.type == 'click') {     
+	                	
+	                	localStorage.setItem("diagnosis-object", JSON.stringify({entity:param.name}));
+				    	
+				    	window.open(
+                            "/janesware/diagnosis",
+                            "_blank"
+                        );
+	                	eventHub.$emit("entity-pattern-event", param.name);
+	                }
+	            }); 
+
+	            $(window).on('resize', function(){
+                    if(self.chart.id){
+                        self.chart.resize();
+                    }
+	            });
+	        },
+	        refresh: function(event){
+	            var self = this;
+	            var byName = "host";
+	            var company = window.COMPANY_NAME;
+
+	            if(company == "telus"){
+	                byName = "node";
+	            }
+	            
+	            if(_.isEmpty(event)){
+	                 self.option.xAxis.data = [];
+	                 self.option.yAxis.data = [];
+	                 self.option.series[0].data = [];
+	            } else {
+	                
+	                self.option.xAxis.data = [];
+	                self.option.yAxis.data = [];
+	                self.option.series[0].data = [];
+
+	                var groupByTime = _.omit(_.groupBy(_.sortBy(event,self.preconfig.time[0]),function(v,k){
+	                                    return moment(v[self.preconfig.time[0]]).format(self.preset.scale.pattern);
+	                                 }),['undefined','']);
+	                
+	                self.option.xAxis.data = _.keys(_.omit(_.groupBy(event, byName),['undefined','']));
+
+	                self.option.yAxis.data = _.keys(groupByTime);
+
+	                var data = [];
+	                var _groupByHost = _.omit(_.groupBy(event,byName),["undefined",""]);
+	                
+	                _.forEach(event,function(val,key){
+	                    
+	                    var subdata = [];
+
+	                    // y-index
+	                    var pTime = moment(val[self.preconfig.time[0]]).format(self.preset.scale.pattern);
+	                    subdata[0] = _.indexOf(self.option.yAxis.data, pTime);
+	                    
+	                    // x-index
+	                    subdata[1] = _.indexOf(self.option.xAxis.data, val[byName]);
+	                    
+	                    // data
+	                    subdata[2] = {severity:"", count:0, "entity": ""};
+	                    _.forEach(event, function(d){
+	                        if( moment(d[self.preconfig.time[0]]).format(self.preset.scale.pattern) == pTime && d[byName] == val[byName]){
+	                            subdata[2].count = subdata[2].count+1;
+	                        }
+	                    });
+	                    
+	                    let maxSeverity = "";
+
+	                    if(_groupByHost[val[byName]]){
+	                    	maxSeverity = _.maxBy(_groupByHost[val[byName]],self.preconfig.severity.name[0])[self.preconfig.severity.name[0]];
+	                    }
+
+	                    if(self.preconfig.severity.level[maxSeverity]) {
+	                        subdata[2].severity = self.preconfig.severity.level[maxSeverity].color;
+	                    } else {
+	                        subdata[2].severity = self.preconfig.severity.level["other"].color
+	                    }
+
+	                    subdata[2].entity = val.entity;
+	                    
+	                    data.push(subdata);
+	                })
+
+	                data = _.map(data, function (v,k) {
+	                		return {
+	                                    name: v[2].entity,
+	                                    visualMap: false,
+	                                    value: [v[1], v[0], v[2].count || '-'],
+	                                    itemStyle:{
+	                                        normal:{
+	                                            color: v[2].severity,
+	                                        },
+	                                        emphasis:{
+	                                            color: v[2].severity,
+	                                        }
+	                                    }
+	                                }
+	                        });
+	                
+	                self.option.series[0].data = data;
+
+	                if(data.length > 80 || self.option.yAxis.data.length>80) {
+            			self.option.series[0].label.normal.show = false;
+            		} else {
+            			self.option.series[0].label.normal.show = true;
+            		}
+	            }
+	            self.chart.setOption(self.option);
+	            
+	        },
+	        resize: function () {
+	            var self = this;
+
+	            if(self.chart.id){
+	                self.chart.resize();
+                }
+	        }
+	    }
+	}
+	</script>
+
+</code>

@@ -1,0 +1,560 @@
+<code>
+
+	<style scoped>
+		/*----------  style  ----------*/
+		.omdb-path-datatables-component,
+		.omdb-path-datatables-component .dataTables_wrapper{
+			width:100%;
+			margin: 0 auto;
+		}
+
+		.omdb-path-datatables-component .dataTables_wrapper table.dataTable{
+			margin: 0!important
+		}
+
+		.omdb-path-datatables-component .dataTables_scrollHead{
+			background: rgb(241, 241, 241);
+		}
+
+		.omdb-path-datatables-component thead tr th, .omdb-path-datatables-component tbody tr td{
+			line-height: 10px;
+			white-space: nowrap;
+		}
+
+		.omdb-path-datatables-component table.dataTable tbody>tr.selected,
+		.omdb-path-datatables-component table.dataTable tbody>tr.selected td,
+		.omdb-path-datatables-component table.dataTable tbody>tr>.selected {
+			background: rgb(196, 235, 253)!important;
+		}
+
+		.omdb-path-datatables-component .context-menu-list {
+            box-shadow: 0 2px 8px 0 rgba(0,0,0,0.15);
+			padding:5px;
+            border: none;
+		}
+
+		.omdb-path-datatables-component .context-menu-list>li>a{
+            padding: 5px 5px;
+            color:rgb(102, 102, 102)!important;
+        }
+
+		.omdb-path-datatables-component div.toolbar i {
+			color: rgb(218, 224, 231);
+			cursor: pointer;
+			margin: 10px 0px 0px 5px;
+		}
+
+		.omdb-path-datatables-component .dataTables_info {
+			position: fixed;
+			bottom: 32px;
+			height: 28px;
+			background-color: rgb(255, 255, 255);
+			width: 100%;
+			text-align: left;
+			border-top: 1px solid rgb(226, 231, 236);
+			padding:5px;
+
+		}
+
+		.omdb-path-datatables-component .datatables-toolbars {
+			height: 30px;
+			background-color: #f2f2f2;
+			width: 100%;
+		}
+
+		.omdb-path-datatables-component .datatables-toolbars .btn-primary,
+		.omdb-path-datatables-component .datatables-toolbars .btn-primary:hover{
+			background-color: #f2f2f2;
+			border:none;
+			color: #333333;
+		}
+
+		/*.dataTables_scrollBody{
+			padding-bottom: 135px;
+		}*/
+
+		.omdb-path-datatables-component .datatables-toolbars > .btn-group {
+			top: 1px;
+		}
+
+		.omdb-path-datatables-component .datatables-toolbars-button {
+			border: none;
+			padding: 8px 10px;
+			background-color: rgba(0, 0, 0, 0);
+			outline-style: none;
+		}
+
+        
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="omdb-path-datatables-component"  ----------*/
+	<template>
+		<div>
+			<table :id="id" class="display" width="100%"></table>
+		</div>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="omdb-path-datatables-component">
+	{
+        delimiters: ['${', '}'],
+		props: {
+        	id: String,
+            bid: String,
+			columns: Array,
+			dataset: Array,
+			options: Object,
+            contextmenu: String,
+			result: Object,
+		},
+		data: function(){
+          	return {
+                datatable: null,
+				selectedRow: null,
+				selectedCell: null,
+                items: {
+                    objectData: {
+                                "detail": { app:"object", name: "详细", icon: "fa-tasks", callback: function(key, opt) {
+                                                                                                }
+                                },
+                                "sep1": "---------",
+                                "new": { app:"object", name: "新建", icon: "fa-plus", callback: function(key, opt) {
+                                                                                                }
+                                },
+                                "sep2": "---------",
+                                "delete": { app:"object", name: "删除", icon: "fa-trash", callback: function(key, opt) {
+                                                                                                }
+                                }
+                    }
+                }
+			}
+		},
+        created: function(){
+            let self = this;
+
+            eventHub.$on(`LAYOUT-DATATABLE-RESIZE-EVENT-${self.id}`, self.resize);
+            eventHub.$on("DATATABLE-RESIZE-EVENT", self.redraw);
+            eventHub.$on("DATATABLES-REFRESH-DATA-EVENT", self.refresh);
+        },
+		mounted: function () {
+            let self = this;
+
+            self.$nextTick(function () {
+
+                _.delay(function() {
+                    self.init();
+                },500);
+
+            })
+        },
+		computed: {
+            _columns: function(){
+                let self = this;
+
+                let _cols = _.map(self.columns,function(v,k){
+
+		                    //  msg
+		                    if(_.includes(['msg'],v.field)){
+		                        return { "data": v.field, "title": v.field, visible: v.visible, orderable: true, render: function(data, type, row){
+		                                return  _.truncate(data, {'length': 100});
+		                            }};
+		                    }
+
+                            //  data & time render
+                            if(_.includes(['day','vtime','mtime','ctime'],v.field)){
+                                return { "data": v.field, "title": v.field, visible: v.visible, orderable: true, render: function(data, type, row){
+                                        return moment(data).format("YYYY-MM-DD HH:mm:ss");
+	                                }};
+                            }
+
+		                    if(_.includes(['map','set','list'],v.type) || typeof(data) === 'object'){
+                                return { "data": v.field, "title": v.field, visible: v.visible, render: function(data, type, row){
+		                                if(_.isNull(data) || _.isEmpty(data)) {
+                                            return '';
+		                                } else{
+                                            return JSON.stringify(data,null,2);
+		                                }
+		                            }};
+		                    }
+
+	                        return { "data": v.field, "title": v.field || v.title, visible: v.visible, orderable: true, render: v.render};
+
+
+						});
+
+                //_cols.unshift({ data: "checkbox", title: "", visible: true, orderable: false, order: null, targets: 0, checkboxes: { selectRow: true } } );
+
+                return _cols;
+			}
+		},
+		watch: {
+          	dataset: {
+                handler: function(val,oldVal){
+                      	    if(val == oldVal) return false;
+
+		                    if(this.datatable instanceof $.fn.dataTable.Api) {
+                                this.datatable.destroy();
+		                        $("#" + this.id).empty();
+		                    }
+                            this.init();
+
+                },
+                deep:true
+			}
+
+		},
+		methods: {
+            init: function(){
+                let self = this;
+
+                self.datatable = $("#"+self.id).DataTable( _.extend({
+                                destroy: true,
+	                            data: self.dataset,
+                                columns: _.uniqBy(self._columns,'data'),
+                                responsive: false,
+                                searching: true,
+                                aDataSort: true,
+	                            bSort: true,
+			                    bAutoWidth: true,
+                                colReorder: true,
+								info: true,
+                                scrollX: true,
+                                scrollY: '25vh',
+			                    scrollCollapse: true,
+			                    paging:         false,
+                                aoColumnDefs: [{sDefaultContent:'', aTargets:['_all']}],
+                                language : {
+                                    "sProcessing" : "处理中...",
+                                    "sLengthMenu" : "显示 _MENU_ 项结果",
+                                    "sZeroRecords" : "没有匹配结果",
+                                    "sInfo" : "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
+                                    "sInfoEmpty" : "显示第 0 至 0 项结果，共 0 项",
+                                    "sInfoFiltered" : "(由 _MAX_ 项结果过滤)",
+                                    "sInfoPostFix" : "",
+                                    "sSearch" : "过滤:",
+                                    "sUrl" : "",
+                                    "sEmptyTable" : "表中数据为空",
+                                    "sLoadingRecords" : "载入中...",
+                                    "sInfoThousands" : ",",
+                                    "oPaginate" : {
+                                        "sFirst" : "首页",
+                                        "sPrevious" : "上页",
+                                        "sNext" : "下页",
+                                        "sLast" : "末页"
+                                    },
+                                    "oAria" : {
+                                        "sSortAscending" : ": 以升序排列此列",
+                                        "sSortDescending" : ": 以降序排列此列"
+                                    },
+                                    buttons: {
+                                        copyTitle: '已拷贝到剪切板',
+                                        copyKeys: '已拷贝',
+                                        copySuccess: {
+                                            _: '已拷贝 %d 项',
+                                            1: '1 已拷贝'
+                                        }
+                                    }
+
+                                },
+                                dom: `<"${self.id}-datatables-tool-bars">frtip`,
+                                fixedColumns: false,
+                                fixedHeader: {
+			                        header: true,
+			                        footer: true
+			                    },
+                                keys:  true,
+			                    select: {
+			                        style: 'multi'
+			                    },
+			                    lengthChange: false,
+                                stateSave: true,
+			                    buttons: {
+			                        dom: {
+			                            button: {
+			                                tag: 'button',
+                                            className: 'datatables-toolbars-button'
+			                            }
+			                        },
+                                    buttons: [
+                                        {
+                                            extend: 'selectAll',
+                                            text: '',
+                                            className: 'fas fa-check',
+                                        },
+                                        {
+                                            extend: 'selectNone',
+                                            text: '',
+                                            className: 'fas fa-check-square',
+                                        },
+                                        {
+                                            extend: 'copy',
+                                            text: '',
+                                            copyTitle: '已复制',
+                                            className: 'fas fa-copy',
+                                        },
+                                        {
+                                            extend: 'excel',
+                                            text: '',
+                                            className: 'fas fa-download',
+                                            title: function(){
+                                                return `${self.dataset[0].class.split("/").join("_").replace("_","")}_data_export_${moment().format("LLL")}`
+                                            },
+                                            messageTop: null
+                                        },
+                                        {
+                                            extend: 'colvis',
+                                            text: '',
+                                            className: 'fas fa-columns',
+                                            collectionLayout: 'fixed four-column',
+                                            columnText: function ( dt, idx, title ) {
+                                                return (idx+1)+'. '+title;
+                                            }
+                                        }
+                                    ]
+			                    },
+                    },self.options)).columns.adjust().draw();
+
+                _.delay(function(){
+                    self.datatable.buttons().container().appendTo( `.${self.id}` );
+                    self.redraw();
+                },500)
+
+                _.delay(function(){
+                    self.initPlugin();
+                },1000)
+
+			},
+			initPlugin: function(){
+                let self = this;
+
+                //self.initClassMenu();
+
+                // init selected row's status
+                $("#"+self.id).find("tbody").on("mouseenter", "tr", function () {
+
+                    /*if ( $(this).hasClass('selected') ) {
+                        $(this).removeClass('selected');
+                    }
+                    else {
+                        self.datatable.$("tr.selected").removeClass("selected");
+                        $(this).addClass("selected");
+                    }*/
+                    self.selectedRow = self.datatable.row( this ).data();
+                } );
+
+                /*$("#"+self.id).find("tbody").on( 'mouseenter', 'td', function () {
+					var colIdx = self.datatable.cell(this).index().column;
+
+					$( self.datatable.cells().nodes() ).removeClass( 'highlight' );
+					$( self.datatable.column( colIdx ).nodes() ).addClass( 'highlight' );
+				} );*/
+
+                // selected row
+                $("#"+self.id).on( 'click', 'tr', function () {
+
+                    /*if ( $(this).hasClass('selected') ) {
+                        $(this).removeClass('selected');
+                    }
+                    else {
+                        self.datatable.$("tr.selected").removeClass("selected");
+                        $(this).addClass("selected");
+                    }*/
+
+                    self.selectedRow = self.datatable.row( this ).data();
+                } );
+                
+                self.datatable.on( 'select', function ( e, dt, type, indexes ) {
+                    var rowData = self.datatable.rows( '.selected' ).data().toArray();
+                    eventHub.$emit(`PATH-TOGGLE-EVENT-${self.id}`,rowData);
+                } ).on( 'deselect', function ( e, dt, type, indexes ) {
+                    var rowData = self.datatable.rows( '.selected' ).data().toArray();
+                    eventHub.$emit(`PATH-TOGGLE-EVENT-${self.id}`,rowData);
+                } );
+
+                // selected row
+                $("#"+self.id).on( 'dblclick', 'tr', function () {
+                    self.selectedRow = self.datatable.row( this ).data();
+                } );
+
+                // selected cell
+                $("#"+self.id).on( 'click', 'td', function () {
+                    self.selectedCell = self.datatable.cell( this ).data();
+                } );
+
+                // init context menu
+                $.contextMenu({
+                    selector: "#"+self.id,
+                    trigger: "right",
+                    delay: 300,
+                    autoHide: true,
+                    build: function ($trigger, e) {
+                        return {
+                            callback: function (key, options) {
+                                //self.initModules(key, options.items[key]);
+                            },
+                            items: self.items[self.contextmenu]
+                        };
+                    }
+                });
+
+                $("#"+self.id).on('draw.dt', function () {
+                    $('[data-tooltip="tooltip"]').tooltip();
+                });
+
+
+			},
+            redraw: function(){
+                let self = this;
+
+                self.datatable.columns.adjust().draw(); // Redraw the DataTable
+
+            },
+			resize: function(event){
+                let self = this;
+
+                //$('.omdb-path-datatables-component .dataTables_scrollBody').css("max-height", event.bottom - 192).css("min-height", event.bottom - 192);
+			},
+			refresh: function(event){
+                let self = this;
+
+                self.columns = self.result.columns[event];
+                self.dataset = self.result.data[event];
+
+                if( !_.isEmpty(self.datatable) ) {
+                    self.datatable.destroy();
+                    self.init();
+                }
+
+			},
+			toolBars: function(){
+                let self = this;
+                let _keys = _.keys(self.result.columns);
+                let _items = {};
+
+                _.forEach(_keys, function (v) {
+                    let o = {};
+
+                    o.name = v;
+                    o.icon = "fa-bars";
+                    o.callback = function (key, opt) {
+                        eventHub.$emit("DATATABLES-REFRESH-DATA-EVENT", v);
+                    };
+                    _.merge(_items, {[v]: o});
+                })
+
+				return {
+                    delimiters: ['${', '}'],
+                    el: `#${self.id}-datatables-tool-bars`,
+                    template: `<div class="${self.id} datatables-toolbars">
+									<div class="btn-group" role="group" aria-label="...">
+										<a href="javascript:void(0);" class="btn btn-sm btn-primary toolbars ${self.id}-datatables-tool-bars" title="选择类" data-tooltip="tooltip"><i class="fa fa-bars"></i></a>
+										<!--<a href="javascript:void(0);" class="btn btn-sm btn-primary selectAll" @click="selectAll" title="全选" data-tooltip="tooltip"><i class="fa fa-square-o"></i></a>-->
+										<a href="javascript:void(0);" class="btn btn-sm btn-primary delete" @click="deleteIt" title="删除" data-tooltip="tooltip"><i class="fa fa-trash"></i></a>
+										<a href="javascript:void(0);" class="btn btn-sm btn-primary edit" @click="editIt" title="编辑" data-tooltip="tooltip"><i class="fa fa-edit"></i></a>
+									</div>
+								</div>`,
+                    data: {
+                        keys: _keys
+	                },
+                    created: function(){
+                        let me = this;
+
+                        me.initMenu();
+                    },
+                    mounted: function () {
+                        let me = this;
+
+                        me.$nextTick(function () {
+
+                        })
+                    },
+                    methods: {
+                        initMenu: function () {
+                            let me = this;
+
+                            $.contextMenu({
+                                selector: `.${self.id}-datatables-tool-bars`,
+                                trigger: 'left',
+                                build: function ($trigger, e) {
+
+                                    return {
+                                        items: _items
+
+                                    }
+                                }
+                            });
+                        },
+                        selectAll: function () {
+                            let self = this;
+
+                            self.datatable.rows({ page: 'current' }).nodes();
+
+                        },
+                        deleteIt: function () {
+                            let me = this;
+
+                            if(_.isEmpty(self.datatable.rows( { selected: true } ).data())){
+								alertify.log("选择删除数据！");
+								return false;
+                            }
+
+                            swal({
+                                title: "",
+                                text: "确定要删除?",
+                                type: "warning",
+                                showCancelButton: true,
+                                closeOnConfirm: false,
+                                cancelButtonText: "取消",
+                                confirmButtonText: "删除",
+                                confirmButtonColor: "#ff0000"
+                            }).then((result) => {
+                                if (result.value) {
+
+                                    let _id = _.map(self.datatable.rows( { selected: true } ).data(), 'id').join("','");
+
+                                    let _rtn = omdbHandler.fetchDataByMql(`delete from /matrix/ where id in ('${_id}')`);
+
+                                    if(_rtn.status === 'ok') {
+                                        self.datatable.rows( { selected: true } ).remove().draw(false);
+                                    } else {
+                                        self.$message({
+                                            type: "error",
+                                            message: _rtn.message
+                                        })
+                                    }
+                                }
+                            })
+
+
+                        },
+                        editIt: function () {
+
+                        },
+	                    exportIt: function(){
+                            let self = this;
+
+                            self.datatable.buttons('.buttons-excel').trigger();
+	                    }
+                    }
+                };
+
+			},
+			initClassMenu: function(){
+                let self = this;
+
+                if(_.isEmpty(self.result)) return false;
+
+				let toolBarsVue = self.toolBars();
+
+				$(`div.${self.id}-datatables-tool-bars`).attr('id',`${self.id}-datatables-tool-bars`).ready(function(){
+                    new Vue(toolBarsVue);
+                });
+
+			}
+		}
+	
+	}
+	</script>
+
+</code>

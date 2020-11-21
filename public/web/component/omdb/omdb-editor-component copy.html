@@ -1,0 +1,753 @@
+<code>
+
+	<style scoped>
+		/*----------  style  ----------*/
+		.omdb-editor-component {
+			background-color: rgb(246, 246, 246);
+			width:100%;
+			height: 100%;
+			position: relative;
+		}
+
+		.omdb-editor-component .ace_editor{
+			border: none;
+			margin: 0px 0px 10px 0px;
+			width: 100%;
+			height:calc(100% - 50px)!important;
+			position: relative !important;
+			overflow: auto;
+		}
+
+		.lm_maximised .omdb-editor-component .ace_editor{
+			border: none;
+			margin: 0px 0px 10px 0px;
+			width: 100%;
+			height:calc(100% - 50px)!important;
+			position: relative !important;
+			overflow: auto;
+		}
+
+		.ace_keyword {
+			color: #a70909!important;
+		}
+
+		.editorToolBar{
+			height: 30px;
+			background-color: rgb(246, 246, 246);/*rgb(33, 149, 243);*/
+			width: 100%;
+		}
+
+		.editorToolBar .btn-primary,
+		.editorToolBar .btn-primary:hover{
+			background-color: rgb(246, 246, 246);
+			color: #333333;
+			border:none;
+		}
+
+		.editorToolBar > .btn-group {
+			top: 1px;
+			width: 100%;
+		}
+
+		.editorToolBar .btn-group > a > i{
+			color: #666666;
+		}
+
+		.scrollmargin {
+			height: 500px;
+			text-align: center;
+		}
+
+		.editor-container{
+			width: 100%;
+			height: 100%;
+		}
+
+		.omdb-editor-component .statusBar {
+			display: -webkit-box;
+			position: fixed;
+			width: 100%;
+			height: 30px;
+			padding: 7px;
+			background: rgb(246, 246, 246);
+		}
+
+		
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="omdb-editor-component"  ----------*/
+	<template>
+		<div class="editor-container">
+			<div class="editorToolBar" id="editorToolBar">
+				<div class="btn-group" role="group">
+                    <el-tooltip content="另存到文件系统" placement="bottom" open-delay="500">
+                        <a href="javascript:void(0);" class="btn btn-sm btn-primary saveas" @click="saveToFs" title="另存到文件系统" data-tooltip="tooltip"><i class="fas fa-save"></i></a>
+                    </el-tooltip>
+                    <el-tooltip content="加载" placement="bottom" open-delay="500">
+                        <a href="javascript:void(0);" class="btn btn-sm btn-primary load" @click="loadFromFs" title="加载" data-tooltip="tooltip"><i class="fas fa-arrow-circle-down"></i></a>
+                    </el-tooltip>
+                    <el-tooltip content="复制" placement="bottom" open-delay="500">
+                        <a href="javascript:void(0);" class="btn btn-sm btn-primary copy" @click="copyIt" title="复制" data-tooltip="tooltip"><i class="fas fa-copy"></i></a>
+                    </el-tooltip>
+                    <el-tooltip content="粘贴" placement="bottom" open-delay="500">
+                        <a href="javascript:void(0);" class="btn btn-sm btn-primary paste" @click="pasteIt" title="粘贴" data-tooltip="tooltip"><i class="fas fa-paste"></i></a>
+                    </el-tooltip>
+					<el-tooltip content="全选" placement="bottom" open-delay="500">
+                        <a href="javascript:void(0);" class="btn btn-sm btn-primary selectAll" @click="selectAll" title="全选" data-tooltip="tooltip"><i class="fas fa-check"></i></a>
+                    </el-tooltip>
+                    <el-tooltip content="清空" placement="bottom" open-delay="500">
+                        <a href="javascript:void(0);" class="btn btn-sm btn-primary clear" @click="clearIt" title="清空" data-tooltip="tooltip"><i class="fas fa-trash"></i></a>
+                    </el-tooltip>
+                    <el-tooltip content="执行输出为表格" placement="bottom" open-delay="500">
+                        <a href="javascript:void(0);" class="btn btn-sm btn-primary query" @click="query"  title="执行" data-tooltip="tooltip"><i class="fas fa-play"></i></a>
+                    </el-tooltip>
+                    <el-tooltip content="执行输出为JSON" placement="bottom" open-delay="500">
+                        <a href="javascript:void(0);" class="btn btn-sm btn-primary queryByJson" @click="queryByJson"  title="执行输出为JSON" data-tooltip="tooltip"><i class="fas fa-play-circle"></i></a>
+                    </el-tooltip>
+					<el-tooltip content="在新窗口执行" placement="bottom" open-delay="500">
+                        <!--<a href="javascript:void(0);" class="btn btn-sm btn-primary queryPlus" @click="queryPlus"  title="在新窗口执行"><i class="fa fa-play"></i>+</a>-->
+                    </el-tooltip>
+                    <el-tooltip content="执行并保存到文件" placement="bottom" open-delay="500">
+                        <a href="javascript:void(0);" class="btn btn-sm btn-primary queryAndSave" @click="queryAndSave"  title="执行并保存到文件" data-tooltip="tooltip"><i class="fas fa-forward"></i></a>
+                    </el-tooltip>
+                    <el-tooltip content="主题" placement="bottom" open-delay="500">
+                        <a href="javascript:void(0)" :class="'btn btn-sm btn-link pull-right editor-select-theme-'+objectHash.sha1(id)" title="主题" data-tooltip="tooltip"><i class="fas fa-tshirt"></i></a>
+                    </el-tooltip>
+				</div>
+			</div>
+			<div :id="id" ></div>
+			<div :id="id+'_statusBar'" class="statusBar"></div>
+		</div>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="omdb-editor-component">
+	{
+	    delimiters: ['${', '}'],
+        props: {
+            id: String,
+			bid: String,
+            model: Object,
+            showToolsBar: Boolean,
+			showStatusBar: Boolean
+        },
+        data(){
+            return {
+                langTools:null,
+                editor: null,
+                inputText: "",
+	            result: null
+            }
+        },
+        mounted(){
+            var self = this;
+
+            self.$nextTick(function(){
+                self.init();
+            })
+        },
+        watch: {
+            'model.newInput': {
+            	handler:function(val,oldVal){
+                    const self = this;
+                    
+                    self.editor.setValue(val);
+                },
+                deep:true
+            }
+
+        },
+        created () {
+            const self = this;
+
+        },
+        methods: {
+            init() {
+                const self = this;
+
+                self.langTools = ace.require("ace/ext/language_tools");
+                self.editor = ace.edit(self.id);
+                
+                self.editor.setOptions({
+                    // maxLines: 1000,
+                    // minLines: 20,
+                    autoScrollEditorIntoView: true,
+                    enableBasicAutocompletion: true,
+                    enableSnippets: true,
+                    enableLiveAutocompletion: false
+                });
+                //self.editor.$blockScrolling = Infinity;
+                self.editor.setShowPrintMargin(self.model.printMargin);
+                self.editor.setReadOnly(self.model.readOnly);
+                self.editor.getSession().setUseSoftTabs(true);
+
+                self.editor.getSession().setTabSize(2);
+                self.editor.getSession().setUseWrapMode(true);
+
+                self.setTheme();
+                self.setMode();
+                self.setOptions();
+
+				self.toggleToolsBar();
+
+				self.toggleStatusBar();
+
+                // Customer Auto Completer
+                let customerCompleter = {
+                    getCompletions(editor, session, pos, prefix, callback) {
+                            
+                        if (prefix.length === 0) { callback(null, []); return };
+
+                        let templates = mx.searchJson.search(prefix);
+
+                        if(_.isEmpty(templates)) return;
+
+                        callback(null, _.uniqBy(_.map(templates,function(v) {
+                            return {
+                                name: v.name,
+                                score: 300,
+                                meta: v.title,
+                                caption: v.title,
+                                value: v.template
+                            }
+                        }),'name'));
+
+                    }
+                };
+
+                self.langTools.addCompleter(customerCompleter);
+
+
+                // Add commands
+                self.editor.commands.addCommand({
+	                    name: "query",
+                        bindKey: {mac: "cmd-enter", win: "ctrl-enter"},
+	                    exec: self.query
+	                },
+                    {
+                        name: "save",
+                        bindKey: {mac: "cmd-S", win: "ctrl-S"},
+                        exec: self.saveToFs
+                    }
+                );
+
+                // init Theme
+                _.delay(function(){
+                    self.initTheme();
+                },3000)
+
+                
+            },
+            setOptions(){
+                const self = this;
+
+                if(!_.isEmpty(self.model.options)){
+                    self.editor.setOptions(self.model.options);
+                } 
+            },
+            setTheme(){
+                const self = this;
+
+                let localTheme = localStorage.getItem(`editor-select-theme-${objectHash.sha1(self.id)}`);
+
+                if(localTheme){
+                    self.editor.setTheme("ace/theme/" + localTheme);
+                    return false;
+                }
+
+                if(_.isEmpty(self.model.theme)){
+                	self.editor.setTheme("ace/theme/tomorrow");
+                } else {
+                	self.editor.setTheme("ace/theme/"+self.model.theme);
+                }
+                
+            },
+            setMode(){
+                const self = this;
+
+                if(_.isEmpty(self.model.mode)){
+                	self.editor.getSession().setMode("ace/mode/json");
+                } else {
+                	self.editor.getSession().setMode("ace/mode/"+ self.model.mode);
+                }
+                
+            },
+            setValue(){
+                const self = this;
+
+                self.editor.setValue(self.model.oldInput);
+            },
+            getSelected(){
+                const self = this;
+                var temp = self.editor.getSelectedText();
+
+                if(_.isEmpty(temp)){
+                    self.inputText = self.editor.getValue();
+                } else {
+                    self.inputText = temp;
+                }
+            },
+            toggleToolsBar(){
+                const self = this;
+
+                if(self.showToolsBar){
+                    $(".editorToolBar").show();
+                } else {
+                    $(".editorToolBar").hide();
+                }
+            },
+	        toggleStatusBar(){
+                const self = this;
+
+                if(self.showStatusBar) {
+                    let StatusBar = ace.require("ace/ext/statusbar").StatusBar;
+                    let statusBar = new StatusBar(self.editor, document.getElementById(`${self.id}_statusBar`));
+                }
+	        },
+	        copyIt(){
+		        const self = this;
+
+                new Clipboard(".copy", {
+                    text: function(trigger) {
+                        alertify.log("已复制");
+                        return self.editor.getValue();
+                    }
+                });
+
+	        },
+            pasteIt(){
+                const self = this;
+
+                document.execCommand("paste");
+                alertify.log("已粘贴");
+            },
+	        selectAll(){
+                const self = this;
+
+                self.editor.selection.selectAll();
+            },
+            clearIt(){
+                const self = this;
+
+                self.editor.setValue();
+                alertify.log("已清空");
+            },
+            query(){
+                const self = this;
+                
+                let _mql = self.editor.getValue();
+
+                if(_.isEmpty(self.editor.getValue())){
+                    return false;
+                }
+
+                // if(_.includes(_mql,'limit -1')){
+                //     alertify.confirm(`确认要查询所有记录？`, function (e) {
+                //         if (e) {
+                //             return;
+                //         } else {
+                //             return false;
+                //         }
+                //     });
+                // }
+
+                if( self.editor.getSelectedText().length > 0 ) {
+                    _mql = self.editor.getSelectedText();
+                }
+
+                let _list = omdbHandler.fetchDataByMql(_mql);
+
+                if(_list.status === 'ok'){
+                    eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'info', _list)
+                } else {
+                    // 设置表格为空
+                    self.result = { id:self.id, bid: self.bid, type: 'table-update', data: [], columns: [] };
+                    eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
+                    eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT-${self.bid}`,self.result);
+
+                    // 输出日志
+                    eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'error', _list)
+	                return false;
+                }
+
+                if(_.isEmpty(_list)) {
+                    alertify.log("查询结果为空");
+                    return false;
+                }
+
+                // MQL for  CRUD
+                if(_.includes(['create'],_list.meta.type)){
+                    alertify.success("创建成功");
+                    eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'create-class', node: null});
+                    return false;
+                }
+
+                if(_.includes(['drop'],_list.meta.type)){
+                    alertify.success("删除成功");
+                    eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'drop-class', node: null});
+                    return false;
+                }
+
+                if(_.includes(['create edge'],_list.meta.type)){
+                    alertify.success("创建成功");
+                    eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'create-edge-type', node: null});
+                    return false;
+                }
+
+                if(_.includes(['drop edge'],_list.meta.type)){
+                    alertify.success("删除成功");
+                    eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'drop-edge-type', node: null});
+                    return false;
+                }
+
+                if(_list.meta.type === 'alter'){
+                    alertify.success("修改成功");
+                    eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'alter-class', node: null});
+                    return false;
+                }
+
+                if(_list.meta.type === 'insert'){
+                    alertify.success("插入成功");
+                    eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'insert-class', node: null});
+                    return false;
+                }
+
+
+                let _data = _list.message;
+
+                let _columns = mx.columnsParse(_list.meta);
+
+
+                // Graph
+                if(_list.meta.type === 'graph'){
+
+                    //有数据
+                    if(!_.isEmpty(_data)){   
+                        self.result = {id:self.id, bid: self.bid, type: 'graph-update', data: _data[0].graph};
+
+                        eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
+                        return false;
+                    }
+                    // 没数据 
+                    else {
+                        self.result = {id:self.id, bid: self.bid, type: 'graph-update', data: {nodes:[],edges:[]}};
+
+                        eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
+                        return false;
+                    }
+                }
+
+                // Graph-PATH
+                if(_list.meta.type === 'path'){
+
+                    self.result = {id:self.id, bid: self.bid, type: 'graph-update', data: _data[0].graph};
+
+                    eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
+
+                    return false;
+                }
+
+                // For Select count Pattern
+	            // 判断数据中没有返回class属性，如果没有将meta中的class属性赋值到数据中，构造Table所需要的结构
+	            let temp = _list.message;
+
+                if(!_.has(temp[0],'class')) {
+                    _data = _.map(_data,function(v){ return _.merge(v,{class:_.keys(_list.meta.classes)[0]})});
+                }
+
+                // 结果数据太大,超过阈值【max_record_threshold】，以html形式显示
+                if( _list.meta.type == 'select' &&  _list.message.length > mx.global.register.omdb.max_record_threshold){
+                    alertify.confirm(`返回结果集超过阈值【${mx.global.register.omdb.max_record_threshold}】 <br><br> 
+                                    点击【确认】以文本形式输出`, function (e) {
+                        if (e) {
+                            self.queryByJson();
+                        } else {
+                            
+                        }
+                    });
+                    return false;
+                } else if( _list.meta.type == 'graph' && _list.message[0].graph.nodes.length > mx.global.register.omdb.max_record_threshold){
+                    alertify.confirm(`返回结果集超过阈值【${mx.global.register.omdb.max_record_threshold}】 <br><br> 
+                                    点击【确认】以文本形式输出`, function (e) {
+                        if (e) {
+                            self.queryByJson();
+                        } else {
+                            
+                        }
+                    });
+                    return false;
+                }
+                // 正常Table显示 
+                else {
+                    //self.result = { id:self.id, bid: self.bid, type: 'table-update', data: _.groupBy(_data,'class'), columns: _columns, rootclass: _list.meta.rootclass};
+                    self.result = { id:self.id, bid: self.bid, type: 'table-update', data: _data, columns: _columns, rootclass: _list.meta.rootclass};
+                }
+                
+                // 初始化生成table
+                eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
+                // 更新table
+                eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT-${self.bid}`,self.result);
+
+            },
+            queryByJson(){
+                const self = this;
+
+                let _mql = self.editor.getValue();
+
+                if(_.isEmpty(self.editor.getValue())){
+                    return false;
+                }
+
+                if( self.editor.getSelectedText().length > 0 ) {
+                    _mql = self.editor.getSelectedText();
+                }
+
+                let _list = omdbHandler.fetchDataByMql(_mql);
+
+                if(_list.status === 'ok'){
+                    // 输出日志
+                    eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'info', _list)
+
+                    // 输出结果
+                    self.result = { id:self.id, bid: self.bid, type: 'json-update', data: _list};
+                    // 初始化生成JSON
+                    eventHub.$emit(`QUERY-JSON-RESULT-TRIGGER-EVENT`,self.result);
+                    // 更新table
+                    eventHub.$emit(`QUERY-JSON-RESULT-TRIGGER-EVENT-${self.bid}`,self.result);
+
+                } else {
+                    // 设置为空
+                    self.result = { id:self.id, bid: self.bid, type: 'json-update', data: null };
+                    eventHub.$emit(`QUERY-JSON-RESULT-TRIGGER-EVENT`,self.result);
+                    eventHub.$emit(`QUERY-JSON-RESULT-TRIGGER-EVENT-${self.bid}`,self.result);
+
+                    // 输出日志
+                    eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'error', _list)
+	                return false;
+                }        
+            },
+            queryPlus(){
+                const self = this;
+
+                let _mql = self.editor.getValue();
+
+                if(_.isEmpty(self.editor.getValue())){
+                    return false;
+                }
+
+                if( self.editor.getSelectedText().length > 0 ) {
+                    _mql = self.editor.getSelectedText();
+                }
+
+                let _list = omdbHandler.fetchDataByMql(_mql);
+
+                if(_list.status === 'ok'){
+                    eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'info', _list)
+                } else {
+                    eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'error', _list)
+                }
+
+
+                if(_.isEmpty(_list)) {
+
+                    alertify.log("查询结果为空");
+
+                    return false;
+                }
+
+                // MQL for  CRUD
+                if(_.includes(['create'],_list.meta.type)){
+                    alertify.success("创建成功");
+                    //eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'create-class', node: null});
+                    return false;
+                }
+
+                if(_.includes(['drop'],_list.meta.type)){
+                    alertify.success("删除成功");
+                    //eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'drop-class', node: null});
+                    return false;
+                }
+
+                if(_.includes(['create edge'],_list.meta.type)){
+                    alertify.success("创建成功");
+                    //eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'create-edge-type', node: null});
+                    return false;
+                }
+
+                if(_.includes(['drop edge'],_list.meta.type)){
+                    alertify.success("删除成功");
+                    //eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'drop-edge-type', node: null});
+                    return false;
+                }
+
+                if(_list.meta.type === 'alter'){
+                    alertify.success("修改成功");
+                    //eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'alter-class', node: null});
+                    return false;
+                }
+
+                if(_list.meta.type === 'insert'){
+                    alertify.success("插入成功");
+                    //eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'insert-class', node: null});
+                    return false;
+                }
+
+
+                let _data = _list.message;
+
+                let _columns = mx.columnsParse(_list.meta);
+
+
+                // Graph
+                if(_list.meta.type === 'graph'){
+
+                    self.result = {id:self.id, bid: self.bid, type: 'graph-new', data: _data[0].graph};
+
+                    eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
+
+                    return false;
+                }
+
+                self.result = {id:self.id, bid: self.bid, type: 'table-new', data: _.groupBy(_data,'class'), columns: _columns};
+                eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
+                eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT-${self.bid}`,self.result);
+
+            },
+            queryAndSave(){
+                const self = this;
+
+                let _mql = self.editor.getValue();
+
+                if(_.isEmpty(self.editor.getValue())){
+                    return false;
+                }
+
+                if( self.editor.getSelectedText().length > 0 ) {
+                    _mql = self.editor.getSelectedText();
+                }
+
+                _mql = _mql.replace(/\n/g,' ').replace(/\t/g,' ').replace(/\\/g,' ');
+
+                let _list = omdbHandler.fetchDataByMql(_mql);
+                let _content = JSON.stringify({mql: _mql, result: {message: _list.message, meta: _list.meta}},null,4).replace(/   /g, ' ');
+                let _ftype = "html";
+                let _attr = {remark: "", ctime: _.now(), author: window.SignedUser_UserName, type: _ftype};
+				let _name = '查询_' + moment().format("LLL");
+				let _html = `<!DOCTYPE html>
+							<html>
+								<head>
+								    <meta charset="UTF-8">
+                                    <title></title>
+                                    <link href="/web/css/fs/jsonParseStyle.css" rel="stylesheet">
+								</head>
+								<body>
+                                    <pre>${jsonParse.json2html(_content)}</pre>
+                                    <script src="/web/js/util/JsonParse.js"><\/script>
+								</body>
+							</html>`;
+
+                let _url = fsHandler.fsTemp(_ftype, _name + "." + _ftype, _html, _attr);
+                
+                // 保存失败
+                if(!_url)  return false;
+
+                alertify.confirm(`运行结果已保存到以下目录 <br><br> 
+                                  目录：${_url} <br><br>
+                                  MQL: ${_mql} <br><br>
+                                  返回记录: ${_list.message.length} <br><br>
+                                  点击【确认】查看详细`, function (e) {
+                    if (e) {
+                        window.open(`/fs${_url}?type=open&issys=${window.SignedUser_IsAdmin}`,"_blank");
+                    } else {
+                        
+                    }
+                });
+            },
+            saveToFs(){
+                const self = this;
+
+                let mql = self.editor.getValue();
+
+                if(_.isEmpty(mql)) return false;
+
+                let user = window.SignedUser_UserName;
+                let attr = {remark: '', ctime: _.now(), author: user, type: 'txt'};
+                let rtn = fsHandler.fsNew('file', `/home/${user}`, 'cache_mql_script.txt', mql, attr);
+            },
+            loadFromFs(){
+                const self = this;
+
+                let mql = fsHandler.fsContent(`/home/${window.SignedUser_UserName}`, 'cache_mql_script.txt');
+
+                self.editor.setValue(mql);
+
+            },
+            initTheme(){
+                const self = this;
+				let id = objectHash.sha1(self.id);
+
+                $.contextMenu({
+                    selector: `.editor-select-theme-${id}`,
+                    trigger: 'left',
+                    callback (key, options) {
+                        if(key !== 'bright' && key !== 'dark'){
+                            self.editor.setTheme("ace/theme/"+key);
+
+                            localStorage.setItem(`editor-select-theme-${id}`,key);
+                        }
+                    },
+                    items: {
+                        "bright": { name: "亮色", items: {
+                                "chrome": { name: "chrome"},
+                                "clouds": { name: "clouds"},
+                                "crimson_editor": { name: "crimson_editor"},
+                                "dawn": { name: "dawn"},
+                                "dreamweaver": { name: "dreamweaver"},
+                                "eclipse": { name: "eclipse"},
+                                "github": { name: "github"},
+                                "iplastic": { name: "iplastic"},
+                                "solarized_light": { name: "solarized_light"},
+                                "textmate": { name: "textmate"},
+                                "tomorrow": { name: "tomorrow"},
+                                "xcode": { name: "xcode"},
+                                "kuroir": { name: "kuroir"},
+                                "katzenmilch": { name: "katzenmilch"},
+                                "sqlserver": { name: "sqlserver"}
+                            }
+                        },
+                        "dark": { name: "暗色", items: {
+                                "ambiance": { name: "ambiance"},
+                                "chaos": { name: "chaos"},
+                                "clouds_midnight": { name: "clouds_midnight"},
+                                "dracula": { name: "dracula"},
+                                "cobalt": { name: "cobalt"},
+                                "gruvbox": { name: "gruvbox"},
+                                "gob": { name: "gob"},
+                                "idle_fingers": { name: "idle_fingers"},
+                                "kr_theme": { name: "kr_theme"},
+                                "merbivore": { name: "merbivore"},
+                                "merbivore_soft": { name: "merbivore_soft"},
+                                "mono_industrial": { name: "mono_industrial"},
+                                "monokai": { name: "monokai"},
+                                "pastel_on_dark": { name: "pastel_on_dark"},
+                                "solarized_dark": { name: "solarized_dark"},
+                                "terminal": { name: "terminal"},
+                                "tomorrow_night": { name: "tomorrow_night"},
+                                "tomorrow_night_blue": { name: "tomorrow_night_blue"},
+                                "tomorrow_night_bright": { name: "tomorrow_night_bright"},
+                                "tomorrow_night_eighties": { name: "tomorrow_night_eighties"},
+                                "twilight": { name: "twilight"},
+                                "vibrant_ink": { name: "vibrant_ink"}
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    
+	
+	}
+	</script>
+
+</code>

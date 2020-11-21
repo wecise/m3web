@@ -1,0 +1,105 @@
+<code>
+
+	<style>
+		/*----------  style  ----------*/
+		.vue-common-form-component{
+			margin-top: -10px;
+		}
+
+		#ci-card-form.vue-common-form-component{
+			background-color: rgb(255, 255, 255);
+			margin-top: 0px;
+		}
+
+		.alpaca-control.form-control{
+			border:none;
+			background-color: rgb(251, 251, 251);
+		}
+
+		.alpaca-control.form-control input{
+			height: 32px;
+		}
+
+		.control-label.alpaca-control-label{
+			color: #999;
+		}
+
+		.nav.nav-tabs>li.active > a > .widget {
+			box-shadow: 3px 3px 3px #999c9e;
+		}
+
+		
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="vue-common-form-component"  ----------*/
+	<template>
+		<div :id="id"></div>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="vue-common-form-component">
+	{
+	    delimiters: ['${', '}'],
+	    props: {
+	        id: String,
+			form: Object
+	    },
+	    data: function(){
+	        return {
+
+	        }
+	    },
+	    created:function(){
+	        let self = this;
+
+	    },
+	    mounted: function() {
+	        let self = this;
+
+	        self.$nextTick(function(){
+
+                self.init();
+	            self.initPlugIn();
+
+	        })
+
+	    },
+	    watch: {
+	        form: {
+	            handler:function(val,oldVal){
+	                let self = this;
+
+                    let exists = $(self.$el).alpaca("exists");
+
+                    if (exists) {
+                        $(self.$el).alpaca("destroy");
+                    }
+
+	                self.init();
+	            },
+	            deep: true
+	        }
+	    },
+		destroyed: function(){
+            let self = this;
+
+	        $(self.$el).alpaca("destroy");
+		},
+	    methods: {
+	        init: function() {
+	            let self = this;
+
+                $(self.$el).alpaca(self.form);
+
+	        },
+            initPlugIn: function(){
+                let self = this;
+
+            }
+	    }
+	
+	}
+	</script>
+
+</code>

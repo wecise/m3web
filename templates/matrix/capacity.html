@@ -1,0 +1,699 @@
+<!--
+
+    [[[[[[[[[[[[[[[      ]]]]]]]]]]]]]]]
+    [::::::::::::::      ::::::::::::::]
+    [::::::::::::::      ::::::::::::::]
+    [::::::[[[[[[[:      :]]]]]]]::::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[    CODE BY WANGZD    ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [::::::[[[[[[[:      :]]]]]]]::::::]
+    [::::::::::::::      ::::::::::::::]
+    [::::::::::::::      ::::::::::::::]
+    [[[[[[[[[[[[[[[      ]]]]]]]]]]]]]]]
+
+-->
+{{template "base/head" .}}
+
+<!-- zTree Core CSS -->
+<link href="{{AppSubUrl}}/web/vendor/zTree/css/entityStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
+
+
+<style>
+	
+	body {
+		background-color: #d9e0e7;
+	}
+	
+	main#content.content {
+		margin: 40px 50px!important;
+	}
+
+	#chart_example{
+    width: 98%;
+    height: 370px;
+    border: 1px solid red;
+    margin: 0 auto;
+  }
+
+
+	.el-table .warning-row {
+		background: rgb(120, 250, 137);
+	}
+
+	.el-table .success-row {
+		background: #50bd15;
+	}
+	.el-row {
+		margin-bottom: 20px;
+	}
+	.el-col {
+		border-radius: 4px;
+	}
+	
+	.grid-content {
+		background: #f7f7f7;
+		border-radius: 4px;
+		min-height: 360px;
+	}
+	.row-bg {
+		padding: 10px 0;
+		background-color: #f9fafc;
+	}
+	.divcss5{position:relative}
+	.divcss5-c1explain{position:absolute;right:10px;bottom:10px} 
+	.divcss5-c2explain{position:absolute;right:10px;bottom:10px} 
+	.divcss5-c5explain{position:absolute;right:10px;top:10px}
+
+	/* 全屏模式 */
+	section#header{
+		display:initial!important;
+	}
+	aside>#sidebar{
+		display:initial!important;
+	}
+	footer#footer{
+        display:flex!important;
+    }
+</style>
+<main id="content" class="content">
+	<div id="app">	
+	</div>
+</main>
+
+<!-- ECharts单文件引入 --> 
+<script src="{{AppSubUrl}}/web/vendor/echart/echarts.min.js"></script>
+
+<script type="text/javascript">
+	
+	$(function() {
+		
+		//容量概况 - 组件
+		Vue.component('echart_1',{
+			delimiters: ['#{', '}#'],
+			props: {
+				id: String,
+				modelC1: Object
+			},
+			template: `<el-container>
+							<el-header style="height: 40px;line-height:40px;" > 
+								<el-row :gutter="20">
+									<el-col :span="8" ><font  color="50bd15"><b>容量概况</b></font>
+									
+									</el-col>
+									<el-col :span="8" :offset="8" > 
+										<el-select v-model="value_rl" placeholder="请选择">
+											<el-option
+											v-for="item in selectVal"
+											:key="item.value"
+											:label="item.label"
+											:value="item.value">
+											</el-option>
+										</el-select>
+									</el-col>
+								</el-row>
+								<hr>
+							</el-header>
+							<el-main><div class="divcss5"> 
+								<div :id="id+'echart-container'" style="width:98%;height:300px;"></div>
+								<div  class="divcss5-c1explain" id ='echart1-explain'  >
+										 #{c1_dianqi}# 
+									<br>
+									 	 #{c1_lengliang}# 
+									<br>
+										#{c1_daikuan}# 
+									<br>
+										#{c1_jigui}# 
+									<br>
+								</div>
+								</div>
+								</el-main>	
+						</el-container>	`,
+			data(){
+				return {
+					value_rl: '',
+					c1_dianqi: '',
+					c1_lengliang: '',
+					c1_daikuan: '',
+					c1_jigui: '',
+					selectVal:[],			//下拉框数据
+
+					option : {
+
+						tooltip : {
+							trigger: 'axis'
+						},
+						legend: {
+							orient: 'vertical',
+							x: '140px',
+           					y: '260px',
+							data : []
+						},
+						toolbox: {
+							show : true
+				
+						},
+						calculable : true,
+						polar : [
+							{
+								indicator : [
+	
+								],
+								center: ['35%','40%'],
+								radius : 90
+							}
+						],
+						series: [] 
+					}	
+				}
+			},
+			created(){
+				
+			},
+			mounted() {
+				this.upecharts('');
+			},
+			methods:{
+				upecharts(value_rl){   
+					if (value_rl == '选项1') {  
+						
+					} else {
+
+						this.c1_dianqi="电气: 5022.494/6072.0  (单位:KW) ";
+						this.c1_lengliang="冷量: 4689.458/5892.17 (单位:KW)" ;
+						this.c1_daikuan="带宽: 4689.458/5892.17 (单位:G)";
+						this.c1_jigui="机柜: 24/167 (单位:个)";
+
+						this.selectVal=this.modelC1.selectData;
+						let myChart = echarts.init(document.getElementById(this.id+'echart-container'));
+						this.option.legend.data =this.modelC1.legendData, 				
+						this.option.polar[0].indicator=this.modelC1.indicatorData,
+						this.option.series = this.modelC1.seriesData,//雷达数据
+
+					
+						myChart.setOption(this.option);
+						window.addEventListener('resize',function() {myChart.resize()});
+					}
+				}
+			}
+		})
+		//机柜负荷率 - 组件
+		Vue.component('echart_2',{
+			delimiters: ['#{', '}#'],
+			props: {
+				id: String,
+				modelC2: Object
+			},
+			template: `<el-container>
+							<el-header style="height: 40px;line-height:40px;" > 
+								<el-row :gutter="20">
+									<el-col :span="8" ><font  color="50bd15"><b>机柜负荷率</b></font>
+									</el-col>
+									<el-col :span="8" :offset="8" > 
+										<el-select v-model="value_rl" placeholder="请选择">
+											<el-option
+											v-for="item in selectVal"
+											:key="item.value"
+											:label="item.label"
+											:value="item.value">
+											</el-option>
+										</el-select>
+									</el-col>
+								</el-row>
+								<hr>
+							</el-header>
+							<el-main><div class="divcss5"> 
+								<div :id="id+'echart-container'" style="width:98%;height:300px;"></div>
+									<div  class="divcss5-c2explain" id ='echart2-explain'  >
+										#{c2_jfgs}#
+									<br>
+										#{c2hxjfjgsm}#
+								</div>
+								
+								</div></el-main>	
+						</el-container>	`,
+			data(){
+				return {
+					value_rl: '',			
+					c2_jfgs:'', 			//主机房机柜数目35个
+					c2hxjfjgsm:'',			//核心机房机柜数目0个
+					selectVal:[],			//下拉框数据
+					option : {
+						tooltip : {
+							trigger: 'axis',
+							axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+								type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+							}
+						},
+						legend: {
+							orient: 'vertical',
+							x: '300px',
+           					y: '130px',
+							data : []
+						},
+						grid: {
+							left: '3%',
+							right: '55%',
+							bottom: '3%',
+							containLabel: true
+						},
+						xAxis:  {
+							type: 'category',
+							data: []
+						},
+						yAxis: {
+							type: 'value'
+						},
+						series: []  
+					}
+
+				
+				}
+			},
+			created(){
+				
+			},
+			mounted() {
+				this.upecharts('');
+			},
+			methods:{
+				upecharts(value_rl){   
+					if (value_rl == '选项1') {  
+						
+					} else {
+
+						let this_ = this;
+
+						this.c2_jfgs="主机房机柜数目35个";
+						this.c2hxjfjgsm="核心机房机柜数目0个";
+						
+						this_.selectVal=this.modelC2.selectData;
+
+
+						let myChart = echarts.init(document.getElementById(this.id+'echart-container'));
+						this.option.legend.data =this.modelC2.legendData,  
+						this.option.xAxis.data =this.modelC2.xAxisData,  //X轴名称
+						this.option.series = this.modelC2.seriesData,//柱状图展示数据
+						myChart.setOption(this.option);
+						window.addEventListener('resize',function() {myChart.resize()});
+					}
+				}
+			}
+		})
+		//健康度 - 组件
+		Vue.component('echart_5',{
+			delimiters: ['#{', '}#'],
+			props: {
+				id: String,
+				modelC5: Object
+			},
+			template: `<el-container>
+							<el-header style="height: 40px;line-height:40px;" > 
+								<el-row :gutter="20">
+									<el-col :span="8" ><font  color="50bd15"><b>健康度</b></font>
+									</el-col>
+								</el-row>
+								<hr>
+							</el-header>
+							<el-main>
+								<div class="divcss5"> 
+								<div :id="id+'echart-container'" style="width:98%;height:300px;"></div>
+								<div  class="divcss5-c5explain" id ='echart5-explain'  >
+										#{excellent}#
+									<br>
+										#{good}#
+									<br>
+										#{difference}#
+								</div>
+								</div>
+								</el-main>	
+						</el-container>	`,
+			data(){
+				return {
+					value_rl: '',
+					excellent:'',	//优
+					good:'',		//良
+					difference:'',	//差
+					option : {
+						color:['#50bd15','#50bd15'],
+						tooltip: {},
+
+						legend: {
+							textStyle:{//图例文字的样式
+								color:'#ccc',
+								fontSize:16
+							},
+							data:[]
+						},
+						radar: {
+							// shape: 'circle',
+							name: {
+								textStyle: {
+									color: '#fff',
+									backgroundColor: '#999',
+									borderRadius: 3,
+									padding: [3, 5]
+								}
+							},
+							indicator: [],
+							center: ['30%','50%'],
+							radius : 90
+						},
+						series: []
+					}
+				
+				
+				}
+			},
+			created(){
+				
+			},
+			mounted() {
+				this.upecharts('');
+			},
+			methods:{
+				upecharts(value_rl){   
+					if (value_rl == '选项1') {  
+						
+					} else {
+
+						let this_ = this;
+						this.excellent="优：30%-75%";
+						this.good="良：15%-30% 75%-85%";
+						this.difference="差：0%-15% 85%-100%";
+
+
+						let myChart = echarts.init(document.getElementById(this.id+'echart-container'));
+
+						this.option.legend.data =this.modelC5.legendData,  
+						this.option.radar.indicator  =this.modelC5.indicatorData,
+						this.option.series = this.modelC5.seriesData,//雷达数据
+						myChart.setOption(this.option),
+						window.addEventListener('resize',function() {myChart.resize()})
+					}
+				}
+			}
+		})
+
+		//容量告警 - 组件
+		Vue.component('echart_3',{
+			delimiters: ['#{', '}#'],
+			props: {
+				id: String,
+				modelC3: Object
+			},
+			template: `<el-container>
+				<el-header style="height: 40px;line-height:40px;" > 
+								<el-row :gutter="20">
+									<el-col :span="8" ><font  color="50bd15"><b>容量告警</b></font>
+									</el-col>
+								</el-row>
+								<hr>
+							</el-header>
+							<el-main>
+								<div :id="id+'echart-container'" style="width:98%;height:300px;" >
+									<el-table :data="listTableData"    :row-class-name="tableRowClassName"  style="width: 100%" :show-header = "isShow">
+										<el-table-column  width="30" label=""  >
+											<template slot-scope="scope">
+												<i style="color: #ff0000; font-size: 16px;" class="el-icon-warning"></i>
+
+											</template>
+										</el-table-column>
+										<el-table-column prop="warning" label="" >
+											
+										</el-table-column>
+									</el-table>
+									</div>
+							</el-main>	
+						</el-container>	`,
+			data(){
+				return {
+					listTableData : [],
+					isShow:false
+				}
+			},
+			created(){
+				
+			},
+			mounted() {
+				this.readingListVal();
+			},
+			methods:{
+				
+				//获取告警信息列表
+				readingListVal(){				
+							this.modelC3.listTableData.forEach(item => {
+							this.listTableData.push(item)
+						});	
+				},
+				tableRowClassName({row, rowIndex}) {	//列表样式
+					if (rowIndex === 1) {
+					return 'warning-row';
+					} else if (rowIndex === 3) {
+					return 'success-row';
+					}
+					return '';
+				}
+			}	
+		})
+
+		//容量对比 - 组件
+		Vue.component('echart_4',{
+			delimiters: ['#{', '}#'],
+			props: {
+				id: String,
+				modelC4: Object
+			},
+			template: `<el-container>
+							<el-header style="height: 40px;line-height:40px;" > 
+								<el-row :gutter="20">
+									<el-col :span="2" ><font  color="50bd15"><b>容量对比</b></font>
+									</el-col>
+									<el-col :span="9"  :offset="7" >
+										<el-tag ref="echart_4" style="cursor:pointer" type="success" v-on:click="upbutton('echart4_container')">柱状图</el-tag>
+										<el-tag ref="echart_5" style="cursor:pointer" type="info" 	v-on:click="upbutton('echart5_container')">趋势图</el-tag>
+									</el-col>
+
+									<el-col :span="5"> 
+										<el-select v-model="value_rl" placeholder="请选择">
+											<el-option
+											v-for="item in selectVal"
+											:key="item.value"
+											:label="item.label"
+											:value="item.value">
+											</el-option>
+										</el-select>
+									</el-col>
+								</el-row>
+								<hr>
+							</el-header>
+							<el-main><div id="echart4_container"  style="width:98%;height:300px; "></div></el-main>	
+						</el-container>	`,
+			data(){
+				return {
+					
+					value_rl: '',
+					selectVal:[],			//下拉框数据
+					option:{}
+					
+
+				}
+
+			},
+			created(){
+				
+			},
+			mounted() {
+				this.upDivEcharts('echart4_container');
+			},
+			methods:{
+				upDivEcharts(value_rl){   
+
+					this.selectVal=this.modelC4.selectData;
+
+					if (value_rl == 'echart4_container') {  
+						optionBar = {
+							tooltip : {
+								trigger: 'axis',
+								axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+									type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+								}
+							},
+							legend: {
+						
+								data :[]
+							},
+							grid: {
+								left: '1%',
+								right: '10%',
+								bottom: '3%',
+								
+								containLabel: true
+							},
+							xAxis:  {
+								type: 'category',
+							
+								data:[]
+							},
+							yAxis: {
+								type: 'value'
+							},
+							series: [
+								
+							]  
+						};
+							
+						 	//柱状图
+						 	let myChart = echarts.init(document.getElementById('echart4_container'));
+							 optionBar.legend.data =this.modelC4.legendVal_Bar,  
+							 optionBar.xAxis.data =this.modelC4.xAxisVal_Bar,  //X轴名称
+							 optionBar.series = this.modelC4.seriesVal_bar,//柱状图展示数据	
+							this.option=optionBar;
+							myChart.setOption(this.option,true);
+
+							this.$refs.echart_4.type = 'success'
+							this.$refs.echart_5.type = 'info'
+							window.addEventListener('resize',function() {myChart.resize()});
+					}else if(value_rl == 'echart5_container'){
+						optionLine = {
+
+							tooltip: {
+								trigger: 'axis'
+							},
+							legend: {
+								data:[]
+							},
+							grid: {
+								left: '3%',
+								right: '4%',
+								bottom: '3%',
+								containLabel: true
+							},
+							xAxis: {
+								type: 'category',
+								boundaryGap: false,
+								data: []
+							},
+							yAxis: {
+								type: 'value'
+							},
+							series: []
+						};
+							//趋势图
+							
+							let myChart = echarts.init(document.getElementById('echart4_container'));
+							
+							
+							optionLine.legend.data =this.modelC4.legendVal_line,  
+							optionLine.xAxis.data =this.modelC4.xAxisVal_line,  //X轴名称
+							optionLine.series = this.modelC4.seriesVal_line,//柱状图展示数据	
+							 this.option=optionLine;
+							myChart.setOption(this.option,true);
+							this.$refs.echart_4.type = 'info'
+							this.$refs.echart_5.type = 'success'
+							window.addEventListener('resize',function() {myChart.resize()});
+					}
+				},upbutton(subViewVal){
+					this.upDivEcharts(subViewVal)
+				}
+
+			}
+		})
+
+	
+
+
+
+		new Vue({
+
+			delimiters: ['#{', '}#'],
+			template: `<el-container style="background:#ffffff;height:calc(100vh - 30px);">
+							<el-main>
+								<el-row :gutter="20">
+									<el-col :span="8"><div class="grid-content">  <echart_1 id="echart_1" :modelC1="modelC1" ></echart_1></div></el-col>
+									<el-col :span="8"><div class="grid-content">  <echart_2 id="echart_2" :modelC2="modelC2" ></echart_2></div></el-col>
+									<el-col :span="8"><div class="grid-content">  <echart_3 id="echart_3" :modelC3="modelC3" ></echart_3></div></el-col>
+								</el-row>
+								<el-row :gutter="20">
+									<el-col :span="16"><div class="grid-content"><echart_4 id="echart_4" :modelC4="modelC4" ></echart_4></div></el-col> 
+									<el-col :span="8"><div class="grid-content"><echart_5 id="echart_5" :modelC5="modelC5" ></echart_5></div></el-col>
+								</el-row>
+							</el-main>
+						</el-container>`,
+			data: {
+				modelC1: {}, 	//容量概况 --雷达图
+				modelC2: {},	//机柜负荷率 --柱状图
+				modelC3: {},	//容量告警 --列表
+				modelC4: {},	//容量对比 --柱状图以及列表
+				modelC5: {}	,	//健康度 --雷达图
+				
+
+			},
+			created(){
+
+				let init = function(){
+                    let cfg = {"header":false, "sidebar":false, "sidebar-bg": false, "footer": false};
+					_.forEach(cfg,function(v,k){
+		
+						if("false" == String(v)){
+							$(`#${k}`).hide();
+							$(".page-header-fixed").css({
+								"paddingTop": "0px"
+							})
+							$(".page-sidebar-minified .sidebar-bg").css({
+								"width": "0px"
+							})
+							$(".page-sidebar-minified .content").css({
+								"marginLeft": "0px"
+							})
+							$("body").css({
+								"background": "transparent"
+							})
+							$("main#content.content").css({
+								"margin": "0px",
+								"padding": "0px"
+							})
+							//$("main#content.content .el-container.ElContainer").css("height", "calc(50vh - 30px)")
+						}
+					})
+		
+				};
+
+				_.delay(()=>{
+					init();
+				},500)
+				
+				this.modelC1 = fsHandler.callFsJScript("/capacityRs/capacityCharts1.js", null).message;
+				this.modelC2 = fsHandler.callFsJScript("/capacityRs/capacityCharts2.js", null).message;
+				this.modelC3 = fsHandler.callFsJScript("/capacityRs/capacityCharts3.js", null).message;
+				this.modelC4 = fsHandler.callFsJScript("/capacityRs/capacityCharts4.js", null).message;
+				this.modelC5 = fsHandler.callFsJScript("/capacityRs/capacityCharts5.js", null).message;
+			},mounted() {
+				
+				
+			},methods:{
+
+				
+			}
+
+
+
+		}).$mount("#app");
+
+		
+	});
+
+</script>
+
+
+
+
+
+{{template "base/footer" .}}

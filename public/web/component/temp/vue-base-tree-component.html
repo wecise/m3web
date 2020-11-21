@@ -1,0 +1,113 @@
+<code>
+
+	<style>
+		/*----------  style  ----------*/
+		
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="vue-base-tree-component"  ----------*/
+	<template>
+		<ul class="ztree" :id="id" style="overflow:auto;"></ul>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="vue-base-tree-component">
+	{
+        delimiters: ['${', '}'],
+		props: {
+			zNodes: Array,
+			id: String,
+			contextMenu: Object
+		},
+		data: function () {
+			return {
+                zTree: Object,
+				setting: {
+                    view: {
+                        showLine: true,
+                        selectedMulti: false,
+                        dblClickExpand: false
+                    },
+                    edit: {
+                        enable: false,
+                    },
+                    data: {
+                        simpleData: {
+                            enable: true
+                        }
+                    },
+                    check: {
+                        enable: true,
+                        chkStyle: "checkbox",
+                        chkboxType: { "Y": "s", "N": "s" }
+                    }
+                },
+                contextMenuItems: {
+                    "create": {name: "新增", icon: "fa-plus",
+                        callback: function (itemKey, opt, rootMenu, originalEvent) {
+                            let treeObj = $.fn.zTree.getZTreeObj($(this).attr("id"));
+                            let nodes = treeObj.getSelectedNodes();
+                            let _item = {id:$(this).attr("id"),action:"create",node: nodes[0]};
+
+
+                        }
+                    },
+                    "sep1": "---------",
+                    "remove": {name: "删除", icon: "fa-trash",
+                        callback: function (itemKey, opt, rootMenu, originalEvent) {
+                            let treeObj = $.fn.zTree.getZTreeObj($(this).attr("id"));
+                            let nodes = treeObj.getSelectedNodes();
+                            let _item = {id:$(this).attr("id"),action:"remove",node: nodes[0]};
+
+
+
+                        }
+                    }
+                }
+			}
+		},
+		mounted: function () {
+            let self = this;
+
+            self.$nextTick(function () {
+
+				self.init();
+
+                self.initPlugIn();
+
+			})
+		},
+		watch: {
+			zNodes: function (val) {
+			    let self = this;
+
+                if(!_.isEmpty(self.zTree)){
+                    self.zTree.destroy();
+                }
+			    self.zTree = $.fn.zTree.init($(self.$el), self.setting, val);
+			}
+		},
+		methods: {
+			init: function(){
+                let self = this;
+
+			    self.zTree = $.fn.zTree.init($(this.$el), self.setting, self.zNodes);
+			},
+			initPlugIn: function(){
+			    let self = this;
+
+			    if (!_.isEmpty(self.contextMenuItems)){
+                    $.contextMenu({
+                        selector: "#"+self.id,//$(self.$el),
+                        items: self.contextMenuItems
+                    });
+				}
+
+			}
+		}
+	
+	}
+	</script>
+
+</code>

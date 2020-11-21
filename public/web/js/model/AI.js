@@ -1861,11 +1861,11 @@ class AI {
                                     
                                     <el-aside width="20%" style="height:100%;overflow: hidden;background:#f2f2f2" ref="leftView">
                                         <el-container style="height:100%;">
-                                            <el-header style="height: 30px;line-height: 30px;padding: 0px 5px;font-weight: 900;">
-                                                <span><i class="el-icon-s-grid"></i> 规则分类</span>
+                                            <el-header style="height: 30px;line-height: 30px;padding: 0px 10px;font-weight: 900;">
+                                                <span class="el-icon-s-grid"></span> 规则分类
                                                 <div style="float:right;">
-                                                    <el-tooltip content="刷新">
-                                                        <el-button type="text" @click="load"><i class="fas fa-sync-alt"></i></el-button>
+                                                    <el-tooltip content="刷新" open-delay="800">
+                                                        <el-button type="text" icon="el-icon-refresh" @click="load"></el-button>
                                                     </el-tooltip>
                                                 </div>
                                             </el-header>
@@ -1873,8 +1873,8 @@ class AI {
                                                 <el-menu @open="open" @close="open">
                                                     <el-submenu :index="item.id" v-for="item in ruleList" @open="select">
                                                         <template slot="title">
-                                                            <el-image :src="'/fs/assets/images/robot/png/'+item.icon + '?type=download&issys=true'" style="width: 32px;height: 32px;padding-right:8px;"></el-image>
-                                                            #{item.label}# <span style="color:#999;">(#{item.child.length}#)</span>
+                                                            <el-image :src="'/fs/assets/images/robot/png/'+item.icon + '?type=download&issys=true'" style="width: 24px;height: 24px;padding-right:8px;"></el-image>
+                                                            <span style="font-size:12px;">#{item.label}#</span> <span style="color:#999;">(#{item.child.length}#)</span>
                                                             <div style="position: absolute;
                                                                 top: 25%;
                                                                 right: 30px;
@@ -1922,23 +1922,10 @@ class AI {
                         this.load();
                     },
                     mounted(){
-                        const self = this;
-
-                        // 默认样式
-                        $(".el-submenu__title",this.$el).css({
-                            "display": "-webkit-box",
-                            "line-height": "32px",
-                            "height": "40px",
-                            "padding": "5px 10px",
-                            "font-size": "12px"
-                        });
-
-                        $(".el-tabs__content",this.$el).css({
-                            "padding": "0px",
-                            "backgroundColor":"#ffffff"
-                        })
-
-                        _.delay(() => {
+                        this.initSplit();
+                    },
+                    methods:{
+                        initSplit(){
                             this.split.inst = Split([this.$refs.leftView.$el, this.$refs.container.$el], {
                                 sizes: [25, 75],
                                 minSize: [0, 0],
@@ -1948,10 +1935,7 @@ class AI {
                                 direction: 'horizontal',
                                 expandToMin: true,
                             });
-                        },500)
-
-                    },
-                    methods:{
+                        },
                         add(item,event){
                             const self = this;
 
@@ -2037,17 +2021,17 @@ class AI {
                             this.defaultOpends = keyPath;
 
                             let selectItem = this.selectedRule = _.find(this.ruleList,{id:key});
-                            let item = fsHandler.fsList([selectItem.parent,selectItem.name].join("/"));
-                            
-                            // extend当前目录
-                            _.find(this.ruleList,function(v){
-                                if(v.id === key){
-                                    v.child = _.map(item,function(val){
-                                        // merge parent的label
-                                        return _.merge(val,{label:v.label,component:v.component});
-                                    });
-                                }
-                            })
+                            fsHandler.fsListAsync([selectItem.parent,selectItem.name].join("/")).then( (rtn)=>{
+                                // extend当前目录
+                                _.find(this.ruleList,(v)=>{
+                                    if(v.id === key){
+                                        v.child = _.map(rtn,(val)=>{
+                                            // merge parent的label
+                                            return _.merge(val,{label:v.label,component:v.component});
+                                        });
+                                    }
+                                })
+                            } );
                             
                         },
                         select(item){
@@ -2056,17 +2040,17 @@ class AI {
                             if(_.find(this.main.tabs,{id:item.id})){
                                 
                                 // 获取规则内容
-                                let content = fsHandler.fsContent(item.parent,item.name);
+                                fsHandler.fsContentAsync(item.parent,item.name).then( (rtn)=>{
+                                    // 删除
+                                    _.remove(this.main.tabs, {
+                                        id: item.id
+                                    });
+
+                                    // 更新
+                                    this.main.tabs.push(_.merge(item,{content: _.attempt(JSON.parse.bind(null, rtn))}));
+                                    this.main.activeIndex = item.id; 
+                                } );
                                 
-                                // 删除
-                                _.remove(this.main.tabs, {
-                                    id: item.id
-                                });
-
-                                // 更新
-                                this.main.tabs.push(_.merge(item,{content: _.attempt(JSON.parse.bind(null, content))}));
-                                this.main.activeIndex = item.id;  
-
                                 return false;
                             }
 
@@ -2074,9 +2058,10 @@ class AI {
                             this.selectedRule = item;
 
                             // 获取规则内容
-                            let content = fsHandler.fsContent(item.parent,item.name);
-                            this.main.tabs.push(_.merge(item,{content: _.attempt(JSON.parse.bind(null, content))}));
-                            this.main.activeIndex = item.id;   
+                            fsHandler.fsContentAsync(item.parent,item.name).then( (rtn)=>{
+                                this.main.tabs.push(_.merge(item,{content: _.attempt(JSON.parse.bind(null, rtn))}));
+                                this.main.activeIndex = item.id;   
+                            } );
                             
                         },
                         close(targetId){

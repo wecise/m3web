@@ -1,0 +1,635 @@
+<!--
+
+    [[[[[[[[[[[[[[[      ]]]]]]]]]]]]]]]
+    [::::::::::::::      ::::::::::::::]
+    [::::::::::::::      ::::::::::::::]
+    [::::::[[[[[[[:      :]]]]]]]::::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[    CODE BY WANGZD    ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [::::::[[[[[[[:      :]]]]]]]::::::]
+    [::::::::::::::      ::::::::::::::]
+    [::::::::::::::      ::::::::::::::]
+    [[[[[[[[[[[[[[[      ]]]]]]]]]]]]]]]
+
+-->
+{{template "base/head" .}}
+
+<!-- zTree Core CSS -->
+<link href="{{AppSubUrl}}/web/vendor/zTree/css/entityStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
+
+
+<style>
+	
+	body {
+		background-color: #d9e0e7;
+	}
+	
+	main#content.content {
+		margin: 40px 50px!important;
+	}
+
+	#chart_example{
+    width: 98%;
+    height: 370px;
+    border: 1px solid red;
+    margin: 0 auto;
+  }
+
+
+	.el-table .warning-row {
+		background: rgb(120, 250, 137);
+	}
+
+	.el-table .success-row {
+		background: #50bd15;
+	}
+	.el-row {
+		margin-bottom: 20px;
+	}
+	.el-col {
+		border-radius: 4px;
+	}
+	
+	.grid-content {
+		background: #f7f7f7;
+		border-radius: 4px;
+		min-height: 360px;
+	}
+	.row-bg {
+		padding: 10px 0;
+		background-color: #f9fafc;
+	}
+	.divcss5{position:relative}
+	.divcss5-c1explain{position:absolute;right:10px;bottom:10px} 
+	.divcss5-c2explain{position:absolute;right:10px;bottom:10px} 
+	.divcss5-c5explain{position:absolute;right:10px;top:10px}
+
+		/* 全屏模式 */
+	section#header{
+		display:initial!important;
+	}
+	aside>#sidebar{
+		display:initial!important;
+	}
+	footer#footer{
+        display:flex!important;
+    }
+</style>
+<main id="content" class="content">
+	<div id="app">	
+	</div>
+</main>
+
+<!-- ECharts单文件引入 --> 
+<script src="{{AppSubUrl}}/web/vendor/echart/echarts.min.js"></script>
+
+<script type="text/javascript">
+	
+	$(function() {
+		
+		//能耗监测 - 组件
+		Vue.component('echart_1',{
+			delimiters: ['#{', '}#'],
+			props: {
+				id: String,
+				modelC1: Object
+			},
+			template: `<el-container>
+							<el-header style="height: 40px;line-height:40px;" > 
+								<el-row :gutter="10">
+									<el-col :span="2" ><font  color="50bd15"><b>能耗监测</b></font></el-col>
+									<el-col :span="2"  :offset="13" >
+										<el-tag ref="echart_1" style="cursor:pointer" type="success" >详 情</el-tag>
+									</el-col>
+									<el-col :span="7"  > 
+										<el-select v-model="value_rl"   placeholder="请选择">
+											<el-option
+											v-for="item in selectVal"
+											:key="item.value"
+											:label="item.label"
+											:value="item.value">
+											</el-option>
+										</el-select>
+									</el-col>
+								</el-row>
+								<hr>
+							</el-header>
+							<el-main style="padding:5px;"><div class="divcss5"> 
+								<div :id="id+'echart-container'" style="width:98%;height:300px;"></div>
+						
+								</div>
+								</el-main>	
+						</el-container>	`,
+			data(){
+				return {
+					value_rl: '',
+					selectVal:[],			//下拉框数据
+					option : {
+						title : {
+							text: '多园区PUE                              北京基地                         国际信息港数据中心（1号地）',
+							x:'115px',
+							y:'240px'
+						},
+						tooltip : {
+							formatter: "{a} <br/>{c} {b}"
+						},
+						series : [
+							{
+								name: '',
+								type: 'gauge',
+								z: 3,
+								min: 1,
+								max: 2,
+								center: ['20%', '50%'],    // 默认全局居中
+								splitNumber: 5,
+								radius: '65%',
+								axisLine: {            // 坐标轴线
+									lineStyle: {       // 属性lineStyle控制线条样式
+										width: 10
+									}
+								},
+								axisTick: {            // 坐标轴小标记
+									length: 15,        // 属性length控制线长
+									lineStyle: {       // 属性lineStyle控制线条样式
+										color: 'auto'
+									}
+								},
+								splitLine: {           // 分隔线
+									length: 15,         // 属性length控制线长
+									lineStyle: {       // 属性lineStyle（详见lineStyle）控制线条样式
+										color: 'auto'
+									}
+								},
+								axisLabel: {
+									backgroundColor: 'auto',
+									borderRadius: 2,
+									color: '#eee',
+									padding: 3,
+									textShadowBlur: 2,
+									textShadowOffsetX: 1,
+									textShadowOffsetY: 1,
+									textShadowColor: '#222'
+								},
+								title : {
+									// 其余属性默认使用全局文本样式，详见TEXTSTYLE
+									offsetCenter: ['0', '-120'],
+									fontWeight: 'bolder',
+									fontSize: 15,
+									fontStyle: 'italic'
+								},
+								detail : {
+									textStyle: {
+                               		 fontSize: 15,
+                            		},
+									offsetCenter: ['0', '70'],
+								},
+								data:[	]
+							},
+							{
+								name: '',
+								type: 'gauge',
+								z: 3,
+								min: 1,
+								max: 2,
+								center: ['50%', '50%'],    // 默认全局居中
+								splitNumber: 5,
+								radius: '65%',
+								axisLine: {            // 坐标轴线
+									lineStyle: {       // 属性lineStyle控制线条样式
+										width: 10
+									}
+								},
+								axisTick: {            // 坐标轴小标记
+									length: 15,        // 属性length控制线长
+									lineStyle: {       // 属性lineStyle控制线条样式
+										color: 'auto'
+									}
+								},
+								splitLine: {           // 分隔线
+									length: 15,         // 属性length控制线长
+									lineStyle: {       // 属性lineStyle（详见lineStyle）控制线条样式
+										color: 'auto'
+									}
+								},
+								axisLabel: {
+									backgroundColor: 'auto',
+									borderRadius: 2,
+									color: '#eee',
+									padding: 3,
+									textShadowBlur: 2,
+									textShadowOffsetX: 1,
+									textShadowOffsetY: 1,
+									textShadowColor: '#222'
+								},
+								title : {
+									// 其余属性默认使用全局文本样式，详见TEXTSTYLE
+									offsetCenter: ['0', '-120'],
+									fontWeight: 'bolder',
+									fontSize: 15,
+									fontStyle: 'italic'
+								},	
+								detail : {
+									textStyle: {
+                               		 fontSize: 15,
+                            		},
+									offsetCenter: ['0', '70'],
+								},
+								data:[	]
+							},
+							{
+								name: '',
+								type: 'gauge',
+								z: 3,
+								min: 1,
+								max: 2,
+								center: ['80%', '50%'],    // 默认全局居中
+								splitNumber: 5,
+								radius: '65%',
+								axisLine: {            // 坐标轴线
+									lineStyle: {       // 属性lineStyle控制线条样式
+										width: 10
+									}
+								},
+								axisTick: {            // 坐标轴小标记
+									length: 15,        // 属性length控制线长
+									lineStyle: {       // 属性lineStyle控制线条样式
+										color: 'auto'
+									}
+								},
+								splitLine: {           // 分隔线
+									length: 15,         // 属性length控制线长
+									lineStyle: {       // 属性lineStyle（详见lineStyle）控制线条样式
+										color: 'auto'
+									}
+								},
+								axisLabel: {
+									backgroundColor: 'auto',
+									borderRadius: 2,
+									color: '#eee',
+									padding: 3,
+									textShadowBlur: 2,
+									textShadowOffsetX: 1,
+									textShadowOffsetY: 1,
+									textShadowColor: '#222'
+								},
+								title : {
+									// 其余属性默认使用全局文本样式，详见TEXTSTYLE
+									offsetCenter: ['0', '-120'],
+									fontWeight: 'bolder',
+									fontSize: 15,
+									fontStyle: 'italic'
+								},  
+								detail : {
+									textStyle: {
+                               		 fontSize: 15,
+                            		},
+									offsetCenter: ['0', '70'],
+								},
+								data:[]
+							},
+
+						
+						]
+					}	
+				}
+			},
+			created(){
+				
+			},
+			mounted() {
+				this.upecharts('');
+			},
+			methods:{
+				upecharts(value_rl){   
+					if (value_rl == '选项1') {  
+						
+					} else {
+
+						this.selectVal=this.modelC1.selectData;
+
+						let myChart = echarts.init(document.getElementById(this.id+'echart-container'));
+						
+						console.log('name1'+this.modelC1.seriesData[0].name)
+						this.option.series[0].name = this.modelC1.seriesData[0].name,
+						this.option.series[0].data = this.modelC1.seriesData[0].data,
+						this.option.series[1].name = this.modelC1.seriesData[0].name,
+						this.option.series[1].data = this.modelC1.seriesData[0].data,
+						this.option.series[2].name = this.modelC1.seriesData[0].name,
+						this.option.series[2].data = this.modelC1.seriesData[0].data,
+
+					
+						myChart.setOption(this.option);
+						window.addEventListener('resize',function() {myChart.resize()});
+					}
+				}
+			}
+		})
+		
+		
+		//能耗占比 - 组件
+		Vue.component('echart_2',{
+			delimiters: ['#{', '}#'],
+			props: {
+				id: String,
+				modelC2: Object
+			},
+			template: `<el-container>
+							<el-header style="height: 40px;line-height:40px;" > 
+								<el-row :gutter="10">
+									<el-col :span="2" ><font  color="50bd15"><b>能耗占比</b></font>
+									</el-col>
+									<el-col :span="5"  :offset="7" >
+										<el-tag ref="echart_2" style="cursor:pointer" type="success" v-on:click="upbutton('echart2_container')">结 构</el-tag>
+										<el-tag ref="echart_3" style="cursor:pointer" type="info" 	v-on:click="upbutton('echart3_container')">园 区</el-tag>
+									</el-col>
+
+									<el-col :span="7" :offset="3" > 
+										<el-select v-model="value_rl"  multiple placeholder="请选择">
+											<el-option
+											v-for="item in selectVal"
+											:key="item.value"
+											:label="item.label"
+											:value="item.value">
+											</el-option>
+										</el-select>
+									</el-col>
+								</el-row>
+								<hr>
+							</el-header>
+							<el-main style="padding:5px;"><div id="echart2_container"  style="width:99%;height:300px; "></div></el-main>	
+						</el-container>	`,
+			data(){
+				return {
+					
+					value_rl: '',
+					selectVal:[],			//下拉框数据
+					option:{}
+					
+
+				}
+
+			},
+			created(){
+				
+			},
+			mounted() {
+				this.upDivEcharts('echart2_container');
+			},
+			methods:{
+				upDivEcharts(value_rl){   
+
+					this.selectVal=this.modelC2.selectData;
+
+					if (value_rl == 'echart2_container') {  
+						
+							optionPic = {
+								tooltip : {
+									trigger: 'item',
+									formatter: "{a} <br/>{b} : {c} ({d}%)"
+								},
+								legend: {
+									
+									data: []
+								},
+								series : []
+							};
+
+							//饼图
+							let myChart = echarts.init(document.getElementById('echart2_container'));
+							optionPic.legend.data =this.modelC2.legendVal_Pic,  
+							optionPic.series = this.modelC2.seriesVal_Pic,//饼图展示数据	
+							this.option=optionPic;
+							myChart.setOption(this.option,true);
+							this.$refs.echart_2.type = 'success'
+							this.$refs.echart_3.type = 'info'
+							window.addEventListener('resize',function() {myChart.resize()});
+
+
+
+					}else if(value_rl == 'echart3_container'){
+
+					
+						optionBar = {
+							tooltip : {
+								trigger: 'axis',
+								axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+									type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+								}
+							},
+							legend: {
+						
+								data :[]
+							},
+							grid: {
+								left: '1%',
+								right: '5%',
+								bottom: '3%',
+								
+								containLabel: true
+							},
+							xAxis:  {
+								type: 'category',
+							
+								data:[]
+							},
+							yAxis: {
+								type: 'value'
+							},
+							series: [
+								
+							]  
+						};	
+						 	//柱状图
+						 	let myChart = echarts.init(document.getElementById('echart2_container'));
+							 optionBar.legend.data =this.modelC2.legendVal_Bar,  
+							 optionBar.xAxis.data =this.modelC2.xAxisVal_Bar,  //X轴名称
+							 optionBar.series = this.modelC2.seriesVal_bar,//柱状图展示数据	
+							this.option=optionBar;
+							myChart.setOption(this.option,true);
+							this.$refs.echart_2.type = 'info'
+							this.$refs.echart_3.type = 'success'
+							window.addEventListener('resize',function() {myChart.resize()});
+					}
+				},upbutton(subViewVal){
+					
+					this.upDivEcharts(subViewVal);
+				}
+
+			}
+		})
+
+		//功率曲线 - 组件
+		Vue.component('echart_4',{
+			delimiters: ['#{', '}#'],
+			props: {
+				id: String,
+				modelC4: Object
+			},
+			template: `<el-container>
+							<el-header style="height: 40px;line-height:40px;" > 
+								<el-row :gutter="20">
+									<el-col :span="8" ><font  color="50bd15"><b>功率曲线</b></font>
+									</el-col>
+									<el-col :span="8" :offset="8" > 
+										<el-select v-model="value_rl" placeholder="请选择">
+											<el-option
+											v-for="item in selectVal"
+											:key="item.value"
+											:label="item.label"
+											:value="item.value">
+											</el-option>
+										</el-select>
+									</el-col>
+								</el-row>
+								<hr>
+							</el-header>
+							<el-main style="padding:5px;">	<div :id="id+'echart-container'" style="width:98%;height:300px;"></div> </el-main>	
+						</el-container>	`,
+			data(){
+				return {
+					value_rl: '',			
+					c2_jfgs:'', 			//主机房机柜数目35个
+					c2hxjfjgsm:'',			//核心机房机柜数目0个
+					selectVal:[],			//下拉框数据
+
+					option : {
+						tooltip: {
+							trigger: 'axis'
+						},
+						legend: {
+							data:[]
+						},
+						grid: {
+							left: '3%',
+							right: '4%',
+							bottom: '3%',
+							containLabel: true
+						},
+						xAxis: {
+							type: 'category',
+							boundaryGap: false,
+							data: []
+						},
+						yAxis: {
+							type: 'value'
+						},
+						series: []
+
+					}				
+				}
+			},
+			created(){
+				
+			},
+			mounted() {
+				this.upecharts('');
+			},
+			methods:{
+				upecharts(value_rl){   
+					if (value_rl == '选项1') {  
+						
+					} else {
+							this.selectVal=this.modelC4.selectData;
+							//趋势图
+							let myChart = echarts.init(document.getElementById(this.id+'echart-container'));
+							this.option.legend.data =this.modelC4.legendVal_line,  
+							this.option.xAxis.data =this.modelC4.xAxisVal_line,  //X轴名称
+							this.option.series = this.modelC4.seriesVal_line,	
+							myChart.setOption(this.option,true)
+							window.addEventListener('resize',function() {myChart.resize()});
+					}
+				}
+			}
+		})
+	
+
+
+		new Vue({
+
+			delimiters: ['#{', '}#'],
+			template: `<el-container style="background:#ffffff;height:calc(100vh - 30px);">
+							<el-main>
+								<el-row :gutter="10">
+									<el-col :span="14"><div class="grid-content">  <echart_1 id="echart_1" :modelC1="modelC1" ></echart_1></div></el-col>
+									<el-col :span="10"><div class="grid-content">  <echart_2 id="echart_2" :modelC2="modelC2" ></echart_2></div></el-col>
+								</el-row>
+								<el-row :gutter="10">
+									<el-col :span="24"><div class="grid-content"><echart_4 id="echart_4" :modelC4="modelC4" ></echart_4></div></el-col> 
+								</el-row>
+							</el-main>
+						</el-container>`,
+			data: {
+				modelC1: {}, 	
+				modelC2: {},		
+				modelC4: {}	
+	
+				
+
+			},
+			created(){
+
+				let init = function(){
+                    let cfg = {"header":false, "sidebar":false, "sidebar-bg": false, "footer": false};
+					_.forEach(cfg,function(v,k){
+		
+						if("false" == String(v)){
+							$(`#${k}`).hide();
+							$(".page-header-fixed").css({
+								"paddingTop": "0px"
+							})
+							$(".page-sidebar-minified .sidebar-bg").css({
+								"width": "0px"
+							})
+							$(".page-sidebar-minified .content").css({
+								"marginLeft": "0px"
+							})
+							$("body").css({
+								"background": "transparent"
+							})
+							$("main#content.content").css({
+								"margin": "0px",
+								"padding": "0px"
+							})
+							//$("main#content.content .el-container.ElContainer").css("height", "calc(50vh - 30px)")
+						}
+					})
+		
+				};
+
+				_.delay(()=>{
+					init();
+				},500)
+				
+				this.modelC1 = fsHandler.callFsJScript("/capacityRs/consumptionCharts1.js", null).message;
+				this.modelC2 = fsHandler.callFsJScript("/capacityRs/consumptionCharts2.js", null).message;
+				this.modelC4 = fsHandler.callFsJScript("/capacityRs/consumptionCharts3.js", null).message;
+			},mounted() {
+				
+				
+			},methods:{
+
+				
+			}
+
+
+
+		}).$mount("#app");
+
+		
+	});
+
+</script>
+
+
+
+
+
+{{template "base/footer" .}}

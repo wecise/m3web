@@ -1,0 +1,160 @@
+<code>
+
+	<style>
+		/*----------  style  ----------*/
+		
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="vue-entity-graph-component"  ----------*/
+	<template>
+		<div id="graphContainer"
+            style="position:relative;overflow:auto;padding:10px;">
+        </div>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="vue-entity-graph-component">
+	{
+		
+	    delimiters: ['${', '}'],
+	    props: {
+	        model: Object,
+	    },
+	    data: function () {
+	        return {
+	            timer: {
+	                sched: Object,
+	                timer: Object
+	            },
+	            graph: Object,
+	            parent: Object,
+	            root: Object,
+	            layout: Object,
+	        }
+	    },
+	    watch: {
+	        model: {
+	        	handler:function(val,oldVal){
+	        		var self = this;
+
+	        		if(!_.isEmpty(self.graph)){
+		            	self.graph.destroy();
+		            }
+
+	        		self.draw();
+	        	},
+	        	deep: true
+	        }
+	    },
+	    created:function(){
+	        var self = this;
+
+	    },
+	    mounted: function() {
+	        var self = this;
+
+	        self.$nextTick(function(){
+
+	            self.sched = later.parse.text('every 5 hour');
+	            self.timer = later.setInterval(self.arrange, self.sched);
+
+	            self.draw();
+	            
+	        })
+	    },
+	    methods: {
+	        draw: function(){
+	            var self = this;
+	            var gData = self.model;
+	            var prefix = '';
+
+	            self.graph = new mxGraph(self.$el);
+	            self.graph.setEnabled(false);
+	            self.graph.setPanning(false);
+	            self.graph.setTooltips(true);
+	            self.graph.panningHandler.useLeftButtonForPanning = true;
+
+	            self.parent = self.graph.getDefaultParent();
+	            self.root = undefined;
+
+	            new mxRubberband(self.graph);
+
+	            self.graph.getStylesheet().getDefaultEdgeStyle()['edgeStyle'] = 'orthogonalEdgeStyle';
+	            
+	            self.graph.addListener(mxEvent.CLICK, function(sender, evt)
+	            {
+	                var cell = evt.getProperty('cell');
+	                
+	                if (cell != null)
+	                {
+	                    var overlays = self.graph.getCellOverlays(cell);
+	                    
+	                    if (overlays == null)
+	                    {
+	                        // Creates a new overlay with an image and a tooltip
+	                        var overlay = new mxCellOverlay(
+	                            new mxImage('/web/lib/mxgraph/graph/stencils/matrix/check.svg', 16, 16),'Overlay tooltip');
+
+	                        // Installs a handler for clicks on the overlay                         
+	                        overlay.addListener(mxEvent.CLICK, function(sender, evt2)
+	                        {
+	                            mxUtils.alert('Overlay clicked');
+	                        });
+	                        
+	                        // Sets the overlay for the cell in the graph
+	                        self.graph.addCellOverlay(cell, overlay);
+
+	                        eventHub.$emit("graph-select-event", {type: true, value:cell.getValue()});
+	                    }
+	                    else
+	                    {
+	                        self.graph.removeCellOverlays(cell);
+
+	                        eventHub.$emit("graph-select-event", {type: false, value:cell.getValue()});
+	                    }
+	                }
+	            });
+
+	            // Creates a layout
+	            self.layout = new mxHierarchicalLayout(self.graph, mxConstants.DIRECTION_NORTH);
+	            self.layout.forceConstant = 140;
+	            
+	            self.graph.getModel().beginUpdate();
+	            
+	            try
+	            {
+	                var nodes = {};
+	                _.forEach(gData.nodes,function(v){
+	                    let node = self.graph.insertVertex(self.parent, null, v.data.name, 50, 50, 120, 50,
+	                                                        'shape=image;image=/web/lib/mxgraph/graph/stencils/matrix/17/'+_.last(v.classes.split("/"))+'.svg;verticalLabelPosition=bottom;verticalAlign=top');
+	                    
+	                    nodes[v.data.id] = node;
+	                })
+
+	                _.forEach(gData.edges,function(k){
+	                    let source = nodes[k.data.source];
+	                    let target = nodes[k.data.target];
+	                    let edge = self.graph.insertEdge(self.parent, '', k.classes, source, target, 'startArrow=block;endArrow=block;edgeStyle=orthogonalEdgeStyle;');
+	                })
+	                
+	            }
+	            finally
+	            {
+	                // Updates the display
+	                self.graph.getModel().endUpdate();
+
+	                self.layout.execute(self.parent);
+	            }
+	        },
+	        arrange: function(){
+	            var self = this;
+	            
+	            self.layout.execute(self.parent);
+	        }
+	    }
+	
+	}
+	</script>
+
+</code>

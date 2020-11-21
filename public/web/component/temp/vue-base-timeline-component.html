@@ -1,0 +1,97 @@
+<code>
+
+    <style>
+        /*----------  style  ----------*/
+        .vis-item {
+            border-color: rgb(226, 226, 226);
+            background-color: rgb(228, 239, 245);
+        }
+
+        .vis-item.vis-selected {
+            background-color: rgb(229, 229, 229);
+            border-color: rgb(255, 255, 255);
+            color: rgb(51, 51, 51);
+            box-shadow: 0 0 10px #bfbfbf;
+        }
+
+
+    </style>
+
+
+    /*----------  最外层element会自动增加组件同名 class="vue-base-timeline-component"  ----------*/
+    <template>
+        <div :id="id"></div>
+    </template>
+
+    /*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+    <script id="vue-base-timeline-component">
+        {
+            delimiters: ['${', '}'],
+            props: {
+                id: String,
+                model: Array
+            },
+            data: function(){
+                return {
+                    timeline: Object,
+                    container: Object,
+                    items: Array,
+                    options: Object,
+                    itemsSelected: Array
+                }
+            },
+            mounted: function(){
+                let self = this;
+
+                self.$nextTick(function(){
+                    _.delay(function(){
+                        self.init();
+                    },200)
+                })
+            },
+            watch: {
+
+            },
+            created: function () {
+                let self = this;
+
+            },
+            methods: {
+                init: function() {
+                    let self = this;
+
+                    self.container = document.getElementById(self.id);
+
+                    self.items = new vis.DataSet(self.model);
+
+                    self.options = {
+                        width: '100%',
+                        height: '300px',
+                        margin: {
+                            item: 20
+                        },
+                        multiselect: true,
+                        editable: {
+                            add: true,         // add new items by double tapping
+                            updateTime: true,  // drag items horizontally
+                            updateGroup: true, // drag items from one group to another
+                            remove: true,       // delete an item by tapping the delete button top right
+                            overrideItems: false,  // allow these options to override item.editable
+                        },
+                        locale: '{{.Lang}}'
+                    };
+
+                    self.timeline = new vis.Timeline(self.container, self.items, self.options);
+
+                    self.timeline.on('select', function (properties) {
+                        self.itemsSelected = properties;
+                        eventHub.$emit("timeline-selected-event",properties);
+                    });
+                }
+            }
+
+
+        }
+    </script>
+
+</code>

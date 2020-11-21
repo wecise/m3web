@@ -22,6 +22,10 @@
 -->
 {{template "base/head" .}}
 
+<!-- zTree Core CSS -->
+<link href="{{AppSubUrl}}/web/vendor/zTree/css/entityStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
+
+
 <style>
 	
 	body {
@@ -45,13 +49,13 @@
         	template: "#app-template",
         	data: {},
         	mounted: function(){
-				/* _.delay(()=>{
+				_.delay(()=>{
 					$('.grid-stack').gridstack({
 						resizable: {
 							handles: 'e, se, s, sw, w'
 						}
 					});
-				},5000) */
+				},5000)
 			}
         })
 	});

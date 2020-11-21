@@ -1,0 +1,226 @@
+<code>
+
+	<style>
+		/*----------  style  ----------*/
+		
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="vue-search-input-component"  ----------*/
+	<template>
+		<div style="display: flex;">
+            <a href="javascript:void(0)" @click="openHelpPanel" class="btn btn-xs btn-help" style="background-color: #dce2eb;border: 1px solid #ccc;border-right: none;width: 24px;height: 34px;border-radius: 0px;padding: 7px 5px;">
+                <i class="fa fa-question"></i>
+            </a>
+            <div class="btn-group quick" :style="'display:'+model.quick+';'">
+				<a href="javascript:;" data-toggle="dropdown" class="btn btn-default dropdown-toggle" aria-expanded="true">Quick <span class="caret"></span></a>
+				<ul class="dropdown-menu">
+					<li v-for="item in quick.list" style="display:-webkit-box;">
+						<a href="javascript:;" @click="setDefaultTerm(item)">${item.name} &nbsp;<small style="color:#ccc;">(${item.value})</small></a>
+						<a href="javascropt:;" @click="removeQuick(item)" style="color:#9f9f9f;"><i class="fa fa-close"></i></a>
+					</li>
+					<li class="divider"></li>
+					<li><a href="javascript:;" @click="newQuick">New Condition</a></li>
+				</ul>
+			</div>
+            <input type="text" v-model.trim="newInputValue" placeholder="Search" class="form-control" style="border-radius: 0px;" autofocus="autofocus">
+            <a class="btn btn-xs btn-cancel" style="background-color: #fff;border: 1px solid #ccc;border-left: none;width: 24px;height: 34px;border-radius: 0px;padding: 7px 5px;display: none;">
+                <i class="fas fa-times"></i>
+            </a>
+        </div>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="vue-search-input-component">
+	{
+	   
+	    delimiters: ['${', '}'],
+	    props:{
+	        id: String,
+	    	model:Object
+	    },
+	    data: function() {
+	        return {
+	            newInputValue: "",
+	            win: {},
+	            quick:{
+	            	list:[]
+	            }
+	        }   
+	    },
+	    created: function () {
+	        let self = this;
+
+	    },
+	    mounted: function(){
+            let self = this;
+
+	        self.$nextTick(function () {
+	            self.init();
+	            self.initQuick();
+	        })
+	    },
+	    watch: {
+            newInputValue: {
+                handler:function(val,oldVal) {
+                    let self = this;
+
+                    if(!_.isEmpty(val)){
+                        $(self.$el).find(".btn-cancel").css("display","");
+                        eventHub.$emit("input-term-event", val);
+                    } else {
+                        $(self.$el).find(".btn-cancel").css("display","none");
+                        $(self.$el).find("input").val("");
+                        eventHub.$emit("input-term-event", val);
+                    }
+
+                },
+				deep:true
+			},
+			model:{
+                handler:function(val,oldVal) {
+                    let self = this;
+
+                    self.newInputValue = val.term;
+                    
+                },
+                deep:true
+			}
+	    },
+	    methods: {
+	        init: function() {
+	            let self = this;
+
+                self.newInputValue = self.model.term;
+
+	            $(self.$el).find("a.btn-cancel").on("click",function(event) {
+	                self.deleteParam();
+	            })
+	        },
+	        initQuick: function(){
+	        	let self = this;
+	        	let _tmp = localStorage.getItem(window.GLOBAL_OBJECT.company.name + "_quick_list_"+self.model.type.type);
+	        	let _quick = _.attempt(JSON.parse.bind(null, _tmp));
+	        	
+	        	self.quick.list = _.map(_quick,function(v){
+	        						return v;
+					        	 });
+	        	eventHub.$emit("quick-update-event",null);
+
+	        },
+	        setDefaultTerm: function(term){
+	        	let self = this;
+
+                self.newInputValue = term.value;
+	        },
+	        newQuick: function(){
+	        	let self = this;
+
+	        	swal.setDefaults({
+					input: 'text',
+					confirmButtonText: 'Save &rarr;',
+					showCancelButton: true,
+					progressSteps: ['1', '2']
+				})
+
+				var steps = [
+				  {
+				    title: 'New Filter Name',
+				    text: ''
+				  },
+				  'New Filter'
+				]
+
+				swal.queue(steps).then((result) => {
+					swal.resetDefaults()
+
+					if (result.value) {
+				 		
+						let _value = {name: result.value[0], value: result.value[1]};
+						let _tmp = localStorage.getItem(window.GLOBAL_OBJECT.company.name + "_quick_list_"+self.model.type.type);
+		        			
+	        			if(_.isEmpty(_tmp)){
+	        				let _quick = [];
+	        				_quick.push(_value);
+	        				localStorage.setItem(window.GLOBAL_OBJECT.company.name + "_quick_list_"+self.model.type.type,JSON.stringify(_quick));
+	        			} else {
+	        				let _quick = _.attempt(JSON.parse.bind(null, _tmp));
+	        				let _idx = _.indexOf(_quick,_value);	
+
+	        				if(_idx == -1){
+		        				_quick.push(_value);
+		        				localStorage.setItem(window.GLOBAL_OBJECT.company.name + "_quick_list_"+self.model.type.type,JSON.stringify(_quick));
+		        			}
+						}
+
+						self.initQuick();
+					}
+				})
+	        },
+	        removeQuick: function(term){
+                let self = this;
+
+	        	self.quick.list = _.pull(self.quick.list,term);
+	        			
+    			localStorage.setItem(window.GLOBAL_OBJECT.company.name + "_quick_list_"+self.model.type.type,JSON.stringify(self.quick.list));
+
+    			self.initQuick();
+	        },
+	        deleteParam: function () {
+                let self = this;
+
+                self.newInputValue = "";
+	            eventHub.$emit("input-reset-event", null);
+	        },
+	        openHelpPanel: function(){
+                let self = this;
+
+	        	var w = $( window ).width();
+	            var h = $( window ).height();
+	            var wW = $( window ).width()*2/3;
+	            var hH = $( window ).height()*1.5/3;
+	            var lrwh = [10, 148, wW, hH];//[(w-wW)/3.1, (h-hH)/3, wW, hH];
+	            var tb = document.createElement('div');
+
+	        	$(tb).append(`  <div id="editor-keywords"></div>`
+	            			);
+	            self.win = new mxWindow("How to Search", tb, lrwh[0], lrwh[1], lrwh[2], lrwh[3], true, true);
+	            self.win.setMaximizable(true);
+	            self.win.setResizable(true);
+	            self.win.setClosable(true);
+	            self.win.setVisible(true);
+
+	            var helpVue = new Vue({
+	            	el: "#editor-keywords",
+	            	template: `<vue-editor-component id="help-editor" :model="model"></vue-editor-component>`,
+	            	data: {
+	            		model:{
+                        	oldInput: "",
+                        	newInput: "",
+                        	mode: "toml",
+                        	theme: "tomorrow_night_blue",
+                        	printMargin: false,
+                        	readOnly: true
+                        }
+	            	},
+	            	created: function(){
+                    	let self = this;
+
+                    },
+                    mounted: function(){
+                        let self = this;
+
+                        self.$nextTick(function () {
+                        	_.delay(function(){
+                        		self.model.newInput = GLOBAL_CONFIG.global.help.join("\n");
+                        	},200)
+                        })
+                    }
+	            });
+	        }
+	    }
+	
+	}
+	</script>
+
+</code>

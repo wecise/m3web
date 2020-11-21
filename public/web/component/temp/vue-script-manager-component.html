@@ -1,0 +1,138 @@
+<code>
+
+	<style>
+		/*----------  style  ----------*/
+
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="vue-script-manager-component"  ----------*/
+	<template>
+		<div class="panel panel-grey">
+			<div class="panel-body" style="padding:0px 10px;">
+				<!--<div class="row">
+                    <div class="col-lg-12">
+                        <div class="btn-group pull-right">
+                            <a class="btn btn-xs btn-default" href="javascript:void(0);"><i class="fa fa-upload fa-fw"></i> 上传</a>
+                            <a class="btn btn-xs btn-default" href="javascript:void(0);"><i class="fa fa-edit fa-fw"></i> 编辑</a>
+                            <a class="btn btn-xs btn-success" href="javascript:void(0);"><i class="fa fa-download fa-fw"></i> 下载</a>
+                        </div>
+                    </div>
+                </div>
+                <BR/>
+                <div class="row">
+                    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3" v-for="item in agentModel"
+                         style="display: -webkit-block;cursor: pointer;text-align:center;">
+                        <img :src="[item.type=='isFolder'?'/web/assets/images/filesystem_orange.png':'/web/assets/images/Document-Blank-icon.png']"
+                             width="48" height="48">
+                        <p>${item.name}</p>
+                    </div>
+                </div>-->
+				<div class="btn-group pull-right">
+					<a class="btn btn-xs btn-default" href="javascript:void(0);"><i class="fa fa-upload fa-fw"></i> 上传</a>
+					<a class="btn btn-xs btn-default" href="javascript:void(0);"><i class="fa fa-edit fa-fw"></i> 编辑</a>
+					<a class="btn btn-xs btn-success" href="javascript:void(0);"><i class="fa fa-download fa-fw"></i> 下载</a>
+				</div>
+				<BR/>
+				<BR/>
+				<div :id="item.id" data-item="{}"
+					 class="dir col-md-2 col-sm-4 context-menu-file"
+					 style="cursor: pointer;"
+					 v-for="item in agentModel">
+					<div class="widget widget-stats bg-silver">
+						<div class="stats-icon"></div>
+						<div class="stats-info">
+							<p>
+								<img src="/web/assets/images/filesystem_orange.png"
+									 alt="Image"
+									 class="img-responsive"
+									 style="width: 48px; height: 48px;">
+							</p>
+						</div>
+						<div class="stats-link">
+							<a href="javascript:;"
+							   style="text-align: left; margin: 15px -15px -15px; padding: 5px;">
+								${item.name}
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="panel-footer">
+				<div class="panel-footer">
+					Count: 0 | ${moment().format("LLL")}
+				</div>
+			</div>
+		</div>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="vue-script-manager-component">
+	{
+		delimiters: ['${', '}'],
+		data: function () {
+			return {
+				dispatchTreeNodes: {},
+				agentModel: [
+								{name: 'bin', img: 'file.svg', id: _.now(), type: "isFolder"},
+								{name: 'cfg', img: 'file.svg', id: _.now(), type: "isFolder"},
+								{name: 'etc', img: 'file.svg', id: _.now(), type: "isFolder"},
+								{name: 'log', img: 'file.svg', id: _.now(), type: "isFolder"},
+								{name: 'readme.txt', img: 'file.svg', id: _.now(), type: "isFolder"}
+							]
+			}
+		},
+		methods: {
+			toggleEvent: function (event) {
+			    let self = this;
+
+                self.loadTreeData('/', 'dispatchTreeNodes');
+
+			},
+			toggleView: function (event) {
+                let self = this;
+
+				self.currentView = event;
+			},
+			loadTreeData: function (event, param) {
+				let self = this;
+
+				jQuery.ajax({
+					url: '/mxconfig/get',
+					type: 'POST',
+					dataType: 'json',
+					data: {
+						key: event
+					},
+					beforeSend: function (xhr) {
+						loading = layer.load(2, {
+							shade: [0.1, '#ccc'],
+							time: 30 * 1000
+						});
+					},
+					complete: function (xhr, textStatus) {
+						layer.close(loading);
+					},
+					success: function (data, textStatus, xhr) {
+						var rtn = JSON.parse(JSON.stringify(data).replace(new RegExp('"dir":true', 'gm'), '"isParent":true,"dir":true'));
+						self[param] = rtn.message.node;
+
+					},
+					error: function (xhr, textStatus, errorThrown) {
+						layer.close(loading);
+					}
+				});
+			},
+			newGroup: function () {
+
+			},
+			newUser: function () {
+
+			}
+		}
+	
+	}
+	</script>
+
+</code>
+
