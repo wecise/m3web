@@ -1899,7 +1899,7 @@ class AI {
                                             #{[selectedRule.label,selectedRule.name].join("/").replace(/\\//g," / ")}#
                                         </el-header-->
                                         <el-main style="padding:0px;overflow:hidden;height:100%;background: #ffffff;">
-                                            <el-tabs v-model="main.activeIndex" type="border-card" closable @tab-remove="close" style="height:100%;">
+                                            <el-tabs v-model="main.activeIndex" type="border-card" closable @tab-remove="close" style="height:100%;" v-if="!_.isEmpty(main.tabs)">
                                                 <el-tab-pane :label="tab.name" :key="tab.id" :name="tab.id" v-for="tab in main.tabs" style="height:100%;overflow:auto;">
                                                     <span slot="label">
                                                         <el-image :src="'/fs/assets/images/robot/png/'+tab.component + '.png?type=download&issys=true'" style="width: 10px;height: 10px;"></el-image>
@@ -1914,6 +1914,16 @@ class AI {
                                                     <matrix-ai-setup-cafp :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='cafp'" transition="fade" transition-mode="out-in" ref="aiSetupInst"></matrix-ai-setup-cafp>
                                                 </el-tab-pane>
                                             </el-tabs>
+                                            <div style="background:#ffffff;padding:20px;height:100%;display:block;text-align:center;" v-else>
+                                                <h2 style="margin: 0px 0px 40px 0px;">欢迎使用AI管理</h2>
+                                                <object data="/fs/assets/images/files/svg/configWorld.svg?type=open&issys=true" 
+                                                    type="image/svg+xml" style="width:40vw;height:40vh;background: #ffffff;">
+                                                </object>
+                                                <p>
+                                                    如有任何意见或建议，请及时反馈给我们。
+                                                    <el-link href="mailto:m3@wecise.com">Email：m3@wecise.com</el-link>
+                                                </p>
+                                            </div>
                                         </el-main>
                                     </el-container>
                                     

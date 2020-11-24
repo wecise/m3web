@@ -427,10 +427,10 @@ Vue.component("mx-fs-editor",{
                                     <el-tooltip content="执行结果" placement="top" open-delay="500">
                                         <el-button type="text" icon="el-icon-tickets" @click="onToggleRunningView('result')"></el-button>
                                     </el-tooltip>
-                                    <el-tooltip content="预览" placement="top" open-delay="500">
-                                        <el-button type="text" icon="el-icon-platform-eleme" @click="onToggleRunningView('preview')" v-if="tabs.activeNode.ftype=='html'"></el-button>
-                                    </el-tooltip>
                                 </span>
+                                <el-tooltip content="预览" placement="top" open-delay="500">
+                                    <el-button type="text" icon="el-icon-platform-eleme" @click="onToggleRunningView('preview')" v-if="tabs.activeNode.ftype=='html'"></el-button>
+                                </el-tooltip>
                                 <el-tooltip content="主题" placement="top" open-delay="500">
                                     <el-button type="text" :class="'M3-EDITOR-THEME-'+tabs.activeIndex" v-show="!_.isEmpty(tabs.list)" style="float:right;">
                                         <i class="fas fa-tshirt"></i>

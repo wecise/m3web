@@ -25,10 +25,30 @@ class VueHub {
     lang() {
         
         try{
-            return new VueI18n({
+
+            let cache = localStorage.getItem("MATRIX-LANG-LIST");
+
+            if( cache !== null ){
+                
+                return new VueI18n({
+                    locale: window.MATRIX_LANG,
+                    messages: JSON.parse(cache)
+                });    
+                
+            } else {
+
+                fsHandler.callFsJScriptAsync("/matrix/lang/getLangList.js",null).then( (rtn)=>{
+                    
+                    localStorage.setItem("MATRIX-LANG-LIST", JSON.stringify(rtn.message));
+
+                    return new VueI18n({
                         locale: window.MATRIX_LANG,
-                        messages: fsHandler.callFsJScript("/matrix/lang/getLangList.js",null).message
+                        messages: rtn.message
                     });
+                } );
+                
+            }
+            
         } catch(err){
             return null;
         }

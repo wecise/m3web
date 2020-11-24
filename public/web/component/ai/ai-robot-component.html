@@ -292,7 +292,7 @@
 			<el-main style="padding:0px;height:100%;">
 				<el-tabs :tab-position="tabs.position" v-model="tabs.activeName" @tab-click="onClick">
 					<el-tab-pane name="robot-ai">
-						<span slot="label"><img src="/fs/assets/images/robot/png/robot.png?issys=true&type=download" class="image" style="width: 68px;"></span>
+						<span slot="label"><img src=`${window.ASSETS_ROBOT_ICON}/robot.png${window.ASSETS_POSTFIX}` class="image" style="width: 68px;"></span>
 						<ai-robot></ai-robot>
 					</el-tab-pane>
 					<el-tab-pane label="消息"  name="robot-message">

@@ -181,7 +181,7 @@ class UserHandler{
     };
 
     async userUpdateAsync(event,token) {
-        let rtn = 0;
+        let rtn = null;
         
         try{
 
@@ -289,6 +289,49 @@ class UserHandler{
 
         })
 
+        return rtn;
+
+    };
+
+    /* 用户组更新 */
+    async userGruopUpdateAsync(user,newGroup) {
+        let rtn = null;
+        
+        try{
+
+            await jQuery.ajax({
+                url: `/admin/users/${user.id}?to=${newGroup.id}`,
+                dataType: 'json',
+                type: 'GET',
+                async: true,
+                beforeSend(xhr) {
+                },
+                complete(xhr, textStatus) {
+                },
+                success(data, status) {
+
+                    userHandler.ifSignIn(data);
+
+                    if( _.lowerCase(data.status) == "ok"){
+                        
+                        rtn = { id:data.message, status:1 };
+
+                        // Audit
+                        auditLogHandler.writeLog("system:user", "Update user group: " + user.username, 0);
+                    }
+
+                },
+                error(xhr, textStatus, errorThrown) {
+                    rtn = xhr.responseText;
+
+                    // Audit
+                    auditLogHandler.writeLog("system:user", "Update user group: " + user.username, 1);
+                }
+
+            })
+        } catch(err){
+
+        }
         return rtn;
 
     };

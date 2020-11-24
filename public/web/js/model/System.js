@@ -705,9 +705,7 @@ class System {
 					methods:{
 						initData(){
 							let term = {action:"list"};
-							console.log(1,term)
 							let rtn = fsHandler.callFsJScript("/matrix/system/severity-action.js",encodeURIComponent(JSON.stringify(term))).message;
-							console.log(2,rtn)
 							this.$set(this.dt,'rows',rtn.rows);
 							this.$set(this.dt,'columns',rtn.columns);
 						}
@@ -1093,7 +1091,7 @@ class System {
 								volume: 1,
 								
 								onend: function() {
-									console.log('Finished!');
+									
 								}
 							});
 							this.sound.play();
@@ -2078,7 +2076,9 @@ class System {
 												</span>
 											</span>                  
 										</el-tree>
-										<el-dialog title="新建组织" :visible.sync="dialog.group.show" v-if="dialog.group.show">
+										<el-dialog title="新建组织" :visible.sync="dialog.group.show" v-if="dialog.group.show" 
+											:close-on-press-escape="false"
+											:close-on-click-modal="false">
 											<el-container>
 												<el-main>
 													<el-form ref="form" label-width="80px" size="mini">
@@ -2099,7 +2099,9 @@ class System {
 												<el-button type="primary" icon="el-icon-" @click="onSaveGroup">创建组</el-button>
 											</div>
 										</el-dialog>
-										<el-dialog title="新建用户" :visible.sync="dialog.user.show" v-if="dialog.user.show">
+										<el-dialog title="新建用户" :visible.sync="dialog.user.show" v-if="dialog.user.show" 
+											:close-on-press-escape="false"
+											:close-on-click-modal="false">
 											<el-container>
 												<el-main>
 													<el-form ref="newUserForm" label-width="80px">
@@ -2184,9 +2186,12 @@ class System {
 						nodes:{
 							handler(val,oldVal){
 								// 只显示组织
-								this.$refs.tree.filter('org');
+								if(this.$refs.tree){
+									this.$refs.tree.filter('org');	
+								}
 							},
-							deep:true
+							deep:true,
+							immediate:true
 						}
 					},
 					methods:{
@@ -2578,8 +2583,133 @@ class System {
 								
 								this.$emit('update:selectedLdap', selectedNodes);
 							} catch(err){
-								console.log(err)
+								console.error(err)
 							}
+						}
+					}
+				})
+
+				// ldap组织更换选择使用
+				Vue.component("ldap-manage-move",{
+					delimiters: ['#{', '}#'],
+					props:{
+						rowData: Object,
+						root:String
+					},
+					data(){
+						return {
+							defaultProps: {
+								children: 'nodes',
+								label: 'username'
+							},
+							nodes: [],
+							selectedNodes: []
+						}
+					},
+					template: 	`<el-container style="height:100%;background:#f2f2f2;">
+									<el-main style="">
+										<el-tree 
+											node-key="fullname"
+											highlight-current
+											:data="nodes" 
+											:props="defaultProps" 
+											:filter-node-method="onFilterNode"
+											:expand-on-click-node="false"
+											@node-click="onNodeClick"
+											style="background: transparent;"
+											ref="tree">
+											<span slot-scope="{ node, data }" style="width:100%;height:30px;line-height: 30px;">
+												<span v-if="data.otype=='org'">
+													<span class="el-icon-school" style="color:#FF9800;"></span>
+													<span v-if="data.username === '/'">#{window.COMPANY_FULLNAME}#</span><span v-else>#{node.label}#</span>
+												</span>
+												<span v-else>
+													<span class="el-icon-user" style="color:#67c23a;"></span>
+													<span>#{node.label}#</span>
+												</span>
+											</span>                  
+										</el-tree>
+									</el-main>
+								</el-container>`,
+					watch: {
+						nodes:{
+							handler(val,oldVal){
+								// 只显示组织
+								this.$refs.tree.filter('org');
+							},
+							deep:true
+						}
+					},
+					created(){
+						this.initNodes();
+					},
+					methods:{
+						initNodes() {
+							const self = this;
+
+							try{
+
+								const traverse = (obj) => {
+									
+									_.forEach(obj,(v)=>{
+										
+										let disabled = false;
+
+										if( v ){
+											
+											// 禁止admin权限操作
+											if(v.fullname == '/admin'){
+												disabled = true;
+												this.selectedNodes.push(v.fullname);
+											}
+
+											// LDAP 当前组织不能删除
+											if(this.rowData.isldap ){
+												disabled = true;
+
+												// 设置已选择项 需要勾选子节点  111111
+												// this.selectedNodes.push(v.fullname);
+											}
+
+											// 设置已选择项 需要勾选子节点   111111
+											if( _.startsWith(v.fullname, this.rowData.fullname+"/") ) {
+												this.selectedNodes.push(v.fullname);
+											}
+
+											_.extend(v,{ show:false, disabled:disabled });
+
+										}
+										
+										if(v.nodes){
+											traverse(v.nodes);
+										}
+									})
+									
+								}
+
+								// 只显示组织
+								this.nodes = _.sortBy([userHandler.userList("/").message],'fullname');
+
+								traverse(this.nodes);
+
+							} catch(err){
+
+							} finally{
+								
+								// 设置已选择项 需要勾选子节点  111111
+								if( this.rowData ){
+									_.forEach(this.rowData.member,(v)=>{
+										self.selectedNodes.push(v.replace(/^['G','U','O']/g,''));
+									})
+								}
+							}
+
+						},
+						onFilterNode(value, data){
+							return data.otype.indexOf(value) !== -1
+						},
+						onNodeClick(data){
+							this.$emit('update:selectedLdapToMove', data);
 						}
 					}
 				})
@@ -2721,13 +2851,27 @@ class System {
 												</template>
 											</el-table-column>
 										</el-table>
-										<el-dialog title="用户编辑" :visible.sync="dialog.user.show" v-if="dialog.user.show">
+										<el-dialog :title="'用户编辑 ' + dialog.user.row.username" :visible.sync="dialog.user.show" 
+											:close-on-press-escape="false"
+											:close-on-click-modal="false"
+											v-if="dialog.user.show">
 											<el-container>
 												<el-main>
 													<el-form label-width="80px">
 
 														<el-form-item label="组名称" required>
-															<el-input v-model="dialog.user.row.parent" disabled="true"></el-input>
+															<el-input v-model="dialog.user.row.parent">
+																<el-dropdown slot="prepend" trigger="click">
+																	<span class="el-dropdown-link">
+																	更换组<i class="el-icon-arrow-down el-icon--right"></i>
+																	</span>
+																	<el-dropdown-menu slot="dropdown">
+																		<el-dropdown-item>
+																			<ldap-manage-move root="/" @update:selectedLdapToMove="(($event)=>{ onUserGroupMoved(dialog.user.row,$event); })" ref="ldapManageMove"></ldap-manage-move>
+																		</el-dropdown-item>
+																	</el-dropdown-menu>
+																</el-dropdown>
+															</el-input>
 														</el-form-item>
 
 														<el-form-item label="登录名称" required>
@@ -2789,7 +2933,7 @@ class System {
 										<el-pagination
                                             @size-change="onPageSizeChange"
                                             @current-change="onCurrentPageChange"
-                                            :page-sizes="[10, 15, 20]"
+                                            :page-sizes="[10, 15, 20, 50, 100, 300]"
                                             :page-size="dt.pagination.pageSize"
                                             :total="dt.rows.length"
                                             layout="total, sizes, prev, pager, next">
@@ -2870,7 +3014,7 @@ class System {
 									_.extend(self.dt, {rows: self.model.rows});
 									
 								} catch(err){
-									console.log(err);
+									console.error(err);
 								}
 							};
 	
@@ -2967,6 +3111,38 @@ class System {
 							this.dialog.user.passwd = "";
 							this.dialog.user.checkPasswd = "";
 							this.dialog.user.show = true;
+						},
+						onUserGroupMoved(user,newGroup){
+							
+							this.$confirm(`确认要更新该用户到新组：${newGroup.fullname}？`, '提示', {
+								confirmButtonText: '确定',
+								cancelButtonText: '取消',
+								type: 'warning'
+							}).then(() => {
+									
+								userHandler.userGruopUpdateAsync(user, newGroup).then( (rtn)=>{
+									if(rtn.status == 1){
+										this.$message({
+											type: "success",
+											message: "更新组成功"
+										})
+
+										this.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$refs.ldapManage.onRefresh();
+										this.dialog.user.row.id = rtn.id;
+										this.dialog.user.row.parent = newGroup.fullname;
+										
+									} else{
+										this.$message({
+											type: "error",
+											message: "更新组失败 " + rtn
+										})
+									}
+								} )
+								
+							}).catch(() => {
+								
+							});
+							
 						},
 						onSaveUser(row){
 
@@ -3546,7 +3722,7 @@ class System {
 
 							// 更新
 							let term = encodeURIComponent( JSON.stringify( { roleGroup: [this.rowData.row], data: this.selectedNodes } ) );
-							console.log(JSON.stringify( { roleGroup: [this.rowData.row], data: this.selectedNodes } ))
+							
 							fsHandler.callFsJScriptAsync("/matrix/system/updateGroupByApp.js", term).then( (rtn)=>{
 								this.$emit('update:selectedApp');
 								this.$message({
@@ -3816,7 +3992,7 @@ class System {
 
 							// 更新
 							let term = encodeURIComponent( JSON.stringify( { roleGroup: [this.rowData.row], data: this.selectedNodes } ) );
-							console.log(JSON.stringify( { roleGroup: [this.rowData.row], data: this.selectedNodes } ))
+							
 							fsHandler.callFsJScriptAsync("/matrix/system/updateGroupByData.js", term).then( (rtn)=>{
 								
 								this.$emit('update:selectedData');
@@ -3882,7 +4058,7 @@ class System {
 												</el-dropdown-menu>
 											</el-dropdown>
 										</el-tooltip>
-										<el-dialog title="新建接口组" :visible.sync="dialog.newApi.show">
+										<el-dialog title="新建接口组" :visible.sync="dialog.newApi.show" :close-on-press-escape="false" :close-on-click-modal="false">
 											<el-container style="width:100%;">
 												<el-main>
 													<el-form label-position="top">
@@ -4063,7 +4239,7 @@ class System {
 
 									
 								} catch(err){
-									console.log(err);
+									console.error(err);
 								}
 							};
 	
@@ -4524,7 +4700,7 @@ class System {
 									})});
 									
 								} catch(err){
-									console.log(err);
+									console.error(err);
 								}
 							};
 	
@@ -4931,7 +5107,9 @@ class System {
 													</template>
 												</el-table-column>
 											</el-table>
-											<el-dialog :title="permissionTitle" :visible.sync="dialog.permission.show" v-if="dialog.permission.show" width="80vw">
+											<el-dialog :title="permissionTitle" :visible.sync="dialog.permission.show" 
+												:close-on-press-escape="false"
+												:close-on-click-modal="false" v-if="dialog.permission.show" width="80vw">
 												<el-container style="width:100%;height:100%">
 													<el-main style="padding:0px;overflow:hidden;">
 														<el-tabs value="tagdir">
@@ -4967,7 +5145,8 @@ class System {
 													</el-main>
 												</el-container>
 											</el-dialog>
-											<el-dialog :title="selectLdapTitle" :visible.sync="dialog.ldap.show" v-if="dialog.ldap.show" width="80vw">
+											<el-dialog :title="selectLdapTitle" :visible.sync="dialog.ldap.show" 
+												:close-on-press-escape="false" :close-on-click-modal="false" v-if="dialog.ldap.show" width="80vw">
 												<el-container style="height:100%;">
 													<el-main style="overflow:hidden;padding:0px 10px;">
 														<el-row :gutter="20">
@@ -5002,7 +5181,7 @@ class System {
 											<el-pagination
 												@size-change="onPageSizeChange"
 												@current-change="onCurrentPageChange"
-												:page-sizes="[10, 15, 20]"
+												:page-sizes="[10, 15, 20, 50, 100, 300]"
 												:page-size="dt.pagination.pageSize"
 												:total="dt.rows.length"
 												layout="total, sizes, prev, pager, next">
@@ -5121,7 +5300,7 @@ class System {
 									})});
 									
 								} catch(err){
-									console.log(err);
+									console.error(err);
 								}
 							};
 	
@@ -5443,7 +5622,7 @@ class System {
 					},
 					template: 	`<el-container style="height:100%;" class="user-manage-container">
 									<el-main style="padding:0px;overflow:hidden;">
-										<el-tabs v-model="tabs.main.activeName" type="border-card">
+										<el-tabs v-model="tabs.main.activeName" type="border-card" @tab-click="onTabClick">
 											<el-tab-pane label="用户管理" name="users">
 												<el-container style="height:calc(100% - 40px);">
 													<el-aside style="width:260px;height:100%;background:#f2f2f2;" ref="leftView">
@@ -5459,7 +5638,7 @@ class System {
 											<el-tab-pane label="角色管理" name="role" lazy>
 												<el-container style="height:100%;">
 													<el-main style="padding:0px;">
-														<user-roleGroup :checkSelect="false"></user-roleGroup>
+														<user-roleGroup :checkSelect="false" ref="userRoleGroupRef"></user-roleGroup>
 													</el-main>
 												</el-container>
 											</el-tab-pane>
@@ -5483,12 +5662,16 @@ class System {
 							});
 
 						},
+						onTabClick(tab,event){
+							if(tab.name == 'role'){
+								this.$refs.userRoleGroupRef.initData();
+							}
+						},
 						onLoadUser(event) {
 							this.selectedNode = event;
 							this.ldap = [];
 							// 只加载用户
 							this.travelChildUser(userHandler.userList(event.fullname).message.nodes);
-							console.log(this.ldap)
 							this.model.rows = _.orderBy(this.ldap,'fullname');
 						},
 						travelChildUser(nodes){
@@ -5576,7 +5759,7 @@ class System {
 											style="padding: 8px 0px;"
 											@size-change="onPageSizeChange"
 											@current-change="onCurrentPageChange"
-											:page-sizes="[10, 15, 20]"
+											:page-sizes="[10, 15, 20, 50, 100, 300]"
 											:page-size="dt.pagination.pageSize"
 											:total="dt.rows.length"
 											layout="total, sizes, prev, pager, next">
@@ -5588,11 +5771,9 @@ class System {
 					},
 					methods: {
 						onPageSizeChange(val) {
-							console.log(1,val)
 							this.dt.pagination.pageSize = val;
 						},
 						onCurrentPageChange(val) {
-							console.log(2,val)
 							this.dt.pagination.currentPage = val;
 						},
 						rowClassName({row, rowIndex}){
@@ -6031,7 +6212,7 @@ class System {
 									name: "新建配置组", icon: "fa-copy",
 									callback: function (itemKey, opt, rootMenu, originalEvent) {
 										let _item = $(this).data("item");
-										console.log($(this).data("item"))
+										
 										self.mkdir(_item);
 									}
 								},
@@ -6108,7 +6289,6 @@ class System {
 								selector: '#calendar',
 								callback: function (key, options) {
 									var m = "clicked: " + key;
-									console.log(m);
 								},
 								items: _menu
 							});

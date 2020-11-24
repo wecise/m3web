@@ -321,29 +321,32 @@
 				this.toggleStatusBar();
 
                 // Customer Auto Completer
-                let customerCompleter = {
-                    getCompletions(editor, session, pos, prefix, callback) {
-                            
-                        if (prefix.length === 0) { callback(null, []); return };
+                if(mx.searchJson){
+                    
+                    let customerCompleter = {
+                        getCompletions(editor, session, pos, prefix, callback) {
+                                
+                            if (prefix.length === 0) { callback(null, []); return };
 
-                        let templates = mx.searchJson.search(prefix);
+                            let templates = mx.searchJson.search(prefix);
 
-                        if(_.isEmpty(templates)) return;
+                            if(_.isEmpty(templates)) return;
 
-                        callback(null, _.uniqBy(_.map(templates,function(v) {
-                            return {
-                                name: v.name,
-                                score: 300,
-                                meta: v.title,
-                                caption: v.title,
-                                value: v.template
-                            }
-                        }),'name'));
+                            callback(null, _.uniqBy(_.map(templates,function(v) {
+                                return {
+                                    name: v.name,
+                                    score: 300,
+                                    meta: v.title,
+                                    caption: v.title,
+                                    value: v.template
+                                }
+                            }),'name'));
 
-                    }
-                };
+                        }
+                    };
 
-                this.langTools.addCompleter(customerCompleter);
+                    this.langTools.addCompleter(customerCompleter);
+                }
 
 
                 // Add commands
@@ -755,6 +758,8 @@
                             
                             });
                         return false;
+                    } else if( _list.meta.type == 'select edge'){
+                        self.result = { id:self.id, bid: self.bid, type: 'table-update', data: _data, columns: _columns, rootclass: _list.meta.rootclass};
                     }
                     // 正常Table显示 
                     else {

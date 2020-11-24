@@ -158,33 +158,35 @@
 
 
                 // Customer Auto Completer
-	            let customerCompleter = {
-                    getCompletions: function(editor, session, pos, prefix, callback) {
+                if(mx.searchJson){
+                    let customerCompleter = {
+                        getCompletions: function(editor, session, pos, prefix, callback) {
 
-                        if (prefix.length === 0) {
-                            callback(null, []);
-                            return
-                        }
-
-                        let rtn = omdbHandler.fetchDataByMql(`select name from /matrix/ where name like '${prefix}*'`);
-
-                        if(_.isEmpty(rtn)) return;
-
-                        let word = rtn.message;
-
-                        callback(null,_.map(word,(ea)=> {
-                            return {
-                                name: ea.name,
-                                value: ea.name,
-                                score: 300,
-                                meta: ea.class
+                            if (prefix.length === 0) {
+                                callback(null, []);
+                                return
                             }
-                        }));
 
-                    }
-                };
+                            let rtn = omdbHandler.fetchDataByMql(`select name from /matrix/ where name like '${prefix}*'`);
 
-                this.langTools.addCompleter(customerCompleter);
+                            if(_.isEmpty(rtn)) return;
+
+                            let word = rtn.message;
+
+                            callback(null,_.map(word,(ea)=> {
+                                return {
+                                    name: ea.name,
+                                    value: ea.name,
+                                    score: 300,
+                                    meta: ea.class
+                                }
+                            }));
+
+                        }
+                    };
+
+                    this.langTools.addCompleter(customerCompleter);
+                }
 
 
                 this.editor.on("input", this.updateToolbar);

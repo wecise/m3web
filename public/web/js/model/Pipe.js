@@ -1265,7 +1265,7 @@ class Pipe {
                                                             <el-pagination
                                                                 @size-change="onPageSizeChange"
                                                                 @current-change="onCurrentPageChange"
-                                                                :page-sizes="[10, 15, 20]"
+                                                                :page-sizes="[10, 15, 20, 50, 100, 300]"
                                                                 :page-size="dt.pagination.pageSize"
                                                                 :total="dt.rows.length"
                                                                 layout="total, sizes, prev, pager, next"

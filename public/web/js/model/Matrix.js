@@ -143,17 +143,19 @@ class Matrix {
                 return false;
             }
             
-            let name = fsHandler.callFsJScript("/matrix/system/getAppNameByUrl.js", encodeURIComponent(pathName)).message;
-            
-            if(!_.isEmpty(name)){
-                if(window.MATRIX_LANG == 'zh-CN'){
-                    document.title = name['cnname'];
+            fsHandler.callFsJScriptAsync("/matrix/system/getAppNameByUrl.js", encodeURIComponent(pathName)).then( (rtn)=>{
+                let name = rtn.message;
+
+                if(!_.isEmpty(name)){
+                    if(window.MATRIX_LANG == 'zh-CN'){
+                        document.title = name['cnname'];
+                    } else {
+                        document.title = name['enname'];
+                    }
                 } else {
-                    document.title = name['enname'];
+                    document.title = mxAuth.signedUser.Company.title;
                 }
-            } else {
-                document.title = mxAuth.signedUser.Company.title;
-            }
+            } );
             
         } catch(err){
             document.title = mxAuth.signedUser.Company.title;
@@ -189,24 +191,37 @@ class Matrix {
     // 设置当前用户template
     setCurrentUserTemplate(){
         try{
-            let parent = `/etc/template`;
-
-            let temp = fsHandler.fsContent(parent,'template.json');
             
-            mx.currentUserTemplate = _.attempt(JSON.parse.bind(null, temp));
+            let cache = localStorage.getItem("MATRIX-GLOBAL-TEMPLATES");
+            
+            if( cache !== null ){
+                
+                mx.searchJson = new JsSearch.Search('name');
+                mx.searchJson.addIndex('name');
+                //mx.searchJson.addIndex('title');
+                //mx.searchJson.addIndex('template')
+                
+                mx.searchJson.addDocuments(cache);
+                
+            } else {
 
-            mx.searchJson = new JsSearch.Search('name');
-            mx.searchJson.addIndex('name');
-            //mx.searchJson.addIndex('title');
-            //mx.searchJson.addIndex('template')
-
-            let templates = _.map(mx.currentUserTemplate,function(v){
-                let t = fsHandler.fsContent(parent,`${v.name}.json`);
-                return _.merge(v,{template: t});
-            })
-            mx.searchJson.addDocuments(templates);
+                fsHandler.callFsJScriptAsync('/matrix/utils/getGlobalTemplates.js',null).then( (rtn)=>{
+                
+                    mx.searchJson = new JsSearch.Search('name');
+                    mx.searchJson.addIndex('name');
+                    //mx.searchJson.addIndex('title');
+                    //mx.searchJson.addIndex('template')
+                    
+                    mx.searchJson.addDocuments(rtn.message);
+    
+                    localStorage.setItem("MATRIX-GLOBAL-TEMPLATES", JSON.stringify(rtn.message));
+                
+                } );
+            }
+            
+            
         } catch(err){
-
+            
         }
     }
 

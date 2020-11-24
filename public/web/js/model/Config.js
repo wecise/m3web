@@ -890,30 +890,32 @@ class Config {
                             );
 
                             // Customer Auto Completer
-                            let customerCompleter = {
-                                getCompletions(editor, session, pos, prefix, callback) {
-                                     
-                                    if (prefix.length === 0) { callback(null, []); return };
+                            if(mx.searchJson){
+                                let customerCompleter = {
+                                    getCompletions(editor, session, pos, prefix, callback) {
+                                        
+                                        if (prefix.length === 0) { callback(null, []); return };
 
-                                    let templates = mx.searchJson.search(prefix);
+                                        let templates = mx.searchJson.search(prefix);
 
-                                    if(_.isEmpty(templates)) return;
+                                        if(_.isEmpty(templates)) return;
 
-                                    callback(null, _.uniqBy(_.map(templates,(v)=> {
-                                        return {
-                                            name: v.name,
-                                            score: 1000,
-                                            meta: v.title,
-                                            caption: v.title,
-                                            value: v.template,
-                                            className: "btn btn-danger"
-                                        }
-                                    }),'name'));
+                                        callback(null, _.uniqBy(_.map(templates,(v)=> {
+                                            return {
+                                                name: v.name,
+                                                score: 1000,
+                                                meta: v.title,
+                                                caption: v.title,
+                                                value: v.template,
+                                                className: "btn btn-danger"
+                                            }
+                                        }),'name'));
 
-                                }
-                            };
+                                    }
+                                };
 
-                            this.langTools.addCompleter(customerCompleter);
+                                this.langTools.addCompleter(customerCompleter);
+                            }
                             
                             // 设置value
                             if(_.has(this.model,'value')){
