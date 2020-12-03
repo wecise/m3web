@@ -48,17 +48,60 @@ class UserHandler{
                 rtn = data;
 
                 // Audit
-                auditLogHandler.writeLog("system:user", "Query: " + event, 0);
+                //auditLogHandler.writeLog("system:user", "Query: " + event, 0);
 
             },
             error: function (xhr, textStatus, errorThrown) {
                 rtn = xhr.responseText;
 
                 // Audit
-                auditLogHandler.writeLog("system:user", "Query: " + event, 1);
+                //auditLogHandler.writeLog("system:user", "Query: " + event, 1);
             }
 
         })
+
+        return rtn;
+
+    };
+
+    async userListAsync(event) {
+        let rtn = null;
+
+        try{
+            await jQuery.ajax({
+                url: '/admin/users',
+                dataType: 'json',
+                type: 'GET',
+                async: true,
+                data: {
+                    fullname: event || "/"
+                },
+                beforeSend: function (xhr) {
+                },
+                complete: function (xhr, textStatus) {
+                    
+                },
+                success: function (data, status) {
+
+                    userHandler.ifSignIn(data);
+
+                    rtn = data;
+
+                    // Audit
+                    //auditLogHandler.writeLog("system:user", "Query: " + event, 0);
+
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    rtn = xhr.responseText;
+
+                    // Audit
+                    //auditLogHandler.writeLog("system:user", "Query: " + event, 1);
+                }
+
+            })
+        } catch(err){
+
+        }
 
         return rtn;
 
@@ -611,7 +654,7 @@ class UserHandler{
                     rtn = data.message;
 
                     // Audit
-                    auditLogHandler.writeLog("system:permission", "Query group permissions: " + event.parent, 0);
+                    //auditLogHandler.writeLog("system:permission", "Query group permissions: " + event.parent, 0);
                 }
 
             },
@@ -619,7 +662,7 @@ class UserHandler{
                 rtn = xhr.responseText;
 
                 // Audit
-                auditLogHandler.writeLog("system:permission", "Query group permissions: " + event.parent, 1);
+                //auditLogHandler.writeLog("system:permission", "Query group permissions: " + event.parent, 1);
             }
         });
         return rtn;
@@ -647,7 +690,7 @@ class UserHandler{
                         rtn = data.message;
 
                         // Audit
-                        auditLogHandler.writeLog("system:permission", "Query group permissions: " + event.parent, 0);
+                        //auditLogHandler.writeLog("system:permission", "Query group permissions: " + event.parent, 0);
                     }
 
                 },
@@ -655,7 +698,7 @@ class UserHandler{
                     rtn = xhr.responseText;
 
                     // Audit
-                    auditLogHandler.writeLog("system:permission", "Query group permissions: " + event.parent, 1);
+                    //auditLogHandler.writeLog("system:permission", "Query group permissions: " + event.parent, 1);
                 }
             });
         } catch(err){
@@ -687,14 +730,14 @@ class UserHandler{
                     rtn = data.message;
 
                     // Audit
-                    auditLogHandler.writeLog("system:permission", "Query group permissions: " + event.id, 0);
+                    //auditLogHandler.writeLog("system:permission", "Query group permissions: " + event.id, 0);
                 }
 
             },
             error: function(xhr, textStatus, errorThrown) {
                 rtn = xhr.responseText;
                 // Audit
-                auditLogHandler.writeLog("system:permission", "Query group permissions: " + event.id, 1);
+                //auditLogHandler.writeLog("system:permission", "Query group permissions: " + event.id, 1);
             }
         });
         return rtn;
@@ -849,7 +892,7 @@ class UserHandler{
                     rtn = data.message;
 
                     // Audit
-                    auditLogHandler.writeLog("system:permissionser", "Query api permissions", 0);
+                    //auditLogHandler.writeLog("system:permissionser", "Query api permissions", 0);
                 }
 
             },
@@ -857,9 +900,49 @@ class UserHandler{
                 rtn = xhr.responseText;
 
                 // Audit
-                auditLogHandler.writeLog("system:permission", "Query api permissions", 1);
+                //auditLogHandler.writeLog("system:permission", "Query api permissions", 1);
             }
         });
+        return rtn;
+    };
+
+    async getApiPermissionsAsync() {
+        let rtn = null;
+
+        try{
+            await jQuery.ajax({
+                url: `/admin/perms/api`,
+                dataType: 'json',
+                type: 'GET',
+                async: true,
+                beforeSend(xhr){
+                },
+                complete(xhr, textStatus) {
+                    
+                },
+                success(data, status) {
+
+                    userHandler.ifSignIn(data);
+
+                    if( _.lowerCase(data.status) == "ok"){
+                        rtn = data.message;
+
+                        // Audit
+                        //auditLogHandler.writeLog("system:permissionser", "Query api permissions", 0);
+                    }
+
+                },
+                error(xhr, textStatus, errorThrown) {
+                    rtn = xhr.responseText;
+
+                    // Audit
+                    //auditLogHandler.writeLog("system:permission", "Query api permissions", 1);
+                }
+            });
+        } catch(err){
+
+        }
+
         return rtn;
     };
 
@@ -885,7 +968,7 @@ class UserHandler{
                     rtn = data.message;
 
                     // Audit
-                    auditLogHandler.writeLog("system:permission", "Query api permissions: " + event.name, 0);
+                    //auditLogHandler.writeLog("system:permission", "Query api permissions: " + event.name, 0);
                 }
 
             },
@@ -893,7 +976,7 @@ class UserHandler{
                 rtn = xhr.responseText;
 
                 // Audit
-                auditLogHandler.writeLog("system:permission", "Query api permissions: " + event.name, 1);
+                //auditLogHandler.writeLog("system:permission", "Query api permissions: " + event.name, 1);
             }
         });
         return rtn;

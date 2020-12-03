@@ -15,6 +15,53 @@ class FsHandler {
 
     }
 
+    /*  文件系统
+        
+        cache刷新
+
+    */
+    async  fsRefreshAsync(path, name){
+        
+        let rtn = null;
+
+        try{
+            
+            let parent = path.replace(/\/\//g,'/');
+            let url = `/fs/tolocal${parent}/${name}`;
+
+            if(window.SignedUser_IsAdmin){
+                url += '?issys=true';
+            }
+
+            await jQuery.ajax({
+                url: url,
+                dataType: 'json',
+                type: 'POST',
+                async: true,
+                data: {},
+                beforeSend(xhr) {
+                },
+                complete(xhr, textStatus) {
+                },
+                success(data) {
+
+                    userHandler.ifSignIn(data);
+
+                    if( _.lowerCase(data.status) == "ok"){
+                        rtn = 1;
+                    }
+                },
+                error(xhr, textStatus, errorThrown) {
+                    rtn = xhr.responseText;
+                }
+            })
+        } catch(err) {
+
+        }
+        
+    }
+
+
     /*
     *   文件系统
     *
@@ -40,11 +87,11 @@ class FsHandler {
             dataType: "json",
             data: {},
             async:false,
-            beforeSend: function(xhr) {
+            beforeSend(xhr) {
             },
-            complete: function(xhr, textStatus) {
+            complete(xhr, textStatus) {
             },
-            success: function(data, textStatus, xhr) {
+            success(data, textStatus, xhr) {
 
                 userHandler.ifSignIn(data);
 
@@ -53,7 +100,7 @@ class FsHandler {
                 }
 
             },
-            error: function(xhr, textStatus, errorThrown) {
+            error(xhr, textStatus, errorThrown) {
                 rtn=xhr.responseJSON;
             }
         })
@@ -107,6 +154,9 @@ class FsHandler {
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
+
+                    // 刷新cache
+                    fsHandler.fsRefreshAsync(path, name);
                 }
 
             },
@@ -165,6 +215,9 @@ class FsHandler {
 
                     if( _.lowerCase(data.status) == "ok"){
                         rtn = 1;
+
+                        // 刷新cache
+                        fsHandler.fsRefreshAsync(path, name);
                     }
 
                 },
@@ -833,12 +886,12 @@ class FsHandler {
             url: url,
             type: 'POST',
             dataType: "json",
-            async:false,
-            beforeSend: function(xhr) {
+            async: false,
+            beforeSend(xhr) {
             },
-            complete: function(xhr, textStatus) {
+            complete(xhr, textStatus) {
             },
-            success: function(data, textStatus, xhr) {
+            success(data, textStatus, xhr) {
 
                 userHandler.ifSignIn(data);
 
@@ -847,7 +900,7 @@ class FsHandler {
                 }
 
             },
-            error: function(xhr, textStatus, errorThrown) {
+            error(xhr, textStatus, errorThrown) {
                 rtn=xhr.responseJSON;
             }
         })

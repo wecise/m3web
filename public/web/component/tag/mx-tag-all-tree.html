@@ -87,7 +87,6 @@
 		},
 		created(){
 
-			console.log(1,JSON.stringify(this.selected))
 			this.loadNodes();
 
 			eventHub.$on("TAG-TREE-REFRESH",this.loadNodes);

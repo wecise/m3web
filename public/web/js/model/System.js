@@ -2050,17 +2050,16 @@ class System {
 									<el-main style="padding:0px;">
 										<el-tree 
 											node-key="fullname"
-											default-expand-all
+											auto-expand-parent
 											highlight-current
 											:data="nodes" 
 											:props="defaultProps" 
 											:filter-node-method="onFilterNode"
 											:expand-on-click-node="false"
 											@node-click="onNodeClick"
-											@node-expand="onNodeExpand"
 											style="background: transparent;"
 											ref="tree">
-											<span slot-scope="{ node, data }" style="width:100%;height:30px;line-height: 30px;"  @mouseenter="onMouseEnter(data)" @mouseleave="onMouseLeave(data)">
+											<span slot-scope="{ node, data }" style="width:100%;height:30px;line-height: 30px;"  @mouseenter="onMouseEnter(data)" @mouseleave="onMouseLeave(data)" v-if="data.otype=='org'">
 												<span v-if="data.otype=='org'">
 													<span class="el-icon-school" style="color:#FF9800;"></span>
 													<span v-if="data.username === '/'">#{window.COMPANY_FULLNAME}#</span><span v-else>#{node.label}# (#{data | pickCount}#)</span>
@@ -2189,9 +2188,7 @@ class System {
 								if(this.$refs.tree){
 									this.$refs.tree.filter('org');	
 								}
-							},
-							deep:true,
-							immediate:true
+							}
 						}
 					},
 					methods:{
@@ -2201,15 +2198,14 @@ class System {
 						initNodes() {
 							
 							try{
-
-								this.nodes = [userHandler.userList("/").message];
-
+								userHandler.userListAsync("/").then( (rtn)=>{
+									this.nodes = [rtn.message];
+									// 首次赋值给LDAP-LIST
+									this.$emit('update:selectedNode', _.first(this.nodes));
+								} );
 							} catch(err){
 
-							} finally {
-								// 首次赋值给LDAP-LIST
-								this.$emit('update:selectedNode', _.first(this.nodes));
-							}
+							} 
 
 						},
 						onFilterNode(value, data){
@@ -2218,14 +2214,12 @@ class System {
 						onNodeClick(node){
 							this.$emit('update:selectedNode', node);
 						},
-						onNodeExpand(node){
-							
-						},
 						onMouseEnter(data){
-							this.$set(data, 'show', true)
+							this.$set(data, 'show', true);
+							this.$refs.tree.setCurrentKey(data.fullname);
 						},
 						onMouseLeave(data){
-							this.$set(data, 'show', false)
+							this.$set(data, 'show', false);
 						},
 						onDeleteUser(node,data){
 							
@@ -2727,7 +2721,7 @@ class System {
 								columns: [],
 								selected: [],
 								pagination:{
-                                    pageSize: 10,
+                                    pageSize: 20,
                                     currentPage: 1
                                 }
 							},
@@ -2738,7 +2732,12 @@ class System {
 									row: null,
 									passwd: "",
 									checkPasswd: "",
-									resetPasswd: false
+									resetPasswd: false,
+									changeGroup: {
+										change: false,
+										user: null,
+										newGroup: null
+									}
 								}
 							}
 						}
@@ -2861,7 +2860,7 @@ class System {
 
 														<el-form-item label="组名称" required>
 															<el-input v-model="dialog.user.row.parent">
-																<el-dropdown slot="prepend" trigger="click">
+																<el-dropdown slot="prepend" trigger="hover">
 																	<span class="el-dropdown-link">
 																	更换组<i class="el-icon-arrow-down el-icon--right"></i>
 																	</span>
@@ -3114,7 +3113,12 @@ class System {
 						},
 						onUserGroupMoved(user,newGroup){
 							
-							this.$confirm(`确认要更新该用户到新组：${newGroup.fullname}？`, '提示', {
+							this.dialog.user.row.parent = newGroup.fullname;
+							this.dialog.user.changeGroup.change = true;
+							this.dialog.user.changeGroup.user = user;
+							this.dialog.user.changeGroup.newGroup = newGroup;
+
+							/* this.$confirm(`确认要更新该用户到新组：${newGroup.fullname}？`, '提示', {
 								confirmButtonText: '确定',
 								cancelButtonText: '取消',
 								type: 'warning'
@@ -3141,7 +3145,34 @@ class System {
 								
 							}).catch(() => {
 								
-							});
+							}); */
+							
+						},
+						onUserGroupMovedAction(user,newGroup){
+							
+							userHandler.userGruopUpdateAsync(user, newGroup).then( (rtn)=>{
+								if(rtn.status == 1){
+									/* this.$message({
+										type: "success",
+										message: "更新组成功"
+									}) */
+
+									this.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$refs.ldapManage.onRefresh();
+									this.dialog.user.row.id = rtn.id;
+									this.dialog.user.row.parent = newGroup.fullname;
+									
+								} else{
+									/* this.$message({
+										type: "error",
+										s
+										message: "更新组失败 " + rtn
+									}) */
+								}
+
+								this.dialog.user.changeGroup.change = false;
+								this.dialog.user.changeGroup.user = null;
+								this.dialog.user.changeGroup.newGroup = null;
+							} )
 							
 						},
 						onSaveUser(row){
@@ -3227,21 +3258,28 @@ class System {
 								cancelButtonText: '取消',
 								type: 'warning'
 							}).then(() => {
-									
+
 								let _csrf = window.CsrfToken.replace(/'/g,"");
-								let rtn = userHandler.userUpdate(row, _csrf);
+								
+								userHandler.userUpdateAsync(row, _csrf).then( (rtn)=>{
+									if(rtn == 1){
+										this.$message({
+											type: "success",
+											message: `更新用户: ${row.username} 成功！`
+										})
+	
+										if(this.dialog.user.changeGroup){
+											this.onUserGroupMovedAction(this.dialog.user.changeGroup.user,this.dialog.user.changeGroup.newGroup);
+										}
+	
+										this.dialog.user.show = false;
+	
+										//this.dt.rows[index] = row;
+	
+									}
+								} );
 
-								if(rtn == 1){
-									this.$message({
-										type: "success",
-										message: `更新用户: ${row.username} 成功！`
-									})
-
-									this.dialog.user.show = false;
-
-									this.dt.rows[index] = row;
-
-								}
+								
 								
 							}).catch(() => {
 								
@@ -3291,6 +3329,535 @@ class System {
 								
 								userHandler.updateGroupPermissionsAsync(group);
 							})
+						}
+					}
+				})
+
+				// tagdir 组合选择树
+				Vue.component("tagdir-group-select",{
+					delimiters: ['#{', '}#'],
+					props: {
+						model: Object,
+						rowData: Object
+					},
+					data(){
+						return {
+							defaultProps: {
+								children: 'nodes',
+								label: 'name'
+							},
+							filterText: "",
+							nodes: [],
+							filterNodes: [],
+							selectedKeys: [],
+							selectedNodes: [],
+							selectedDomain: '',
+							domain:{
+								mapping: null,
+								list: []
+							},
+							logical: false,
+							loading:false,
+							ifCheckStrictly: true
+						}
+					},
+					template: `<el-container>
+									<el-header style="height:auto;float:left;display:flex;flex-wrap:wrap;padding:0px;">
+										<el-radio-group v-model="selectedDomain">
+											<el-button v-for="item,key in domain.mapping" :key="item.title" style="margin:5px;">
+												<el-radio :label="key">#{item.title}#</el-radio>
+											</el-button>
+										</el-radio-group>	
+									</el-header>
+									<el-main style="height:70vh;background:#f2f2f2;overflow:hidden;">
+										<el-row :gutter="20" style="height: 100%;">
+											<el-col :span="10" style="height: 100%;">
+												<el-container style="height:100%;background: #ffffff;">
+													<el-header style="height:50px;line-height:50px;display:flex;">
+														<el-input
+															placeholder="输入关键字进行过滤"
+															v-model="filterText"
+															clearable
+															style="width:70%;">
+														</el-input>
+														<el-checkbox v-model="ifCheckStrictly" label="节点关联" style="margin-left:20px;float:right;"></el-checkbox>
+													</el-header>
+													<el-main>
+														<el-tree 
+															node-key="id"
+															show-checkbox
+															highlight-current="true"
+															:default-expanded-keys="selectedKeys"
+															:default-checked-keys="selectedKeys"
+															:expand-on-click-node="false"
+															:filter-node-method="onFilterNode"
+															:data="nodes" 
+															:props="defaultProps" 
+															:check-strictly="!ifCheckStrictly"
+															@check-change="onCheckChange"
+															style="background: transparent;"
+															ref="tree">
+															<span slot-scope="{ node, data }" style="width:100%;height:30px;line-height: 30px;"  @mouseenter="onMouseEnter(data)" @mouseleave="onMouseLeave(data)">
+																<span class="el-icon-price-tag" style="color: #f8a502;font-size: 14px;"></span>
+																<span v-if="_.isEmpty(data.name)">
+																	<span>#{data.domain}#</span>
+																	<el-dropdown style="float:right;display:none;">
+																		<span class="el-dropdown-link">
+																			<i class="el-icon-more el-icon--right"></i>
+																		</span>
+																		<el-dropdown-menu slot="dropdown">
+																			<el-dropdown-item>
+																				<el-checkbox-group v-model="data.perms" style="float: right;padding-right: 10px;" v-if="data.checked">
+																					<el-checkbox label="add">添加</el-checkbox>
+																					<el-checkbox label="delete">删除</el-checkbox>
+																					<el-checkbox label="edit">编辑</el-checkbox>
+																					<el-checkbox label="list">查询</el-checkbox>
+																				</el-checkbox-group>
+																			</el-dropdown-item>
+																		</el-dropdown-menu>
+																	</el-dropdown>
+																</span>
+																<span v-else>
+																	<span>#{node.label}#</span>
+																	<el-dropdown style="float:right;display:none;">
+																		<span class="el-dropdown-link">
+																			<i class="el-icon-more el-icon--right"></i>
+																		</span>
+																		<el-dropdown-menu slot="dropdown">
+																			<el-dropdown-item>
+																				<el-checkbox-group v-model="data.perms" style="float: right;padding-right: 10px;" v-if="data.checked">
+																					<el-checkbox label="add">添加</el-checkbox>
+																					<el-checkbox label="delete">删除</el-checkbox>
+																					<el-checkbox label="edit">编辑</el-checkbox>
+																					<el-checkbox label="list">查询</el-checkbox>
+																				</el-checkbox-group>
+																			</el-dropdown-item>
+																		</el-dropdown-menu>
+																	</el-dropdown>
+																</span>
+															</span>                  
+														</el-tree>
+													</el-main>
+												</el-container>
+											</el-col>
+											<el-col :span="4" style="height: 100%;">
+												<div style="height:100%;padding-top:10em;text-align:center;">
+													<p>
+														<el-button type="primary" @click="onSelectByRel(',')">加入标签组（或者）</el-button>
+													</p>
+													<p>
+														<el-button type="primary" @click="onSelectByRel('+')">加入标签组（并且）</el-button>
+													</p>
+												</div>
+											</el-col>
+											<el-col :span="10" style="height: 100%;">
+												<el-container style="height:100%;background: #ffffff;">
+													<el-header style="height:40px;line-height:40px;">
+														<el-button type="text" icon="el-icon-refresh" @click="selectedNodes = []">重置</el-button>
+														<span style="float:right;display:none;">
+															<el-switch
+																v-model="logical"
+																active-text="标签组关系(或者)"
+																inactive-text="标签组关系(并且)">
+															</el-switch>
+														</span>
+													</el-header>
+													<el-main styl="display:flex;flex-wrap:wrap;" v-if="!_.isEmpty(selectedNodes)">
+														<span v-for="item,index in _.filter(selectedNodes,{type:','})" :key="item.id">
+															<el-tag
+																:key="tag.id"
+																effect="plain"
+																type="primary"
+																closable
+																:disable-transitions="false"
+																@close="onTagClose(tag,item)" 
+																style="margin:5px;width:100%;"
+																v-for="tag,idx in item.nodes"
+																v-if="tag.name">
+																#{ tag.path }# 
+															</el-tag>
+														</span>
+														<span v-for="item,index in _.filter(selectedNodes,{type:'+'})" 
+															:key="item.id"
+															style="margin:5px;width:100%;max-height:300px;overflow:auto;display:flex;flex-wrap: wrap;border: 1px solid #b3d8ff;color: #409eff;border-radius: 5px;"
+															v-if="!_.isEmpty(item.nodes)">
+															<el-tag
+																:key="tag.id"
+																closable
+																:disable-transitions="false"
+																@close="onTagClose(tag,item)"
+																style="margin:5px;"
+																v-for="tag,idx in item.nodes"
+																v-if="tag.name">
+																#{tag.path}#
+															</el-tag>
+															<el-button type="text" icon="el-icon-close" style="float:right;" @click="onTagGroupClose(item)"></el-button>
+														</span>
+													</el-main>
+												</el-container>
+											</el-col>
+										</el-row>
+									</el-main>
+									<el-footer style="text-align:right;line-height:60px;background: #f2f2f2;">
+										<el-button type="default" @click="rowData.show = false;">关闭</el-button>
+										<el-button type="primary" @click="onUpdateRoleGroupByTagGroup" :loading="loading">更新标签权限</el-button>
+									</el-footer>
+								</el-container>`,
+					computed:{
+						logicalStr(){
+							return this.logical ? '或' : '且';
+						}
+					},
+					watch: {
+						filterText(val) {
+						  this.$refs.tree.filter(val);
+						},
+						selectedDomain(val){
+							this.nodes = _.filter(this.filterNodes,{domain:val});
+						},
+						selectedKeys(val){
+							this.$emit("count:selectedTag", val.length);
+						}
+					},
+					created(){
+						this.loadNodes();
+						this.initDomain();
+					},
+					methods:{
+						initDomain(){
+							fsHandler.fsContentAsync("/script/matrix/tags/","tagDomainMapping.json").then((rtn)=>{
+								this.domain.mapping = JSON.parse(rtn);
+							});
+						},
+						loadNodes(){
+							fsHandler.callFsJScriptAsync(`${['/matrix'+this.model.parent,this.model.name].join("/")}`).then( (val)=>{
+								let rtn = val.message;
+								
+								this.filterNodes = _.cloneDeep(rtn);
+								this.nodes = _.filter(this.filterNodes,{domain:this.selectedDomain});
+								_.delay(()=>{
+									this.onSetSelected();
+								},1000)
+								
+								
+							} );
+						},
+						onSetSelected(){
+							
+							let getDomainByClass = (json, text)=>{
+								let rtn = null;
+								try{
+									_.forEach(json, (v,k)=>{
+										if(_.includes(v['class'],text)){
+											rtn = k;
+											return;
+										}
+									})
+								} catch(err){
+									rtn = null;
+								}
+								return rtn;
+							};
+
+							let orSet = (rt)=>{
+								let values = _.values(rt)[0];
+								let or = values.split(",");
+								
+								let ids = [];
+								
+								// or
+								_.forEach(or, (v)=>{
+									ids.push(this.findIdByName(v));
+								})
+								
+								if(_.isEmpty(_.compact(ids))) return;
+
+								_.delay(()=>{
+									this.onSelectByRelById(",",_.compact(ids));
+								},50)
+
+							}
+
+							let andSet = (rt)=>{
+								
+								let values = _.values(rt)[0];
+								let or = values.split(",");
+								
+								// or->and
+								_.forEach(or, (v)=>{
+									
+									if(_.indexOf(v,'+') == -1) return;
+
+									let and = v.split("+");
+									
+									let ids = [];
+									_.forEach(and, (val)=>{
+										ids.push(this.findIdByName(val));
+									})	
+									
+									if(_.isEmpty(_.compact(ids))) return;
+
+									_.delay(()=>{
+										this.onSelectByRelById("+",_.compact(ids));
+									},50)
+									
+								})
+								
+							}
+
+							fsHandler.callFsJScriptAsync("/matrix/system/getTlistById.js", this.rowData.row.id).then( (rtn)=>{
+								
+								if(_.isEmpty(_.compact(_.values(rtn.message)))) return false;
+
+								let keys = _.keys(rtn.message);
+								let domains = _.map(keys, (v)=>{		
+									return getDomainByClass(this.domain.mapping,v);
+								});
+								
+								// 当前group对应的domain
+								if(!_.isEmpty(domains)){
+									_.forEach(domains,(v)=>{
+										
+										orSet(rtn.message);
+										andSet(rtn.message);
+
+										this.selectedDomain = v;
+										this.nodes = _.filter(this.filterNodes,{domain:v});
+									})
+								} 
+								  
+							} );
+							
+						},
+						findIdByName(name){
+							let rtn = null;
+
+							let find = (nodes)=> {
+
+								_.forEach(nodes,(v)=>{
+									
+									if(v.name == name){
+										rtn = v.id;
+									}
+
+									if(v.nodes){
+										find(v.nodes)
+									}
+								})	
+							} 
+
+							find(this.filterNodes);
+
+							return rtn;
+						},
+						findNodeById(id){
+							let rtn = null;
+
+							let find = function(nodes){
+								_.forEach(nodes,(v)=>{
+									
+									if(v.id == id){
+										rtn = v;
+									}
+
+									if(v.nodes){
+										find(v.nodes)
+									}
+								})	
+							} 
+
+							find(this.nodes);
+
+							return rtn;
+						},
+						findNodesByIdFromAll(id){
+							let rtn = null;
+
+							let find = function(nodes){
+								_.forEach(nodes,(v)=>{
+									
+									if(v.id == id){
+										rtn = v;
+									}
+
+									if(v.nodes){
+										find(v.nodes)
+									}
+								})	
+							} 
+
+							find(this.filterNodes);
+
+							return rtn;
+						},
+						onMouseEnter(data){
+							this.$set(data, 'show', true)
+						},
+						onMouseLeave(data){
+							this.$set(data, 'show', false)
+						},
+						onFilterNode(value, data) {
+							if (!value) return true;
+							return data.path.indexOf(value) !== -1;
+						},
+						onTagGroupClose(item){
+							
+							_.forEach(item.nodes,(v)=>{
+								// 取消禁用
+								let sNode = this.findNodeById(v.id);
+								this.$set(sNode, 'disabled', false);
+							})
+
+							item.nodes = [];
+
+						},
+						onTagClose(node,item){
+							let index = item.nodes.indexOf(node);
+							item.nodes.splice(index, 1);
+							
+							// 取消禁用
+							_.delay(()=>{
+								let sNode = this.findNodeById(node.id);
+								this.$set(sNode, 'disabled', false);
+							},1000)
+						},
+						onResetChecked() {
+							this.$refs.tree.setCheckedKeys([]);
+						},
+						onDisabledNodes(nodes,flag){
+							_.forEach(nodes,(v)=>{
+								v.disabled = flag;
+							})
+						},
+						parentNodesCheckChange(data){
+							
+							let perms = ['add','delete','edit','list'];
+							let node = null;
+
+							if(data.id){
+								node = this.$refs.tree.getNode(data.id);
+							} else {
+								node = this.$refs.tree.getNode("");
+							}
+							
+							if(node && node.parent){
+								this.$refs.tree.setChecked(node.parent.data, true, false);
+								this.$set( node.parent.data, 'perms', perms );	
+							}
+
+							this.parentNodesCheckChange(node.parent.data);
+
+						},
+						onCheckChange(data, checked, indeterminate){
+							
+							// 选择父节点
+							if(checked && this.ifCheckStrictly){
+								//this.childNodesCheckChange(data);
+								this.parentNodesCheckChange(data);
+							}
+
+						},
+						onSelectByRel(type){
+							
+							// Tag用
+							let nodes = this.$refs.tree.getCheckedNodes(false,false);
+							// Tlist用
+							let data = this.$refs.tree.getCheckedNodes(true,false);
+
+							if(_.isEmpty(nodes)) return false;
+
+							let id = objectHash.sha1(JSON.stringify(nodes));
+							let title = _.truncate(_.map(nodes,'name').join(" "),{
+								'length': 10,
+								'omission': ' ...'
+							});
+
+							// 已选择
+							if(_.find(this.selectedNodes, {id:id})) return false;
+
+							this.selectedNodes.push( {id: id, title: title, type: type, nodes: nodes, data: data} );
+
+							//console.log(111,JSON.stringify(this.selectedNodes))
+							
+							// 选过的禁用
+							//this.onDisabledNodes(nodes,true);
+							this.onResetChecked();
+
+						},
+						findNodeByIds(ids){
+							
+							let nodes = [];
+							console.log(this.filterNodes)
+							try{
+								
+								_.forEach(ids,(id)=>{
+									let node = this.findNodesByIdFromAll(id);//this.$refs.tree.getNode(id).data;
+									if(node){
+										nodes.push(node);
+									} else {
+										return;
+									}
+								})
+							} catch(err){
+								console.error(err);
+							}
+
+							return nodes;
+						},
+						onSelectByRelById(type,ids){
+							
+							let nodes = this.findNodeByIds(ids);
+							
+							if(_.isEmpty(nodes)) return false;
+
+							let id = objectHash.sha1(JSON.stringify(nodes));
+							let title = _.truncate(_.map(nodes,'name').join(" "),{
+								'length': 10,
+								'omission': ' ...'
+							});
+
+							// 已选择
+							if(_.find(this.selectedNodes, {id:id})) return false;
+
+							this.selectedNodes.push( {id: id, title: title, type: type, nodes: nodes} );
+
+							//console.log(111,JSON.stringify(this.selectedNodes))
+							
+							// 选过的禁用
+							//this.onDisabledNodes(nodes,true);
+							this.onResetChecked();
+
+						},	
+						// 标签授权
+						onUpdateRoleGroupByTagGroup(){
+							
+							if(_.isEmpty(this.selectedNodes)){
+								this.$message({
+									type: "warning",
+									message: "请选择标签组"
+								})
+								return false;
+							}
+
+							this.loading = true;
+
+							// 更新
+							let term =  JSON.stringify( { roleGroup: [this.rowData.row], data: this.selectedNodes, logical: this.logical?',':'+'} );
+							
+							console.log(222,JSON.stringify(this.selectedNodes,null,2))
+							
+							fsHandler.callFsJScriptAsync("/matrix/system/updateGroupByTagdirGroup.js", encodeURIComponent(term)).then( (rtn)=>{
+								this.$emit('update:selectedTag');
+								this.$message({
+									type: "success",
+									message: "更新标签权限成功！"
+								})
+
+								// 标签相应的类需要授权
+								fsHandler.callFsJScriptAsync("/matrix/system/updateRoleGroupByDataAfterTagdirGroup.js", term);
+
+								this.loading = false;
+							} );
 						}
 					}
 				})
@@ -3485,9 +4052,9 @@ class System {
 							this.loading = true;
 
 							// 更新
-							let term = encodeURIComponent( JSON.stringify( { roleGroup: [this.rowData.row], data: this.selectedNodes } ) );
+							let term = JSON.stringify( { roleGroup: [this.rowData.row], data: this.selectedNodes } );
 							
-							fsHandler.callFsJScriptAsync("/matrix/system/updateGroupByTagdir.js", term).then( (rtn)=>{
+							fsHandler.callFsJScriptAsync("/matrix/system/updateGroupByTagdir.js", encodeURIComponent( term )).then( (rtn)=>{
 								this.$emit('update:selectedTag');
 								this.$message({
 									type: "success",
@@ -3524,17 +4091,19 @@ class System {
 						}
 					},
 					template:   `<el-container style="height:70vh;background:#f2f2f2;">
-									<el-aside :width="!_.isEmpty(selectedNode)?'60%':'100%'">
-										<el-header style="height:30px;;padding:0px 10px;">
-											<!--el-input v-model="filterText" 
-												placeholder="搜索" size="mini"
-												clearable></el-input-->
-											<h4>应用权限</h4>
+									<el-aside :width="!_.isEmpty(selectedNode)?'100%':'100%'" style="overflow:hidden;">
+										<el-header style="height:10%;line-height:60px;">
+											<el-input
+												placeholder="输入关键字进行过滤"
+												v-model="filterText"
+												clearable>
+											</el-input>
 										</el-header>
-										<el-main style="padding:0px 10px; height: 100%;overflow:hidden;">
+										<el-main style="padding:0px 10px; height: 80%;">
 											<el-tree :data="treeData" 
 													:props="defaultProps" 
 													:default-checked-keys="selectedKeys"
+													:filter-node-method="onFilterNode"
 													node-key="id"
 													highlight-current
 													default-expand-all
@@ -3564,7 +4133,7 @@ class System {
 												</span>  
 											</el-tree>
 										</el-main>
-										<el-footer style="text-align:right;line-height:60px;">
+										<el-footer style="text-align:right;height:10%;line-height:60px;">
 											<el-button type="default" @click="rowData.show = false;">关闭</el-button>
 											<el-button type="primary" @click="onUpdateRoleGroupByApp" :loading="loading">更新应用权限</el-button>
 										</el-footer>
@@ -3622,6 +4191,10 @@ class System {
 								this.selectedKeys = _.keys(sapp);
 							} );
 						},
+						onFilterNode(value, data) {
+							if (!value) return true;
+							return data.name.indexOf(value) !== -1 || data.cnname.indexOf(value) !== -1 || data.enname.indexOf(value) !== -1 ;
+						},
 						findNodeById(id){
 							let rtn = null;
 
@@ -3654,15 +4227,6 @@ class System {
 
 							this.$set(data, 'children', childrenData);
 						},
-						onFilterNode:_.debounce(function(value, data) {
-							if (!value) return true;
-							try{
-								let rtn = fsHandler.callFsJScript("/matrix/fs/getFsByTerm.js", encodeURIComponent(value)).message;
-								this.treeData = rtn;
-							} catch(err){
-								this.treeData = [];
-							}
-						},1000),
 						onNodeClick(data){
 							try{
 
@@ -3748,6 +4312,7 @@ class System {
 					data(){
 						return {
 							treeData: [],
+							treeLoading: true,
 							selectedNode: null,
 							selectedNodes: [],
 							selectedKeys: [],
@@ -3767,12 +4332,14 @@ class System {
 					template:   `<el-container style="height:70vh;background:#f2f2f2;">
 									<el-header style="height:100%">
 										<el-container style="height:100%;">
-											<el-header style="height:40px;line-height:40px;padding:0px 10px;display:none;">
-												<el-input v-model="filterText" 
-													placeholder="搜索" size="mini"
-													clearable></el-input>
+											<el-header style="height:10%;line-height:60px;">
+												<el-input
+													placeholder="输入关键字进行过滤"
+													v-model="filterText"
+													clearable>
+												</el-input>
 											</el-header>
-											<el-main style="padding:0px 10px; height: 100%;">
+											<el-main style="padding:0px 10px; height: 80%;">
 												<el-tree :data="treeData" 
 														:props="defaultProps" 
 														:default-expanded-keys="selectedKeys"
@@ -3789,6 +4356,7 @@ class System {
 														:expand-on-click-node="false"
 														:check-strictly="true"
 														style="background:transparent;"
+														:loading="treeLoading"
 														ref="tree">
 													<span slot-scope="{ node, data }" style="width:100%;">
 														<span>
@@ -3804,7 +4372,7 @@ class System {
 													</span>
 												</el-tree>
 											</el-main>
-											<el-footer style="text-align:right;line-height:60px;">
+											<el-footer style="text-align:right;height:10%;line-height:60px;">
 												<el-button type="default" @click="rowData.show = false;">关闭</el-button>
 												<el-button type="primary" @click="onUpdateRoleGroupByData" :loading="loading">更新类权限</el-button>
 											</el-footer>
@@ -3873,9 +4441,10 @@ class System {
 					},
 					methods: {
 						initData(){
+							
 							fsHandler.callFsJScriptAsync("/matrix/entity/entity_class.js",encodeURIComponent(this.root)).then( (rtn)=>{
 								this.treeData = rtn.message;
-
+								this.treeLoading = false;
 								this.onSetSelected();
 							} );
 						},
@@ -3911,17 +4480,10 @@ class System {
 
 							return rtn;
 						},
-						onFilterNode:_.debounce(function(value, data) {
+						onFilterNode(value, data) {
 							if (!value) return true;
-							try{
-								let rtn = fsHandler.callFsJScript("/matrix/graph/entity-search-by-term.js",encodeURIComponent(value)).message;
-								this.treeData = _.map(rtn,(v)=>{
-									return _.extend(v,{ children:[], alias:_.last(v.class.split("/"))});
-								});
-							} catch(err){
-								this.treeData = [];
-							}
-						},1000),
+							return data.alias.indexOf(value) !== -1 || data.class.indexOf(value) !== -1 ;
+						},
 						onNodeClick(data){
 							
 							try{
@@ -4021,7 +4583,8 @@ class System {
 									{ "field":"name", title:"名称", width:200 },
 									{ "field":"pprefix", title:"角色组" }
 								],
-								selected: []
+								selected: [],
+								loading: true
 							},
 							info: [],
 							dialog: {
@@ -4093,7 +4656,7 @@ class System {
 											@selection-change="onSelectionChange"
 											@current-change="onCurrentChange"
 											ref="table"
-											:loading="loading">
+											:loading="dt.loading">
 											<el-table-column type="selection" align="center"></el-table-column> 
 											<el-table-column
 												sortable 
@@ -4213,15 +4776,17 @@ class System {
 							doLayout();
 						},
 						initData(){
-							const self = this;
 							
-							let init = function(){
+							let init = ()=>{
 								
 								try{
 
-									self.dt.rows = userHandler.getApiPermissions();
+									userHandler.getApiPermissionsAsync().then( (rtn)=>{
+										this.dt.rows = rtn;
+										this.dt.loading = false;
+									} );
 
-									_.extend(self.dt, {columns: _.map(self.dt.columns, function(v){
+									_.extend(this.dt, {columns: _.map(this.dt.columns, function(v){
 										
 										if(_.isUndefined(v.visible)){
 											_.extend(v, { visible: true });
@@ -4235,7 +4800,7 @@ class System {
 										
 									})});
 		
-									_.extend(self.dt, {rows: self.dt.rows});
+									_.extend(this.dt, {rows: this.dt.rows});
 
 									
 								} catch(err){
@@ -4929,7 +5494,7 @@ class System {
 								],
 								selected:[],
 								pagination:{
-                                    pageSize: 10,
+                                    pageSize: 100,
                                     currentPage: 1
                                 }
 							},
@@ -5141,6 +5706,15 @@ class System {
 																	ref="tagdirTree"
 																	v-if="!_.isEmpty(dialog.permission.row)"></tagdir-select>
 															</el-tab-pane>
+															<el-tab-pane name="tagdirGroup">
+																<span slot="label"><i class="el-icon-collection-tag"></i> 标签组合权限</span>
+																<tagdir-group-select :model="{parent:'/system',name:'tagdir_tree_data.js',domain:'*'}" 
+																	:rowData="dialog.permission"
+																	@count:selectedTag="(count)=>{ this.count.tag = count;}"
+																	@update:selectedTag="()=>{ this.initData(); }"
+																	ref="tagdirTree"
+																	v-if="!_.isEmpty(dialog.permission.row)"></tagdir-group-select>
+															</el-tab-pane>
 														</el-tabs>
 													</el-main>
 												</el-container>
@@ -5319,20 +5893,22 @@ class System {
 							this.initData();
 						},
 						onForward(fullname){
-							let rtn = userHandler.getGroupPermissionsByParent({parent: fullname});
-							
-							if(!_.isEmpty(rtn)){
-								this.dt.rows = _.map(rtn,(v)=>{
-									let isParent = this.getRoleGroupChildrens(v.fullname);
-									return _.extend(v, {isParent: isParent}); 
-								});
-
-								if(fullname){
-									this.fullname = fullname.split("/");
-								} else {
-									this.fullname = ["/"];
+							userHandler.getGroupPermissionsByParentAsync({parent: fullname}).then( (rtn)=>{
+								
+								if(!_.isEmpty(rtn)){
+									this.dt.rows = _.map(rtn,(v)=>{
+										let isParent = this.getRoleGroupChildrens(v.fullname);
+										return _.extend(v, {isParent: isParent}); 
+									});
+	
+									if(fullname){
+										this.fullname = fullname.split("/");
+									} else {
+										this.fullname = ["/"];
+									}
 								}
-							}
+							} );
+							
 						},
 						onSelectionChange(val) {
 							this.dt.selected = [val];
@@ -5663,7 +6239,7 @@ class System {
 
 						},
 						onTabClick(tab,event){
-							if(tab.name == 'role'){
+							if(tab.name == 'role' && this.$refs.userRoleGroupRef){
 								this.$refs.userRoleGroupRef.initData();
 							}
 						},

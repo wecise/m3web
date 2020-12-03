@@ -334,7 +334,7 @@ class SideBar {
                                                 menu-trigger="hover">
                                             <el-submenu index="1">
                                                 <template slot="title">
-                                                    <i class="el-icon-user-solid" style="color:#ffffff;"></i> #{window.SignedUser_UserName}#
+                                                    <i class="el-icon-user-solid" style="color:#ffffff;"></i> #{ window.SignedUser_FirstName + window.SignedUser_LastName || window.SignedUser_UserName}#
                                                 </template>
                                                 <el-menu-item index="/matrix/user">
                                                     <template slot="title">

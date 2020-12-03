@@ -1801,7 +1801,7 @@ class Omdb{
                                     <p>耗时：#{model.consume}#</p>
                                 </div>
                             </el-main>
-                            <el-footer  style="height:30px;line-height:30px;">
+                            <el-footer  style="height:30px;line-height:30px;" v-if="!_.isEmpty(model.data) && _.includes(['select'],model.type)">
                                 #{ info.join(' &nbsp; | &nbsp;') }#
                             </el-footer>
                         </el-container>`,
