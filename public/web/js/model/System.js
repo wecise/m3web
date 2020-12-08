@@ -3690,6 +3690,26 @@ class System {
 
 							return rtn;
 						},
+						findNodeByPathFromAll(path){
+							let rtn = null;
+
+							let find = function(nodes){
+								_.forEach(nodes,(v)=>{
+									
+									if(v.path == path){
+										rtn = v;
+									}
+
+									if(v.nodes){
+										find(v.nodes)
+									}
+								})	
+							} 
+
+							find(this.filterNodes);
+
+							return rtn;
+						},
 						onMouseEnter(data){
 							this.$set(data, 'show', true)
 						},
@@ -3702,24 +3722,20 @@ class System {
 						},
 						onTagGroupClose(item){
 							
-							_.forEach(item.nodes,(v)=>{
-								// 取消禁用
-								let sNode = this.findNodeById(v.id);
-								this.$set(sNode, 'disabled', false);
-							})
-
 							item.nodes = [];
+
+							let index = this.selectedNodes.indexOf(item);
+							this.selectedNodes.splice(index, 1);
 
 						},
 						onTagClose(node,item){
 							let index = item.nodes.indexOf(node);
 							item.nodes.splice(index, 1);
+
+							let selectedNode = _.find(this.selectedNodes,{ id:item.id });
+							selectedNode.nodes = item.nodes;
 							
-							// 取消禁用
-							_.delay(()=>{
-								let sNode = this.findNodeById(node.id);
-								this.$set(sNode, 'disabled', false);
-							},1000)
+							
 						},
 						onResetChecked() {
 							this.$refs.tree.setCheckedKeys([]);
@@ -3784,16 +3800,42 @@ class System {
 							this.onResetChecked();
 
 						},
-						findNodeByIds(ids){
+						getNodesByParentPaths(path){
+							
+							let paths =  path.split("/").slice(0, -1).reduce((acc, item, index) => {
+								acc.push(index ? acc[index - 1] + '/' + item : item);
+								return acc;
+							}, []);
+
+							paths.push(path);
+							
+							let nodes = _.map(paths,(v)=>{
+								return this.findNodeByPathFromAll(v);
+							});
+							
+							return nodes;
+							
+						},
+						findNodeByIds(ids,flag){
 							
 							let nodes = [];
-							console.log(this.filterNodes)
+							
 							try{
 								
 								_.forEach(ids,(id)=>{
+
 									let node = this.findNodesByIdFromAll(id);//this.$refs.tree.getNode(id).data;
+									
 									if(node){
 										nodes.push(node);
+
+										if(flag){
+											if( _.indexOf(node.path,'/') != -1 ){
+												let subNodes = this.getNodesByParentPaths(node.path);
+												_.concat(nodes,subNodes);
+											}
+										}
+
 									} else {
 										return;
 									}
@@ -3802,11 +3844,14 @@ class System {
 								console.error(err);
 							}
 
-							return nodes;
+							return _.uniq(nodes);
 						},
 						onSelectByRelById(type,ids){
 							
-							let nodes = this.findNodeByIds(ids);
+							// Tag用
+							let nodes = this.findNodeByIds(ids,true);
+							// Tlist用
+							let data = this.findNodeByIds(ids,false);
 							
 							if(_.isEmpty(nodes)) return false;
 
@@ -3819,7 +3864,7 @@ class System {
 							// 已选择
 							if(_.find(this.selectedNodes, {id:id})) return false;
 
-							this.selectedNodes.push( {id: id, title: title, type: type, nodes: nodes} );
+							this.selectedNodes.push( {id: id, title: title, type: type, nodes: nodes, data: data} );
 
 							//console.log(111,JSON.stringify(this.selectedNodes))
 							
