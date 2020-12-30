@@ -324,7 +324,7 @@ Vue.component("mx-fs-editor",{
                 result: {
                     show: true
                 },
-                activeView: 'result'
+                activeView: 'log'
             },
             splitInst: null,
             tip: {
@@ -401,37 +401,46 @@ Vue.component("mx-fs-editor",{
                         </div>
                         <!-- 工具栏 -->
                         <div>  
-                            <el-tooltip content="左边栏" placement="top" open-delay="500">
+                            <el-tooltip content="左边栏" placement="top" open-delay="800">
                                 <el-button type="text" :icon="toolBar.left.show?'el-icon-s-fold':'el-icon-s-unfold'" @click="toolBar.left.show = !toolBar.left.show"></el-button>
                             </el-tooltip>    
                             <span v-if="!_.isEmpty(tabs.list)" style="padding-left:10px;">
-                                <el-tooltip content="重打开" placement="top" open-delay="500">
+                                <el-tooltip content="重打开" placement="top" open-delay="800">
                                     <el-button type="text" icon="el-icon-refresh" @click="onReload"></el-button>
                                 </el-tooltip>    
                                 <el-divider direction="vertical"></el-divider>
-                                <el-tooltip content="保存" placement="top" open-delay="500">
+                                <el-tooltip content="保存" placement="top" open-delay="800">
                                     <el-button type="text" icon="far fa-save" @click="onSave"></el-button>
                                 </el-tooltip>
-                                <el-tooltip content="另存为" placement="top" open-delay="500">
+                                <el-tooltip content="另存为" placement="top" open-delay="800">
                                     <el-button type="text" icon="el-icon-edit-outline" @click="file.dialogSaveAs.visible=true"></el-button>
                                 </el-tooltip>
-                                <el-divider direction="vertical"></el-divider>
                                 <span  v-if="!_.isEmpty(tabs.activeNode) && tabs.activeNode.ftype=='js'">
-                                    <el-tooltip content="执行" placement="top" open-delay="500">
+                                    <el-divider direction="vertical"></el-divider>
+                                    <el-tooltip content="执行" placement="top" open-delay="800">
                                         <el-button type="text" icon="el-icon-caret-right" @click="onSaveAndPlay" :loading="tip.loading"></el-button>
                                     </el-tooltip>
                                     <el-divider direction="vertical"></el-divider>
-                                    <el-tooltip content="执行日志" placement="top" open-delay="500">
+                                    <el-tooltip content="执行日志" placement="top" open-delay="800">
                                         <el-button type="text" icon="el-icon-monitor" @click="onToggleRunningView('log')"></el-button>
                                     </el-tooltip>
-                                    <el-tooltip content="执行结果" placement="top" open-delay="500">
+                                    <el-tooltip content="执行结果" placement="top" open-delay="800">
                                         <el-button type="text" icon="el-icon-tickets" @click="onToggleRunningView('result')"></el-button>
                                     </el-tooltip>
                                 </span>
-                                <el-tooltip content="预览" placement="top" open-delay="500">
-                                    <el-button type="text" icon="el-icon-platform-eleme" @click="onToggleRunningView('preview')" v-if="tabs.activeNode.ftype=='html'"></el-button>
-                                </el-tooltip>
-                                <el-tooltip content="主题" placement="top" open-delay="500">
+                                <span v-if="tabs.activeNode.ftype=='html' || tabs.activeNode.ftype=='js' || tabs.activeNode.ftype=='json'">
+                                    <el-divider direction="vertical"></el-divider>
+                                    <el-tooltip content="格式化" placement="top" open-delay="800">
+                                        <el-button type="text" icon="el-icon-finished" @click="onFormatContent"></el-button>
+                                    </el-tooltip>
+                                </span>
+                                <span v-if="tabs.activeNode.ftype=='html'">
+                                    <el-divider direction="vertical"></el-divider>
+                                    <el-tooltip content="预览" placement="top" open-delay="800">
+                                        <el-button type="text" icon="el-icon-platform-eleme" @click="onToggleRunningView('preview')" ></el-button>
+                                    </el-tooltip>
+                                </span>
+                                <el-tooltip content="主题" placement="top" open-delay="800">
                                     <el-button type="text" :class="'M3-EDITOR-THEME-'+tabs.activeIndex" v-show="!_.isEmpty(tabs.list)" style="float:right;">
                                         <i class="fas fa-tshirt"></i>
                                     </el-button>
@@ -476,7 +485,7 @@ Vue.component("mx-fs-editor",{
                                         closable 
                                         @tab-remove="tabRemove" v-else>
                                     <el-tab-pane
-                                        :key="item.name"
+                                        :key="item.id"
                                         v-for="(item, index) in tabs.list"
                                         :label="item.title"
                                         :name="item.name"
@@ -524,18 +533,18 @@ Vue.component("mx-fs-editor",{
             }
         },
         'toolBar.left.show':{
-            handler(val,oldVal){
+            handler(val){
                 this.onToggleLeftBar(val);
             },
             immediate:true
         },
         'toolBar.result.show':{
-            handler(val,oldVal){
+            handler(val){
                 localStorage.setItem('M3-EDITOR-RESULT', val);
             }
         },
         'toolBar.log.show':{
-            handler(val,oldVal){
+            handler(val){
                 localStorage.setItem('M3-EDITOR-LOG', val);
             }
         }
@@ -551,11 +560,12 @@ Vue.component("mx-fs-editor",{
     },
     methods: {
         onInitToolBar(){
+            
             this.toolBar.left.show = (localStorage.getItem('M3-EDITOR-LEFTBAR') == 'true');
-            _.delay(()=>{
-                this.toolBar.result.show = (localStorage.getItem('M3-EDITOR-RESULT') == 'true');
-                this.toolBar.log.show = (localStorage.getItem('M3-EDITOR-LOG') == 'true');
-            },800)
+            
+            this.toolBar.result.show = (localStorage.getItem('M3-EDITOR-RESULT') == 'true');
+            this.toolBar.log.show = (localStorage.getItem('M3-EDITOR-LOG') == 'true');
+            
         },
         tabClose(key,tab){
             
@@ -593,9 +603,8 @@ Vue.component("mx-fs-editor",{
                     this.splitInst.setSizes([0,100]);
                     $(this.$refs.leftView.$el).hide();
                 }
+                localStorage.setItem('M3-EDITOR-LEFTBAR',show);
             }
-
-            localStorage.setItem('M3-EDITOR-LEFTBAR',show);
         }, 
         onToggleRunningView(view){
             
@@ -638,6 +647,10 @@ Vue.component("mx-fs-editor",{
                     editor.setTheme("ace/theme/"+theme);
                 },500)
                 
+                // 窗口正常化
+                if( window.jsPanel.activePanels.getPanel(`jsPanel-editor`) ){
+                    window.jsPanel.activePanels.getPanel(`jsPanel-editor`).normalize();
+                } 
 
             } catch(error){
                 this.tabs.list = [];
@@ -725,6 +738,24 @@ Vue.component("mx-fs-editor",{
                     return editor.getValue();
                 }
             });
+        },
+        onFormatContent(){
+            let editor = ace.edit('editor-'+this.tabs.activeIndex);
+            let content = editor.getValue();
+            let formatted = "";
+            
+            if(this.tabs.activeNode.ftype=='html'){
+                formatted = style_html(content, 4, ' ', 200);
+            } else if(this.tabs.activeNode.ftype=='js'){
+                formatted = js_beautify(content, 4, ' ', 0);
+            } else if(this.tabs.activeNode.ftype=='json'){
+                formatted = JSON.stringify(JSON.parse(content),null,2);
+            } else { 
+                return false;
+            }
+
+            editor.setValue(formatted);
+
         },
         onFormat(){
             let editor = ace.edit('editor-'+this.tabs.activeIndex);
@@ -851,13 +882,12 @@ Vue.component("mx-fs-editor",{
                 try {
                     
                     fsHandler.callFsJScriptAsync([this.tabs.activeNode.parent, this.tabs.activeNode.name].join("/").replace(/\/script\//g, "/"), '').then( (rtn)=>{
-                        
                         _.forEach(this.tabs.list,(v)=>{
                             if(v.name == this.tabs.activeIndex){
                                 _.extend(v.model,{output:rtn});
+                                eventHub.$emit(this.tabs.activeNode.fullname);
                             }
                         })
-
                         this.tip.loading = false;
                         this.tip.message = "";
                     } );
@@ -933,7 +963,12 @@ Vue.component("mx-fs-editor",{
                 }
             });
         }
-    } 
+    },
+    beforeDestroy(){
+        let editor = ace.edit('editor-'+this.tabs.activeIndex);
+        editor.destroy();
+        editor.container.remove();
+    }
 })
 
 /* Common Fs Open */
@@ -3146,7 +3181,7 @@ Vue.component("mx-entity-class-keys-cascader",{
                             autofocus>
                             <template slot="prepend">
                                 <el-dropdown trigger="click" placement="top-end">
-                                    <el-tooltip content="选则实体类" open-delay="500">
+                                    <el-tooltip content="选则实体类" open-delay="800">
                                         <el-button type="text" size="mini">
                                             <i class="el-icon-office-building" style="font-size:16px;"></i>
                                         </el-button>
@@ -3177,12 +3212,12 @@ Vue.component("mx-entity-class-keys-cascader",{
                             <div style="height:48px;line-height:48px;width:50%;">
                                 <mx-classkeys-number-cascader :root="item.class" :value="item" multiplenable="true" :key="item.id" :ref="item.id"></mx-classkeys-number-cascader> 
                             </div>
-                            <el-tooltip content="作为输入指标加入计算模型" open-delay="500">
+                            <el-tooltip content="作为输入指标加入计算模型" open-delay="800">
                                 <el-button type="text" @click="onInputAdd(item)">
                                     <i class="el-icon-plus"></i> 输入
                                 </el-button>
                             </el-tooltip>
-                            <el-tooltip content="作为输出指标加入计算模型" open-delay="500">
+                            <el-tooltip content="作为输出指标加入计算模型" open-delay="800">
                                 <el-button type="text" @click="onOutputAdd(item)">
                                     <i class="el-icon-plus"></i> 输出
                                 </el-button>

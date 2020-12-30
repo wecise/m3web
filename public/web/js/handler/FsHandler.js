@@ -23,7 +23,12 @@ class FsHandler {
     async  fsRefreshAsync(path, name){
         
         let rtn = null;
-
+        
+        // 该接口只适用于 ["/app", "/script", "/web"]
+        if( !_.startsWith(path, '/app') && !_.startsWith(path, '/script') && !_.startsWith(path, '/web') ){
+            return false;
+        }
+        
         try{
             
             let parent = path.replace(/\/\//g,'/');
@@ -132,8 +137,8 @@ class FsHandler {
 
         fm.append("data", content);
         fm.append("type", ftype);
-        fm.append("attr", JSON.stringify(attr));
-        fm.append("index", true);
+        fm.append("attr", JSON.stringify(attr)=='{}'?'':JSON.stringify(attr));
+        fm.append("index", false);
 
         jQuery.ajax({
             url: _url,
@@ -144,11 +149,11 @@ class FsHandler {
             dataType: "json",
             data: fm,
             async:false,
-            beforeSend: function(xhr) {
+            beforeSend(xhr) {
             },
-            complete: function(xhr, textStatus) {
+            complete(xhr, textStatus) {
             },
-            success: function(data, textStatus, xhr) {
+            success(data, textStatus, xhr) {
 
                 userHandler.ifSignIn(data);
 
@@ -160,7 +165,7 @@ class FsHandler {
                 }
 
             },
-            error: function(xhr, textStatus, errorThrown) {
+            error(xhr, textStatus, errorThrown) {
                 rtn = xhr.responseJSON;
             }
         })
@@ -193,8 +198,8 @@ class FsHandler {
 
             fm.append("data", content);
             fm.append("type", ftype);
-            fm.append("attr", JSON.stringify(attr));
-            fm.append("index", true);
+            fm.append("attr", JSON.stringify(attr)=='{}'?'':JSON.stringify(attr));
+            fm.append("index", false);
 
             await jQuery.ajax({
                 url: _url,
@@ -573,6 +578,57 @@ class FsHandler {
         return rtn;
     };
 
+    async fsRenameAsync(srcpath,dstpath){
+        let rtn = null;
+        let _issys = false;
+
+        try{
+            if(window.SignedUser_IsAdmin){
+                _issys = true;
+            }
+
+            // Root
+            srcpath = srcpath.replace(/\/\//g,'/');
+            dstpath = dstpath.replace(/\/\//g,'/');
+
+            if(_.lastIndexOf(srcpath,"/") === 0){
+                _issys = true;
+            }
+
+            await jQuery.ajax({
+                url: `/fs/rename?issys=${_issys}`,
+                type: 'POST',
+                dataType: 'json',
+                async: true,
+                data: {
+                    srcpath: srcpath,
+                    dstpath: dstpath
+                },
+                beforeSend(xhr) {
+                    
+                },
+                complete(xhr, textStatus) {
+                },
+                success(data, textStatus, xhr) {
+
+                    userHandler.ifSignIn(data);
+
+                    if( _.lowerCase(data.status) == "ok"){
+                        rtn = 1;
+                    }
+
+                },
+                error(xhr, textStatus, errorThrown) {
+                    rtn = xhr.responseText;
+                }
+            })
+        } catch(err){
+
+        }
+
+        return rtn;
+    };
+
     /*
     *   文件系统
     *
@@ -873,37 +929,41 @@ class FsHandler {
     *
     *
     */
-    fsSyncToLocal(item){
+    async fsSyncToLocalAsync(item){
         let rtn = null;
 
-        let url = `/fs/tolocal${item.fullname}`;
+        try{
+            let url = `/fs/tolocal${item.fullname}`;
 
-        if(window.SignedUser_IsAdmin){
-            url += '?issys=true';
-        }
-
-        jQuery.ajax({
-            url: url,
-            type: 'POST',
-            dataType: "json",
-            async: false,
-            beforeSend(xhr) {
-            },
-            complete(xhr, textStatus) {
-            },
-            success(data, textStatus, xhr) {
-
-                userHandler.ifSignIn(data);
-
-                if( _.lowerCase(data.status) == "ok"){
-                    rtn = 1;
-                }
-
-            },
-            error(xhr, textStatus, errorThrown) {
-                rtn=xhr.responseJSON;
+            if(window.SignedUser_IsAdmin){
+                url += '?issys=true';
             }
-        })
+
+            await jQuery.ajax({
+                url: url,
+                type: 'POST',
+                dataType: "json",
+                async: true,
+                beforeSend(xhr) {
+                },
+                complete(xhr, textStatus) {
+                },
+                success(data, textStatus, xhr) {
+
+                    userHandler.ifSignIn(data);
+
+                    if( _.lowerCase(data.status) == "ok"){
+                        rtn = 1;
+                    }
+
+                },
+                error(xhr, textStatus, errorThrown) {
+                    rtn=xhr.responseJSON;
+                }
+            })
+        } catch(err){
+
+        }
 
         return rtn;
     };

@@ -49,7 +49,7 @@
 	<template>
 		<el-container class="editor-container">
 			<el-main style="padding:0px;">
-                <div :id="id" ref="editor"></div>
+                <div ref="editor"></div>
             </el-main>
 			<el-footer id="statusBar"></el-footer>
 		</el-container>
@@ -60,26 +60,19 @@
 	{
 	    delimiters: ['${', '}'],
         props: {
-            id: String,
-			bid: String,
             model: Object,
-            showToolsBar: Boolean,
-			showStatusBar: Boolean
+            showStatusBar: Boolean
         },
         data(){
             return {
-                langTools:null,
+                langTools: null,
                 editor: null,
                 inputText: "",
 	            result: null
             }
         },
         mounted(){
-            var self = this;
-
-            self.$nextTick(function(){
-                self.init();
-            })
+            this.init();
         },
         watch: {
             model: {
@@ -91,12 +84,8 @@
             }
 
         },
-        created () {
-            let self = this;
-
-        },
         methods: {
-            init() {
+            init(){
                 
                 this.langTools = ace.require("ace/ext/language_tools");
                 this.editor = ace.edit(this.$refs.editor);
@@ -124,8 +113,6 @@
                 this.setTheme();
                 this.setMode();
                 this.setOptions();
-
-				this.toggleToolsBar();
 
 				//this.toggleStatusBar();
 
@@ -162,92 +149,35 @@
                 } */
                 
             },
-            setOptions: function(){
+            setOptions(){
                 
                 if(!_.isEmpty(this.model.options)){
                     this.editor.setOptions(this.model.options);
                 } 
             },
-            setTheme: function(){
-                let self = this;
-
-                if(_.isEmpty(self.model.theme)){
-                	self.editor.setTheme("ace/theme/tomorrow");
+            setTheme(){
+                if(_.isEmpty(this.model.theme)){
+                	this.editor.setTheme("ace/theme/tomorrow");
                 } else {
-                	self.editor.setTheme("ace/theme/"+self.model.theme);
-                }
-                
-            },
-            setMode: function(){
-                let self = this;
-
-                if(_.isEmpty(self.model.mode)){
-                	self.editor.getSession().setMode("ace/mode/json");
-                } else {
-                	self.editor.getSession().setMode("ace/mode/"+ self.model.mode);
-                }
-                
-            },
-            setValue: function(){
-                let self = this;
-
-                self.editor.setValue(self.model.oldInput);
-            },
-            getSelected: function(){
-                let self = this;
-                var temp = self.editor.getSelectedText();
-
-                if(_.isEmpty(temp)){
-                    self.inputText = self.editor.getValue();
-                } else {
-                    self.inputText = temp;
+                	this.editor.setTheme("ace/theme/"+this.model.theme);
                 }
             },
-            toggleToolsBar: function(){
-                let self = this;
-
-                if(self.showToolsBar){
-                    $(".editorToolBar").show();
+            setMode(){
+                if(_.isEmpty(this.model.mode)){
+                	this.editor.getSession().setMode("ace/mode/json");
                 } else {
-                    $(".editorToolBar").hide();
+                	this.editor.getSession().setMode("ace/mode/"+ this.model.mode);
                 }
             },
-	        toggleStatusBar: function(){
-                let self = this;
-
-                if(self.showStatusBar) {
+            setValue(){
+                this.editor.setValue(this.model.oldInput);
+            },
+	        toggleStatusBar(){
+                if(this.showStatusBar) {
                     let StatusBar = ace.require("ace/ext/statusbar").StatusBar;
-                    let statusBar = new StatusBar(self.editor, document.getElementById("statusBar"));
+                    let statusBar = new StatusBar(this.editor, document.getElementById("statusBar"));
                 }
-	        },
-	        copyIt: function(){
-		        let self = this;
-
-                new Clipboard(".copy", {
-                    text: function(trigger) {
-                        alertify.log("已复制");
-                        return self.editor.getValue();
-                    }
-                });
-
-	        },
-            pasteIt: function(){
-                let self = this;
-
-                document.execCommand("paste");
-                alertify.log("已粘贴");
-            },
-	        selectAll: function(){
-                let self = this;
-
-                self.editor.selection.selectAll();
-            },
-            clearIt: function(){
-                let self = this;
-
-                self.editor.setValue();
-                alertify.log("已清空");
-            }
+	        }
         }
     
 	

@@ -170,10 +170,11 @@ class Probe extends Matrix {
                                         <el-header style="height: 40px;line-height: 40px;background: #f2f2f2;">#{titles[1]}# #{target.selected.length}#/#{target.rows.length}#</el-header>
                                         <el-main style="overflow:hidden;">
                                             <el-input v-model="target.term" 
-                                                @input="onSearchAllList" 
-                                                @clear="onSearchAllList" 
+                                                @input="onSearchTargetList" 
+                                                @clear="onSearchTargetList" 
                                                 placeholder="关键字" 
-                                                clearable suffix-icon="el-icon-search"
+                                                clearable 
+                                                suffix-icon="el-icon-search"
                                                 class="mx-transfer-search">
                                             </el-input>
                                             <el-table ref="target"
@@ -312,6 +313,17 @@ class Probe extends Matrix {
                             this.setSourceData();
                         },500)
                     },500),
+                    onSearchTargetList(){
+                        let term = this.target.term;
+                        
+                        if(term){
+                            this.target.rows = _.filter(this.target.rows,(v)=>{
+                                return v.host.indexOf(term) !== -1;
+                            });
+                        } else {
+                            this.setTargetData();
+                        }
+                    },
                     onSourceSelectionChange(val){
                         this.source.selected = val;
                     },
@@ -506,7 +518,7 @@ class Probe extends Matrix {
                     'model.rows': {
                         handler(val,oldVal){
                             if(val !== oldVal){
-                                //this.dt.rows = [];
+                                this.dt.pagination.currentPage = 1;
                                 this.initData();
                             }
                             this.layout();
@@ -1237,7 +1249,9 @@ class Probe extends Matrix {
                             if(val !== oldVal){
                                 this.dt.rows = [];
                                 this.initData();
+                                this.dt.pagination.currentPage = 1;
                             }
+                        
                             this.layout();
                         },
                         deep:true
@@ -1707,7 +1721,7 @@ class Probe extends Matrix {
                                 self.$set(row, 'fileObj', versionObj);
                                 self.$set(row, 'versionObj', _.values(versionObj));
                                 self.$set(row, 'selectedVersion', row.version);
-    
+                                console.log(row)
                                 // 初始化命令编辑器
                                 _.delay(()=>{
                                     

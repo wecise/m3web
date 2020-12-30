@@ -2,33 +2,6 @@
 
 	<style scoped>
 		/*----------  style  ----------*/
-		.editor-container.fs-editor-component{
-			background-color: #f2f2f2;
-			width:100%;
-			height: 100%;
-			position: relative;
-			overflow: hidden;
-		}
-
-		.ace_editor{
-			border: none;
-			margin: 0px 0px 10px 0px;
-			width: 100%;
-			height: 100%;
-			/*height:calc(100% - 50px)!important;*/
-			/*position: relative !important;*/
-			overflow: auto;
-		}
-
-        .fs-editor-component .ace_editor{
-			border: none;
-			margin: 0px 0px 10px 0px;
-			width: 100%;
-			/*height:calc(100% - 50px)!important;*/
-			position: relative !important;
-			overflow: auto;
-		}
-
 		.ace_keyword {
 			color: #a70909!important;
 		}
@@ -45,11 +18,11 @@
 	
 	/*----------  最外层element会自动增加组件同名 class="fs-editor-component"  ----------*/
 	<template>
-		<el-container class="editor-container">
-            <el-main class="editor-content" style="padding:0px;">
-                <div :id="id" ref="editor"></div>
+		<el-container style="height:100%;">
+            <el-main style="padding:0px;">
+                <pre ref="editor" :id="id"></pre>
             </el-main>
-            <el-footer style="height:30px;line-height: 30px;">
+            <el-footer style="height:30px;line-height: 30px;background:#f2f2f2;">
                 <div id="statusBar"></div>
             </el-footer>
         </el-container>
@@ -448,19 +421,19 @@
                         confirmButtonText: '确定',
                         cancelButtonText: '取消'
                 }).then(() => {
-                    let rtn = fsHandler.fsNew(self.model.fs.ftype, self.model.fs.parent, self.model.fs.name, sc, _.attempt(JSON.parse.bind(null, self.model.fs.attr)));
+                    fsHandler.fsNewAsync(self.model.fs.ftype, self.model.fs.parent, self.model.fs.name, sc, _.attempt(JSON.parse.bind(null, self.model.fs.attr))).then( (rtn)=>{
+                        if(rtn == 0){
+                            this.$message({
+                                type: 'success',
+                                message: '请确认脚本！'
+                            });
+                            done();
+                            return false;
+                        }
 
-                    if(rtn == 0){
-                        this.$message({
-                            type: 'success',
-                            message: '请确认脚本！'
-                        });
-                        done();
-                        return false;
-                    }
-
-                    self.editor.session.getUndoManager().markClean();
-                    self.updateToolbar();
+                        self.editor.session.getUndoManager().markClean();
+                        self.updateToolbar();
+                    } );
                     
                 }).catch(()=>{
 

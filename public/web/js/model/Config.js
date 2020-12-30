@@ -464,7 +464,7 @@ class Config {
                     props: {
                         rule: String
                     },
-                    template:   `<el-container style="height:100%;">
+                    template:   `<el-container style="height:calc(100% - 70px);">
                                     <el-header style="height:30px;line-height:30px;text-align:right;">
                                         <el-tooltip content="重置测试内容" open-delay="800">
                                             <el-button type="text" @click="onReset" icon="el-icon-refresh"></el-button>
@@ -483,8 +483,7 @@ class Config {
                                             </el-dropdown>
                                         </el-tooltip>
                                     </el-header>
-                                    <el-main style="padding: 20px;">
-                                        <pre ref="debugEditor" style="height: calc(100% - 60px);background: #f2f2f2;"></pre>
+                                    <el-main style="background:#f2f2f2;" ref="debugEditor">
                                     </el-main>
                                 </el-container>`,
                     data(){
@@ -498,38 +497,32 @@ class Config {
                             this.mode = rtn.message;
                         } );
                     },
-                    mounted: function() {
+                    mounted() {
                         this.initEditor();
                     },
                     methods:{
                         initEditor(){
-                            const self = this;
-
+                            
                             //初始化对象
-                            self.editor = ace.edit(this.$refs.debugEditor);
-
-                            //设置风格和语言（更多风格和语言，请到github上相应目录查看）
-                            self.editor.setTheme("ace/theme/tomorrow");
-                            self.editor.session.setMode("ace/mode/json");
-
-                            //字体大小
-                            self.editor.setFontSize(12);
-
-                            //自动换行,设置为off关闭
-                            self.editor.setOption("wrap", "free")
-
-                            //启用提示菜单
-                            ace.require("ace/ext/language_tools");
-                            self.editor.setOptions({
+                            this.editor = ace.edit(this.$refs.debugEditor.$el);
+                            this.editor.setOptions({
+                                maxLines: 30,
+                                minLines: 20,
+                                autoScrollEditorIntoView: true,
                                 enableBasicAutocompletion: true,
                                 enableSnippets: true,
                                 enableLiveAutocompletion: true
                             });
 
-                            self.editor.getSession().on('change', function() {
-                                //self.debug = self.getValue();
-                                //self.editor.resize();
-                            });
+                            //设置风格和语言（更多风格和语言，请到github上相应目录查看）
+                            this.editor.setTheme("ace/theme/tomorrow");
+                            this.editor.session.setMode("ace/mode/csv");
+
+                            //字体大小
+                            this.editor.setFontSize(12);
+
+                            //自动换行,设置为off关闭
+                            this.editor.setOption("wrap", "free")
                             
                         },
                         onReset(){

@@ -82,13 +82,13 @@ class Home extends Matrix {
                                                                                 <el-dropdown-item :command="{cmd:'walking',data:subItem}" divided>#{ $t('home.actions.open') }#</el-dropdown-item>
                                                                                 <el-dropdown-item :command="{cmd:'running',data:subItem}">#{ $t('home.actions.openNew') }#</el-dropdown-item>
                                                                                 <el-dropdown-item :command="{cmd:'home',data:subItem}" divided>#{ $t('home.actions.setHome') }#</el-dropdown-item>
-                                                                                <el-dropdown-item :command="{cmd:'allUserHome',data:item}">#{ $t('home.actions.seAllUsertHome') }#</el-dropdown-item>
-                                                                                <el-dropdown-item divided disabled>#{ $t('home.group.groupTitle') }#</el-dropdown-item>
-                                                                                <el-dropdown-item :command="{cmd:'groupAction', targetGroup: groupItem.name, data:subItem}" v-for="groupItem in _.xor(apps.template,[item])">#{ $t('home.actions.moveTo') }#【#{groupItem.title}#】</el-dropdown-item>
-                                                                                <el-dropdown-item :command="{cmd:'groupAction', targetGroup: '', data:subItem}">#{ $t('home.actions.moveToDesktop') }#</el-dropdown-item>
-                                                                                <el-dropdown-item :command="{cmd:'uninstall',data:subItem}" divided>#{ $t('home.actions.uninstall') }#</el-dropdown-item>
-                                                                                <el-dropdown-item :command="{cmd:'appKeeper',data:subItem}" divided>#{ $t('home.actions.appKeeper') }#</el-dropdown-item>
-                                                                                <!--el-dropdown-item :command="{cmd:'share',data:item}" divided>#{ $t('home.actions.share') }#</el-dropdown-item-->
+                                                                                <el-dropdown-item :command="{cmd:'allUserHome',data:subItem}" v-if="mxAuth.isAdmin">#{ $t('home.actions.seAllUsertHome') }#</el-dropdown-item>
+                                                                                <el-dropdown-item divided disabled v-if="mxAuth.isAdmin">#{ $t('home.group.groupTitle') }#</el-dropdown-item>
+                                                                                <el-dropdown-item :command="{cmd:'groupAction', targetGroup: groupItem.name, data:subItem}" v-for="groupItem in _.xor(apps.template,[item])" v-if="mxAuth.isAdmin">#{ $t('home.actions.moveTo') }#【#{groupItem.title}#】</el-dropdown-item>
+                                                                                <el-dropdown-item :command="{cmd:'groupAction', targetGroup: '', data:subItem}" v-if="mxAuth.isAdmin">#{ $t('home.actions.moveToDesktop') }#</el-dropdown-item>
+                                                                                <el-dropdown-item :command="{cmd:'uninstall',data:subItem}" divided v-if="mxAuth.isAdmin">#{ $t('home.actions.uninstall') }#</el-dropdown-item>
+                                                                                <el-dropdown-item :command="{cmd:'appKeeper',data:subItem}" divided v-if="mxAuth.isAdmin">#{ $t('home.actions.appKeeper') }#</el-dropdown-item>
+                                                                                <!--el-dropdown-item :command="{cmd:'share',data:item}" divided v-if="mxAuth.isAdmin">#{ $t('home.actions.share') }#</el-dropdown-item-->
                                                                             </el-dropdown-menu>
                                                                         </el-dropdown>
                                                                     </p>
@@ -119,17 +119,17 @@ class Home extends Matrix {
                                                             <el-dropdown-item :command="{cmd:'walking',data:item}" divided>#{ $t('home.actions.open') }#</el-dropdown-item>
                                                             <el-dropdown-item :command="{cmd:'running',data:item}">#{ $t('home.actions.openNew') }#</el-dropdown-item>
                                                             <el-dropdown-item :command="{cmd:'home',data:item}" divided>#{ $t('home.actions.setHome') }#</el-dropdown-item>
-                                                            <el-dropdown-item :command="{cmd:'allUserHome',data:item}">#{ $t('home.actions.seAllUsertHome') }#</el-dropdown-item>
-                                                            <el-dropdown-item divided disabled>#{ $t('home.group.groupTitle') }#</el-dropdown-item>
-                                                            <el-dropdown-item :command="{cmd:'groupAction', targetGroup: groupItem.name, data:item}" v-for="groupItem in apps.template">#{ $t('home.actions.moveTo') }#【#{groupItem.title}#】组</el-dropdown-item>
-                                                            <el-dropdown-item :command="{cmd:'uninstall',data:item}" divided>#{ $t('home.actions.uninstall') }#</el-dropdown-item>
-                                                            <el-dropdown-item :command="{cmd:'appKeeper',data:item}" divided>#{ $t('home.actions.appKeeper') }#</el-dropdown-item>
-                                                            <!--el-dropdown-item :command="{cmd:'share',data:item}" divided>#{ $t('home.actions.share') }#</el-dropdown-item-->
+                                                            <el-dropdown-item :command="{cmd:'allUserHome',data:item}" v-if="mxAuth.isAdmin">#{ $t('home.actions.seAllUsertHome') }#</el-dropdown-item>
+                                                            <el-dropdown-item divided disabled v-if="mxAuth.isAdmin">#{ $t('home.group.groupTitle') }#</el-dropdown-item>
+                                                            <el-dropdown-item :command="{cmd:'groupAction', targetGroup: groupItem.name, data:item}" v-for="groupItem in apps.template" v-if="mxAuth.isAdmin">#{ $t('home.actions.moveTo') }#【#{groupItem.title}#】组</el-dropdown-item>
+                                                            <el-dropdown-item :command="{cmd:'uninstall',data:item}" divided v-if="mxAuth.isAdmin">#{ $t('home.actions.uninstall') }#</el-dropdown-item>
+                                                            <el-dropdown-item :command="{cmd:'appKeeper',data:item}" divided v-if="mxAuth.isAdmin">#{ $t('home.actions.appKeeper') }#</el-dropdown-item>
+                                                            <!--el-dropdown-item :command="{cmd:'share',data:item}" divided v-if="mxAuth.isAdmin">#{ $t('home.actions.share') }#</el-dropdown-item-->
                                                         </el-dropdown-menu>
                                                     </el-dropdown>
                                                 </el-button>
                                                 <el-button type="default" 
-                                                    style="max-width: 120px;width: 120px;height:90px;border-radius:10px!important;background: rgba(255,255,255,0.3);margin: 5px;">
+                                                    style="max-width: 120px;width: 120px;height:90px;border-radius:10px!important;background: rgba(255,255,255,0.3);margin: 5px;" v-if="mxAuth.isAdmin">
                                                     <el-dropdown trigger="hover" placement="top-start">
                                                         <span class="el-dropdown-link">
                                                             <i class="el-icon-plus" style="font-size: 20px;"></i>

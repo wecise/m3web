@@ -209,7 +209,7 @@ class ScriptHandler {
                     rtn = data.message;
 
                     // Audit
-                    auditLogHandler.writeLog("collection:rule", "Get info: " + event.name + " " + event.version, 0);
+                    //auditLogHandler.writeLog("collection:rule", "Get info: " + event.name + " " + event.version, 0);
                 }
 
             },
@@ -217,7 +217,7 @@ class ScriptHandler {
                 rtn = xhr.responseText;
 
                 // Audit
-                auditLogHandler.writeLog("collection:rule", "Get info: " + event.name + " " + event.version, 1);
+                //auditLogHandler.writeLog("collection:rule", "Get info: " + event.name + " " + event.version, 1);
             }
         });
         
@@ -251,14 +251,14 @@ class ScriptHandler {
                     rtn = data;
 
                     // Audit
-                    auditLogHandler.writeLog("collection:rule", "List", 0);
+                    //auditLogHandler.writeLog("collection:rule", "List", 0);
                 }
 
             },
             error: function(xhr, textStatus, errorThrown){
                 rtn = xhr.responseText;
                 // Audit
-                auditLogHandler.writeLog("collection:rule", "List", 1);
+                //auditLogHandler.writeLog("collection:rule", "List", 1);
             }
         });
 
@@ -410,13 +410,13 @@ class ScriptHandler {
                     rtn = data.message;
 
                     // Audit
-                    auditLogHandler.writeLog("collection:rule", "Get file by name: " + event.name + " " + event.version, 0);
+                    //auditLogHandler.writeLog("collection:rule", "Get file by name: " + event.name + " " + event.version, 0);
                 }
             },
             error: function(xhr, textStatus, errorThrown){
                 rtn = xhr.responseText;
                 // Audit
-                auditLogHandler.writeLog("collection:rule", "Get file by name: " + event.name + " " + event.version, 1);
+                //auditLogHandler.writeLog("collection:rule", "Get file by name: " + event.name + " " + event.version, 1);
             }
         });
 

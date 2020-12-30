@@ -235,7 +235,8 @@
 	.el-checkbox__label{
 		font-size: 12px;
 	}
-	 .el-radio{
+	
+	.el-radio:not(.matrix-ai-setup .el-radio){
 		margin-right: 0px;
 	}
 
@@ -333,7 +334,7 @@
 		list-style: none;
 	}
 
-	footer ul li {
+	footer ul li:not(.jsoneditor-menu li) {
 		font-size: 12px;
 		display: inline-block;
 		margin-right: 10px;
@@ -349,6 +350,8 @@
 		transition: all 0.2s;
 		color: #333333;
 	}
+
+	
 
 	footer ul li:hover {
 		color: #333333;

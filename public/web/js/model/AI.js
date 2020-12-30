@@ -74,7 +74,7 @@ class AI {
                                             <div class="media-left">
                                                 <span class="fas fa-circle" style="position: absolute;left:40px;color: rgb(255, 0, 0);transform: scale(.7);" v-if="item.msgs.length>0"></span>
                                                 <a href="#">
-                                                    <img class="media-object" :src="'/fs/assets/images/robot/png/'+item.icon + '.png?type=download&issys=true'" style="width: 42px;height: 42px;">
+                                                    <img class="media-object" :src="'/static/assets/images/robot/png/'+item.icon + '.png'" style="width: 42px;height: 42px;">
                                                 </a>
                                             </div>
                                             <div class="media-body" style="text-align: left;">
@@ -90,7 +90,7 @@ class AI {
                                                     <span class="date-time">#{moment(item.ctime).format("LLL")}#</span>
                                                     <a href="javascript:;" class="name">#{item.icon}#</a>
                                                     <a href="javascript:;" class="image">
-                                                        <img alt="" :src="'/fs/assets/images/robot/png/'+item.icon + '.png?type=download&issys=true'" style="width: 42px;height: 42px;" />
+                                                        <img alt="" :src="'/static/assets/images/robot/png/'+item.icon + '.png'" style="width: 42px;height: 42px;" />
                                                     </a>
                                                     <div class="message animated pulse" contenteditable="false" style="outline:none;">
                                                         #{item.msg}#
@@ -234,15 +234,77 @@ class AI {
                         }
                     },
                 });
+
+                // 脚本编辑器组件
+                Vue.component("matrix-ai-script",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        value: String
+                    },
+                    data(){
+                        return {
+                            editor: null,
+                            options: {
+                                mode: "lua",
+                                theme: "tomorrow",
+                                printMargin: false,
+                                readOnly: false,
+                            }
+                        }
+                    },
+                    template: `<el-container style="height:300px;border:1px solid #dddddd;">
+                                    <el-main style="padding:0px;">
+                                        <div ref="editor"></div>
+                                    </el-main>
+                                </el-container>`,
+                    mounted(){
+                        this.init();
+                    },
+                    methods: {
+                        init() {
                 
+                            this.editor = ace.edit(this.$refs.editor);
+            
+                            this.editor.setOptions({
+                                maxLines: Infinity,
+                                minLines: 50,
+                                autoScrollEditorIntoView: true,
+                                enableBasicAutocompletion: true,
+                                enableSnippets: true,
+                                enableLiveAutocompletion: true
+                            });
+                            this.editor.$blockScrolling = Infinity;
+                            this.editor.setShowPrintMargin(this.options.printMargin);
+                            this.editor.setReadOnly(this.options.readOnly);
+                            this.editor.setTheme("ace/theme/" + this.options.theme);
+                            this.editor.getSession().setMode("ace/mode/" + this.options.mode);
+                            this.editor.getSession().setUseSoftTabs(true);
+                            this.editor.getSession().setTabSize(4);
+                            this.editor.getSession().setUseWrapMode(true);
+            
+                            _.delay(()=>{
+                                if(this.value){
+                                    this.editor.setValue(this.value);
+                                }
+                                this.editor.focus(); 
+                                let row = this.editor.session.getLength() - 1;
+                                let column = this.editor.session.getLine(row).length;
+                                this.editor.gotoLine(row + 1, column);
+                            },1000)
+                            
+                        }
+                    }
+
+                })
                 
+                // 基线计算
                 Vue.component('matrix-ai-setup-baseline',{
                     delimiters: ['#{', '}#'],
                     props:{
                         id: String,
                         model: Object
                     },
-                    template: `<el-container :id="id" style="height:100%;">
+                    template: `<el-container :id="id" style="height:calc(100% - 60px);">
                                     <el-header style="line-height:40px;height:40px;text-align:right;">
                                         <el-tooltip content="保存规则">
                                             <el-button type="text" @click="onSave" icon="far fa-save"></el-button>
@@ -254,8 +316,8 @@ class AI {
                                             <el-button type="text" @click="job(content.name)" icon="el-icon-date"></el-button>
                                         </el-tooltip>
                                         <el-divider direction="vertical"></el-divider>
-                                        <span>#{content.status==1?'启用中':'关闭中'}#</span>
-                                        <el-switch v-model="content.status"
+                                        <span>#{content.job.enable==1?'启用中':'关闭中'}#</span>
+                                        <el-switch v-model="content.job.enable"
                                                 active-color="#13ce66"
                                                 inactive-color="#dddddd"
                                                 active-value=1
@@ -376,6 +438,31 @@ class AI {
                                             <el-tab-pane label="服务器组">
                                                 <mx-job-group :value="content.job.group" ref="jobGroup"></mx-job-group>
                                             </el-tab-pane>
+                                            <el-tab-pane label="任务配置">
+                                                <el-form label-width="80px" label-position="top" style="height:100%;overflow:auto;padding: 0 20px; border-left: 1px solid #dddddd;">
+                                                                
+                                                    <el-form-item label="运行模式">
+                                                        <el-radio-group v-model="content.job.groupmode">
+                                                            <el-radio label="one">选一个执行</el-radio>
+                                                            <el-radio label="parallel">所有并行执行</el-radio>
+                                                            <el-radio label="sequence">所有按顺序执行</el-radio>
+                                                        </el-radio-group>
+                                                    </el-form-item>
+
+                                                    <el-form-item label="前置脚本">
+                                                        <matrix-ai-script :value="content.job.begin" ref="scriptBegin"></matrix-ai-script>
+                                                    </el-form-item>
+
+                                                    <el-form-item label="后置脚本">
+                                                        <matrix-ai-script :value="content.job.end" ref="scriptEnd"></matrix-ai-script>
+                                                    </el-form-item>
+
+                                                    <el-form-item label="队列">
+                                                        <el-input v-model="content.job.queue"></textarea></el-input>
+                                                    </el-form-item>
+                                                </el-form>
+
+                                            </el-tab-pane>
                                             <el-tab-pane label="定时任务">
                                                 <mx-job-cron :value="content.job.cron" style="height:100%;" ref="jobCron"></mx-job-cron>
                                             </el-tab-pane>
@@ -493,10 +580,15 @@ class AI {
                                             }
                                         };
                                         
-                                        let rtn = jobHandler.jobDelete(jobAlert); 
+                                        jobHandler.jobExistAsync(`${name}@${this.content.job.dir}`).then( (rtn)=>{
+                                            if(rtn){
+                                                jobHandler.jobDeleteAsync(jobAlert); 
+                                            }
+                                        } )
+                                        
                                     }
                                 } catch(err){
-                                    console.log(err)
+                                    
                                 }
                             },
                             deep:true
@@ -636,6 +728,8 @@ class AI {
                         onSave(){
                             let attr = {ctime: _.now()};
                             
+                            _.extend(this.content.job, { begin:this.$refs.scriptBegin.editor.getValue(), end: this.$refs.scriptEnd.editor.getValue() });
+
                             fsHandler.fsNewAsync('json', this.model.parent, this.model.name, JSON.stringify(this.content,null,2), attr).then( (rt)=>{
                                 if(rt == 1){
 
@@ -655,9 +749,14 @@ class AI {
                                         exec: [this.content.job.exec[0], this.model.fullname].join(" "), 
                                         group: this.content.job.group, 
                                         schedule: `${this.content.job.cron}`, // 'cron 0 0 * * *'
-                                        timeout: 43200
+                                        timeout: 43200,
+                                        groupmode: this.content.job.groupmode,
+                                        begin: this.$refs.scriptBegin.editor.getValue(),
+                                        end: this.$refs.scriptEnd.editor.getValue(),
+                                        queue: this.content.job.queue,
+                                        enable: this.content.job.enable
                                     };
-    
+
                                     this.$set(this.content,'name',name);
     
                                     // 检查job是否存在
@@ -699,7 +798,7 @@ class AI {
 								
                                 try{
 
-                                    let rt = jobHandler.jobDelete(this.content);
+                                    jobHandler.jobDeleteAsync(this.content);
                                     
                                 } catch(err){
 
@@ -731,23 +830,39 @@ class AI {
                         },
                         onStatusUpdate(evt){
                             
-                            _.extend(this.content,{status:evt+'', ospace:window.COMPANY_OSPACE, user: window.SignedUser_UserName,time: _.now()});
+                            _.extend(this.content,{ status:evt+'', ospace:window.COMPANY_OSPACE, user: window.SignedUser_UserName,time: _.now() });
+                            _.extend(this.content.job,{ enable:evt+'' });
                             
                             // 更新到文件系统
                             let attr = {ctime: _.now()};
                             fsHandler.fsNewAsync('json', this.model.parent, this.model.name, JSON.stringify(this.content,null,2), attr).then( (rtn)=>{
                                 // 生成JOB
                                 if(rtn == 1){
-                                    this.$message({
-                                        type: 'success',
-                                        message: '作业提交成功！'
-                                    })
+                                    if(evt==1){
+                                        this.$message({
+                                            type: 'success',
+                                            message: '作业已生成，执行情况请查看作业控制台！'
+                                        })
+                                    } else {
+                                        this.$message({
+                                            type: 'success',
+                                            message: '作业取消成功！'
+                                        })
+                                    }
                                 } else {
                                     this.$message({
                                         type: 'error',
-                                        message: '作业提交失败!'
-                                    })        
+                                        message: '作业生成失败!'
+                                    })
+                                    return false;      
                                 }
+
+                                if(this.content.job.enable==1){
+                                    jobHandler.jobEnableAsync(`${this.content.name}@${this.content.job.dir}`);
+                                } else {
+                                    jobHandler.jobDisableAsync(`${this.content.name}@${this.content.job.dir}`);
+                                }
+                                
                             } );
                             
                         },
@@ -1599,8 +1714,8 @@ class AI {
                                             <el-button type="text" @click="job(content.name)" icon="el-icon-date"></el-button>
                                         </el-tooltip>
                                         <el-divider direction="vertical"></el-divider>
-                                        <span>#{content.status==1?'启用中':'关闭中'}#</span>
-                                        <el-switch v-model="content.status"
+                                        <span>#{content.job.enable==1?'启用中':'关闭中'}#</span>
+                                        <el-switch v-model="content.job.enable"
                                                 active-color="#13ce66"
                                                 inactive-color="#dddddd"
                                                 active-value=1
@@ -1669,6 +1784,12 @@ class AI {
                         this.content = this.model.content;
                         this.$set(this.graph,'hidden',this.content.nodes.hiddencount);
                         this.$set(this.graph,'model',this.content.model);
+                        let job = jobHandler.jobContent(`${this.content.name}@${this.content.job.dir}`);
+                        try{
+                            _.extend(this.content.job,{enable: job.enable});
+                        } catch(err){
+                            _.extend(this.content.job,{enable: 0});
+                        }
                     },
                     mounted(){
                         // job Group
@@ -1700,7 +1821,11 @@ class AI {
                             // 更新到文件系统
                             let attr = {ctime: _.now()};
                             fsHandler.fsNewAsync('json', this.model.parent, this.model.name, JSON.stringify(this.content,null,2), attr).then( (rtn)=>{
-
+                                if(this.content.job.enable==1){
+                                    jobHandler.jobEnableAsync(`${this.content.name}@${this.content.job.dir}`);
+                                } else {
+                                    jobHandler.jobDisableAsync(`${this.content.name}@${this.content.job.dir}`);
+                                }
                             } );
                         },
                         onSave(){
@@ -1755,7 +1880,8 @@ class AI {
                                     exec: [this.content.job.exec[0], this.model.fullname].join(" "), 
                                     group: this.content.job.group, 
                                     schedule: `${this.content.job.cron}`, // 'cron 0 0 * * *'
-                                    timeout: 43200
+                                    timeout: 43200,
+                                    enable: this.content.job.enable
                                 };
                                 let jobObj2 = { 
                                     name: name+'-analysis', 
@@ -1763,7 +1889,8 @@ class AI {
                                     exec: [this.content.job.exec[0], this.model.parent+'/analysis/' + this.model.name].join(" "), 
                                     group: this.content.job.group, 
                                     schedule: `${this.content.job.cron}`, // 'cron 0 0 * * *'
-                                    timeout: 43200
+                                    timeout: 43200,
+                                    enable: this.content.job.enable
                                 };
 
                                 jobHandler.jobMerge(jobObj1);
@@ -1792,10 +1919,11 @@ class AI {
                                  
                                 try{
 
-                                    let rt1 = jobHandler.jobDelete(this.content);
+                                    jobHandler.jobDeleteAsync(this.content);
+                                    
                                     let jobAnalysis = _.cloneDeep(this.content);
                                     this.$set(jobAnalysis,'name',this.content.name+'-analysis');
-                                    let rt2 = jobHandler.jobDelete(jobAnalysis);
+                                    jobHandler.jobDeleteAsync(jobAnalysis);
                                     
                                 } catch(err){
 
@@ -1870,10 +1998,10 @@ class AI {
                                                 </div>
                                             </el-header>
                                             <el-main style="padding:0px;overflow:auto;height:100%;">
-                                                <el-menu @open="open" @close="open">
+                                                <el-menu @open="open">
                                                     <el-submenu :index="item.id" v-for="item in ruleList" @open="select">
                                                         <template slot="title">
-                                                            <el-image :src="'/fs/assets/images/robot/png/'+item.icon + '?type=download&issys=true'" style="width: 24px;height: 24px;padding-right:8px;"></el-image>
+                                                            <el-image :src="'/static/assets/images/robot/png/'+item.icon" style="width: 24px;height: 24px;padding-right:8px;"></el-image>
                                                             <span style="font-size:12px;">#{item.label}#</span> <span style="color:#999;">(#{item.child.length}#)</span>
                                                             <div style="position: absolute;
                                                                 top: 25%;
@@ -1902,7 +2030,7 @@ class AI {
                                             <el-tabs v-model="main.activeIndex" type="border-card" closable @tab-remove="close" style="height:100%;" v-if="!_.isEmpty(main.tabs)">
                                                 <el-tab-pane :label="tab.name" :key="tab.id" :name="tab.id" v-for="tab in main.tabs" style="height:100%;overflow:auto;">
                                                     <span slot="label">
-                                                        <el-image :src="'/fs/assets/images/robot/png/'+tab.component + '.png?type=download&issys=true'" style="width: 10px;height: 10px;"></el-image>
+                                                        <el-image :src="'/static/assets/images/robot/png/'+tab.component + '.png'" style="width: 10px;height: 10px;"></el-image>
                                                         #{tab.name.split(".")[0]}#
                                                     </span>
                                                     <matrix-ai-setup-words :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='words'" transition="fade" transition-mode="out-in" ref="aiSetupInst"></matrix-ai-setup-words>
@@ -1916,7 +2044,7 @@ class AI {
                                             </el-tabs>
                                             <div style="background:#ffffff;padding:20px;height:100%;display:block;text-align:center;" v-else>
                                                 <h2 style="margin: 0px 0px 40px 0px;">欢迎使用AI管理</h2>
-                                                <object data="/fs/assets/images/files/svg/configWorld.svg?type=open&issys=true" 
+                                                <object data="/static/assets/images/files/svg/configWorld.svg" 
                                                     type="image/svg+xml" style="width:40vw;height:40vh;background: #ffffff;">
                                                 </object>
                                                 <p>
@@ -2037,7 +2165,7 @@ class AI {
                                     if(v.id === key){
                                         v.child = _.map(rtn,(val)=>{
                                             // merge parent的label
-                                            return _.merge(val,{label:v.label,component:v.component});
+                                            return _.merge(val,{ label:v.label, component:v.component });
                                         });
                                     }
                                 })
@@ -2057,7 +2185,7 @@ class AI {
                                     });
 
                                     // 更新
-                                    this.main.tabs.push(_.merge(item,{content: _.attempt(JSON.parse.bind(null, rtn))}));
+                                    this.main.tabs.push(_.extend(item,{content: _.attempt(JSON.parse.bind(null, rtn))}));
                                     this.main.activeIndex = item.id; 
                                 } );
                                 
@@ -2069,7 +2197,7 @@ class AI {
 
                             // 获取规则内容
                             fsHandler.fsContentAsync(item.parent,item.name).then( (rtn)=>{
-                                this.main.tabs.push(_.merge(item,{content: _.attempt(JSON.parse.bind(null, rtn))}));
+                                this.main.tabs.push(_.extend(item,{content: _.attempt(JSON.parse.bind(null, rtn))}));
                                 this.main.activeIndex = item.id;   
                             } );
                             

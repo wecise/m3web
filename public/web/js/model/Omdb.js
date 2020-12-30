@@ -163,7 +163,7 @@ class Omdb{
                                                 <span v-else>#{ data,control | pickNodeLabel }#</span>
                                             </span>
 
-                                            <el-dropdown v-show="data.show" style="float:right;width:14px;margin:0 5px;">
+                                            <el-dropdown v-show="data.show" style="float:right;width:14px;margin:0 5px;" trigger="click">
                                                 <span class="el-dropdown-link">
                                                     <i class="el-icon-more el-icon--right"></i>
                                                 </span>

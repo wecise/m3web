@@ -2255,6 +2255,9 @@ class System {
 									// 清除对象_group中的角色组信息
 									fsHandler.callFsJScriptAsync("/matrix/system/clearRoleGroupInstAfterDeleteRoleGroup.js",encodeURIComponent(data.fullname));
 
+									// 清除对象UI选择实例
+									fsHandler.fsDeleteAsync("/matrix/system/group/tagdir",data.id);
+
 									_.delay(()=>{
 										// 更新Ldap树
 										const parent = node.parent;
@@ -2949,6 +2952,7 @@ class System {
 							handler(val,oldVal){
 								this.initData();
 								this.layout();
+								this.dt.pagination.currentPage = 1;
 							},
 							deep:true,
 							immediate:true
@@ -3463,12 +3467,12 @@ class System {
 														</span>
 													</el-header>
 													<el-main styl="display:flex;flex-wrap:wrap;" v-if="!_.isEmpty(selectedNodes)">
-														<span v-for="item,index in _.filter(selectedNodes,{type:','})" :key="item.id">
+														<span v-for="item,index in _.filter(selectedNodes,{type:','})" :key="item.id" v-if="!_.isEmpty(item.nodes)">
 															<el-tag
 																:key="tag.id"
 																effect="plain"
-																type="primary"
 																closable
+																type="primary"
 																:disable-transitions="false"
 																@close="onTagClose(tag,item)" 
 																style="margin:5px;width:100%;"
@@ -3483,7 +3487,6 @@ class System {
 															v-if="!_.isEmpty(item.nodes)">
 															<el-tag
 																:key="tag.id"
-																closable
 																:disable-transitions="false"
 																@close="onTagClose(tag,item)"
 																style="margin:5px;"
@@ -3535,120 +3538,16 @@ class System {
 								
 								this.filterNodes = _.cloneDeep(rtn);
 								this.nodes = _.filter(this.filterNodes,{domain:this.selectedDomain});
-								_.delay(()=>{
-									this.onSetSelected();
-								},1000)
-								
+								this.onSetSelected();
 								
 							} );
 						},
 						onSetSelected(){
 							
-							let getDomainByClass = (json, text)=>{
-								let rtn = null;
-								try{
-									_.forEach(json, (v,k)=>{
-										if(_.includes(v['class'],text)){
-											rtn = k;
-											return;
-										}
-									})
-								} catch(err){
-									rtn = null;
-								}
-								return rtn;
-							};
-
-							let orSet = (rt)=>{
-								let values = _.values(rt)[0];
-								let or = values.split(",");
-								
-								let ids = [];
-								
-								// or
-								_.forEach(or, (v)=>{
-									ids.push(this.findIdByName(v));
-								})
-								
-								if(_.isEmpty(_.compact(ids))) return;
-
-								_.delay(()=>{
-									this.onSelectByRelById(",",_.compact(ids));
-								},50)
-
-							}
-
-							let andSet = (rt)=>{
-								
-								let values = _.values(rt)[0];
-								let or = values.split(",");
-								
-								// or->and
-								_.forEach(or, (v)=>{
-									
-									if(_.indexOf(v,'+') == -1) return;
-
-									let and = v.split("+");
-									
-									let ids = [];
-									_.forEach(and, (val)=>{
-										ids.push(this.findIdByName(val));
-									})	
-									
-									if(_.isEmpty(_.compact(ids))) return;
-
-									_.delay(()=>{
-										this.onSelectByRelById("+",_.compact(ids));
-									},50)
-									
-								})
-								
-							}
-
-							fsHandler.callFsJScriptAsync("/matrix/system/getTlistById.js", this.rowData.row.id).then( (rtn)=>{
-								
-								if(_.isEmpty(_.compact(_.values(rtn.message)))) return false;
-
-								let keys = _.keys(rtn.message);
-								let domains = _.map(keys, (v)=>{		
-									return getDomainByClass(this.domain.mapping,v);
-								});
-								
-								// 当前group对应的domain
-								if(!_.isEmpty(domains)){
-									_.forEach(domains,(v)=>{
-										
-										orSet(rtn.message);
-										andSet(rtn.message);
-
-										this.selectedDomain = v;
-										this.nodes = _.filter(this.filterNodes,{domain:v});
-									})
-								} 
-								  
+							fsHandler.callFsJScriptAsync("/matrix/system/getTlistById.js", encodeURIComponent( this.rowData.row.id ) ).then( (rtn)=>{
+								this.selectedNodes = rtn.message;
 							} );
 							
-						},
-						findIdByName(name){
-							let rtn = null;
-
-							let find = (nodes)=> {
-
-								_.forEach(nodes,(v)=>{
-									
-									if(v.name == name){
-										rtn = v.id;
-									}
-
-									if(v.nodes){
-										find(v.nodes)
-									}
-								})	
-							} 
-
-							find(this.filterNodes);
-
-							return rtn;
 						},
 						findNodeById(id){
 							let rtn = null;
@@ -3667,46 +3566,6 @@ class System {
 							} 
 
 							find(this.nodes);
-
-							return rtn;
-						},
-						findNodesByIdFromAll(id){
-							let rtn = null;
-
-							let find = function(nodes){
-								_.forEach(nodes,(v)=>{
-									
-									if(v.id == id){
-										rtn = v;
-									}
-
-									if(v.nodes){
-										find(v.nodes)
-									}
-								})	
-							} 
-
-							find(this.filterNodes);
-
-							return rtn;
-						},
-						findNodeByPathFromAll(path){
-							let rtn = null;
-
-							let find = function(nodes){
-								_.forEach(nodes,(v)=>{
-									
-									if(v.path == path){
-										rtn = v;
-									}
-
-									if(v.nodes){
-										find(v.nodes)
-									}
-								})	
-							} 
-
-							find(this.filterNodes);
 
 							return rtn;
 						},
@@ -3733,7 +3592,8 @@ class System {
 							item.nodes.splice(index, 1);
 
 							let selectedNode = _.find(this.selectedNodes,{ id:item.id });
-							selectedNode.nodes = item.nodes;
+							this.$set(selectedNode, 'nodes',item.nodes);
+							this.$set(selectedNode, 'data',item.nodes);
 							
 							
 						},
@@ -3750,18 +3610,22 @@ class System {
 							let perms = ['add','delete','edit','list'];
 							let node = null;
 
-							if(data.id){
-								node = this.$refs.tree.getNode(data.id);
-							} else {
-								node = this.$refs.tree.getNode("");
-							}
-							
-							if(node && node.parent){
-								this.$refs.tree.setChecked(node.parent.data, true, false);
-								this.$set( node.parent.data, 'perms', perms );	
-							}
+							try{
+								if(data.id){
+									node = this.$refs.tree.getNode(data.id);
+								} else {
+									node = this.$refs.tree.getNode("");
+								}
+								
+								if(node && node.parent){
+									this.$refs.tree.setChecked(node.parent.data, true, false);
+									this.$set( node.parent.data, 'perms', perms );	
+								}
 
-							this.parentNodesCheckChange(node.parent.data);
+								this.parentNodesCheckChange(node.parent.data);
+							} catch(err){
+
+							}
 
 						},
 						onCheckChange(data, checked, indeterminate){
@@ -3800,79 +3664,6 @@ class System {
 							this.onResetChecked();
 
 						},
-						getNodesByParentPaths(path){
-							
-							let paths =  path.split("/").slice(0, -1).reduce((acc, item, index) => {
-								acc.push(index ? acc[index - 1] + '/' + item : item);
-								return acc;
-							}, []);
-
-							paths.push(path);
-							
-							let nodes = _.map(paths,(v)=>{
-								return this.findNodeByPathFromAll(v);
-							});
-							
-							return nodes;
-							
-						},
-						findNodeByIds(ids,flag){
-							
-							let nodes = [];
-							
-							try{
-								
-								_.forEach(ids,(id)=>{
-
-									let node = this.findNodesByIdFromAll(id);//this.$refs.tree.getNode(id).data;
-									
-									if(node){
-										nodes.push(node);
-
-										if(flag){
-											if( _.indexOf(node.path,'/') != -1 ){
-												let subNodes = this.getNodesByParentPaths(node.path);
-												_.concat(nodes,subNodes);
-											}
-										}
-
-									} else {
-										return;
-									}
-								})
-							} catch(err){
-								console.error(err);
-							}
-
-							return _.uniq(nodes);
-						},
-						onSelectByRelById(type,ids){
-							
-							// Tag用
-							let nodes = this.findNodeByIds(ids,true);
-							// Tlist用
-							let data = this.findNodeByIds(ids,false);
-							
-							if(_.isEmpty(nodes)) return false;
-
-							let id = objectHash.sha1(JSON.stringify(nodes));
-							let title = _.truncate(_.map(nodes,'name').join(" "),{
-								'length': 10,
-								'omission': ' ...'
-							});
-
-							// 已选择
-							if(_.find(this.selectedNodes, {id:id})) return false;
-
-							this.selectedNodes.push( {id: id, title: title, type: type, nodes: nodes, data: data} );
-
-							//console.log(111,JSON.stringify(this.selectedNodes))
-							
-							// 选过的禁用
-							//this.onDisabledNodes(nodes,true);
-							this.onResetChecked();
-
-						},	
 						// 标签授权
 						onUpdateRoleGroupByTagGroup(){
 							
@@ -3889,7 +3680,7 @@ class System {
 							// 更新
 							let term =  JSON.stringify( { roleGroup: [this.rowData.row], data: this.selectedNodes, logical: this.logical?',':'+'} );
 							
-							console.log(222,JSON.stringify(this.selectedNodes,null,2))
+							console.log(222,JSON.stringify(this.selectedNodes))
 							
 							fsHandler.callFsJScriptAsync("/matrix/system/updateGroupByTagdirGroup.js", encodeURIComponent(term)).then( (rtn)=>{
 								this.$emit('update:selectedTag');
@@ -5722,7 +5513,17 @@ class System {
 												:close-on-click-modal="false" v-if="dialog.permission.show" width="80vw">
 												<el-container style="width:100%;height:100%">
 													<el-main style="padding:0px;overflow:hidden;">
-														<el-tabs value="tagdir">
+														<el-tabs value="tagdirGroup">
+
+															<el-tab-pane name="tagdirGroup">
+																<span slot="label"><i class="el-icon-collection-tag"></i> 标签组合权限</span>
+																<tagdir-group-select :model="{parent:'/system',name:'tagdir_tree_data.js',domain:'*'}" 
+																	:rowData="dialog.permission"
+																	@count:selectedTag="(count)=>{ this.count.tag = count;}"
+																	@update:selectedTag="()=>{ this.initData(); }"
+																	ref="tagdirTree"
+																	v-if="!_.isEmpty(dialog.permission.row)"></tagdir-group-select>
+															</el-tab-pane>
 															<el-tab-pane name="app" lazy>
 																<span slot="label"><i class="el-icon-files"></i> 应用权限 (#{ count.app }#)</span>
 																<app-permission  :rowData="dialog.permission" ref="appTree" 
@@ -5750,15 +5551,6 @@ class System {
 																	@update:selectedTag="()=>{ this.initData(); }"
 																	ref="tagdirTree"
 																	v-if="!_.isEmpty(dialog.permission.row)"></tagdir-select>
-															</el-tab-pane>
-															<el-tab-pane name="tagdirGroup">
-																<span slot="label"><i class="el-icon-collection-tag"></i> 标签组合权限</span>
-																<tagdir-group-select :model="{parent:'/system',name:'tagdir_tree_data.js',domain:'*'}" 
-																	:rowData="dialog.permission"
-																	@count:selectedTag="(count)=>{ this.count.tag = count;}"
-																	@update:selectedTag="()=>{ this.initData(); }"
-																	ref="tagdirTree"
-																	v-if="!_.isEmpty(dialog.permission.row)"></tagdir-group-select>
 															</el-tab-pane>
 														</el-tabs>
 													</el-main>
@@ -5832,6 +5624,7 @@ class System {
 								this.info.push(`共 ${this.dt.rows.length} 项`);
 								this.info.push(`已选择 ${this.dt.selected.length} 项`);
 								this.info.push(moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
+								this.dt.pagination.currentPage = 1;
 							},
 							deep:true,
 							immediate:true
@@ -6122,6 +5915,9 @@ class System {
 									fsHandler.callFsJScriptAsync("/matrix/system/clearRoleGroupInstAfterDeleteRoleGroup.js",encodeURIComponent(row.fullname)).then( ()=>{
 										this.onRefresh();
 									} );
+
+									// 清除对象UI选择实例
+									fsHandler.fsDeleteAsync("/matrix/system/group/tagdir",row.id);
 									
                                 } else {
 									this.$message({

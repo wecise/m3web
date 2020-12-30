@@ -256,7 +256,6 @@
     
             /* For view-container */
             .note-view,
-            .list-view,
             .grid-view,
             .table-view{
                 overflow: auto;
@@ -337,6 +336,14 @@
                 background-color: #f6f6f6;
                 border-bottom: 1px solid #f6f6f6;
                 margin: 0;
+            }
+
+            .jsoneditor-contextmenu{
+                background: #ffffff;
+                box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+            }
+            .jsoneditor{
+                border-color: #f2f2f2;
             }
         </style>
     
@@ -450,7 +457,7 @@
                         </el-col>
                     </el-row>
                 </el-header>
-                <el-main style="padding:0 5px;overflow:hidden;" ref="contentRef">
+                <el-main ref="contentRef">
                     <component v-bind:is="currentView" :model.sync="model" @dblclick.native="resetStatus"></component>
                     <el-dialog title="应用发布" :visible.sync="dialog.appDeploy.show" v-if="dialog.appDeploy.show" destroy-on-close="true">
                         <mx-app-deploy :model="dialog.appDeploy"></mx-app-deploy>
@@ -626,49 +633,47 @@
                             this.fileList = _.cloneDeep(this.model);
                         }
                     },
-                    template:   `<div id="list">
-                                    <el-checkbox-group v-model="$root.$refs.viewRef.$children[0].selectedItem" class="fs-view-node">
-                                        <el-button type="default" 
-                                                style="max-width: 18.5em;width: 18.5em;height:auto;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);"
-                                                @dblclick.native="eventHub.$emit('FS-NODE-OPENIT-EVENT',item, item.parent+'/'+item.name)"
-                                                @click="onTriggerClick(item)"
-                                                v-for="item in fileList">
-                                                <div style="position: relative;right: -100px;">    
-                                                    <el-dropdown trigger="hover" 
-                                                        placement="top-start" @command="$root.$refs.viewRef.$children[0].onMenuCommand">
-                                                            <span class="el-dropdown-link">
-                                                                <i class="el-icon-arrow-down el-icon--right"></i>
-                                                            </span>
-                                                            <el-dropdown-menu slot="dropdown">
-                                                                <el-dropdown-item :command="{fun:menuItem.fun,param:item,type:menuItem.type?menuItem.type:false}" v-for="menuItem in $root.$refs.viewRef.$children[0].getMenuModel(item)" :divided="menuItem | pickDivided">
-                                                                    #{menuItem.name}#
-                                                                </el-dropdown-item>
-                                                            </el-dropdown-menu>
-                                                    </el-dropdown>
-                                                </div>
-                                                <el-image style="width:64px;margin:5px;" :src="item | pickIcon"></el-image>
-                                                <div>
-                                                    <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;" v-show="item.editable">
-                                                        <el-input v-model="item.name" 
-                                                            type="textarea" 
-                                                            autosize 
-                                                            @keyup.enter.native="$event.target.blur"
-                                                            @blur.self="onRename(item)" :ref="'input_'+item.id"></el-input>
-                                                    </p>
-                                                    <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;" @click.self="onSetFocus(item)" v-show="!item.editable">
-                                                        名称：#{item.name}#
-                                                    </p>
-                                                    <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">作者：#{item|pickAuthor}#</p>
-                                                    <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">创建：#{moment(item.ctime).format("YYYY-MM-DD hh:mm:ss")}#</p>
-                                                    <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">描述：#{item|pickRemark}#</p>
-                                                    <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">
-                                                        <mx-tag domain='files' :model.sync="item.tags" :id="item.id" limit="1"></mx-tag>
-                                                    </p>
-                                                </div>
-                                                <el-checkbox :label="item.id" :ref="'checkBox_'+item.id"></el-checkbox>
-                                        </el-button>
-                                    </el-checkbox-group>
-                                </div>`,
+                    template:   `<el-checkbox-group v-model="$root.$refs.viewRef.$children[0].selectedItem" class="fs-view-node" style="overflow:hidden!important;">
+                                    <el-button type="default" 
+                                            style="max-width: 25em;width: 25em;height:auto;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);background:rgb(239, 244, 246);"
+                                            @dblclick.native="eventHub.$emit('FS-NODE-OPENIT-EVENT',item, item.parent+'/'+item.name)"
+                                            @click="onTriggerClick(item)"
+                                            v-for="item in fileList">
+                                            <div style="position: relative;right: -130px;">    
+                                                <el-dropdown trigger="hover" 
+                                                    placement="top-start" @command="$root.$refs.viewRef.$children[0].onMenuCommand">
+                                                        <span class="el-dropdown-link">
+                                                            <i class="el-icon-arrow-down el-icon--right"></i>
+                                                        </span>
+                                                        <el-dropdown-menu slot="dropdown">
+                                                            <el-dropdown-item :command="{fun:menuItem.fun,param:item,type:menuItem.type?menuItem.type:false}" v-for="menuItem in $root.$refs.viewRef.$children[0].getMenuModel(item)" :divided="menuItem | pickDivided">
+                                                                #{menuItem.name}#
+                                                            </el-dropdown-item>
+                                                        </el-dropdown-menu>
+                                                </el-dropdown>
+                                            </div>
+                                            <el-image style="width:64px;margin:5px;" :src="item | pickIcon"></el-image>
+                                            <div>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;" v-show="item.editable">
+                                                    <el-input v-model="item.name" 
+                                                        type="textarea" 
+                                                        autosize 
+                                                        @keyup.enter.native="$event.target.blur"
+                                                        @blur.self="onRename(item)" :ref="'input_'+item.id"></el-input>
+                                                </p>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;" @click.self="onSetFocus(item)" v-show="!item.editable">
+                                                    名称：#{item.name}#
+                                                </p>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">作者：#{item|pickAuthor}#</p>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">创建：#{moment(item.ctime).format("YYYY-MM-DD hh:mm:ss")}#</p>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">描述：#{item|pickRemark}#</p>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">
+                                                    <mx-tag domain='files' :model.sync="item.tags" :id="item.id" limit="1"></mx-tag>
+                                                </p>
+                                            </div>
+                                            <el-checkbox :label="item.id" :ref="'checkBox_'+item.id"></el-checkbox>
+                                    </el-button>
+                                </el-checkbox-group>`,
                     filters: {
                         pickName(item){
     
@@ -975,115 +980,63 @@
                     }
                 });
     
-                Vue.component('fs-editor-view-by-html',{
-                    props:{
-                        id: String,
-                        output: String
-                    },
-                    template:   `<div style="width:100%;height:100%;overflow-y:auto;">
-                                    <iframe style="border:unset;width:100%;height:100%;" :src="src"></iframe>
-                                </div>`,
-                    data(){
-                        return {
-                            src: ""
-                        }
-                    },
-                    watch: {
-                        src(val, oldVal) {
-                            document.getElementsByTagName('iframe')[0].src = val;
-                        }
-                    },
-                    created() {
-                        setInterval(()=>{
-                            this.setSrc(self.output);
-                        },1500)
-
-                        eventHub.$on(`FS-EDITOR-RUN-EVENT-${this.id}`, this.setSrc)
-                    },
-                    methods: {
-                        setSrc(event) {
-                            this.src = event;
-                        }
-                    }
-                })
-    
-                Vue.component('fs-editor-view-by-other',{
+                // 输出为JSON
+                Vue.component('fs-editor-view-by-json',{
                     delimiters: ['#{', '}#'],
                     props:{
-                        id: String,
-                        output: Object
+                        fs: Object,
+                        options: Object
                     },
-                    template: `<fs-output-component :id="'editor-output-'+id" :bid="id"
-                                    :model="model"
-                                    showToolsBar="false"
-                                    showStatusBar="false"></fs-output-component>`,
+                    template:   `<el-container style="height: calc(100% - 60px);">
+                                    <el-main style="padding: 0px;overflow:hidden;" ref="editor">
+                                    </el-main>
+                                </el-container>`,
                     data(){
                         return{
-                            model: {
-                                oldInput: "",
-                                newInput: "",
-                                mode: "json",
-                                theme: "tomorrow",
-                                printMargin: false,
-                                readOnly: false,
-                            }
-                        }
-                    },
-                    watch: {
-                        output: {
-                            handler:function(val,oldVal){
-                                //_.extend(this.model,{newInput: JSON.stringify(this.output, null, 2)});
-                                // console.log(88,val)
-                                //eventHub.$on(`FS-EDITOR-RUN-EVENT-${this.id}`, this.setData)
-                                this.setData(val);
-                            },
-                            deep:true,
-                            immediate:true
+                            langTools: null,
+                            editor: null
                         }
                     },
                     mounted() {
-                        setInterval(()=>{
-                            this.setData(this.output);
-                        },3000)
+                        this.initEditor();
 
-                        this.$nextTick(function () {
-                            this.init();
-                        })
+                        eventHub.$on(this.fs.fullname,()=>{
+                            this.setValue(this.fs.output);
+                        });
                     },
                     methods: {
-                        init() {
-                            const self = this;
-    
-                            let rtn = fsHandler.callFsJScript(item.name, '');
-    
-                            self.model.newInput = JSON.stringify(rtn.message, null, 4);
+                        initEditor(){
+                            let options = {
+                                modes: ['text', 'code', 'tree', 'form', 'view'],
+                                mode: 'code',
+                            };
+                            this.editor = new JSONEditor(this.$refs.editor.$el, options);
+                            this.setValue(this.fs.output);
                         },
-                        setData(event) {
-                            
+                        setValue(output){
                             try{
                                 
-                                if(!event.output) return false;
-
-                                if(event.output.message) {
+                                if(output.message) {
                                     
-                                    if (typeof event.output.message === 'object') {
-                                        this.$set( this.model, 'newInput', JSON.stringify(event.output.message, null, 2) );
+                                    if (typeof output.message === 'object') {
+                                        this.editor.set(output.message);
                                     } else {
-                                        this.$set(this.model, 'newInput', JSON.stringify(event.output.message, null, 4) );
+                                        this.editor.set(JSON.parse(output.message));
                                     }
         
                                 } else {
-                                    this.$set(this.model, 'newInput', event.output );
+                                    this.editor.set(output);
                                 }
                             } catch(err){
-                                
+                                this.editor.set(err);
                             }
+
                         }
                     }
     
                 })
                 
-                // 日志
+                // 输出日志
                 Vue.component('fs-editor-log-console',{
                     delimiters: ['${', '}'],
                     props: {
@@ -1155,12 +1108,8 @@
                                                 }
                                                 return v;
                                             });
-                        } );
-                        
-                        // 更新DataTable
-                        eventHub.$on("FS-LOG-UPDATE-EVENT",()=>{
-                            this.onLoad();
-                        })
+                        });
+                
                     },
                     methods:{
                         rowClassName({row, rowIndex}){
@@ -1217,6 +1166,12 @@
                                     output:{}
                                 }
                             },
+                            options:{
+                                mode: "javascript",
+                                theme: "tomorrow",
+                                printMargin: false,
+                                readOnly: false,
+                            },
                             splitInst: null,
                             mainHeight: '80',
                             footerHeight: '20'
@@ -1229,7 +1184,7 @@
                                             showToolsBar="false"
                                             showStatusBar="false"></fs-editor-component>
                                     </el-main>
-                                    <el-footer :style="'background-color:#ddd;overflow:hidden;padding:0px;width:100%;height:'+footerHeight+'%;'" ref="footerView" v-show="toolBar.log.show || toolBar.result.show">
+                                    <el-footer :style="'background-color:#ddd;overflow:hidden;padding:0px;width:100%;height:'+footerHeight+'%;'" ref="footerView" v-show="toolBarShow">
                                         <el-tabs v-model="toolBar.activeView" type="border-card" style="height:100%;" closable @tab-remove="onRemoveTab">
                                             <el-tab-pane name="log" style="height:100%;" v-show="toolBar.log.show">
                                                 <span slot="label">执行日志</span>
@@ -1237,47 +1192,44 @@
                                             </el-tab-pane>
                                             <el-tab-pane name="result" style="height:100%;overflow:auto;padding-top: 1px;" v-show="toolBar.result.show">
                                                 <span slot="label">#{ item | pickResultTitle }#</span>
-                                                <fs-editor-view-by-html :id="'output-'+id" :output="item" v-if="item.ftype=='html'" style="height:100%;"></fs-editor-view-by-html>
-                                                <fs-editor-view-by-other :id="'output-'+id" :output="item" style="height:100%;" v-else></fs-editor-view-by-other>
+                                                <fs-editor-view-by-json :fs="item" :options="options"></fs-editor-view-by-json>
                                             </el-tab-pane>
                                         </el-tabs>
                                     </el-footer>
                                 </el-container>`,
                     watch: {
                         item: {
-                            handler(val,oldVal){
+                            handler(val){
                                 this.$set(this.model, 'fs', val);
-                                this.$set(this.model,'mode', this.getMode());
+                                this.$set(this.model, 'mode',this.getMode());
                             },
                             deep: true,
                             immediate:true
                         }
                     },
+                    computed:{
+                        toolBarShow(){
+                            return _.includes(['js'],this.item.ftype) && (this.toolBar.log.show || this.toolBar.result.show);
+                        }
+                    },
                     filters: {
                         pickResultTitle(item){
-                            console.log(item)
                             if(_.isEmpty(item.output)){
                                 return '执行结果';
                             } else {
                                 return `执行结果(耗时:${item.output.consume})`;
                             }
-                            
                         }
                     },
                     mounted() {
-                        // 临时
-                        //setInterval(()=>{
-                            _.extend(this.model,{  mode: this.getMode() });
-                        //},5000)
-
                         this.init();
                         this.initSplit();
                     },
                     methods: {
                         init() {
                             fsHandler.fsContentAsync(this.item.parent, this.item.name).then( (rtn)=>{
-                                _.extend(this.model, {newInput:rtn});
-                            } );
+                                _.extend(this.model, { newInput: rtn });
+                            });
                         },
                         initSplit(){
                             this.splitInst = Split([this.$refs.mainView.$el, this.$refs.footerView.$el], {
@@ -1342,7 +1294,8 @@
                             show: false,
                             item: null
                         }
-                    }
+                    },
+                    systemFS:['/app','/assets','/etc','/home','/opt','/script','/storage','/home/admin']
                 }
             },
             filters:{
@@ -1532,22 +1485,22 @@
                     
                     let oldValue = [item.parent, item.name].join("/");
                     let newValue = [item.parent, newItem.name].join("/");
-                    let rtn = fsHandler.fsRename( oldValue, newValue );
+                    fsHandler.fsRenameAsync( oldValue, newValue ).then( (rtn)=>{
+                        if(rtn == 1){
+                            this.load();
+                            this.$message({
+                                type: "success",
+                                message: "重命名成功！"
+                            })
+                        } else {
+                            this.$message({
+                                type: "error",
+                                message: rtn.message
+                            })
+                        }
 
-                    if(rtn == 1){
-                        this.load();
-                        this.$message({
-                            type: "success",
-                            message: "重命名成功！"
-                        })
-                    } else {
-                        this.$message({
-                            type: "error",
-                            message: rtn.message
-                        })
-                    }
-
-                    newItem.editable = false;
+                        newItem.editable = false;
+                    } );
                 },
                 // 同步文件系统到本地目录
                 onSyncToLocal(item){
@@ -1562,21 +1515,21 @@
                             type: 'warning',
                     }).then(() => {
 
-                        let rtn = fsHandler.fsSyncToLocal(item);
-
-                        if(rtn == 1){
-                            this.$message({
-                                type: "info",
-                                message: "同步操作将提交至后台，请稍后。。。"
-                            });
-                            return;
-                        } else {
-                            this.$message({
-                                type: "error",
-                                message: "同步失败，请确认！"
-                            });
-                            return false;
-                        }
+                        fsHandler.fsSyncToLocalAsync(item).then( (rtn)=>{
+                            if(rtn == 1){
+                                this.$message({
+                                    type: "info",
+                                    message: "同步操作将提交至后台，请稍后。。。"
+                                });
+                                return;
+                            } else {
+                                this.$message({
+                                    type: "error",
+                                    message: "同步失败，请确认！"
+                                });
+                                return false;
+                            }
+                        } );
                         
                     }).catch(()=>{
 
@@ -1918,23 +1871,19 @@
                 },
                 load() {
                     
-                    this.$nextTick().then(()=>{
-                        
-                        // 重置选择
-                        this.selectedItem = [];
-    
-                        fsHandler.fsListAsync(this.rootPath).then( (rtn)=>{
-                            this.model = _.orderBy(_.map(rtn,(v,k)=>{
+                    // 重置选择
+                    this.selectedItem = [];
 
-                                            return _.merge(v, {"username": `${this.signedUserName}`, editable: false});
+                    fsHandler.fsListAsync(this.rootPath).then( (rtn)=>{
+                        this.model = _.orderBy(_.map(rtn,(v,k)=>{
 
-                                        }),[v => v.name.toLowerCase(),"vtime"],["asc","desc"]);
+                                        return _.merge(v, {"username": `${this.signedUserName}`, editable: false});
 
-                            // 刷新
-                            this.refresh();
-                        } );
+                                    }),[v => v.name.toLowerCase(),"vtime"],["asc","desc"]);
 
-                    })
+                        // 刷新
+                        this.refresh();
+                    } );
     
                 },
                 refresh() {
@@ -2021,20 +1970,15 @@
                     
                     let items = [];
                     _.forEach(this.selectedItem,(v)=>{
-                        items.push(_.find(this.model,{id:v}));
-                    })
-                    
-                    _.forEach(items,(v)=>{
-                        if(_.includes([['app','extend','assets','opt','script']],v.name)){
-                            this.$message({
-                                type: "info",
-                                message: "系统目录，不允许删除!"
-                            })
-                            return false;
+                        let item = _.find(this.model,{id:v});
+                        
+                        if(_.includes(this.systemFS,item.fullname)){
+                            return;
+                        } else {
+                            items.push(item);
                         }
                     })
                     
-    
                     if(_.isEmpty(this.selectedItem)) {
                         this.$message({
                             type: "info",
@@ -2057,15 +2001,18 @@
                         })
                         
                     }).catch(()=>{
-
+                        this.$message({
+                            type: "info",
+                            message: "取消删除操作"
+                        })
                     });
 
                 },
                 deleteIt(event, prompt) {
                     
-                    if(_.includes(['admin','app','extend','assets','opt','script','web'],event.name)){
+                    if(_.includes(this.systemFS,event.fullname)){
                         this.$message({
-                            type: "info",
+                            type: "warning",
                             message: "系统目录，不允许删除!"
                         })
                         return false;
@@ -2081,7 +2028,7 @@
     
                     if(prompt){
                         
-                        this.$confirm('确定要删除 ${event.name} 文件??', '提示', {
+                        this.$confirm(`确定要删除 ${event.name} 文件?`, '提示', {
                             confirmButtonText: '确定',
                             cancelButtonText: '取消',
                             type: 'warning'
@@ -2102,7 +2049,10 @@
                                 } );
 
                             }).catch(() => {
-                                
+                                this.$message({
+                                    type: "info",
+                                    message: "取消删除操作"
+                                })
                             });
                         
                     } else {
@@ -2126,17 +2076,14 @@
     
                 },
                 shareIt(event){
-                    const self = this
-    
-                    alertify.prompt("共享设置", function (e, str) {
-                        // str is the input text
-                        if (e) {
-                            // user clicked "ok"
-                        } else {
-                            // user clicked "cancel"
-                        }
-                    }, "admin;");
-                    $(".alertify-prompt .alertify-message").css('height','5vh');
+                    this.$prompt('共享设置', '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消'
+                    }).then(({ value }) => {
+                        
+                    }).catch(() => {
+                        
+                    });
                 },
                 onNewAppDeploy(item){
                     this.dialog.appDeploy.show = true;
@@ -2168,7 +2115,7 @@
                     } 
     
                 },
-                downloadIt(item, prompt) {
+                downloadIt(item, prompt){
                     
                     if(item.ftype == 'dir'){
                         fsHandler.fsListAsync(item.parent).then( (rtn)=>{
@@ -2207,7 +2154,6 @@
     
                 },
                 exportIt(path){
-                    const self = this;
                     
                     this.$confirm(`确认要导出 ${path} 目录下的所有文件?`, '提示', {
                             confirmButtonText: '确定',
@@ -2215,7 +2161,7 @@
                             type: 'warning'
                     }).then(() => {
                         fsHandler.fsZip(path);
-                        self.$message({
+                        this.$message({
                             type: "info",
                             message: "导出操作将提交至后台，请稍后。。。"
                         })
@@ -2224,9 +2170,8 @@
                     }); 
     
                 },
-                importIt(event) {
-                    const self = this;
-    
+                importIt(event){
+                    
                     let file = event.target.files[0];
                     
                     const h = this.$createElement;
@@ -2245,15 +2190,15 @@
                             customClass: "fs-custom-msgbox"
                     }).then(() => {
 
-                        let rtn = fsHandler.fsUnZip(self.rootPath, file);
+                        let rtn = fsHandler.fsUnZip(this.rootPath, file);
 
-                        self.$message({
+                        this.$message({
                             type: "info",
                             message: "导入操作将提交至后台，请稍后。。。"
                         })
 
                         if(rtn == 1){
-                            self.load();
+                            this.load();
                         }
 
                         event.target.value = null;
@@ -2264,17 +2209,16 @@
                     
                 },
                 syncIt(){
-                    const self = this
-    
-                    alertify.prompt("同步设置", function (e, str) {
-                        // str is the input text
-                        if (e) {
-                            // user clicked "ok"
-                        } else {
-                            // user clicked "cancel"
-                        }
-                    }, "url:http://47.92.151.165/matrix/web.git;username:admin;password:admin;interval=24hour;");
-                    $(".alertify-prompt .alertify-message").css('height','5vh');
+                    
+                    this.$prompt('同步设置', '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        inputValue: 'url:http://47.92.151.165/matrix/web.git;username:admin;password:admin;interval=24hour;'
+                    }).then(({ value }) => {
+                        
+                    }).catch(() => {
+                        
+                    });
                 },
                 selectAll(){
                     if(_.isEmpty(this.selectedItem)){
@@ -2283,41 +2227,12 @@
                         this.selectedItem = [];
                     }
                 },
-                setRootPath(item) {
-                    const self = this;
+                setRootPath(item){
                     
                     let _item = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(item))));
     
-                    self.openIt(_item, [_item.parent,_item.name].join("/"));
+                    this.openIt(_item, [_item.parent,_item.name].join("/"));
     
-                },
-                toggleLeft() {
-                    const self = this;
-    
-                    if(self.toggle.left) {
-    
-                        $("#nav").hide();
-    
-                        $("#content").removeClass("col-lg-10");
-                        $("#content").addClass("col-lg-12");
-    
-                        $(".navtoggle").removeClass("fa fa-caret-left");
-                        $(".navtoggle").addClass("fa fa-caret-right");
-    
-                        self.toggle.left = false;
-                    } else {
-                        $("#nav").slideDown(500);
-                        $("#nav").show();
-    
-                        $("#content").removeClass("col-lg-12");
-                        $("#content").addClass("col-lg-10");
-                        //$("#content").find(".panel-default").css("border-left","2px #ddd dotted");
-    
-                        $(".navtoggle").removeClass("fa fa-caret-right");
-                        $(".navtoggle").addClass("fa fa-caret-left");
-    
-                        self.toggle.left = true;
-                    }
                 }
             }
         

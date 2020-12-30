@@ -68,6 +68,7 @@ class Job extends Matrix {
                     watch: {
                         model: {
                             handler(val,oldVal){
+                                this.dt.pagination.currentPage = 1;
                                 this.initData();
                             },
                             deep:true,

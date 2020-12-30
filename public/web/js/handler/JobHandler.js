@@ -17,6 +17,160 @@ class  JobHandler {
     /*
     *   作业管理
     *
+    *   作业列表
+    *
+    *
+    */
+    jobList() {
+        let rtn = null;
+
+        jQuery.ajax({
+            url: '/job',
+            dataType: 'json',
+            type: 'GET',
+            async:false,
+            beforeSend(xhr){},
+            complete(xhr, textStatus) {},
+            success(data, status) {
+
+                userHandler.ifSignIn(data);
+
+                rtn = data;
+
+            },
+            error(xhr, textStatus, errorThrown){
+                rtn = xhr.responseJSON;
+            }
+        });
+        return rtn;
+    };
+
+    /*
+    *   作业管理
+    *
+    *   作业内容
+    *
+    *
+    */
+    jobContent(job) {
+        let rtn = null;
+
+        jQuery.ajax({
+            url: `/job/${job}`,
+            dataType: 'json',
+            type: 'GET',
+            async:false,
+            beforeSend(xhr){},
+            complete(xhr, textStatus) {},
+            success(data, status) {
+
+                userHandler.ifSignIn(data);
+
+                rtn = data;
+
+            },
+            error(xhr, textStatus, errorThrown){
+                rtn = xhr.responseJSON;
+            }
+        });
+        return rtn;
+    };
+
+    async jobContentAsync(job) {
+        let rtn = null;
+
+        try{
+            await jQuery.ajax({
+                url: `/job/${job}`,
+                dataType: 'json',
+                type: 'GET',
+                async: true,
+                beforeSend(xhr){},
+                complete(xhr, textStatus) {},
+                success(data, status) {
+
+                    userHandler.ifSignIn(data);
+
+                    rtn = data;
+
+                },
+                error(xhr, textStatus, errorThrown){
+                    rtn = xhr.responseJSON;
+                }
+            });
+        } catch(err){
+
+        }
+        return rtn;
+    };
+
+    /*
+    *   作业管理
+    *
+    *   作业Enable
+    *
+    *
+    */
+    async jobEnableAsync(job) {
+        let rtn = null;
+        try{
+            await jQuery.ajax({
+                url: `/job/enable/${job}`,
+                dataType: 'json',
+                type: 'GET',
+                async: true,
+                beforeSend(xhr){},
+                complete(xhr, textStatus) {},
+                success(data, status) {
+
+                    userHandler.ifSignIn(data);
+
+                },
+                error(xhr, textStatus, errorThrown){
+                    rtn = xhr.responseJSON;
+                }
+            });
+        } catch(err){
+
+        }
+        return rtn;
+    };
+
+    /*
+    *   作业管理
+    *
+    *   作业Enable
+    *
+    *
+    */
+    async jobDisableAsync(job) {
+        let rtn = null;
+        try{
+            await jQuery.ajax({
+                url: `/job/disable/${job}`,
+                dataType: 'json',
+                type: 'GET',
+                async: true,
+                beforeSend(xhr){},
+                complete(xhr, textStatus) {},
+                success(data, status) {
+
+                    userHandler.ifSignIn(data);
+
+                },
+                error(xhr, textStatus, errorThrown){
+                    rtn = xhr.responseJSON;
+                }
+            });
+        } catch(err){
+
+        }
+        return rtn;
+    };
+
+    /*
+    *   作业管理
+    *
     *   添加作业
     *
     *
@@ -30,16 +184,16 @@ class  JobHandler {
             type: 'POST',
             async:false,
             data: job,
-            beforeSend:function(xhr){},
-            complete: function(xhr, textStatus) {},
-            success: function (data, status) {
+            beforeSend(xhr){},
+            complete(xhr, textStatus) {},
+            success(data, status) {
 
                 userHandler.ifSignIn(data);
 
                 rtn = data;
 
             },
-            error: function(xhr, textStatus, errorThrown){
+            error(xhr, textStatus, errorThrown){
                 rtn = xhr.responseJSON;
             }
         });
@@ -60,7 +214,7 @@ class  JobHandler {
             url: '/job/merge',
             dataType: 'json',
             type: 'POST',
-            async:false,
+            async: false,
             data: job,
             beforeSend(xhr){},
             complete(xhr, textStatus) {},
@@ -111,6 +265,33 @@ class  JobHandler {
         return rtn;
     };
 
+    async jobDeleteAsync(job) {
+        let rtn = null;
+        try{
+            await jQuery.ajax({
+                url: `/job/${job.name}@${job.job.dir}`,
+                dataType: 'json',
+                type: 'DELETE',
+                async: true,
+                beforeSend:function(xhr){},
+                complete: function(xhr, textStatus) {},
+                success: function (data, status) {
+
+                    userHandler.ifSignIn(data);
+
+                    rtn = data;
+
+                },
+                error: function(xhr, textStatus, errorThrown){
+                    rtn = xhr.responseJSON;
+                }
+            });
+        } catch(err){
+            
+        }
+        return rtn;
+    };
+
     /*
     *   作业管理
     *
@@ -139,6 +320,34 @@ class  JobHandler {
                 rtn = xhr.responseJSON;
             }
         });
+        return rtn;
+    };
+
+    async jobExistAsync(job) {
+        let rtn = null;
+
+        try{
+            await jQuery.ajax({
+                url: `/job/exist/${job}`,
+                dataType: 'json',
+                type: 'GET',
+                async: true,
+                beforeSend:function(xhr){},
+                complete: function(xhr, textStatus) {},
+                success: function (data, status) {
+
+                    userHandler.ifSignIn(data);
+
+                    rtn = data;
+
+                },
+                error: function(xhr, textStatus, errorThrown){
+                    rtn = xhr.responseJSON;
+                }
+            });
+        } catch(err){
+
+        }
         return rtn;
     };
 

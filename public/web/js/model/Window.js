@@ -256,7 +256,8 @@ class Window {
             onresized: function(){
                 eventHub.$emit("WINDOW-STATUS-CHANGE-EVENT");
             },
-            callback:       function(){
+            callback: function(){
+                
                 $(".jsPanel").css({
                     "position":"absoulate!important",
                     "z-index": "2000"

@@ -516,6 +516,21 @@ class Matrix {
                 $("body").removeClass("view-fullscreen");
             }
         });
+
+        window.addEventListener("resize", ()=>{
+            try{
+                if( window.jsPanel.activePanels.getPanel(`jsPanel-editor`) ){
+                    window.jsPanel.activePanels.getPanel(`jsPanel-editor`).resize(
+                        function(){
+                            return document.body.clientWidth * 0.85;
+                        }, 
+                        function(){
+                            return document.body.clientHeight * 0.7;
+                        }
+                    );
+                } 
+            } catch(err){}
+        }, true);
     }
 
     // Window RESIZE事件
