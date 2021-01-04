@@ -283,7 +283,7 @@ Vue.component("mx-editor",{
 })
 
 
- /* Common FS Editor */
+/* Common FS Editor */
 Vue.component("mx-fs-editor",{
     delimiters: ['#{', '}#'],
     props: {
@@ -890,7 +890,16 @@ Vue.component("mx-fs-editor",{
                         })
                         this.tip.loading = false;
                         this.tip.message = "";
-                    } );
+                    }).catch((err)=> {
+                        _.forEach(this.tabs.list,(v)=>{
+                            if(v.name == this.tabs.activeIndex){
+                                _.extend(v.model,{output:err});
+                                eventHub.$emit(this.tabs.activeNode.fullname);
+                            }
+                        })
+                        this.tip.loading = false;
+                        this.tip.message = "";
+                    });
                     
                 } catch(err) {
                     console.log(err)
@@ -968,6 +977,163 @@ Vue.component("mx-fs-editor",{
         let editor = ace.edit('editor-'+this.tabs.activeIndex);
         editor.destroy();
         editor.container.remove();
+    }
+})
+
+/* Common Console Log */
+Vue.component("mx-consolelog",{
+    delimiters: ['#{', '}#'],
+    props:{
+        logType: String,
+        //规则名称
+        fullname: String
+    },
+    data(){
+        return {
+            editor: null,
+            dt:{
+                rows:[]
+            },
+            options:{
+                mode: "toml",
+                theme: "tomorrow",
+                readOnly: true
+            }
+        }
+    },
+    template:   `<el-container style="height:calc(100% - 60px);">
+                    <el-header style="height:30px;line-height:30px;">
+                        <el-tooltip content="清空" open-delay="800">
+                            <el-button type="text" @click="onReset" icon="el-icon-delete"></el-button>
+                        </el-tooltip>
+                        <el-tooltip content="重新加载" open-delay="800">
+                            <el-button type="text" @click="onLoad" icon="el-icon-refresh"></el-button>
+                        </el-tooltip>
+                        <el-tooltip content="选择主题" placement="bottom" open-delay="800">
+                            <el-button type="text" :class="logType+'-editor-select-theme-'+objectHash.sha1(fullname)" style="float:right;"><i class="fas fa-tshirt"></i></el-button>
+                        </el-tooltip>
+                    </el-header>
+                    <el-main style="padding:0px;">
+                        <div ref="editor"></div>
+                    </el-main>
+                </el-container>`,
+    watch:{
+        'dt.rows':{
+            handler(val,oldVal){
+                if(val !== oldVal && !_.isEmpty(val)){
+                    let preFix = ['级别','时间','摘要'].join("  ");
+                    let csv = _.concat(preFix,_.map(val,(v)=>{
+                        return `[${mx.global.register.consolelog.level[v.level][1]}]  ${v.msg}`;
+                    })).join('\n');
+                    this.editor.setValue(csv);
+                }
+                
+            },
+            deep:true
+        }
+    },
+    created(){
+        
+        fsHandler.traceLogAsync(this.logType,this.fullname,200,null).then( (rtn)=>{
+            this.dt.rows = rtn.message.logs;
+            this.initEditor();
+        })
+
+    },
+    methods:{
+        initEditor(){
+            this.editor = ace.edit(this.$refs.editor);
+
+            this.editor.setOptions({
+                maxLines: Infinity,
+                minLines: 50,
+                autoScrollEditorIntoView: true,
+                enableBasicAutocompletion: true,
+                enableSnippets: true,
+                enableLiveAutocompletion: true
+            });
+            this.editor.$blockScrolling = Infinity;
+            this.editor.setReadOnly(this.options.readOnly);
+            this.editor.getSession().setMode("ace/mode/"+ this.options.mode);
+            this.editor.getSession().setTabSize(4);
+            this.editor.getSession().setUseWrapMode(true);
+            this.editor.getSession().setUseSoftTabs(true);
+            this.editor.setTheme("ace/theme/"+this.options.theme);
+
+            this.initTheme();
+        },
+        onReset(){
+            let item = {class:"/matrix/consolelog/scriptjs", ids: _.map(this.dt.rows,'id').join("', '"), ifDeleteVersionData: this.ifDeleteVersionData};
+            
+            fsHandler.callFsJScriptAsync("/matrix/fs/action-by-delete.js",encodeURIComponent(JSON.stringify(item))).then( ()=>{
+                this.onLoad();
+            } );
+        },
+        onLoad(){
+            fsHandler.traceLogAsync(this.logType,this.fullname,200,null).then( (rtn)=>{
+                this.dt.rows = rtn.message.logs;
+            })
+        },
+        initTheme(){
+            let id = objectHash.sha1(this.fullname);
+
+            $.contextMenu({
+                selector: `.${this.logType}-editor-select-theme-${id}`,
+                trigger: 'left',
+                callback:  (key, options)=> {
+                    if(key !== 'bright' && key !== 'dark'){
+                        this.editor.setTheme("ace/theme/"+key);
+
+                        localStorage.setItem(`${this.logType}-editor-select-theme-${id}`,key);
+                    }
+                },
+                items: {
+                    "bright": { name: "亮色", items: {
+                            "chrome": { name: "chrome"},
+                            "clouds": { name: "clouds"},
+                            "crimson_editor": { name: "crimson_editor"},
+                            "dawn": { name: "dawn"},
+                            "dreamweaver": { name: "dreamweaver"},
+                            "eclipse": { name: "eclipse"},
+                            "github": { name: "github"},
+                            "iplastic": { name: "iplastic"},
+                            "solarized_light": { name: "solarized_light"},
+                            "textmate": { name: "textmate"},
+                            "tomorrow": { name: "tomorrow"},
+                            "xcode": { name: "xcode"},
+                            "kuroir": { name: "kuroir"},
+                            "katzenmilch": { name: "katzenmilch"},
+                            "sqlserver": { name: "sqlserver"}
+                        }
+                    },
+                    "dark": { name: "暗色", items: {
+                            "ambiance": { name: "ambiance"},
+                            "chaos": { name: "chaos"},
+                            "clouds_midnight": { name: "clouds_midnight"},
+                            "dracula": { name: "dracula"},
+                            "cobalt": { name: "cobalt"},
+                            "gruvbox": { name: "gruvbox"},
+                            "gob": { name: "gob"},
+                            "idle_fingers": { name: "idle_fingers"},
+                            "kr_theme": { name: "kr_theme"},
+                            "merbivore": { name: "merbivore"},
+                            "merbivore_soft": { name: "merbivore_soft"},
+                            "mono_industrial": { name: "mono_industrial"},
+                            "monokai": { name: "monokai"},
+                            "pastel_on_dark": { name: "pastel_on_dark"},
+                            "solarized_dark": { name: "solarized_dark"},
+                            "terminal": { name: "terminal"},
+                            "tomorrow_night": { name: "tomorrow_night"},
+                            "tomorrow_night_blue": { name: "tomorrow_night_blue"},
+                            "tomorrow_night_bright": { name: "tomorrow_night_bright"},
+                            "tomorrow_night_eighties": { name: "tomorrow_night_eighties"},
+                            "twilight": { name: "twilight"},
+                            "vibrant_ink": { name: "vibrant_ink"}
+                        }
+                    }
+                }
+            });
+        }
     }
 })
 

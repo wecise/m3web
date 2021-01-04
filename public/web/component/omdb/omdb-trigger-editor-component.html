@@ -31,9 +31,11 @@
 	
 	/*----------  最外层element会自动增加组件同名 class="omdb-trigger-editor-component"  ----------*/
 	<template>
-		<el-container>
-			<el-header :id="id+'_editorToolBar'" style="height: 35px;line-height: 35px;padding: 0px 10px;background: #f6f6f6;">
-				<el-button-group style="width:100%;" v-if="!_.isEmpty(selected) && !_.isEmpty(list)">
+        <el-tabs value="trigger" type="border-card">
+            
+            <el-tab-pane label="trigger" name="trigger">
+                <span slot="label">
+                    <i class="el-icon-postcard"></i>
                     <el-dropdown v-if="list" :hide-on-click="true">
                         <span class="el-dropdown-link">
                             <span v-if="_.isEmpty(selected)">选择触发器</span>
@@ -51,55 +53,66 @@
                             </el-dropdown-item>
                         </el-dropdown-menu>
                     </el-dropdown>
+                </span>
 
-                    <el-divider direction="vertical"></el-divider>
-                    <el-tooltip content="新建触发器" placement="bottom" open-delay="800">
-                        <el-button type="text" @click="add" icon="el-icon-plus">
-                        </el-button>
-                    </el-tooltip>
+                <el-container style="height:100%;">
+                    <el-header :id="id+'_editorToolBar'" style="height: 35px;line-height: 35px;padding: 0px 10px;background: #f6f6f6;">
+                        <el-button-group style="width:100%;" v-if="!_.isEmpty(selected) && !_.isEmpty(list)">
+                            
+                            <el-tooltip content="新建触发器" placement="bottom" open-delay="800">
+                                <el-button type="text" @click="add" icon="el-icon-plus">
+                                </el-button>
+                            </el-tooltip>
+        
+                            <el-divider direction="vertical"></el-divider>
+                            
+                            <el-tooltip content="删除触发器" placement="bottom" open-delay="800">
+                                <el-button type="text" @click="remove" icon="el-icon-delete">
+                                </el-button>
+                            </el-tooltip>
+                            
+                            <el-divider direction="vertical"></el-divider>
+                            
+                            <el-tooltip content="保存触发器" placement="bottom" open-delay="800">
+                                <el-button type="text" @click="save" icon="fas fa-save">
+                                </el-button>
+                            </el-tooltip>
+                            
+                            <el-divider direction="vertical"></el-divider>
+        
+                            <el-switch v-model="selected.disable"
+                                    inactive-color="#13ce66"
+                                    active-color="#dddddd"
+                                    active-value="true"
+                                    inactive-value="false"
+                                    @change="changeStatus"
+                                    v-if="!_.isEmpty(selected)">
+                            </el-switch>
+        
+                            <el-tooltip content="选择主题" placement="bottom" open-delay="800">
+                                <el-button type="text" :class="'editor-select-theme-'+objectHash.sha1(className)" style="float:right;"><i class="fas fa-tshirt"></i></el-button>
+                            </el-tooltip>
+        
+                        </el-button-group>
+                        <el-button-group style="width:100%;" v-else>
+                            
+                            <el-tooltip content="新建触发器" placement="bottom" open-delay="800">
+                                <el-button type="text" @click="add" icon="el-icon-plus">
+                                </el-button>
+                            </el-tooltip>
+        
+                        </el-button-group>
+                    </el-header>
+                    <el-main :id="id" style="padding:0px;overflow: hidden;" ref="editor"></el-main>
+                    <el-footer :id="id+'_statusBar'" style="height:30px;line-height: 30px;" ref="statusBar"></el-footer>
+                </el-container>
+            </el-tab-pane>
 
-                    <el-divider direction="vertical"></el-divider>
-                    
-                    <el-tooltip content="删除触发器" placement="bottom" open-delay="800">
-                        <el-button type="text" @click="remove" icon="el-icon-delete">
-                        </el-button>
-                    </el-tooltip>
-                    
-                    <el-divider direction="vertical"></el-divider>
-                    
-                    <el-tooltip content="保存触发器" placement="bottom" open-delay="800">
-                        <el-button type="text" @click="save" icon="fas fa-save">
-                        </el-button>
-                    </el-tooltip>
-                    
-                    <el-divider direction="vertical"></el-divider>
-
-                    <el-switch v-model="selected.disable"
-                            inactive-color="#13ce66"
-                            active-color="#dddddd"
-                            active-value="true"
-                            inactive-value="false"
-                            @change="changeStatus"
-                            v-if="!_.isEmpty(selected)">
-                    </el-switch>
-
-                    <el-tooltip content="选择主题" placement="bottom" open-delay="800">
-                        <el-button type="text" :class="'editor-select-theme-'+objectHash.sha1(className)" style="float:right;"><i class="fas fa-tshirt"></i></el-button>
-                    </el-tooltip>
-
-                </el-button-group>
-                <el-button-group style="width:100%;" v-else>
-                    
-                    <el-tooltip content="新建触发器" placement="bottom" open-delay="800">
-                        <el-button type="text" @click="add" icon="el-icon-plus">
-                        </el-button>
-                    </el-tooltip>
-
-				</el-button-group>
-			</el-header>
-			<el-main :id="id" style="padding:0px;" ref="editor"></el-main>
-			<el-footer :id="id+'_statusBar'" style="height:30px;line-height: 30px;" ref="statusBar"></el-footer>
-		</el-container>
+            <el-tab-pane name="log" style="padding:10px;">
+                <span slot="label"><i class="el-icon-date"></i> 日志</span>
+                <mx-consolelog :fullname="logName" logType="trigger" v-if="!_.isEmpty(logName)"></mx-consolelog> 
+            </el-tab-pane>
+        </el-tabs>
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
@@ -125,7 +138,13 @@
                     class: "",
 	                script: ""
                 },
-	            statusBarInfo: ""
+                statusBarInfo: "",
+                logName: ""
+            }
+        },
+        computed: {
+            selectedTitle(){
+                return this.selected.disable == 'true' ? '启用中。。。' : '禁用中。。。';
             }
         },
         mounted(){
@@ -137,7 +156,12 @@
         watch: {
 	        selected:{
 	            handler:function(val,oldVal){
-	                this.editor.setValue(val.script);
+                    this.editor.setValue(val.script);
+                    
+                    if(val.name){
+                        this.logName = `${val.class}#${val.name}`;
+                        console.log(11,this.logName)
+                    }
 	            },
 		        deep:true
 	        },
@@ -147,11 +171,6 @@
                     }
             }
 
-        },
-        computed:{
-            selectedTitle(){
-                return this.selected.disable == 'true' ? '启用中。。。' : '禁用中。。。';
-            }
         },
         methods: {
             init() {
@@ -474,7 +493,7 @@
                                 type: 'success',
                                 message: '删除触发器成功'
                             });
-                            let name = this.list.length>0 ? _.head(this.list).name : null
+                            let name = this.list.length>0 ? _.head(this.list).name : null;
                             this.refresh(name);
                         } else{
                             this.$message({

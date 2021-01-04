@@ -126,7 +126,8 @@ class Config {
                                                             <i class="el-icon-more el-icon--right"></i>
                                                         </span>
                                                         <el-dropdown-menu slot="dropdown">
-                                                            <el-dropdown-item @click.native="onNewFile(data)"icon="el-icon-plus">新建</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onEditFile(data)"icon="el-icon-edit-outline">编辑</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onNewFile(data)"icon="el-icon-plus" divided>新建</el-dropdown-item>
                                                             <el-dropdown-item @click.native="onNewDir(data)"icon="el-icon-folder-add">新建目录</el-dropdown-item>
                                                             <el-dropdown-item @click.native="onDelete(data)" icon="el-icon-delete" divided>删除</el-dropdown-item>
                                                         </el-dropdown-menu>
@@ -356,105 +357,6 @@ class Config {
                             }); 
 
                         },
-                    }
-                })
-
-                // 日志
-                Vue.component('config-log-console',{
-                    delimiters: ['${', '}'],
-                    props: {
-                        //规则名称
-                        id: String   
-                    },
-                    template:   `<el-container>
-                                    <el-header style="height:30px;line-height:30px;">
-                                        <el-tooltip content="清空" open-delay="800" placement="top">
-                                            <el-button type="text" @click="onReset"><i class="fas fa-trash"></i></el-button>
-                                        </el-tooltip>
-                                        <el-tooltip content="重新加载" open-delay="800" placement="top">
-                                            <el-button type="text" @click="onLoad"><i class="fas fa-sync"></i></el-button>
-                                        </el-tooltip>
-                                    </el-header>
-                                    <el-main style="padding: 20px;">
-                                        <el-table :data="rows" style="width: 100%" max-height="200" stripe :default-sort="{prop: 'vtime', order: 'descending'}" 
-                                                :row-class-name="rowClassName"
-                                                :header-cell-style="headerRender"
-                                                @selection-change="handleSelectionChange">
-                                            <el-table-column type="selection" width="55"></el-table-column>                                                
-                                            <el-table-column :label="item.title" 
-                                                            :prop="item.data" 
-                                                            v-for="(item,index) in columns" 
-                                                            :formatter="item.render" 
-                                                            sortable 
-                                                            :width="item.width"
-                                                            v-if="item.visible">
-                                            </el-table-column>
-                                            <!--el-table-column align="right">
-                                                <template slot="header" slot-scope="scope">
-                                                    <el-input size="mini" placeholder="输入关键字搜索"/>
-                                                </template>
-                                            </el-table-column-->
-                                        </el-table>
-                                    </el-main>
-                                </el-container>`,
-                    data(){
-                        return {
-                            rows: [],
-                            columns: [],
-                            selectedRows: [],
-                            ifDeleteVersionData: false
-                        }
-                    },
-                    created(){
-                        
-                        fsHandler.callFsJScriptAsync("/matrix/config/log-by-name.js", encodeURIComponent(this.id)).then( (val)=>{
-                            let rtn = val.message;
-
-                            this.rows = rtn.rows;
-                            this.columns = _.map(rtn.columns,function(v){
-                                                if(v.render){
-                                                    v.render = eval(v.render);
-                                                }
-                                                return v;
-                                            });
-                        } );
-                        
-                        
-                        // 更新DataTable
-                        eventHub.$on("CONFIG-LOG-UPDATE-EVENT",()=>{
-                            fsHandler.callFsJScriptAsync("/matrix/config/log-by-name.js", encodeURIComponent(this.id)).then( (val)=>{
-                                let rtn = val.message;
-                                this.rows = rtn.rows;
-                            } );
-                        })
-                    },
-                    methods:{
-                        rowClassName({row, rowIndex}){
-                            return `row-${rowIndex}`;
-                        },
-                        headerRender({ row, column, rowIndex, columnIndex }){
-                            if (rowIndex === 0) {
-                                //return 'text-align:center;';
-                            }
-                        },
-                        onReset(){
-                            let item = {class:"/matrix/consolelog/", ids: _.map(this.selectedRows,'id').join("', '"), ifDeleteVersionData: self.ifDeleteVersionData}
-                            fsHandler.callFsJScriptAsync("/matrix/config/action-by-delete.js",encodeURIComponent(JSON.stringify(item))).then( ()=>{
-                                fsHandler.callFsJScriptAsync("/matrix/config/log-by-name.js", encodeURIComponent(this.id)).then( (val)=>{
-                                    let rtn = val.message;
-                                    this.rows = rtn.rows;
-                                } );
-                            } );
-                        },
-                        onLoad(){
-                            fsHandler.callFsJScriptAsync("/matrix/config/log-by-name.js", encodeURIComponent(this.id)).then( (val)=>{
-                                let rtn = val.message;
-                                this.rows = rtn.rows;
-                            } );
-                        },
-                        handleSelectionChange(val) {
-                            this.selectedRows = val;
-                        }
                     }
                 })
 
@@ -693,7 +595,7 @@ class Config {
                                         <el-tabs v-model="debug.tabs.activeIndex" type="border-card" closable @tab-remove="logClose" @tab-click="handleClick">
                                             <el-tab-pane name="log" style="padding:10px;">
                                                 <span slot="label">日志 <i class="el-icon-date"></i></span>
-                                                <config-log-console :id="id" :model="classModel" v-if="!_.isEmpty(id)" ref="configLogConsoleRef"></config-log-console> 
+                                                <mx-consolelog :fullname="id" logType="rule" v-if="!_.isEmpty(id)" ref="configLogConsoleRef"></mx-consolelog> 
                                             </el-tab-pane>
                                             <el-tab-pane label="测试" name="debug" style="padding:10px;">
                                                 <config-debug-console :rule="id"></config-debug-console>

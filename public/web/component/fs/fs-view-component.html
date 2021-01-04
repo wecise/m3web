@@ -1036,116 +1036,6 @@
     
                 })
                 
-                // 输出日志
-                Vue.component('fs-editor-log-console',{
-                    delimiters: ['${', '}'],
-                    props: {
-                        //规则名称
-                        id: String   
-                    },
-                    template:   `<el-container style="height:calc(100% - 60px);">
-                                    <el-header style="height:30px;line-height:30px;padding:5px 30px;">
-                                        <el-tooltip content="清空" open-delay="800">
-                                            <el-button type="text" @click="onReset" icon="el-icon-delete"></el-button>
-                                        </el-tooltip>
-                                        <el-tooltip content="重新加载" open-delay="800">
-                                            <el-button type="text" @click="onLoad" icon="el-icon-refresh"></el-button>
-                                        </el-tooltip>
-                                    </el-header>
-                                    <el-main style="padding: 20px 20px 0px 20px;">
-                                        <el-table 
-                                            :data="dt.rows.slice((dt.pagination.currentPage - 1) * dt.pagination.pageSize,dt.pagination.currentPage * dt.pagination.pageSize)" 
-                                            style="width: 100%;height:100%;" 
-                                            stripe :default-sort="{prop: 'vtime', order: 'descending'}" 
-                                            :row-class-name="rowClassName"
-                                            :header-cell-style="headerRender"
-                                            @selection-change="handleSelectionChange">
-                                            <el-table-column type="selection" width="55"></el-table-column>                                                
-                                            <el-table-column :label="item.title" 
-                                                            :prop="item.data" 
-                                                            v-for="(item,index) in dt.columns" 
-                                                            :formatter="item.render" 
-                                                            sortable 
-                                                            :width="item.width"
-                                                            v-if="item.visible">
-                                            </el-table-column>
-                                        </el-table>
-                                    </el-main>
-                                    <el-footer style="height:30px;line-height:30px;">
-                                        <el-pagination
-                                            @size-change="onPageSizeChange"
-                                            @current-change="onCurrentPageChange"
-                                            :page-sizes="[10, 15, 20, 50, 100, 300]"
-                                            :page-size="dt.pagination.pageSize"
-                                            :total="dt.rows.length"
-                                            layout="total, prev, pager, next">
-                                        </el-pagination>
-                                    </el-footer>
-                                </el-container>`,
-                    data(){
-                        return {
-                            dt:{
-                                rows: [],
-                                columns: [],
-                                selectedRows: [],
-                                selected: [],
-                                pagination:{
-                                    pageSize: 10,
-                                    currentPage: 1
-                                }
-                            },
-                            ifDeleteVersionData: false
-                        }
-                    },
-                    created(){
-                        fsHandler.callFsJScriptAsync("/matrix/fs/log-by-name.js", encodeURIComponent(this.id)).then( (val)=>{
-                            let rtn = val.message;
-
-                            this.dt.rows = rtn.rows;
-                            this.dt.columns = _.map(rtn.columns,(v)=>{
-                                                if(v.render){
-                                                    v.render = eval(v.render);
-                                                }
-                                                return v;
-                                            });
-                        });
-                
-                    },
-                    methods:{
-                        rowClassName({row, rowIndex}){
-                            return `row-${rowIndex}`;
-                        },
-                        headerRender({ row, column, rowIndex, columnIndex }){
-                            if (rowIndex === 0) {
-                                //return 'text-align:center;';
-                            }
-                        },
-                        onPageSizeChange(val) {
-                            this.dt.pagination.pageSize = val;
-                        },
-                        onCurrentPageChange(val) {
-                            this.dt.pagination.currentPage = val;
-                        },
-                        onReset(){
-                            let item = {class:"/matrix/consolelog/scriptjs", ids: _.map(this.dt.selected,'id').join("', '"), ifDeleteVersionData: this.ifDeleteVersionData};
-                            
-                            fsHandler.callFsJScriptAsync("/matrix/fs/action-by-delete.js",encodeURIComponent(JSON.stringify(item))).then( ()=>{
-                                this.onLoad();
-                            } );
-                        },
-                        onLoad(){
-                            fsHandler.callFsJScriptAsync("/matrix/fs/log-by-name.js", encodeURIComponent(this.id)).then( (val)=>{
-                                let rtn = val.message;
-
-                                this.dt.rows = rtn.rows;
-                            } );
-                        },
-                        handleSelectionChange(val) {
-                            this.dt.selected = val;
-                        }
-                    }
-                })
-
                 Vue.component("fs-editor-view",{
                     delimiters: ['#{', '}#'],
                     props:{
@@ -1188,7 +1078,7 @@
                                         <el-tabs v-model="toolBar.activeView" type="border-card" style="height:100%;" closable @tab-remove="onRemoveTab">
                                             <el-tab-pane name="log" style="height:100%;" v-show="toolBar.log.show">
                                                 <span slot="label">执行日志</span>
-                                                <fs-editor-log-console :id="item.fullname" v-if="!_.isEmpty(item)"></fs-editor-log-console> 
+                                                <mx-consolelog :fullname="item.fullname" logType="serverjs" v-if="!_.isEmpty(item)"></mx-consolelog> 
                                             </el-tab-pane>
                                             <el-tab-pane name="result" style="height:100%;overflow:auto;padding-top: 1px;" v-show="toolBar.result.show">
                                                 <span slot="label">#{ item | pickResultTitle }#</span>

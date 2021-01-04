@@ -1288,17 +1288,19 @@ class FsHandler {
                 }
             });
         } catch(err){
-
+            rtn = err;
+            //消耗时间
+            let now = _.now();
+            let timeDiff = moment(now).diff(moment(stime), "millisecond");
+            if(timeDiff > 1000){
+                _.extend(rtn, { consume: moment(now).diff(moment(stime), "seconds") + ' 秒' }); 
+            } else {
+                _.extend(rtn, { consume: timeDiff + ' 毫秒' }); 
+            }
         }
 
         return rtn;
     };
-
-    // updateCount(fullname){
-    //     fsHandler.callFsJScriptAsync("/matrix/summary/updateCount.js", encodeURIComponent(fullname)).then( (rtn)=>{
-
-    //     } )
-    // }
 
     /*
     *   获取一个文件内容
@@ -1328,6 +1330,60 @@ class FsHandler {
                 console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
             }
         });
+
+        return rtn;
+
+    };
+
+    /*
+    *   获取日志内容
+    *
+    *       参数：
+    *          url
+    */
+    async traceLogAsync(type,name,limit,positon) {
+
+        let rtn = null;
+        let stime = _.now();
+        try {
+            await jQuery.ajax({
+                url: `/consolelog/${type}?name=${encodeURIComponent( name.replace(/\/script/g,"") )}&limit=${limit}`,
+                type: "GET",
+                dataType: 'json',
+                async: true,
+                beforeSend(xhr) {
+                },
+                complete(xhr, textStatus) {
+                    //消耗时间
+                    let now = _.now();
+                    let timeDiff = moment(now).diff(moment(stime), "millisecond");
+                    if(timeDiff > 1000){
+                        _.extend(rtn, { consume: moment(now).diff(moment(stime), "seconds") + ' 秒' }); 
+                    } else {
+                        _.extend(rtn, { consume: timeDiff + ' 毫秒' }); 
+                    }
+                },
+                success(data, textStatus, xhr) {
+
+                    userHandler.ifSignIn(data);
+                    rtn = data;
+                },
+                error(xhr, textStatus, errorThrown) {
+                    rtn = xhr.responseText;
+                }
+            });
+        } catch(err){
+            rtn = err;
+
+            //消耗时间
+            let now = _.now();
+            let timeDiff = moment(now).diff(moment(stime), "millisecond");
+            if(timeDiff > 1000){
+                _.extend(rtn, { consume: moment(now).diff(moment(stime), "seconds") + ' 秒' }); 
+            } else {
+                _.extend(rtn, { consume: timeDiff + ' 毫秒' }); 
+            }
+        }
 
         return rtn;
 

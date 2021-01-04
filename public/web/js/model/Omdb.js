@@ -1286,8 +1286,8 @@ class Omdb{
                                     </el-tab-pane>
                                     <el-tab-pane name="trigger">
                                         <span slot="label"><i class="fas fa-stopwatch"></i> 触发器</span>
-                                        <el-container style="height:calc(100% - 200px);padding:10px;"> 
-                                            <el-header style="height:30px;"> 
+                                        <el-container style="height:calc(100% - 215px);padding:10px;"> 
+                                            <!--el-header style="height:30px;"> 
                                                 <el-breadcrumb separator="/" style="height:30px;line-height:30px;">
                                                     <el-breadcrumb-item>
                                                         <el-button type="text">基类</el-button>
@@ -1296,8 +1296,8 @@ class Omdb{
                                                         <el-button type="text">#{item}#</el-button>
                                                     </el-breadcrumb-item>
                                                 </el-breadcrumb>
-                                            </el-header>
-                                            <el-main style="padding:0px;">
+                                            </el-header-->
+                                            <el-main style="padding:0px;overflow:hidden;">
                                                 <omdb-trigger-console :id="id+'-trigger'" :model="model"></omdb-trigger-console>
                                             </el-main>
                                         </el-container>
