@@ -693,7 +693,7 @@ class Topological {
             template:   `<div>
                             <el-header style="height:32px;line-height:32px;padding:0px;display:flex;">
                                 <el-button type="text" icon="el-icon-arrow-left"  @click="$parent.$parent.control.show=false" style="width:8%;"></el-button>
-                                <div style="margin-top:-1px;width:84%;">
+                                <div style="width:84%;">
                                     <el-radio-group v-model="type">
                                         <el-radio-button label="all">全路径</el-radio-button>
                                         <el-radio-button label="short">最短路径</el-radio-button>
@@ -782,7 +782,7 @@ class Topological {
                                     </template>
                                 </el-input>
                                 <el-button type="default" @click="$parent.$parent.onToggleView('topological-search-toolbar-path')"  style="margin-left:-1px;">
-                                    <el-image src="/fs/assets/images/tools/png/path-blue.png?type=open&issys=true" style="width:16px;"></el-image>
+                                    <el-image src="/static/assets/images/tools/png/path-blue.png" style="width:16px;"></el-image>
                                 </el-button>
                                 <el-button type="default" 
                                     @click="$parent.$parent.onToggleView('topological-search-toolbar-graphAdv')" style="margin-left:-1px;">
@@ -843,8 +843,8 @@ class Topological {
                         </div>`,
             filters: {
                 pickIcon(item){
-                    let icon = _.last(item.class.split("/"));
-                    return `/fs/assets/images/entity/png/${icon}.png?type=open&issys=true`;
+                    let icon = item.icon;
+                    return `/static/assets/images/entity/png/${icon}.png`;
                 }
             },
             watch: {

@@ -111,7 +111,7 @@ Vue.component("mx-app-deploy",{
                                                 v-for="icon in app.icon.list"> 
                                                 <el-image :src="icon | pickIcon" fit="scale-down" style="width:48px;"></el-image> 
                                                 <p>
-                                                    <el-radio :label="icon | pickLabel" :ref="'radio_'+icon.id"></el-radio>
+                                                    <el-radio :label="icon | pickIcon" :ref="'radio_'+icon.id"></el-radio>
                                                 </p>
                                             </el-button>
                                         </el-radio-group>
@@ -142,10 +142,7 @@ Vue.component("mx-app-deploy",{
                 </el-container>`,
     filters:{
         pickIcon(icon) {
-            return `/fs${icon.parent}/${icon.name}?type=open&issys=${window.SignedUser_IsAdmin}`;
-        },
-        pickLabel(icon){
-            return '/fs'+icon.parent+'/'+icon.name+'?type=open&issys='+window.SignedUser_IsAdmin;
+            return `/static${icon.parent}/${icon.name}`;
         }
     },
     mounted(){
@@ -153,7 +150,7 @@ Vue.component("mx-app-deploy",{
             if(this.model.item){
                 this.app.cnname = _.head(this.model.item.name.split("."));
                 this.app.enname = _.head(this.model.item.name.split("."));
-                this.app.url = `/fs${[this.model.item.parent, this.model.item.name].join("/")}?issys=true&type=open&issys=${window.SignedUser_IsAdmin}`;
+                this.app.url = `/static${[this.model.item.parent, this.model.item.name].join("/")}`;
             }
             this.app.seat = _.random(100, 10000);
 
@@ -172,7 +169,7 @@ Vue.component("mx-app-deploy",{
         initIconList(){
             fsHandler.fsListAsync(this.upload.url).then( (rtn)=>{
                 this.app.icon.list = rtn;
-                this.app.icon.value = `${this.upload.url}/creative.png?type=open&issys=${window.SignedUser_IsAdmin}`;
+                this.app.icon.value = `/static/assets/images/apps/png/creative.png`;
             } );   
         },
         onTriggerRadioClick(item){
@@ -190,7 +187,7 @@ Vue.component("mx-app-deploy",{
                     });
                     return false;
                 } else {
-                    _.extend(this.app,{ icon: this.app.icon.value.replace(/\/fs\/assets\/images\/apps\/png\//,'').replace(/\?type=open&issys=true/,'').replace(/\?type=download&issys=true/,'') } );
+                    _.extend(this.app,{ icon: this.app.icon.value.replace(/\/static\/assets\/images\/apps\/png\//,"") } );
                     _.extend(this.app.groups, { group: this.app.groups.default.name} );
                     
                     fsHandler.callFsJScriptAsync("/matrix/apps/app.js",encodeURIComponent(JSON.stringify(this.app))).then( (rtn)=>{
@@ -610,7 +607,7 @@ Vue.component("mx-fs-editor",{
             
             if(view === 'preview'){
                 
-                let url = `/fs${[this.tabs.activeNode.parent,this.tabs.activeNode.name].join("/")}?issys=true&type=open`;
+                let url = `/static${[this.tabs.activeNode.parent,this.tabs.activeNode.name].join("/")}`;
 
                 window.open(url,'_blank');
                 
@@ -992,26 +989,63 @@ Vue.component("mx-consolelog",{
         return {
             editor: null,
             dt:{
-                rows:[]
+                rows:[],
+                oldRows: []
+            },
+            consolelog: {
+                level: [],
+                maxtime: "",
+                mintime: "",
+                position: null,
+                limit: 100
             },
             options:{
                 mode: "toml",
                 theme: "tomorrow",
                 readOnly: true
+            },
+            control: {
+                ifRefresh: false
             }
         }
     },
     template:   `<el-container style="height:calc(100% - 60px);">
-                    <el-header style="height:30px;line-height:30px;">
-                        <el-tooltip content="清空" open-delay="800">
-                            <el-button type="text" @click="onReset" icon="el-icon-delete"></el-button>
-                        </el-tooltip>
-                        <el-tooltip content="重新加载" open-delay="800">
-                            <el-button type="text" @click="onLoad" icon="el-icon-refresh"></el-button>
-                        </el-tooltip>
-                        <el-tooltip content="选择主题" placement="bottom" open-delay="800">
-                            <el-button type="text" :class="logType+'-editor-select-theme-'+objectHash.sha1(fullname)" style="float:right;"><i class="fas fa-tshirt"></i></el-button>
-                        </el-tooltip>
+                    <el-header style="height:35px;line-height:33px;">
+                        <el-row style="width:100%;">
+                            <el-col :span="2">
+                                <el-tooltip content="重新加载" open-delay="800">
+                                    <el-button type="text" @click="onLoad" icon="el-icon-refresh"></el-button>
+                                </el-tooltip>    
+
+                                <el-tooltip content="删除" open-delay="800">
+                                    <el-button type="text" @click="onDelete" icon="el-icon-close"></el-button>
+                                </el-tooltip>
+
+                                <el-tooltip content="清空" open-delay="800">
+                                    <el-button type="text" @click="onTruncate" icon="el-icon-delete"></el-button>
+                                </el-tooltip>
+                            </el-col>
+                            
+                            <el-col :span="19" style="padding-left:10px;">
+                                <el-checkbox-group v-model="consolelog.level">
+                                    <el-checkbox :label="item[0].toLowerCase()" v-for="item in mx.global.register.consolelog.level">#{item[1]}#</el-checkbox>
+                                </el-checkbox-group>
+                            </el-col>
+                            <el-col :span="3" style="text-align:right;">
+                                #{ control.ifRefresh==1 ? '自动刷新' : '关闭刷新' }#
+                                <el-switch
+                                    v-model="control.ifRefresh"
+                                    active-color="#13ce66"
+                                    inactive-color="#dddddd"
+                                    active-value="1"
+                                    inactive-value="0">
+                                </el-switch>
+                            
+                                <el-tooltip content="选择主题" placement="bottom" open-delay="800">
+                                    <el-button type="text" :class="logType+'-editor-select-theme-'+objectHash.sha1(fullname)" style="padding-left:10px;"><i class="fas fa-tshirt"></i></el-button>
+                                </el-tooltip>
+                            </el-col>
+                        </el-row>
                     </el-header>
                     <el-main style="padding:0px;">
                         <div ref="editor"></div>
@@ -1019,22 +1053,51 @@ Vue.component("mx-consolelog",{
                 </el-container>`,
     watch:{
         'dt.rows':{
-            handler(val,oldVal){
-                if(val !== oldVal && !_.isEmpty(val)){
+            handler(val){
+                if(val !== dt.oldRows && !_.isEmpty(val)){
+                    let arr = _.orderBy(val,['edtime'],['desc']);
                     let preFix = ['级别','时间','摘要'].join("  ");
-                    let csv = _.concat(preFix,_.map(val,(v)=>{
+                    let csv = _.concat(preFix,_.map(arr,(v)=>{
                         return `[${mx.global.register.consolelog.level[v.level][1]}]  ${v.msg}`;
                     })).join('\n');
                     this.editor.setValue(csv);
+                    let row = this.editor.session.getLength() - 1;
+                    let column = this.editor.session.getLine(row).length;
+                    this.editor.gotoLine(row + 1, column);
+                } else {
+                    this.editor.setValue("");
                 }
+
+                this.dt.oldRows = val;
                 
             },
             deep:true
-        }
+        },
+        'control.ifRefresh':{
+            handler(val,oldVal){
+                if(val==1) {
+                    window.intervalListener = setInterval(()=>{
+                        this.onLoad();
+                    },3000);
+                    this.$message({
+                        type: "info",
+                        message: "自动刷新开启"
+                    })
+                } else {
+                    clearInterval(window.intervalListener);
+                    this.$message({
+                        type: "info",
+                        message: "自动刷新关闭"
+                    })
+                }
+            }
+        },
     },
     created(){
         
-        fsHandler.traceLogAsync(this.logType,this.fullname,200,null).then( (rtn)=>{
+        this.consolelog.level = _.map(mx.global.register.consolelog.level,(v)=>{ return v[0].toLowerCase(); });
+
+        fsHandler.traceLogAsync(this.logType,this.fullname,this.consolelog).then( (rtn)=>{
             this.dt.rows = rtn.message.logs;
             this.initEditor();
         })
@@ -1070,8 +1133,18 @@ Vue.component("mx-consolelog",{
             } );
         },
         onLoad(){
-            fsHandler.traceLogAsync(this.logType,this.fullname,200,null).then( (rtn)=>{
+            fsHandler.traceLogAsync(this.logType,this.fullname,this.consolelog).then( (rtn)=>{
                 this.dt.rows = rtn.message.logs;
+            })
+        },
+        onDelete(){
+            fsHandler.deleteLogAsync(this.logType,this.fullname).then( (rtn)=>{
+                this.dt.rows = [];
+            })
+        },
+        onTruncate(){
+            fsHandler.truncateLogAsync(this.logType).then( (rtn)=>{
+                this.dt.rows = [];
             })
         },
         initTheme(){

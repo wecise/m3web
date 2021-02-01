@@ -18,7 +18,9 @@ class Form {
 
     init() {
 
-        VueLoader.onloaded(["form-component"],function() {
+        VueLoader.onloaded(["form-component",
+                            "mx-tag",
+                            "mx-tag-tree"],function() {
 
             $(function() {
 

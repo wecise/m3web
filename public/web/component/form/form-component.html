@@ -40,7 +40,7 @@
                 </span>
             </el-header>
             <el-main ref="mainView" style="padding:0px 20px;">
-                <el-image style="width: 80px; height: 80px;position: absolute;top:5px;left:5px;" :src="model | pickIcon" fit="scale-down" @error="onErrorPickIcon" v-if="model"></el-image>
+                <el-image style="width: 80px; height: 80px;position: absolute;top:5px;left:5px; z-index: 100;" :src="model | pickIcon" fit="scale-down" @error="onErrorPickIcon" v-if="model"></el-image>
                 <el-form :model="model" ref="form" label-width="140px" :label-position="labelPosition">
                     <el-form-item :label="item.label" v-for="item in model.components" v-if="item.visible">
                         <el-select v-model="item.data" :placeholder="item.placeholder" v-if="item.type==='select'">
@@ -49,7 +49,7 @@
                         <el-date-picker type="date" v-model="item.data" :placeholder="item.placeholder" v-else-if="item.type==='date-picker'"></el-date-picker>
                         <el-input-number v-model="item.data" :placeholder="item.placeholder" v-else-if="item.type==='input-number'"></el-input-number>
                         <el-input type="textarea" autosize v-model="item.data" :placeholder="item.placeholder" v-else-if="item.type==='input-textarea'"></el-input>
-                        <el-tag :key="tag" closable v-for="tag in item.data" v-else-if="item.type==='tag'">#{tag}#</el-tag>
+                        <mx-tag domain='graph' :model.sync="item.data" :id="model.dataId" limit="4" v-else-if="item.type==='tag'">#{item.data}#</mx-tag>
                         <el-input v-model="item.data" :placeholder="item.placeholder" v-else="item.type==='input'"></el-input>
                     </el-form-item>
                 </el-form>
@@ -83,9 +83,9 @@
                 },
                 pickIcon(evt){
                     try {
-                        return `/fs/assets/images/entity/png/${_.last(evt.path.split("/"))}.png?issys=true&type=open`;
+                        return `/static/assets/images/entity/png/${_.last(evt.path.split("/"))}.png`;
                     } catch(err){
-                        return `/fs/assets/images/entity/png/matrix.png?issys=true&type=open`;
+                        return `/static/assets/images/entity/png/matrix.png`;
                     }
                     
                 }
@@ -93,21 +93,14 @@
             created(){
                 this.loadForm();
             },
-            mounted() {
-                this.$nextTick(()=>{
-                    
-                })
-            },
-            computed: {
-                
-            },
             methods: {
                 onErrorPickIcon(e){
                     _.extend(this.model,{path:"/matrix"});
                 },
                 loadForm(){
-                    this.model = fsHandler.callFsJScript("/matrix/omdb/form.js", encodeURIComponent(this.term)).message;
-                    console.log(this.model)
+                    fsHandler.callFsJScriptAsync("/matrix/omdb/form.js", encodeURIComponent(this.term)).then((rtn)=>{
+                        this.model = rtn.message;
+                    });
                 },
                 toggleFormStyle(){
                     this.labelPosition = _.sample(_.xor(['top','right','left'],[this.labelPosition]));

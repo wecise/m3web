@@ -685,6 +685,10 @@ class Window {
             headerControls: { maximize: 'remove' },
             headerRemove:  false,
             content:        template,
+            draggable: {
+                handle:  "div.jsPanel-hdr, div.jsPanel-ftr,header.jsPanel-control,.el-header,.el-footer.draggable",
+                opacity: 0.8
+            },
             callback: function(){
                 $(".jsPanel").css({
                     "position":"absoulate",
@@ -728,6 +732,10 @@ class Window {
             headerControls: { maximize: 'remove' },
             headerRemove:  false,
             content:        template,
+            draggable: {
+                handle:  "div.jsPanel-hdr, div.jsPanel-ftr,header.jsPanel-control,.el-header,.el-footer.draggable",
+                opacity: 0.8
+            },
             callback: function(){
                 $(".jsPanel").css({
                     "position":"absoulate",

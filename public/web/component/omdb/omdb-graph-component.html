@@ -17,15 +17,12 @@
 		}
 
 		#tools {
-			z-index: 100;
-			position: absolute;
+			position: relative;
 			overflow: hidden;
-			top: 0px;
-			left: 0px;
 			width: 100%;
 			height: 30px;
             line-height: 30px;
-			padding: 2px 4px;
+			padding: 10px 0 0 0;
 			background: #f2f2f2;
             display: flex;
 		}
@@ -45,13 +42,13 @@
 	
 	/*----------  最外层element会自动增加组件同名 class="omdb-graph-component"  ----------*/
 	<template>
-		<div :id="id">
-			<div id="container"></div>
-			<div id="nav">
+		<el-container :id="id" style="height:100%;">
+			<el-header id="nav" style="height:30px;line-height: 30px; padding:0px;">
 				<div id="tools"></div>
 				<div id="outlineContainer"></div>
-			</div>
-		</div>
+            </el-header>
+            <el-main id="container"></el-main>
+		</el-container>
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
@@ -134,7 +131,7 @@
                     self.model.graph.container.style.position = 'releative';
                     self.model.graph.container.style.overflow = 'hidden';
                     self.model.graph.container.style.left = '0px';
-                    self.model.graph.container.style.top = '30px';
+                    self.model.graph.container.style.top = '0px';
                     self.model.graph.container.style.right = '0px';
                     self.model.graph.container.style.bottom = '0px';
                     document.getElementById(self.id).appendChild(self.model.graph.container);
@@ -622,7 +619,6 @@
                 const self = this;
 
                 let content = document.getElementById('tools');
-                content.style.padding = '4px';
 
                 let tb = new mxToolbar(content);
 

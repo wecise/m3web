@@ -1249,15 +1249,14 @@ class FsHandler {
             }
 
             await jQuery.ajax({
-                url: `/script/exec/js?input=${term}&isfile=true`,
+                //url: `/script/exec/js?input=${term}&isfile=true`,
+                url: `/script/exec/js?filepath=${name}`,
                 type: "POST",
-                data: name,
                 async: true,
+                //data: name,
+                data: { input: term, isfile: true },
                 dataType: 'json',
-                contentType: false,
-                beforeSend(xhr) {
-                    
-                },
+                beforeSend(xhr) {},
                 complete(xhr, textStatus) {
                     //消耗时间
                     let now = _.now();
@@ -1341,14 +1340,128 @@ class FsHandler {
     *       参数：
     *          url
     */
-    async traceLogAsync(type,name,limit,positon) {
+    async traceLogAsync(type,name,param) {
+
+        let rtn = null;
+        let stime = _.now();
+        
+        try {
+            
+            let url = `/consolelog/${type}?name=${encodeURIComponent( name.replace(/\/script/g,"") )}&limit=${param.limit}`;
+            if(!_.isEmpty(param.level)){
+                url = `${url}&level=${param.level.join("&level=")}`;
+            }
+            await jQuery.ajax({
+                url: url,
+                type: "GET",
+                dataType: 'json',
+                async: true,
+                beforeSend(xhr) {
+                },
+                complete(xhr, textStatus) {
+                    //消耗时间
+                    let now = _.now();
+                    let timeDiff = moment(now).diff(moment(stime), "millisecond");
+                    if(timeDiff > 1000){
+                        _.extend(rtn, { consume: moment(now).diff(moment(stime), "seconds") + ' 秒' }); 
+                    } else {
+                        _.extend(rtn, { consume: timeDiff + ' 毫秒' }); 
+                    }
+                },
+                success(data, textStatus, xhr) {
+
+                    userHandler.ifSignIn(data);
+                    rtn = data;
+                },
+                error(xhr, textStatus, errorThrown) {
+                    rtn = xhr.responseText;
+                }
+            });
+        } catch(err){
+            rtn = err;
+
+            //消耗时间
+            let now = _.now();
+            let timeDiff = moment(now).diff(moment(stime), "millisecond");
+            if(timeDiff > 1000){
+                _.extend(rtn, { consume: moment(now).diff(moment(stime), "seconds") + ' 秒' }); 
+            } else {
+                _.extend(rtn, { consume: timeDiff + ' 毫秒' }); 
+            }
+        }
+
+        return rtn;
+
+    };
+
+    /*
+    *   删除日志内容
+    *
+    *       参数：
+    *          name  rule/trigger/serverjs
+    */
+    async deleteLogAsync(type,name) {
 
         let rtn = null;
         let stime = _.now();
         try {
             await jQuery.ajax({
-                url: `/consolelog/${type}?name=${encodeURIComponent( name.replace(/\/script/g,"") )}&limit=${limit}`,
-                type: "GET",
+                url: `/consolelog/${type}?name=${encodeURIComponent( name.replace(/\/script/g,"") )}`,
+                type: "DELETE",
+                dataType: 'json',
+                async: true,
+                beforeSend(xhr) {
+                },
+                complete(xhr, textStatus) {
+                    //消耗时间
+                    let now = _.now();
+                    let timeDiff = moment(now).diff(moment(stime), "millisecond");
+                    if(timeDiff > 1000){
+                        _.extend(rtn, { consume: moment(now).diff(moment(stime), "seconds") + ' 秒' }); 
+                    } else {
+                        _.extend(rtn, { consume: timeDiff + ' 毫秒' }); 
+                    }
+                },
+                success(data, textStatus, xhr) {
+
+                    userHandler.ifSignIn(data);
+                    rtn = data;
+                },
+                error(xhr, textStatus, errorThrown) {
+                    rtn = xhr.responseText;
+                }
+            });
+        } catch(err){
+            rtn = err;
+
+            //消耗时间
+            let now = _.now();
+            let timeDiff = moment(now).diff(moment(stime), "millisecond");
+            if(timeDiff > 1000){
+                _.extend(rtn, { consume: moment(now).diff(moment(stime), "seconds") + ' 秒' }); 
+            } else {
+                _.extend(rtn, { consume: timeDiff + ' 毫秒' }); 
+            }
+        }
+
+        return rtn;
+
+    };
+
+    /*
+    *   清空日志
+    *
+    *       参数：
+    *          name  rule/trigger/serverjs
+    */
+    async truncateLogAsync(type) {
+
+        let rtn = null;
+        let stime = _.now();
+        try {
+            await jQuery.ajax({
+                url: `/consolelog/${type}/truncate`,
+                type: "DELETE",
                 dataType: 'json',
                 async: true,
                 beforeSend(xhr) {
