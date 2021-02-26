@@ -464,33 +464,39 @@ class Probe extends Matrix {
                                                 <mx-tag domain='probe' :model.sync="scope.row.tags" :id="scope.row.id" limit="1"></mx-tag>
                                             </template>
                                         </el-table-column>
+                                        <el-table-column label="状态" width="120">
+                                            <template slot-scope="scope">
+                                                <el-tooltip content="在线" open-delay="800" v-if="scope.row.status == '1'">
+                                                    <span><i class="el-icon-video-play" style="font-size:16px;color: #4caf50;"></i> 在线</span>
+                                                </el-tooltip>
+                                                <el-tooltip content="停止" open-delay="800" v-else>
+                                                    <span><i class="el-icon-video-pause" style="font-size:16px;color: #ff0000;"></i> 断开</span>
+                                                </el-tooltip>
+                                            </template>
+                                        </el-table-column>
                                         <el-table-column label="Toe探针" width="120">
                                             <template slot-scope="scope">
-                                                <el-tooltip content="启动" open-delay="500" v-if="!_.isEmpty(scope.row.agentstatus) && scope.row.agentstatus.toe == '1'">
-                                                    <el-button type="text">
-                                                        启动中
-                                                    </el-button>
+                                                <el-tooltip content="已部署" open-delay="800" v-if="!_.isEmpty(scope.row.agentstatus) && scope.row.agentstatus.toe == '1'">
+                                                    <span>已部署</span>
                                                 </el-tooltip>
-                                                <el-tooltip content="停止" open-delay="500" v-else>
-                                                    <el-button type="text">
-                                                        停止中
-                                                    </el-button>
+                                                <el-tooltip content="未部署" open-delay="800" v-else>
+                                                    <span></span>
                                                 </el-tooltip>
                                             </template>
                                         </el-table-column>
                                         <el-table-column label="Zabbix探针" width="120">
                                             <template slot-scope="scope" v-if="scope.row.iszabbix == 1">
-                                                <el-tooltip content="启动中，点击停止" open-delay="500" v-if="scope.row.agentstatus.zabbix == '1'">
+                                                <el-tooltip content="已部署" open-delay="800" v-if="scope.row.agentstatus.zabbix == '1'">
                                                     <el-button type="success" @click="onStop(scope.row,scope.$index)">
-                                                        <i class="el-icon-video-pause"></i> 启动中
+                                                        <span>已部署</span>
                                                     </el-button>
                                                 </el-tooltip>
-                                                <el-tooltip content="停止中，点击启动" open-delay="500" v-else>
+                                                <el-tooltip content="未部署" open-delay="800" v-else>
                                                     <el-button type="danger" @click="onStart(scope.row,scope.$index)">
-                                                        <i class="el-icon-video-play"></i> 停止中
+                                                        <span></span>
                                                     </el-button>
                                                 </el-tooltip>
-                                                <!--el-tooltip content="重启" open-delay="500">
+                                                <!--el-tooltip content="重启" open-delay="800">
                                                     <el-button type="text" icon="el-icon-refresh" @click="onRestart(scope.row,scope.$index)"></el-button>
                                                 </el-tooltip-->
                                             </template>

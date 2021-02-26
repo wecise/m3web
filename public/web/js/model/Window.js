@@ -61,7 +61,7 @@ class Window {
                     "position":"absoulate",
                     "z-index": "1000"
                 });
-                
+
                 $(".jsPanel-headerbar",this).css({
                     "min-height": "28px",
                     "border-bottom": "none"
@@ -75,7 +75,8 @@ class Window {
                     "min-height": "28px"
                 });
                 $(".jsPanel-titlebar h3").css({
-                    "font-size": "12px"
+                    "font-size": "12px",
+                    "line-height": "unset"
                 });
                 
             },

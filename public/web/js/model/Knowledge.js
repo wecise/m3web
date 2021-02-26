@@ -384,10 +384,19 @@ class Knowledge {
                                         // 刷新
                                         self.onRefresh(item,index);
 
+                                        this.$message({
+                                            type: "success",
+                                            dangerouslyUseHTMLString: true,
+                                            message: `上传成功！`
+                                        })
+
                                     },
                                     onError(res,file,FileList){
-                                        
-
+                                        this.$message({
+                                            type: "error",
+                                            dangerouslyUseHTMLString: true,
+                                            message: `上传失败，请确认！`
+                                        })
                                     },
                                     onRemove(file, fileList) {
                                         let rtn = fsHandler.fsDelete(item.fullname,file.name);

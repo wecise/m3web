@@ -1027,7 +1027,7 @@ Vue.component("mx-consolelog",{
                             </el-col>
                             
                             <el-col :span="19" style="padding-left:10px;">
-                                <el-checkbox-group v-model="consolelog.level">
+                                <el-checkbox-group v-model="consolelog.level" class="mx-consolelog-level">
                                     <el-checkbox :label="item[0].toLowerCase()" v-for="item in mx.global.register.consolelog.level">#{item[1]}#</el-checkbox>
                                 </el-checkbox-group>
                             </el-col>
@@ -1054,7 +1054,7 @@ Vue.component("mx-consolelog",{
     watch:{
         'dt.rows':{
             handler(val){
-                if(val !== dt.oldRows && !_.isEmpty(val)){
+                if(val !== this.dt.oldRows && !_.isEmpty(val)){
                     let arr = _.orderBy(val,['edtime'],['desc']);
                     let preFix = ['级别','时间','摘要'].join("  ");
                     let csv = _.concat(preFix,_.map(arr,(v)=>{
@@ -1124,13 +1124,6 @@ Vue.component("mx-consolelog",{
             this.editor.setTheme("ace/theme/"+this.options.theme);
 
             this.initTheme();
-        },
-        onReset(){
-            let item = {class:"/matrix/consolelog/scriptjs", ids: _.map(this.dt.rows,'id').join("', '"), ifDeleteVersionData: this.ifDeleteVersionData};
-            
-            fsHandler.callFsJScriptAsync("/matrix/fs/action-by-delete.js",encodeURIComponent(JSON.stringify(item))).then( ()=>{
-                this.onLoad();
-            } );
         },
         onLoad(){
             fsHandler.traceLogAsync(this.logType,this.fullname,this.consolelog).then( (rtn)=>{

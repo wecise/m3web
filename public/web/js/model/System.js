@@ -3467,7 +3467,9 @@ class System {
 														</span>
 													</el-header>
 													<el-main styl="display:flex;flex-wrap:wrap;" v-if="!_.isEmpty(selectedNodes)">
+														
 														<span v-for="item,index in _.filter(selectedNodes,{type:','})" :key="item.id" v-if="!_.isEmpty(item.nodes)">
+															<el-divider content-position="left" v-if="!_.isEmpty(_.keys(_.groupBy(item.nodes,'domain')))">#{ _.keys(_.groupBy(item.nodes,'domain'))[0]  }#</el-divider>
 															<el-tag
 																:key="tag.id"
 																effect="plain"
@@ -3485,6 +3487,7 @@ class System {
 															:key="item.id"
 															style="margin:5px;width:100%;max-height:300px;overflow:auto;display:flex;flex-wrap: wrap;border: 1px solid #b3d8ff;color: #409eff;border-radius: 5px;"
 															v-if="!_.isEmpty(item.nodes)">
+															<el-divider content-position="left" v-if="!_.isEmpty(_.keys(_.groupBy(item.nodes,'domain')))">#{ _.keys(_.groupBy(item.nodes,'domain'))[0]  }#</el-divider>
 															<el-tag
 																:key="tag.id"
 																:disable-transitions="false"
@@ -3496,6 +3499,7 @@ class System {
 															</el-tag>
 															<el-button type="text" icon="el-icon-close" style="float:right;" @click="onTagGroupClose(item)"></el-button>
 														</span>
+														
 													</el-main>
 												</el-container>
 											</el-col>
@@ -3640,7 +3644,8 @@ class System {
 						onSelectByRel(type){
 							
 							// Tag用
-							let nodes = this.$refs.tree.getCheckedNodes(false,false);
+							// let nodes = this.$refs.tree.getCheckedNodes(false,false);
+							let nodes = this.$refs.tree.getCheckedNodes(true,false);
 							// Tlist用
 							let data = this.$refs.tree.getCheckedNodes(true,false);
 
@@ -3657,8 +3662,6 @@ class System {
 
 							this.selectedNodes.push( {id: id, title: title, type: type, nodes: nodes, data: data} );
 
-							//console.log(111,JSON.stringify(this.selectedNodes))
-							
 							// 选过的禁用
 							//this.onDisabledNodes(nodes,true);
 							this.onResetChecked();
@@ -5543,7 +5546,7 @@ class System {
 																	@count:selectedApi="(count)=>{ this.count.api = count;}"
 																	:roleGroup="dialog.permission.row"></api-permission>
 															</el-tab-pane>
-															<el-tab-pane name="tagdir">
+															<!--el-tab-pane name="tagdir">
 																<span slot="label"><i class="el-icon-collection-tag"></i> 标签权限 (#{ count.tag }#)</span>
 																<tagdir-select :model="{parent:'/system',name:'tagdir_tree_data.js',domain:'*'}" 
 																	:rowData="dialog.permission"
@@ -5551,7 +5554,7 @@ class System {
 																	@update:selectedTag="()=>{ this.initData(); }"
 																	ref="tagdirTree"
 																	v-if="!_.isEmpty(dialog.permission.row)"></tagdir-select>
-															</el-tab-pane>
+															</el-tab-pane-->
 														</el-tabs>
 													</el-main>
 												</el-container>
@@ -5681,19 +5684,42 @@ class System {
 							
 						},
 						initData(){
-							const self = this;
 							
+							fsHandler.callFsJScriptAsync("/matrix/system/perm/getGroupList.js","").then( (rtn)=>{
+								
+								this.dt.rows = rtn.message;
+								
+								try{
+									_.extend(this.dt, {columns: _.map(this.dt.columns, function(v){
+										
+										if(_.isUndefined(v.visible)){
+											_.extend(v, { visible: true });
+										}
+		
+										if(!v.render){
+											return v;
+										} else {
+											return _.extend(v, { render: eval(v.render) });
+										}
+										
+									})});
+									
+								} catch(err){
+									console.error(err);
+								}
+							} )
+
+							// const self = this;
 							// 过滤 "/" 角色组
-							userHandler.getGroupPermissionsByParentAsync({parent:""}).then( (rtn)=>{
+							/* userHandler.getGroupPermissionsByParentAsync({parent:""}).then( (rtn)=>{
 								this.dt.rows = _.sortBy(_.filter(rtn,(v)=>{ 
 													if(v.fullname != '/'){
 														let isParent = this.getRoleGroupChildrens(v.fullname);
 														return _.extend(v, {isParent: isParent}); 
 													}
 											}),['fullname'],['asc']);
-							} );
+							} ); 
 							
-
 							let init = function(){
 								
 								try{
@@ -5717,6 +5743,7 @@ class System {
 							};
 	
 							init();
+							*/
 							
 						},
 						rowClassName({row, rowIndex}){
@@ -5731,7 +5758,22 @@ class System {
 							this.initData();
 						},
 						onForward(fullname){
-							userHandler.getGroupPermissionsByParentAsync({parent: fullname}).then( (rtn)=>{
+
+							fsHandler.callFsJScriptAsync("/matrix/system/perm/getGroupList.js", encodeURIComponent(fullname)).then( (rtn)=>{
+								
+								if(!_.isEmpty(rtn.message)){
+									this.dt.rows = rtn.message;
+
+									if(fullname){
+										this.fullname = fullname.split("/");
+									} else {
+										this.fullname = ["/"];
+									}
+								}
+								
+							} )
+
+							/* userHandler.getGroupPermissionsByParentAsync({parent: fullname}).then( (rtn)=>{
 								
 								if(!_.isEmpty(rtn)){
 									this.dt.rows = _.map(rtn,(v)=>{
@@ -5745,7 +5787,7 @@ class System {
 										this.fullname = ["/"];
 									}
 								}
-							} );
+							} ); */
 							
 						},
 						onSelectionChange(val) {

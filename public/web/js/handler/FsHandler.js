@@ -1344,7 +1344,7 @@ class FsHandler {
 
         let rtn = null;
         let stime = _.now();
-        
+
         try {
             
             let url = `/consolelog/${type}?name=${encodeURIComponent( name.replace(/\/script/g,"") )}&limit=${param.limit}`;
@@ -1501,6 +1501,7 @@ class FsHandler {
         return rtn;
 
     };
+
 }
 
 var fsHandler = new FsHandler();
