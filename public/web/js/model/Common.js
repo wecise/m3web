@@ -2320,7 +2320,11 @@ Vue.component("mx-entity-new",{
 Vue.component("mx-entity-tree",{
     delimiters: ['#{', '}#'],
     props: {
-        root: String
+        root: String,
+        filterEnable: {
+            type: Boolean,
+            default: true
+        }
     },
     data(){
         return {
@@ -2329,11 +2333,11 @@ Vue.component("mx-entity-tree",{
                 children: 'children',
                 label: 'alias'
             },
-            filterText: ""
+            filterText: "",
         }
     },
     template:   `<el-container style="height:60vh;">
-                    <el-header style="height:40px;line-height:40px;padding:0px 10px;">
+                    <el-header style="height:40px;line-height:40px;padding:0px 10px;" v-if="filterEnable">
                         <el-input v-model="filterText" 
                             placeholder="搜索" size="mini"
                             clearable></el-input>
@@ -2414,6 +2418,8 @@ Vue.component("mx-entity-tree",{
                 window.FS_TREE_DATA = this.$refs.tree.data;
 
                 eventHub.$emit("MX-ENTITY-TREE-NODE",data);
+
+                this.$emit("node-click",data);
 
             } catch(err){
 

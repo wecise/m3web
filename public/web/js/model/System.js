@@ -1524,7 +1524,7 @@ class System {
 					},
 					template: 	`<el-container style="height:100%;">
 									
-									<el-header style="text-align: right; font-size: 12px;height:30px;line-height:30px;">
+									<el-header style="text-align: right; font-size: 12px;height:30px;line-height:30px;" v-if="window.COMPANY_OSPACE == 'matrix' && window.SignedUser_IsAdmin">
 										<span style="float:right;">
 											<el-tooltip content="刷新列表">
 												<el-button type="text" icon="el-icon-refresh" @click="initData">刷新</el-button>
@@ -1584,7 +1584,7 @@ class System {
 													<span  v-else>#{scope.row[item.field]}#</el-avatar>
 												</template>
 											</el-table-column>
-											<el-table-column label="操作" width="130" fixed="right">
+											<el-table-column label="操作" width="130" fixed="right" v-if="window.COMPANY_OSPACE == 'matrix' && window.SignedUser_IsAdmin">
 												<template slot-scope="scope">
 													<div>
 														<el-tooltip content="更新公司信息" open-delay="500" placement="top">
@@ -1640,10 +1640,26 @@ class System {
 						initData(){
 							try {
 								// rows
-								_.extend(this.dt, {rows:companyHandler.companyList().message});
-								this.dt.rows = _.map(this.dt.rows,(v)=>{
-									return _.extend(v,{enableFlag: '0'});
+								companyHandler.companyListAsync().then( (rtn)=>{
+									let rows = [];
+									
+									if( window.COMPANY_OSPACE == 'matrix' ){
+										rows = rtn.message;
+									} else {
+										rows = _.filter(rtn.message,(v)=>{
+											return v.ospace == window.COMPANY_OSPACE;
+										})
+									}
+
+									
+									
+									_.extend(this.dt, { rows: rows });
+									
+									this.dt.rows = _.map(this.dt.rows,(v)=>{
+										return _.extend(v,{enableFlag: '0'});
+									});
 								});
+								
 
 								// columns
 								let ext = fsHandler.callFsJScript("/matrix/company/company-list.js",null).message;
@@ -3337,6 +3353,314 @@ class System {
 					}
 				})
 
+				/* 标签域管理 */
+				Vue.component('domain-manage',{
+					delimiters: ['#{', '}#'],
+					template: 	`<el-container style="height:100%;">
+									<el-aside style="background:#f2f2f2;display:none;">
+										<el-container>
+											<el-header style="height:35px;line-height:35px;display:flex;position:relative;">
+												<h5 style="margin:0px;">选择标签域</h5>
+												<span style="position:absolute;right:10px;">
+													<el-button type="text" icon="el-icon-plus" @click="onNewDomain"></el-button>
+												</span>
+											</el-header>
+											<el-main style="padding:0px;">
+												<el-tree 
+													:data="tree.data" :props="tree.defaultProps" 
+													node-key="id"
+													@node-click="onNodeClick"
+													style="background:#f2f2f2;">
+													<span slot-scope="{ node, data }">
+														<span><i class="el-icon-wallet" style="color:#ff9800;"></i> #{data.title}#(#{ node.label }#)</span>
+													</span>	
+												</el-tree>
+											</el-main>
+										</el-container>
+									</el-aside>
+									<!--el-container-->
+										<el-header style="line-height:60px;display:flex;">
+											<h5 style="margin:0px;" v-if="tree.selected"><i class="el-icon-money"></i>  #{tree.selected.label}#</h5>
+											<span style="position: absolute;right: 30px;">
+											<el-popover
+												placement="top-start"
+												title="标题"
+												width="200"
+												trigger="hover"
+												content="从标签目录中提取标签域，并进行初始化。可反复执行。">
+												<el-button slot="reference" type="default" icon="el-icon-refresh" @click="onLoad(true)">初始化映射类</el-button>	
+											</el-popover>
+											
+											<el-button type="success" icon="el-icon-plus" @click="onNewDomain">新建映射类</el-button>
+											</span>
+										</el-header>
+										<el-main>
+											<el-table
+												:data="dt.rows"
+												stripe
+												border
+												style="width: 100%">
+												<el-table-column 
+													:key="index" 
+													v-for="(item,index) in dt.columns"
+													:prop="item.field"
+													:label="item.title"
+													v-if="item.visible">
+												</el-table-column>
+												<el-table-column
+													label="操作"
+													width="100">
+													<template slot-scope="scope">
+														<el-button @click="onDelete(scope.$index,scope.row)" type="text" size="small">删除</el-button>
+														<el-button @click="onEdit(scope.$index,scope.row)" type="text" size="small">编辑</el-button>
+													</template>
+												</el-table-column>
+											</el-table>
+										</el-main>
+										<el-footer style="line-height:60px;">
+											标签域: #{_.uniqBy(dt.rows,'name').length}#
+										</el-footer>
+									<!--/el-container-->
+									<el-dialog title="标签域管理" 
+										:visible.sync="dialog.domainAdd.show" 
+										:close-on-press-escape="false" 
+										:close-on-click-modal="false"
+										:destroy-on-close="true" 
+										v-if="dialog.domainAdd.show" width="50vw">
+										<el-container style="height:100%;">
+											<el-main style="overflow:hidden;padding:0px 10px;">
+												<el-form ref="form" :model="dialog.domainAdd.data" label-width="80px" v-if="dialog.domainAdd.data">
+													<el-form-item label="名称">
+														<el-input placeholder="名称" v-model="dialog.domainAdd.data.name">
+															<el-select v-model="dialog.domainAdd.data.name" slot="prepend" placeholder="请选择名称">
+																<el-option :label="item.name+'('+item.remark+')'" :value="item.name" :key="index" v-for="(item,index) in _.uniqBy(dt.rows,'name')"></el-option>
+															</el-select>
+														</el-input>
+													</el-form-item>
+													<el-form-item label="描述">
+														<el-input v-model="dialog.domainAdd.data.remark"></el-input>
+													</el-form-item>
+													<el-form-item label="对应类">
+														<el-input v-model="dialog.domainAdd.data.mclass" placeholder="选择对应类"
+															clearable
+															autofocus>
+															<template slot="prepend">
+																<el-dropdown trigger="hover" placement="top-end"  :hide-on-click="true">
+																	<el-tooltip content="选则类" open-delay="500">
+																		<el-button type="text" size="mini">
+																			<i class="el-icon-office-building" style="font-size:16px;"></i>
+																		</el-button>
+																	</el-tooltip>
+																	<el-dropdown-menu slot="dropdown">
+																		<el-dropdown-item>
+																			<template scope="scope">
+																				<mx-entity-tree root="/matrix" :filterEnable="false" ref="entityTree" @node-click="(data)=>{ dialog.domainAdd.data.mclass = data.class; }"></mx-entity-tree>
+																			</template>
+																		</el-dropdown-item>
+																	</el-dropdown-menu>
+																</el-dropdown>
+															</template>
+														</el-input>
+													</el-form-item>
+												</el-form>
+											</el-main>
+										</el-container>
+										<div slot="footer" class="dialog-footer">
+											<el-button type="default" @click="dialog.domainAdd.show = false;">关闭</el-button>
+											<el-button type="primary" @click="onSaveDomain(dialog.domainAdd.data)">确定</el-button>
+										</div>
+									</el-dialog>
+									<el-dialog title="编辑标签域" 
+										:visible.sync="dialog.domainEdit.show" 
+										:close-on-press-escape="false" 
+										:close-on-click-modal="false" 
+										:destroy-on-close="true" 
+										v-if="dialog.domainEdit.show" width="50vw">
+										<el-container style="height:100%;">
+											<el-main style="overflow:hidden;padding:0px 10px;">
+												<el-form ref="form" :model="dialog.domainEdit.data" label-width="80px" v-if="dialog.domainEdit.data">
+													<el-form-item label="名称">
+														<el-input v-model="dialog.domainEdit.data.name"></el-input>
+													</el-form-item>
+													<el-form-item label="描述">
+														<el-input v-model="dialog.domainEdit.data.remark"></el-input>
+													</el-form-item>
+													<el-form-item label="对应类">
+														<el-input v-model="dialog.domainEdit.data.mclass" placeholder="选择对应类"
+															clearable
+															autofocus>
+															<template slot="prepend">
+																<el-dropdown trigger="hover" placement="top-end"  :hide-on-click="true">
+																	<el-tooltip content="选则类" open-delay="500">
+																		<el-button type="text" size="mini">
+																			<i class="el-icon-office-building" style="font-size:16px;"></i>
+																		</el-button>
+																	</el-tooltip>
+																	<el-dropdown-menu slot="dropdown">
+																		<el-dropdown-item>
+																			<template scope="scope">
+																				<mx-entity-tree root="/matrix" :filterEnable="false" ref="entityTree" @node-click="(data)=>{ dialog.domainEdit.data.mclass = data.class; }"></mx-entity-tree>
+																			</template>
+																		</el-dropdown-item>
+																	</el-dropdown-menu>
+																</el-dropdown>
+															</template>
+														</el-input>
+													</el-form-item>
+												</el-form>
+											</el-main>
+										</el-container>
+										<div slot="footer" class="dialog-footer">
+											<el-button type="default" @click="dialog.domainEdit.show = false;">关闭</el-button>
+											<el-button type="primary" @click="onUpdateDomain(dialog.domainEdit.data)">确定</el-button>
+										</div>
+									</el-dialog>
+								</el-container>`,
+					data () {
+						return {
+							tree: {
+								data: [],
+								defaultProps: {
+									children: 'children',
+          							label: 'label'
+								},
+								selected: null
+							},
+							dt:{
+								rows: [],
+								columns: [{
+									field:"id",
+									title: "ID",
+									visible: false
+								},
+								{
+									field:"class",
+									title: "CLASS",
+									visible: false
+								},
+								{
+									field:"name",
+									title: "标签域",
+									visible: true
+								},
+								{
+									field:"mclass",
+									title: "对应类",
+									visible: true
+								},
+								{
+									field:"remark",
+									title: "备注",
+									visible: true
+								}],
+								selected: []
+							},
+							dialog: {
+								domainAdd: {
+									show: false,
+									data: {
+										name: "",
+										remark: "",
+										mclass: []
+									}
+								},
+								domainEdit: {
+									show: false,
+									data: null
+								}
+							}
+						}
+					},
+					created(){
+						this.onLoad(false);
+					},
+					mounted(){
+						
+					},
+					methods: {
+						onLoad(type){
+							fsHandler.callFsJScriptAsync("/matrix/system/domain/getDomains.js",type).then((rtn)=>{
+								this.tree.data = rtn.message;
+								this.dt.rows = rtn.message;
+							})
+						},
+						onNodeClick(data){
+							
+							this.tree.selected = data;
+
+							fsHandler.callFsJScriptAsync("/matrix/system/domain/getClassByDomain.js", encodeURIComponent(data.label) ).then( (rtn)=>{
+								this.dt.rows = rtn.message;
+							});
+						},
+						onDelete(index,data){
+							this.$confirm('确定要删除, 是否继续?', '提示', {
+								confirmButtonText: '确定',
+								cancelButtonText: '取消',
+								type: 'warning'
+							  }).then(() => {
+									let param = encodeURIComponent( JSON.stringify( _.extend( data, {type: 'delete'} ) ) );
+									fsHandler.callFsJScriptAsync("/matrix/system/domain/actions.js",param).then((rtn)=>{
+										this.$message({
+											type: "success",
+											message: "删除成功"
+										})
+										this.onLoad(false);
+									})
+							  }).catch(() => {
+								this.$message({
+								  type: 'info',
+								  message: '已取消删除'
+								});          
+							  });
+						},
+						onEdit(index,row){
+							this.dialog.domainEdit.data = row;
+							this.dialog.domainEdit.show = true;
+							setTimeout(()=>{
+								$(".el-dialog__body .el-input--small .el-input__inner").css("height","40px");
+								$(".el-dialog__body .el-input--small .el-input__inner").css("line-height","40px");
+							},50)
+						},
+						onSave(index,row){
+							
+						},
+						onNewDomain(){
+							this.dialog.domainAdd.data = {
+								name: "",
+								remark: "",
+								mclass: []
+							};
+							this.dialog.domainAdd.show = true;
+							setTimeout(()=>{
+								$(".el-dialog__body .el-input--small .el-input__inner").css("height","40px");
+								$(".el-dialog__body .el-input--small .el-input__inner").css("line-height","40px");
+							},50)
+						},
+						onSaveDomain(data){
+							let param = encodeURIComponent( JSON.stringify( _.extend( data, {type: 'add'} ) ) );
+							fsHandler.callFsJScriptAsync("/matrix/system/domain/actions.js",param).then((rtn)=>{
+								this.$message({
+									type: "success",
+									message: "新建成功"
+								})
+								this.dialog.domainAdd.show = false;
+								this.onLoad(false);
+							})
+						},
+						onUpdateDomain(data){
+							let param = encodeURIComponent( JSON.stringify( _.extend( data, {type: 'edit'} ) ) );
+							fsHandler.callFsJScriptAsync("/matrix/system/domain/actions.js",param).then((rtn)=>{
+								this.$message({
+									type: "success",
+									message: "新建成功"
+								})
+								this.dialog.domainEdit.show = false;
+								this.onLoad(false);
+							})
+						}
+					}
+				})
+
 				// tagdir 组合选择树
 				Vue.component("tagdir-group-select",{
 					delimiters: ['#{', '}#'],
@@ -3368,8 +3692,8 @@ class System {
 					template: `<el-container>
 									<el-header style="height:auto;float:left;display:flex;flex-wrap:wrap;padding:0px;">
 										<el-radio-group v-model="selectedDomain">
-											<el-button v-for="item,key in domain.mapping" :key="item.title" style="margin:5px;">
-												<el-radio :label="key">#{item.title}#</el-radio>
+											<el-button v-for="item,key in domain.mapping" :key="item.id" style="margin:5px;">
+												<el-radio :label="item.name">#{item.remark || item.name}#</el-radio>
 											</el-button>
 										</el-radio-group>	
 									</el-header>
@@ -3386,7 +3710,7 @@ class System {
 														</el-input>
 														<el-checkbox v-model="ifCheckStrictly" label="节点关联" style="margin-left:20px;float:right;"></el-checkbox>
 													</el-header>
-													<el-main>
+													<el-main style="overflow:hidden;">
 														<el-tree 
 															node-key="id"
 															show-checkbox
@@ -3399,7 +3723,7 @@ class System {
 															:props="defaultProps" 
 															:check-strictly="!ifCheckStrictly"
 															@check-change="onCheckChange"
-															style="background: transparent;"
+															style="background: transparent;height:100%;overflow:auto;"
 															ref="tree">
 															<span slot-scope="{ node, data }" style="width:100%;height:30px;line-height: 30px;"  @mouseenter="onMouseEnter(data)" @mouseleave="onMouseLeave(data)">
 																<span class="el-icon-price-tag" style="color: #f8a502;font-size: 14px;"></span>
@@ -3468,8 +3792,8 @@ class System {
 													</el-header>
 													<el-main styl="display:flex;flex-wrap:wrap;" v-if="!_.isEmpty(selectedNodes)">
 														
-														<span v-for="item,index in _.filter(selectedNodes,{type:','})" :key="item.id" v-if="!_.isEmpty(item.nodes)">
-															<el-divider content-position="left" v-if="!_.isEmpty(_.keys(_.groupBy(item.nodes,'domain')))">#{ _.keys(_.groupBy(item.nodes,'domain'))[0]  }#</el-divider>
+														<span v-for="item,index in _.filter(selectedNodes,{type:','})" :key="item.id" v-if="!_.isEmpty(item.data)">
+															<!--el-divider content-position="left" v-if="!_.isEmpty(_.keys(_.groupBy(item.data,'domain')))">#{ _.keys(_.groupBy(item.data,'domain'))[0]  }#</el-divider-->
 															<el-tag
 																:key="tag.id"
 																effect="plain"
@@ -3478,7 +3802,7 @@ class System {
 																:disable-transitions="false"
 																@close="onTagClose(tag,item)" 
 																style="margin:5px;width:100%;"
-																v-for="tag,idx in item.nodes"
+																v-for="tag,idx in item.data"
 																v-if="tag.name">
 																#{ tag.path }# 
 															</el-tag>
@@ -3486,14 +3810,14 @@ class System {
 														<span v-for="item,index in _.filter(selectedNodes,{type:'+'})" 
 															:key="item.id"
 															style="margin:5px;width:100%;max-height:300px;overflow:auto;display:flex;flex-wrap: wrap;border: 1px solid #b3d8ff;color: #409eff;border-radius: 5px;"
-															v-if="!_.isEmpty(item.nodes)">
-															<el-divider content-position="left" v-if="!_.isEmpty(_.keys(_.groupBy(item.nodes,'domain')))">#{ _.keys(_.groupBy(item.nodes,'domain'))[0]  }#</el-divider>
+															v-if="!_.isEmpty(item.data)">
+															<!--el-divider content-position="left" v-if="!_.isEmpty(_.keys(_.groupBy(item.data,'domain')))">#{ _.keys(_.groupBy(item.data,'domain'))[0]  }#</el-divider-->
 															<el-tag
 																:key="tag.id"
 																:disable-transitions="false"
 																@close="onTagClose(tag,item)"
 																style="margin:5px;"
-																v-for="tag,idx in item.nodes"
+																v-for="tag,idx in item.data"
 																v-if="tag.name">
 																#{tag.path}#
 															</el-tag>
@@ -3520,7 +3844,9 @@ class System {
 						  this.$refs.tree.filter(val);
 						},
 						selectedDomain(val){
+							this.selectedNodes = [];
 							this.nodes = _.filter(this.filterNodes,{domain:val});
+							this.onSetSelected();
 						},
 						selectedKeys(val){
 							this.$emit("count:selectedTag", val.length);
@@ -3532,9 +3858,10 @@ class System {
 					},
 					methods:{
 						initDomain(){
-							fsHandler.fsContentAsync("/script/matrix/tags/","tagDomainMapping.json").then((rtn)=>{
-								this.domain.mapping = JSON.parse(rtn);
-							});
+							fsHandler.callFsJScriptAsync("/matrix/system/domain/getDomains.js",false).then((rtn)=>{
+								this.domain.mapping = rtn.message;
+								this.selectedDomain = _.head(this.domain.mapping).label;
+							})
 						},
 						loadNodes(){
 							fsHandler.callFsJScriptAsync(`${['/matrix'+this.model.parent,this.model.name].join("/")}`).then( (val)=>{
@@ -3548,30 +3875,12 @@ class System {
 						},
 						onSetSelected(){
 							
-							fsHandler.callFsJScriptAsync("/matrix/system/getTlistById.js", encodeURIComponent( this.rowData.row.id ) ).then( (rtn)=>{
+							let param = encodeURIComponent( JSON.stringify({domain: this.selectedDomain, roleGroup: this.rowData.row}) );
+							fsHandler.callFsJScriptAsync("/matrix/system/perm/byTagdir/getPermByGroup.js", param ).then( (rtn)=>{
+								if(_.isEmpty(rtn.message)) return;
 								this.selectedNodes = rtn.message;
 							} );
 							
-						},
-						findNodeById(id){
-							let rtn = null;
-
-							let find = function(nodes){
-								_.forEach(nodes,(v)=>{
-									
-									if(v.id == id){
-										rtn = v;
-									}
-
-									if(v.nodes){
-										find(v.nodes)
-									}
-								})	
-							} 
-
-							find(this.nodes);
-
-							return rtn;
 						},
 						onMouseEnter(data){
 							this.$set(data, 'show', true)
@@ -3645,14 +3954,14 @@ class System {
 							
 							// Tag用
 							// let nodes = this.$refs.tree.getCheckedNodes(false,false);
-							let nodes = this.$refs.tree.getCheckedNodes(true,false);
+							//let nodes = this.$refs.tree.getCheckedNodes(true,false);
 							// Tlist用
 							let data = this.$refs.tree.getCheckedNodes(true,false);
+							console.log(1,data)
+							if(_.isEmpty(data)) return false;
 
-							if(_.isEmpty(nodes)) return false;
-
-							let id = objectHash.sha1(JSON.stringify(nodes));
-							let title = _.truncate(_.map(nodes,'name').join(" "),{
+							let id = objectHash.sha1(JSON.stringify(data));
+							let title = _.truncate(_.map(data,'name').join(" "),{
 								'length': 10,
 								'omission': ' ...'
 							});
@@ -3660,7 +3969,7 @@ class System {
 							// 已选择
 							if(_.find(this.selectedNodes, {id:id})) return false;
 
-							this.selectedNodes.push( {id: id, title: title, type: type, nodes: nodes, data: data} );
+							this.selectedNodes.push( {id: id, title: title, type: type, data: data} );
 
 							// 选过的禁用
 							//this.onDisabledNodes(nodes,true);
@@ -3670,33 +3979,58 @@ class System {
 						// 标签授权
 						onUpdateRoleGroupByTagGroup(){
 							
-							if(_.isEmpty(this.selectedNodes)){
+							/* if(_.isEmpty(this.selectedNodes)){
 								this.$message({
 									type: "warning",
 									message: "请选择标签组"
 								})
 								return false;
-							}
+							} */
 
 							this.loading = true;
 
 							// 更新
-							let term =  JSON.stringify( { roleGroup: [this.rowData.row], data: this.selectedNodes, logical: this.logical?',':'+'} );
+							let domain = _.groupBy(this.domain.mapping,'name');
+							let term =  JSON.stringify( { domain: domain[this.selectedDomain], roleGroup: this.rowData.row, data: this.selectedNodes, logical: this.logical?',':'+'} );
 							
-							console.log(222,JSON.stringify(this.selectedNodes))
-							
-							fsHandler.callFsJScriptAsync("/matrix/system/updateGroupByTagdirGroup.js", encodeURIComponent(term)).then( (rtn)=>{
-								this.$emit('update:selectedTag');
-								this.$message({
-									type: "success",
-									message: "更新标签权限成功！"
-								})
-
-								// 标签相应的类需要授权
-								fsHandler.callFsJScriptAsync("/matrix/system/updateRoleGroupByDataAfterTagdirGroup.js", term);
-
+							fsHandler.callFsJScriptAsync("/matrix/system/perm/byTagdir/setPermByTagdirGroup.js", encodeURIComponent(term)).then( (rtn)=>{
+								
 								this.loading = false;
-							} );
+
+								if(rtn.message){
+
+									if(rtn.message.status !== 'error'){
+										
+										this.$message({
+											type: "success",
+											message: "更新标签权限成功！"
+										})
+		
+										this.$emit('update:selectedTag');
+									} else {
+										this.$message({
+											type: "error",
+											message: "更新标签权限失败：" + typeof rtn.message == 'object' ? _.truncate(JSON.stringify(rtn.message.message),{
+												'length': 500,
+												'separator': ' '
+											}) : _.truncate(rtn.message.message,{
+												'length': 500,
+												'separator': ' '
+											})
+										})
+									}
+
+								} else {
+									
+									this.$message({
+										type: "success",
+										message: "更新标签权限成功！"
+									})
+	
+									this.$emit('update:selectedTag');
+								}
+								
+							})
 						}
 					}
 				})
@@ -3962,7 +4296,7 @@ class System {
 													<span v-else>
 														<i class="el-icon-c-scale-to-original" style="color:#0088cc;"></i>
 														<span>#{node.label}#</span>
-														<el-checkbox-group v-model="data.perms" style="float: right;padding-right: 10px;" v-if="data.checked">
+														<el-checkbox-group v-model="data.perms" style="float: right;padding-right: 10px;display:none;" v-if="data.checked">
 															<el-checkbox label="add">添加</el-checkbox>
 															<el-checkbox label="delete">删除</el-checkbox>
 															<el-checkbox label="edit">编辑</el-checkbox>
@@ -4020,14 +4354,15 @@ class System {
 							} );
 						},
 						onSetSelected(){
-							fsHandler.callFsJScriptAsync("/matrix/system/getSappById.js", this.rowData.row.id).then( (rtn)=>{
-								let sapp = rtn.message;
+							let param = encodeURIComponent( JSON.stringify(this.rowData.row) );
+							fsHandler.callFsJScriptAsync("/matrix/system/perm/byApp/getPermByApp.js", param).then( (rtn)=>{
+								let apps = rtn.message;
 
-								_.forEach(sapp,(v,k)=>{
-									let cPerms = JSON.parse(v);
-									_.extend( this.findNodeById(k), { perms: cPerms, checked:true } );
+								_.forEach(apps,(v)=>{
+									_.extend( this.findNodeById(v.id), { perms: ["add","delete","edit","list"], checked:true } );
 								});
-								this.selectedKeys = _.keys(sapp);
+
+								this.selectedKeys = _.values(_.map(apps,'id'));
 							} );
 						},
 						onFilterNode(value, data) {
@@ -4107,7 +4442,6 @@ class System {
 								}
 							} else {
 								this.$set(data, 'checked', false);
-								//this.$set(data, 'perms', []);
 							}
 
 							// 更新
@@ -4124,14 +4458,43 @@ class System {
 							this.loading = true;
 
 							// 更新
-							let term = encodeURIComponent( JSON.stringify( { roleGroup: [this.rowData.row], data: this.selectedNodes } ) );
+							let param = encodeURIComponent( JSON.stringify( { roleGroup: this.rowData.row, data: this.selectedNodes } ) );
 							
-							fsHandler.callFsJScriptAsync("/matrix/system/updateGroupByApp.js", term).then( (rtn)=>{
-								this.$emit('update:selectedApp');
-								this.$message({
-									type: "success",
-									message: "更新应用权限成功！"
-								})
+							fsHandler.callFsJScriptAsync("/matrix/system/perm/byApp/setPermByApp.js", param).then( (rtn)=>{
+								
+								if(rtn.message){
+
+									if(rtn.message.status !== 'error'){
+										
+										this.$message({
+											type: "success",
+											message: "更新应用权限成功！"
+										})
+		
+										this.$emit('update:selectedApp');
+									} else {
+										this.$message({
+											type: "error",
+											message: "更新应用权限失败：" + typeof rtn.message.message == 'object' ? _.truncate(JSON.stringify(rtn.message.message),{
+												'length': 500,
+												'separator': ' '
+											}) : _.truncate(rtn.message.message,{
+												'length': 500,
+												'separator': ' '
+											})
+										})
+									}
+
+								} else {
+									
+									this.$message({
+										type: "success",
+										message: "更新标签权限成功！"
+									})
+	
+									this.$emit('update:selectedApp');
+								}
+								
 								// 刷新应用缓存，针对应用权限过滤
 								userHandler.refreshAppCache();
 
@@ -5533,13 +5896,13 @@ class System {
 																	@count:selectedApp="(count)=>{ this.count.app = count;}"
 																	@update:selectedApp="()=>{ this.initData(); }" v-if="!_.isEmpty(dialog.permission.row)"></app-permission>
 															</el-tab-pane>	
-															<el-tab-pane name="data" lazy>
+															<!--el-tab-pane name="data" lazy>
 																<span slot="label"><i class="el-icon-bank-card"></i> 数据权限 (#{ count.data }#)</span>
 																<data-permission root="/" :rowData="dialog.permission"
 																	@count:selectedData="(count)=>{ this.count.data = count;}"
 																	@update:selectedData="()=>{ this.initData(); }"
 																	ref="classTree"></data-permission>
-															</el-tab-pane>
+															</el-tab-pane-->
 															<el-tab-pane name="api" lazy>
 																<span slot="label"><i class="el-icon-tickets"></i> 接口权限 (#{ count.api }#)</span>
 																<api-permission 
@@ -5685,7 +6048,7 @@ class System {
 						},
 						initData(){
 							
-							fsHandler.callFsJScriptAsync("/matrix/system/perm/getGroupList.js","").then( (rtn)=>{
+							fsHandler.callFsJScriptAsync("/matrix/system/group/getGroupList.js","").then( (rtn)=>{
 								
 								this.dt.rows = rtn.message;
 								
@@ -5759,7 +6122,7 @@ class System {
 						},
 						onForward(fullname){
 
-							fsHandler.callFsJScriptAsync("/matrix/system/perm/getGroupList.js", encodeURIComponent(fullname)).then( (rtn)=>{
+							fsHandler.callFsJScriptAsync("/matrix/system/group/getGroupList.js", encodeURIComponent(fullname)).then( (rtn)=>{
 								
 								if(!_.isEmpty(rtn.message)){
 									this.dt.rows = rtn.message;
@@ -6777,30 +7140,34 @@ class System {
 												<i class="el-icon-user"></i>
 												<span slot="title">用户和权限</span>
 											</el-menu-item>
-											<el-menu-item index="notify-manage">
+											<el-menu-item index="domain-manage">
+												<i class="el-icon-money"></i>
+												<span slot="title">标签域管理</span>
+											</el-menu-item>
+											<!--el-menu-item index="notify-manage">
 												<i class="el-icon-bell"></i>
 												<span slot="title">通知管理</span>
-											</el-menu-item>
+											</el-menu-item-->
 											<el-menu-item index="grok-manage">
 												<i class="el-icon-finished"></i>
 												<span slot="title">解析规则</span>
 											</el-menu-item>
-											<el-menu-item index="calendar-manage">
+											<!--el-menu-item index="calendar-manage">
 												<i class="el-icon-alarm-clock"></i>
 												<span slot="title">日历管理</span>
-											</el-menu-item>
+											</el-menu-item-->
 											<el-menu-item index="apps-manage">
 												<i class="el-icon-menu"></i>
 												<span slot="title">应用管理</span>
-											</el-menu-item>
-											<el-menu-item index="severity-manage">
+											</el-menu-item-->
+											<!--el-menu-item index="severity-manage">
 												<i class="el-icon-warning"></i>
 												<span slot="title">级别管理</span>
-											</el-menu-item>
-											<el-menu-item index="event-manage">
+											</el-menu-item-->
+											<!--el-menu-item index="event-manage">
 												<i class="el-icon-s-opportunity"></i>
 												<span slot="title">事件处理</span>
-											</el-menu-item>
+											</el-menu-item-->
 										</el-menu>
 									</el-aside>
 									<el-main style="padding:0px;overflow:hidden;" ref="mainView">
@@ -6847,15 +7214,6 @@ class System {
 							this.initNotifyTreeNodes();
 							this.initMaintainTreeNodes();
 
-							// this.split.inst = Split([this.$refs.leftView.$el, this.$refs.mainView.$el], {
-                            //     sizes: [15, 85],
-                            //     minSize: [0, 0],
-                            //     gutterSize: 5,
-                            //     gutterAlign: 'end',
-                            //     cursor: 'col-resize',
-                            //     direction: 'horizontal',
-                            //     expandToMin: true,
-                            // });
 						})
 					},
 					methods: {

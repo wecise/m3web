@@ -132,6 +132,40 @@ class CompanyHandler{
 
     };
 
+    async companyListAsync() {
+        let rtn = null;
+
+        try{
+            await jQuery.ajax({
+                url: '/companys',
+                dataType: 'json',
+                type: 'GET',
+                async: false,
+                beforeSend: function (xhr) {
+                    // Pace.restart();
+                },
+                complete: function (xhr, textStatus) {
+                },
+                success: function (data, status) {
+
+                    userHandler.ifSignIn(data);
+
+                    rtn = data;
+
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseText);
+                }
+
+            })
+        }catch(err){
+            
+        }
+
+        return rtn;
+
+    };
+
 
     /*
     *  公司管理

@@ -889,6 +889,7 @@ class Probe extends Matrix {
                                         @selection-change="onSelectionChange"
                                         @current-change="onCurrentChange"
                                         ref="table"
+                                        stripe
                                         v-if="!_.isEmpty(dt.rows)">
                                         <el-table-column type="selection" align="center"></el-table-column> 
                                         <el-table-column label="脚本库名称" prop="name" width="200" sortable></el-table-column>
@@ -2387,7 +2388,7 @@ class Probe extends Matrix {
                                 </el-aside>
                                 <el-main style="padding:0px;width:80%;height:100%;overflow:hidden;" ref="mainView">
                                     <el-container style="height:100%;display:block;">
-                                        <el-header style="height:auto;padding:5px;display:flex;" v-if="!_.isEmpty(model)">
+                                        <el-header style="height:auto;padding:5px;display:flex;display:none;" v-if="!_.isEmpty(model)">
                                             <!--el-button type="primary" v-for="item in model.summary"
                                                 style="max-width: 25%;width: 20%;height:auto;min-height:90px;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);">
                                                 <h3>#{item.name}#</h3>
@@ -2418,7 +2419,7 @@ class Probe extends Matrix {
                                             </el-button>
                                         </el-header>
                                         <el-main style="padding:10px;height:100%;overflow:hidden;">
-                                            <el-container style="height: calc(100% - 85px);">
+                                            <el-container style="height: calc(100% - 0px);">
                                                 <el-header class="probe-view-header" style="height: 40px;line-height: 40px;padding: 0px;background: #dddddd;display: inline-table;">
                                                     <search-base-component :options="options"
                                                                         ref="searchRef"
