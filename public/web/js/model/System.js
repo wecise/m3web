@@ -3919,7 +3919,7 @@ class System {
 						},
 						onSaveDomain(data){
 							let param = encodeURIComponent( JSON.stringify( _.extend( data, {type: 'add'} ) ) );
-							fsHandler.callFsJScriptAsync("/matrix/system/domain/actions.js",param).then((rtn)=>{
+							fsHandler.callFsJScriptAsync("/matrix/system/app/actions.js",param).then((rtn)=>{
 								this.$message({
 									type: "success",
 									message: "新建成功"
@@ -3930,7 +3930,7 @@ class System {
 						},
 						onUpdateDomain(data){
 							let param = encodeURIComponent( JSON.stringify( _.extend( data, {type: 'edit'} ) ) );
-							fsHandler.callFsJScriptAsync("/matrix/system/domain/actions.js",param).then((rtn)=>{
+							fsHandler.callFsJScriptAsync("/matrix/system/app/actions.js",param).then((rtn)=>{
 								this.$message({
 									type: "success",
 									message: "新建成功"
@@ -4737,9 +4737,10 @@ class System {
 						onUpdateRoleGroupByApp(event){
 							
 							this.loading = true;
-
+							
 							// 更新
-							let param = encodeURIComponent( JSON.stringify( { roleGroup: this.rowData.row, data: this.selectedNodes } ) );
+							let checkedApps = _.filter(this.selectedNodes,{checked:true});
+							let param = encodeURIComponent( JSON.stringify( { roleGroup: this.rowData.row, data: checkedApps } ) );
 							
 							fsHandler.callFsJScriptAsync("/matrix/system/perm/byApp/setPermByApp.js", param).then( (rtn)=>{
 								
@@ -5082,7 +5083,7 @@ class System {
 						}
 					},
 					template:   `<el-container style="width:100%;height:70vh;background:#f2f2f2;">
-									<el-header style="height:30px;line-height:30px;">
+									<el-header style="height:40px;line-height:40px;">
 										<el-tooltip content="刷新" open-delay="500" placement="top">
 											<el-button type="text" icon="el-icon-refresh" @click="initData"></el-button>
 										</el-tooltip>
@@ -5104,30 +5105,8 @@ class System {
 												</el-dropdown-menu>
 											</el-dropdown>
 										</el-tooltip>
-										<el-dialog title="新建接口组" :visible.sync="dialog.newApi.show" :close-on-press-escape="false" :close-on-click-modal="false">
-											<el-container style="width:100%;">
-												<el-main>
-													<el-form label-position="top">
-														<el-form-item label="接口组名称">
-															<el-input v-model="dialog.newApi.name"></el-input>
-														</el-form-item>
-														<el-form-item label="选择接口">
-															<mx-fs-tree-select root="/script" @update:selected="onSetPprefix($event)"></mx-fs-tree-select>
-														</el-form-item>
-													</el-form>
-												</el-main>
-											</el-container>
-											<div slot="footer" class="dialog-footer">
-												<el-tooltip content="取消" open-delay="500" placement="top">
-													<el-button type="default" icon="el-icon-close" @click="dialog.newApi.show = false;">关闭</el-button>
-												</el-tooltip>	
-												<el-tooltip content="确定" open-delay="500" placement="top">
-													<el-button type="primary" icon="el-icon-edit" @click="onSaveApi">确定</el-button>
-												</el-tooltip>	
-											</div>
-										</el-dialog>
 									</el-header>   
-									<el-main style="width:100%;padding:0px;">
+									<el-main style="width:100%;padding-top:0px;">
 										<el-table
 											:data="dt.rows"
 											highlight-current-row="true"
@@ -5199,6 +5178,33 @@ class System {
 									<el-footer  style="height:30px;line-height:30px;">
 										#{ info.join(' &nbsp; | &nbsp;') }#
 									</el-footer>
+									<el-dialog title="新建接口组" 
+										:visible.sync="dialog.newApi.show" 
+										:close-on-press-escape="false" 
+										:close-on-click-modal="false"
+										append-to-body
+										v-if="dialog.newApi.show">
+										<el-container style="width:100%;">
+											<el-main>
+												<el-form label-position="top">
+													<el-form-item label="接口组名称">
+														<el-input v-model="dialog.newApi.name"></el-input>
+													</el-form-item>
+													<el-form-item label="选择接口">
+														<mx-fs-tree-select root="/script" @update:selected="onSetPprefix($event)"></mx-fs-tree-select>
+													</el-form-item>
+												</el-form>
+											</el-main>
+										</el-container>
+										<div slot="footer" class="dialog-footer">
+											<el-tooltip content="取消" open-delay="500" placement="top">
+												<el-button type="default" icon="el-icon-close" @click="dialog.newApi.show = false;">关闭</el-button>
+											</el-tooltip>	
+											<el-tooltip content="确定" open-delay="500" placement="top">
+												<el-button type="primary" icon="el-icon-edit" @click="onSaveApi">确定</el-button>
+											</el-tooltip>	
+										</div>
+									</el-dialog>
 								</el-container>`,
 					filters:{
 						pickDatetime(item){
@@ -5324,23 +5330,23 @@ class System {
 								return false;
 							}
 
-							let rtn = userHandler.addApiPermissions( this.dialog.newApi );
-
-							if(rtn === 1){
-								this.$message({
-									type: 'success',
-									message: `接口组 ${this.dialog.newApi.name} 添加成功！`
-								});
-								
-								this.dialog.newApi.show = false;
-								this.initData();
-
-							} else {
-								this.$message({
-									type: 'error',
-									message: `接口组 ${this.dialog.newApi.name} 添加失败！`
-								});
-							}
+							userHandler.addApiPermissionsAsync( this.dialog.newApi ).then( (rtn)=>{
+								if(rtn === 1){
+									this.$message({
+										type: 'success',
+										message: `接口组 ${this.dialog.newApi.name} 添加成功！`
+									});
+									
+									this.dialog.newApi.show = false;
+									this.initData();
+	
+								} else {
+									this.$message({
+										type: 'error',
+										message: `接口组 ${this.dialog.newApi.name} 添加失败！`
+									});
+								}
+							} );
 
 						},
 						onUpdateApi(row,index){
@@ -6795,6 +6801,47 @@ class System {
 				/* * * * * * * * * * * * * * *  Grok变量管理 * * * * * * * * * * * * * * * * * * * * * * * * * * * *  */
 
 				// Grok变量管理
+				Vue.component('groke-editor',{
+					delimiters: ['#{','}#'],
+					props: {
+						value: String
+					},
+					template: `<div ref="editor" style="border: 1px solid #ddd;"></div>`,
+					mounted(){
+						this.initEditor();
+					},
+					methods: {
+						initEditor(){
+							let editor = ace.edit(this.$refs.editor);
+							editor.setOptions({
+								maxLines: Infinity,
+								minLines: 6,
+								autoScrollEditorIntoView: true,
+								enableBasicAutocompletion: true,
+								enableSnippets: true,
+								enableLiveAutocompletion: false
+							});
+							
+							editor.getSession().setMode("ace/mode/sh");
+							editor.setTheme("ace/theme/chrome");
+							editor.getSession().setUseSoftTabs(true);
+							editor.getSession().setTabSize(2);
+							editor.getSession().setUseWrapMode(false);
+							editor.renderer.setShowGutter(true);
+							editor.setValue(this.value);
+				
+							editor.focus(); 
+							let row = editor.session.getLength() - 1;
+							let column = editor.session.getLine(row).length;
+							editor.gotoLine(row + 1, column);
+
+							editor.on("change", _.debounce((v)=>{
+                                this.$emit('input-value', editor.getValue());
+                            },500));
+						}
+					}
+				})
+
 				Vue.component('grok-manage',{
 					delimiters: ['#{', '}#'],
 					data(){
@@ -6803,20 +6850,30 @@ class System {
 								rows: [],
 								columns: [],
 								selected: [],
-								pagination:{
-									pageSize: 10,
-									currentPage: 1
+								search: ""
+							},
+							dialog: {
+								add: {
+									show: false,
+									data: {
+										name: "",
+										pattern: "",
+										eg: ""
+									}
 								}
 							}
 						}
 					},
 					template: 	`<el-container style="height:100%;">
-									<el-header style="height:30px;line-height:30px;">
-										<h4 style="margin:0px;">解析规则</h4>
+									<el-header style="line-height:60px;display:flex;">
+										<h5 style="margin:0px;"><i class="el-icon-finished"></i> 解析规则</h5>
+										<span style="position: absolute;right: 30px;">
+											<el-button type="success" icon="el-icon-plus" @click="onNew">新建解析规则</el-button>
+										</span>
 									</el-header>
-									<el-main style="height:100%;padding:0px;overflow:hidden;">
+									<el-main style="height:100%;overflow:hidden;">
 										<el-table
-											:data="dt.rows.slice((dt.pagination.currentPage - 1) * dt.pagination.pageSize,dt.pagination.currentPage * dt.pagination.pageSize)"
+											:data="dt.rows.filter(data => !dt.search || data.name.toLowerCase().includes(dt.search.toLowerCase()))"
 											stripe
 											highlight-current-row
 											fit="true"
@@ -6826,7 +6883,7 @@ class System {
 											@current-change="onSelectionChange">
 											<el-table-column type="index" label="序号" sortable align="center">
 												<template slot-scope="scope">
-													<div style="width:100%; text-align: center;"> <b> #{ (scope.$index + 1) + (dt.pagination.currentPage - 1) * dt.pagination.pageSize }# </b> </div>
+													<div style="width:100%; text-align: center;"> <b> #{ (scope.$index + 1) }# </b> </div>
 												</template>
 											</el-table-column>
 											<!--el-table-column type="selection" align="center">
@@ -6854,31 +6911,52 @@ class System {
 													<span  v-else>#{scope.row[item.field]}#</el-avatar>
 												</template>
 											</el-table-column>
+											<el-table-column
+												label="操作">
+												<template slot="header" slot-scope="scope">
+													<el-input v-model="dt.search" placeholder="输入关键字搜索" clearable></el-input>
+												</template>
+												<template slot-scope="scope">
+													<el-button @click="onDelete(scope.row)" type="text" size="small">删除</el-button>
+													<el-button @click="onEdit(scope.row)" type="text" size="small">编辑</el-button>
+												</template>
+											</el-table-column>
 										</el-table>
 									</el-main>
 									<el-footer style="height:40px;line-height:40px;">
-										<!--#{ info.join(' &nbsp; | &nbsp;') }#-->
-										<el-pagination
-											style="padding: 8px 0px;"
-											@size-change="onPageSizeChange"
-											@current-change="onCurrentPageChange"
-											:page-sizes="[10, 15, 20, 50, 100, 300]"
-											:page-size="dt.pagination.pageSize"
-											:total="dt.rows.length"
-											layout="total, sizes, prev, pager, next">
-										</el-pagination>
+										数量：#{ dt.rows.length }#
 									</el-footer>
+									<el-dialog title="解析规则管理" 
+										:visible.sync="dialog.add.show" 
+										:close-on-press-escape="false" 
+										:close-on-click-modal="false"
+										:destroy-on-close="true" 
+										v-if="dialog.add.show" width="50vw">
+										<el-container style="height:100%;">
+											<el-main style="overflow:hidden;padding:0px 10px;">
+												<el-form ref="form" :model="dialog.add.data" label-width="80px" v-if="dialog.add.data">
+													<el-form-item label="名称">
+														<el-input v-model="dialog.add.data.name" placeholder="名称" v-model="dialog.add.data.name"></el-input>
+													</el-form-item>
+													<el-form-item label="Pattern">
+														<groke-editor :value="dialog.add.data.pattern" @input-value="(data)=>{ dialog.add.data.pattern=data; }" style="height:10vh;"></groke-editor>
+													</el-form-item>
+													<el-form-item label="示例">
+														<groke-editor :value="dialog.add.data.eg" @input-value="(data)=>{ dialog.add.data.eg=data; }" style="height:15vh;"></groke-editor>
+													</el-form-item>
+												</el-form>
+											</el-main>
+										</el-container>
+										<div slot="footer" class="dialog-footer">
+											<el-button type="default" @click="dialog.add.show = false;">关闭</el-button>
+											<el-button type="primary" @click="onSave(dialog.add.data)">确定</el-button>
+										</div>
+									</el-dialog>
 								</el-container>`,
 					created(){
 						this.initData();
 					},
 					methods: {
-						onPageSizeChange(val) {
-							this.dt.pagination.pageSize = val;
-						},
-						onCurrentPageChange(val) {
-							this.dt.pagination.currentPage = val;
-						},
 						rowClassName({row, rowIndex}){
                             return `row-${rowIndex}`;
                         },
@@ -6892,15 +6970,11 @@ class System {
 						},
 						initData(){
 
-							this.dt.columns = [
-								{field:"name",title:"名称", width:120},
-								{field:"pattern",title:"规则"},
-								{field:"eg",title:"举例", width:120}
-							];
-
-							try {
-								// rows
-								_.extend(this.dt, {rows: grokHandler.grokList().message});
+							grokHandler.grokListAsync().then((rtn)=>{
+								
+								let rows = _.orderBy(rtn.message,['name'],['asc']);
+								
+								_.extend(this.dt, {rows: rows});
 
 								_.map(this.dt.columns,(v)=>{
 									if(!v.render){
@@ -6910,9 +6984,82 @@ class System {
 									}
 								})
 
-							} catch(err){
-								
+								this.dt.columns = [
+									{field:"name",title:"名称", width:120},
+									{field:"pattern",title:"规则"},
+									{field:"eg",title:"举例", width:120}
+								];
+							})
+							
+						},
+						onNew(){
+							this.dialog.add.data = {
+								name: "",
+								pattern: "",
+								eg: ""
+							};
+							this.dialog.add.show = true;
+						},
+						onSave(data){
+
+							if(_.isEmpty(data.name)){
+								this.$message({
+									type: "warning",
+									message: "名称不能为空"
+								})
+								return false;
 							}
+
+							if(_.isEmpty(data.pattern)){
+								this.$message({
+									type: "warning",
+									message: "规则不能为空"
+								})
+								return false;
+							}
+
+							grokHandler.grokNew(data).then((rtn)=>{
+								if(rtn == 1){
+									this.$message({
+										type: "success",
+										message: "新建成功"
+									})
+
+									this.initData();
+
+									this.dialog.add.show = false;
+								} else {
+									this.$message({
+										type: "error",
+										message: "新建失败： "  + rtn.message
+									})
+								}
+							})
+						},
+						onDelete(data){
+							this.$confirm(`确定要删除 ${data.name}, 是否继续?`, '提示', {
+								confirmButtonText: '确定',
+								cancelButtonText: '取消',
+								type: 'warning'
+							  }).then(() => {
+									
+									grokHandler.grokDelete(data).then((rtn)=>{
+										this.$message({
+											type: "success",
+											message: "删除成功"
+										})
+										this.initData();
+									})
+							  }).catch(() => {
+								this.$message({
+								  type: 'info',
+								  message: '已取消删除'
+								});          
+							  });
+						},
+						onEdit(data){
+							this.dialog.add.data = data;
+							this.dialog.add.show = true;
 						}
 					}
 				})

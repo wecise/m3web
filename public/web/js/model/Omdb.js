@@ -2470,6 +2470,12 @@ class Omdb{
                                                         style="background-color:transparent;">
                                                     </el-tree>
                                                 </el-main>
+                                                <el-alert
+                                                    style="margin-bottom:10px;position:relative;"
+                                                    type="warning"
+                                                    v-if="_.includes(['/matrix/filesystem'],dialog.omdbExport.model.class)"
+                                                    description="文件系统类只支持导出DDL，如需导出数据，请在【我的文件】里按目录进行备份及恢复...">
+                                                </el-alert>
                                                 <el-footer style="line-height:60px;text-align:center;">
                                                     <el-button type="default" @click="dialog.omdbExport.show=false;">取消</el-button>
                                                     <el-button type="primary" @click="onExport('mql')" :loading="dialog.omdbExport['mql'].loading">导出MQL</el-button>
@@ -2536,7 +2542,7 @@ class Omdb{
                                     filetype: 'mql',
                                     template: true,
                                     class: '',
-                                    ignoreClass: '/matrix/filesystem'
+                                    ignoreClass: ''
                                 },
                                 mql:{
                                     loading: false
@@ -2650,6 +2656,11 @@ class Omdb{
                         },
                         classDataExport(selectedNode){
 
+                            // 文件系统支持导出DDL
+                            if(_.includes(['/matrix/filesystem'], selectedNode)){
+                                this.dialog.omdbExport.model.limit = 0;
+                            }
+
                             this.dialog.omdbExport.show = true;
 
                             if(!_.isEmpty(selectedNode)){
@@ -2702,16 +2713,17 @@ class Omdb{
                                         message: "导出成功！"
                                     })  
 
-                                    this.dialog.omdbExport[type].loading = false;
-
-                                    this.dialog.omdbExport.show = false;
 
                                 } else{
                                     this.$message({
                                         type: "error",
                                         message: "导出失败: " + rtn
                                     })  
+                                    
                                 }
+
+                                this.dialog.omdbExport[type].loading = false;
+                                this.dialog.omdbExport.show = false;
 
                             });
                         },

@@ -1942,9 +1942,10 @@ Vue.component("mx-fs-tree-select",{
             this.$set(item, 'show', false)
         },
         onRefresh(item,index){
-            let childrenData = fsHandler.fsList(item.fullname);
-
-            this.$set(data, 'children', childrenData);
+            fsHandler.fsListAsync(item.fullname).then((rtn)=>{
+                console.log(111,rtn)
+                this.$set(data, 'children', rtn);
+            });
         },
         onNewDir(item,index){
             this.$prompt('请输入目录名称', '提示', {

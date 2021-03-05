@@ -744,48 +744,52 @@ class UserHandler{
     };
 
     /* Add api permissions */
-    addApiPermissions(event) {
+    async addApiPermissionsAsync(event) {
         let rtn = null;
 
-        let form = new FormData();
-        form.append("name", event.name);
-        _.forEach(event.pprefix, (v)=>{
-            form.append("path", v);
-        })
+        try{
+            let form = new FormData();
+            form.append("name", event.name);
+            _.forEach(event.pprefix, (v)=>{
+                form.append("path", v);
+            })
 
-        jQuery.ajax({
-            url: `/admin/perms/api`,
-            dataType: 'json',
-            type: 'POST',
-            processData: false,
-            contentType: false,
-            mimeType: "multipart/form-data",
-            async: false,
-            data: form,
-            beforeSend:function(xhr){
-            },
-            complete: function(xhr, textStatus) {
-                
-            },
-            success: function (data, status) {
+            await jQuery.ajax({
+                url: `/admin/perms/api`,
+                dataType: 'json',
+                type: 'POST',
+                processData: false,
+                contentType: false,
+                mimeType: "multipart/form-data",
+                async: false,
+                data: form,
+                beforeSend:function(xhr){
+                },
+                complete: function(xhr, textStatus) {
+                    
+                },
+                success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                    userHandler.ifSignIn(data);
 
-                if( _.lowerCase(data.status) == "ok"){
-                    rtn = 1;
+                    if( _.lowerCase(data.status) == "ok"){
+                        rtn = 1;
+
+                        // Audit
+                        auditLogHandler.writeLog("system:permission", "Add api permissions: " + event.name, 0);
+                    }
+
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    rtn = xhr.responseText;
 
                     // Audit
-                    auditLogHandler.writeLog("system:permission", "Add api permissions: " + event.name, 0);
+                    auditLogHandler.writeLog("system:permission", "Add api permissions: " + event.name, 1);
                 }
-
-            },
-            error: function(xhr, textStatus, errorThrown) {
-                rtn = xhr.responseText;
-
-                // Audit
-                auditLogHandler.writeLog("system:permission", "Add api permissions: " + event.name, 1);
-            }
-        });
+            });
+        }catch(err){
+            
+        }
         return rtn;
     };
 

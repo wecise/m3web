@@ -18,30 +18,34 @@ class GrokHandler {
     *  Grok解析规则列表
     *
     */
-    grokList(event) {
+    async grokListAsync(event) {
         let rtn = null;
 
-        jQuery.ajax({
-            url: "/pattern",
-            dataType: 'json',
-            type: 'GET',
-            async: false,
-            beforeSend:function(xhr){
-            },
-            complete: function(xhr, textStatus) {
-            },
-            success: function (data, status) {
+        try{
+            await jQuery.ajax({
+                url: "/pattern",
+                dataType: 'json',
+                type: 'GET',
+                async: true,
+                beforeSend:function(xhr){
+                },
+                complete: function(xhr, textStatus) {
+                },
+                success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                    userHandler.ifSignIn(data);
 
-                if (data.status == "ok"){
-                    rtn = data;
+                    if (data.status == "ok"){
+                        rtn = data;
+                    }
+                },
+                error: function(xhr, textStatus, errorThrown){
+                    rtn = xhr.responseText;
                 }
-            },
-            error: function(xhr, textStatus, errorThrown){
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
-            }
-        });
+            });
+        } catch(err){
+
+        }
         return rtn;
     };
 
@@ -49,39 +53,40 @@ class GrokHandler {
     *  Grok解析规则列表
     *
     */
-    grokNew(event) {
-        let rtn = 1;
+    async grokNew(event) {
+        let rtn = null;
 
-        var form = new FormData();
-        form.append("eg", event.eg);
-        form.append("pattern", event.pattern);
+        try{
+            var form = new FormData();
+            form.append("eg", event.eg);
+            form.append("pattern", event.pattern);
 
-        jQuery.ajax({
-            url: "/pattern/" + event.name,
-            dataType: 'json',
-            type: 'POST',
-            async: false,
-            data: event,
-            beforeSend:function(xhr){
-            },
-            complete: function(xhr, textStatus) {
-            },
-            success: function (data, status) {
+            await jQuery.ajax({
+                url: "/pattern/" + event.name,
+                dataType: 'json',
+                type: 'POST',
+                async: true,
+                data: event,
+                beforeSend:function(xhr){
+                },
+                complete: function(xhr, textStatus) {
+                },
+                success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                    userHandler.ifSignIn(data);
 
-                if( _.lowerCase(data.status) == "ok"){
-                    rtn = 1;
-                    alertify.success("成功" + " " + data.message);
+                    if( _.lowerCase(data.status) == "ok"){
+                        rtn = 1;
+                    }
+
+                },
+                error: function(xhr, textStatus, errorThrown){
+                    rtn = xhr.responseText;
                 }
+            });
+        } catch(err){
 
-            },
-            error: function(xhr, textStatus, errorThrown){
-                rtn = 0;
-                alertify.error("失败" + " " + xhr.responseText)
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
-            }
-        });
+        }
         return rtn;
     };
 
@@ -89,34 +94,34 @@ class GrokHandler {
     *  Grok解析规则列表
     *
     */
-    grokDelete(event) {
-        let rtn = 1;
+    async grokDelete(event) {
+        let rtn = null;
+        try{
+            await jQuery.ajax({
+                url: `/pattern/${event.name}`,
+                dataType: 'json',
+                type: 'DELETE',
+                async: true,
+                beforeSend:function(xhr){
+                },
+                complete: function(xhr, textStatus) {
+                },
+                success: function (data, status) {
 
-        jQuery.ajax({
-            url: `/pattern/${event.name}`,
-            dataType: 'json',
-            type: 'DELETE',
-            async: false,
-            beforeSend:function(xhr){
-            },
-            complete: function(xhr, textStatus) {
-            },
-            success: function (data, status) {
+                    userHandler.ifSignIn(data);
 
-                userHandler.ifSignIn(data);
+                    if( _.lowerCase(data.status) == "ok"){
+                        rtn = 1;
+                    }
 
-                if( _.lowerCase(data.status) == "ok"){
-                    rtn = 1;
-                    alertify.success("成功" + " " + data.message);
+                },
+                error: function(xhr, textStatus, errorThrown){
+                    rtn = xhr.responseText;
                 }
+            });
+        } catch(err){
 
-            },
-            error: function(xhr, textStatus, errorThrown){
-                rtn = 0;
-                alertify.error("失败" + " " + xhr.responseText)
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
-            }
-        });
+        }
         return rtn;
     };
 }
