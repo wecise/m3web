@@ -1112,6 +1112,47 @@ class UserHandler{
         }
 
     }
+
+    /* 
+        用户密码验证
+    */
+    async passwordVaild(event) {
+        let rtn = null;
+
+        try{
+            await jQuery.ajax({
+                url: '/user/vali_password',
+                dataType: 'json',
+                type: 'POST',
+                async: true,
+                data: event,
+                beforeSend: function (xhr) {
+                },
+                complete: function (xhr, textStatus) {
+                },
+                success: function (data, status) {
+
+                    userHandler.ifSignIn(data);
+
+                    if( _.lowerCase(data.status) == "ok" && _.isEmpty(data.message)){
+                        rtn = 1;
+                    } else {
+                        rtn = data.message;
+                    }
+
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    rtn = xhr.responseText;
+                }
+
+            })
+        }catch(err){
+
+        }
+
+        return rtn;
+
+    }
 }
 
 var userHandler = new UserHandler();

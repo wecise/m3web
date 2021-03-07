@@ -2040,6 +2040,7 @@ class System {
 									otype: 'org' 
 								},
 								user: {
+									validPasswd: 0,
 									show: false,
 									ldap: {
 										parent: "", 
@@ -2130,7 +2131,16 @@ class System {
 														</el-form-item>
 
 														<el-form-item label="登录密码" required>
-															<el-input type="password" v-model="dialog.user.ldap.passwd" autocomplete="off" show-password></el-input>
+															<el-input type="password" v-model="dialog.user.ldap.passwd" autocomplete="off" show-password @blur="onPasswordVaild($event)">
+																<template v-if="dialog.user.validPasswd>0">
+																	<el-button slot="append" type="success" icon="el-icon-check" style="background: #67c23a;color: #fff;" v-if="dialog.user.validPasswd==1">
+																		密码设置安全
+																	</el-button>
+																	<el-button slot="append" type="error" style="background: #ffa500;color: #fff;" icon="el-icon-warning" v-else>
+																		密码设置安全级别过低，建议由数字、符号、字母组合设立
+																	</el-button>
+																</template>
+															</el-input>
 														</el-form-item>
 														
 														<el-form-item label="确认密码" required>
@@ -2175,7 +2185,7 @@ class System {
 											<div slot="footer" class="dialog-footer">
 												<el-button type="default" @click="dialog.user.show = false;">关闭</el-button>
 												<el-button type="warning" v-if="dialog.user.loading"><i class="el-icon-loading"></i> 创建用户、同步文件系统，请稍后。。。</el-button>
-												<el-button type="primary" @click="onSaveUser" v-else>创建用户</el-button>
+												<el-button type="primary" @click="onSaveUser" v-else :disabled="dialog.user.validPasswd==2">创建用户</el-button>
 											</div>
 										</el-dialog>
 									</el-main>
@@ -2295,6 +2305,7 @@ class System {
 						},
 						onNewUser(row){
 							this.selectedNode = row;
+							this.dialog.user.validPasswd = 0;
 							this.dialog.user.show = true;
 							this.dialog.user.ldap.parent = !_.isEmpty(row.fullname) ? row.fullname : '/';
 							this.$nextTick(() => {
@@ -2461,7 +2472,16 @@ class System {
 								}
 							},500)
 
-						}
+						},
+						onPasswordVaild(evt){
+                            userHandler.passwordVaild(evt.target.value).then((rtn)=>{
+                                if(rtn === 1){
+                                    this.dialog.user.validPasswd = 1;
+                                } else {
+                                    this.dialog.user.validPasswd = 2;
+                                }
+                            });
+                        }
 					}
 				})
 
@@ -2756,7 +2776,8 @@ class System {
 										change: false,
 										user: null,
 										newGroup: null
-									}
+									},
+									validPasswd: 0
 								}
 							}
 						}
@@ -2901,7 +2922,16 @@ class System {
 														</el-form-item>
 
 														<el-form-item label="登录密码" required v-if="dialog.user.resetPasswd">
-															<el-input type="password" v-model="dialog.user.passwd" autocomplete="off" show-password></el-input>
+															<el-input type="password" v-model="dialog.user.passwd" autocomplete="off" show-password @blur="onPasswordVaild($event)">
+																<template v-if="dialog.user.validPasswd>0">
+																	<el-button slot="append" type="success" icon="el-icon-check" style="background: #67c23a;color: #fff;" v-if="dialog.user.validPasswd==1">
+																		密码设置安全
+																	</el-button>
+																	<el-button slot="append" type="error" style="background: #ffa500;color: #fff;" icon="el-icon-warning" v-else>
+																		密码设置安全级别过低，建议由数字、符号、字母组合设立
+																	</el-button>
+																</template>
+															</el-input>
 														</el-form-item>
 
 														<el-form-item label="确认密码" required v-if="dialog.user.resetPasswd">
@@ -2942,7 +2972,7 @@ class System {
 											</el-container>
 											<div slot="footer" class="dialog-footer">
 												<el-button type="default" @click="dialog.user.show = false;">关闭</el-button>
-												<el-button type="primary" @click="onSaveUser(dialog.user.row)">更新用户</el-button>	
+												<el-button type="primary" @click="onSaveUser(dialog.user.row)" :disabled="dialog.user.resetPasswd && dialog.user.validPasswd==2">更新用户</el-button>	
 											</div>
 										</el-dialog>
 									</el-main>
@@ -3130,6 +3160,7 @@ class System {
 							this.dialog.user.passwd = "";
 							this.dialog.user.checkPasswd = "";
 							this.dialog.user.show = true;
+							this.dialog.user.validPasswd = 0;
 						},
 						onUserGroupMoved(user,newGroup){
 							
@@ -3349,7 +3380,16 @@ class System {
 								
 								userHandler.updateGroupPermissionsAsync(group);
 							})
-						}
+						},
+						onPasswordVaild(evt){
+                            userHandler.passwordVaild(evt.target.value).then((rtn)=>{
+                                if(rtn === 1){
+                                    this.dialog.user.validPasswd = 1;
+                                } else {
+                                    this.dialog.user.validPasswd = 2;
+                                }
+                            });
+                        }
 					}
 				})
 
@@ -4140,7 +4180,8 @@ class System {
 					methods:{
 						initDomain(){
 							fsHandler.callFsJScriptAsync("/matrix/system/domain/getDomains.js",false).then((rtn)=>{
-								this.domain.mapping = rtn.message;
+								//  过滤mclass为空的
+								this.domain.mapping = _.filter(rtn.message,(v)=> { return !_.isEmpty(v.mclass); });
 								this.selectedDomain = _.head(this.domain.mapping).label;
 							})
 						},

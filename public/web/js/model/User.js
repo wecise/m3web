@@ -33,7 +33,8 @@ class User {
                                 resetPasswd: false,
                                 passwd: "",
                                 checkPasswd: ""
-                            }
+                            },
+                            validPasswd: 0
                         }
                     },
                     template:   `<div>
@@ -54,7 +55,16 @@ class User {
                                         </el-form-item>
 
                                         <el-form-item label="登录密码" required v-if="user.resetPasswd">
-                                            <el-input type="password" v-model="user.passwd" autocomplete="off" show-password></el-input>
+                                            <el-input type="password" v-model="user.passwd" autocomplete="off" show-password @blur="onPasswordVaild($event)">
+                                                <template v-if="validPasswd>0">
+                                                    <el-button slot="append" type="success" icon="el-icon-check" style="background: #67c23a;color: #fff;" v-if="validPasswd==1">
+                                                        密码设置安全
+                                                    </el-button>
+                                                    <el-button slot="append" type="error" style="background: #ffa500;color: #fff;" icon="el-icon-warning" v-else>
+                                                        密码设置安全级别过低，建议由数字、符号、字母组合设立
+                                                    </el-button>
+                                                </template>
+                                            </el-input>
                                         </el-form-item>
 
                                         <el-form-item label="确认密码" required v-if="user.resetPasswd">
@@ -90,13 +100,22 @@ class User {
 
                                     <div class="dialog-footer" style="text-align:right;">
                                         <el-button type="default" @click="onCancel">取消</el-button>
-                                        <el-button type="primary" @click="onSaveUser(signedUser)">更新用户</el-button>	
+                                        <el-button type="primary" @click="onSaveUser(signedUser)" :disabled="user.resetPasswd && validPasswd==2">更新用户</el-button>	
                                     </div>
                                     
                                 </div>`,
                     methods: {
                         onCancel(){
                             this.$root.currentView = 'user-info';
+                        },
+                        onPasswordVaild(evt){
+                            userHandler.passwordVaild(evt.target.value).then((rtn)=>{
+                                if(rtn === 1){
+                                    this.validPasswd = 1;
+                                } else {
+                                    this.validPasswd = 2;
+                                }
+                            });
                         },
                         onSaveUser(row){
 
@@ -167,6 +186,11 @@ class User {
     
                                         this.$root.currentView = "user-info";
     
+                                    }else {
+                                        this.$message({
+                                            type: "error",
+                                            message: `更新用户: ${row.username} 失败 ` + rtn
+                                        })
                                     }
                                 } );
 
