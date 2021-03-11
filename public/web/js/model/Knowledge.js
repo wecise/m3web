@@ -354,7 +354,7 @@ class Knowledge {
                                             </el-container>`,
                                 data: {
                                     upload: {
-                                        url: `/fs/${item.fullname}?issys=true`,
+                                        url: `/fs${item.fullname}?issys=true`,
                                         fileList: [],
                                         ifIndex: {index:true}
                                     }

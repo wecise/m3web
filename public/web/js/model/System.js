@@ -2217,12 +2217,14 @@ class System {
 												:label="item.title"
 												v-if="item.visible">
 												<template slot-scope="scope">
-													<template v-if="_.includes(['api_rule','class_rule'], item['field'])">
-														<el-tag :key="index" v-for="(v,index) in scope.row[item['field']]">
-															#{v}#
-														</el-tag>
+													<template v-if="_.includes(['api_rule','class_rule','owner_class_rule'], item['field'])">
+														<div v-if="!_.isEmpty(_.compact(scope.row[item['field']]))">
+															<el-tag :key="index" v-for="(v,index) in scope.row[item['field']]">
+																#{v}#
+															</el-tag>
+														</div>
 													</template>
-													<span v-else>#{scope.row[item['field']]}#</span>
+													<span v-else>#{ scope.row[item['field']] }#</span>
 												</template>
 											</el-table-column>
 											<el-table-column
@@ -2271,26 +2273,6 @@ class System {
 														</el-select>
 													</el-form-item>
 													<el-form-item label="类规则">
-														<!--el-input v-model="dialog.add.data.class_rule" placeholder="选择对应类"
-															clearable
-															autofocus>
-															<template slot="prepend">
-																<el-dropdown trigger="hover" placement="top-end"  :hide-on-click="true">
-																	<el-tooltip content="选则类" open-delay="500">
-																		<el-button type="text" size="mini">
-																			<i class="el-icon-office-building" style="font-size:16px;"></i>
-																		</el-button>
-																	</el-tooltip>
-																	<el-dropdown-menu slot="dropdown">
-																		<el-dropdown-item>
-																			<template scope="scope">
-																				<mx-entity-tree root="/matrix" :filterEnable="false" ref="entityTree" @node-click="(data)=>{ dialog.add.data.class_rule = data.class; }"></mx-entity-tree>
-																			</template>
-																		</el-dropdown-item>
-																	</el-dropdown-menu>
-																</el-dropdown>
-															</template>
-														</el-input-->
 														<span>
 															<el-dropdown trigger="hover" placement="top-end"  :hide-on-click="true">
 																<el-tooltip content="选则类" open-delay="500">
@@ -2316,6 +2298,39 @@ class System {
 																style="width:100%;">
 																<el-option
 																v-for="item in dialog.add.data.class_rule"
+																:key="item"
+																:label="item"
+																:value="item">
+																</el-option>
+															</el-select>
+														</span>
+													</el-form-item>
+													<el-form-item label="所属类规则">
+														<span>
+															<el-dropdown trigger="hover" placement="top-end"  :hide-on-click="true">
+																<el-tooltip content="选则类" open-delay="500">
+																	<el-button type="text" size="mini">
+																		<i class="el-icon-office-building" style="font-size:16px;"></i>
+																	</el-button>
+																</el-tooltip>
+																<el-dropdown-menu slot="dropdown">
+																	<el-dropdown-item>
+																		<template scope="scope">
+																			<mx-entity-tree root="/matrix" :filterEnable="false" @node-click="(data)=>{ dialog.add.data.owner_class_rule=_.xor(dialog.add.data.owner_class_rule,[data.class]); }"></mx-entity-tree>
+																		</template>
+																	</el-dropdown-item>
+																</el-dropdown-menu>
+															</el-dropdown>
+															<el-select
+																v-model="dialog.add.data.owner_class_rule"
+																multiple
+																filterable
+																allow-create
+																default-first-option
+																placeholder="选择类"
+																style="width:100%;">
+																<el-option
+																v-for="item in dialog.add.data.owner_class_rule"
 																:key="item"
 																:label="item"
 																:value="item">
@@ -2393,6 +2408,39 @@ class System {
 															</el-select>
 														</span>
 													</el-form-item>
+													<el-form-item label="所属类规则">
+														<span>
+															<el-dropdown trigger="hover" placement="top-end"  :hide-on-click="true">
+																<el-tooltip content="选则类" open-delay="500">
+																	<el-button type="text" size="mini">
+																		<i class="el-icon-office-building" style="font-size:16px;"></i>
+																	</el-button>
+																</el-tooltip>
+																<el-dropdown-menu slot="dropdown">
+																	<el-dropdown-item>
+																		<template scope="scope">
+																			<mx-entity-tree root="/matrix" :filterEnable="false" ref="entityTree" @node-click="(data)=>{ dialog.edit.data.owner_class_rule=_.xor(dialog.edit.data.owner_class_rule,[data.class]); }"></mx-entity-tree>
+																		</template>
+																	</el-dropdown-item>
+																</el-dropdown-menu>
+															</el-dropdown>
+															<el-select
+																v-model="dialog.edit.data.owner_class_rule"
+																multiple
+																filterable
+																allow-create
+																default-first-option
+																placeholder="选择类"
+																style="width:100%;">
+																<el-option
+																v-for="item in dialog.edit.data.owner_class_rule"
+																:key="item"
+																:label="item"
+																:value="item">
+																</el-option>
+															</el-select>
+														</span>
+													</el-form-item>
 												</el-form>
 											</el-main>
 										</el-container>
@@ -2430,6 +2478,11 @@ class System {
 									field:"class_rule",
 									title: "对应类规则",
 									visible: true
+								},
+								{
+									field:"owner_class_rule",
+									title: "所属类规则",
+									visible: true
 								}],
 								selected: []
 							},
@@ -2442,7 +2495,8 @@ class System {
 									data: {
 										name: "",
 										api_rule: [],
-										class_rule: []
+										class_rule: [],
+										owner_class_rule: []
 									}
 								},
 								edit: {
@@ -2508,7 +2562,8 @@ class System {
 							this.dialog.add.data = {
 								name: "",
 								remark: "",
-								mclass: []
+								class_rule: [],
+								owner_class_rule: []
 							};
 							this.dialog.add.show = true;
 							setTimeout(()=>{
