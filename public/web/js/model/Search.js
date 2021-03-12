@@ -1002,7 +1002,7 @@ class Search {
                                     <el-main style="display:flex;flex-flow: wrap;" class="animated fadeIn" v-if="showContent">
                                         <el-button type="default" 
                                             style="max-width: 20em;width: 20em;height:auto;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);"
-                                            @click="forward(item)"
+                                            @click="onTipWnd(item)"
                                             v-for="item in model.rows" v-if="model.rows">
                                             <!--div style="position: relative;right: -100px;">    
                                                 <el-dropdown trigger="hover" placement="top-start">
@@ -1048,6 +1048,30 @@ class Search {
                         forward(item){
                             let url = `/matrix/entity?term=${window.btoa(encodeURIComponent(item.id))}`;
                             window.open(url,'_blank');
+                        },
+                        onTipWnd(item){
+                            
+                            let wnd = null;
+                            try{
+                                if(jsPanel.activePanels.getPanel('jsPanel-entity-info')){
+                                    jsPanel.activePanels.getPanel('jsPanel-entity-info').close();
+                                }
+                            } catch(error){
+            
+                            }
+                            finally{
+                                wnd = maxWindow.winEntityInfo('信息' + item.id, `<div id="entity-info-wnd"></div>`, null, null, null);
+                            }
+            
+                            new Vue({
+                                delimiters: ['#{', '}#'],
+                                data:{
+                                    src: "/matrix/form?id=" + item.id
+                                },
+                                template:   `<div style="width:100%;height:100%;">
+                                                <iframe style="border:unset;width:100%;height:100%;" :src="src"></iframe>
+                                            </div>`
+                            }).$mount("#entity-info-wnd");
                         }
                     }
                 }); 

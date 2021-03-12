@@ -36,7 +36,8 @@ class Knowledge {
                         return {
                             knowledge: {
                                 list:[]
-                            }
+                            },
+                            timer: null
                         }
                     },
                     template:   `<el-container style="height:100%;">
@@ -49,7 +50,7 @@ class Knowledge {
                                                     flex-wrap: wrap;
                                                     overflow: auto;
                                                     align-content: flex-start;">
-                                        <el-tooltip placement="top" open-delay="500" :content="item.name" 
+                                        <el-tooltip placement="top" open-delay="800" :content="item.name" 
                                             v-for="(item, index) in knowledge.list"
                                             :key="item.id"
                                             v-if="!_.isEmpty(knowledge.list)">
@@ -74,22 +75,25 @@ class Knowledge {
                     },
                     created(){
                         this.initData();
+
+                        this.timer = setInterval(()=>{
+                                        this.initData();
+                                    },30 * 1000);
                     },
                     methods: {
                         initData(){
                             
-                            try{
-                                let rtn = fsHandler.callFsJScript("/matrix/knowledge/knowledgeListTopN.js",encodeURIComponent('')).message;
-                                
-                                this.$set(this.knowledge,'list', rtn);   
-                            } catch(err){
-                                
-                            }
+                            fsHandler.callFsJScriptAsync("/matrix/knowledge/knowledgeListTopN.js",encodeURIComponent('')).then((rtn)=>{
+                                this.$set(this.knowledge,'list', rtn.message);
+                            })
                             
                         },
                         onOpen(data){
                             this.$root.onOpen(data);
                         }
+                    },
+                    beforeDestroy() {
+                        clearInterval(this.timer);
                     }
                 
                 })
@@ -131,8 +135,10 @@ class Knowledge {
                                             <span slot-scope="{ node, data }" style="width:100%;height:30px;line-height: 30px;"  @mouseenter="onMouseEnter(data)" @mouseleave="onMouseLeave(data)">
                                                 <span v-if="data.ftype=='dir'">
                                                     <i class="el-icon-folder" style="color:#FFC107;"></i>
-                                                    <el-tooltip placement="top" open-delay="500" :content="node.label">
-                                                        <span>#{node.label | pickShortLabel}#</span>
+                                                    <el-tooltip placement="top" open-delay="800" :content="node.label">
+                                                        <span>#{node.label | pickShortLabel}# 
+                                                            <span v-if="data.children">(#{data.children.length}#)</span>
+                                                        </span>
                                                     </el-tooltip>
                                                     <el-dropdown v-show="data.show" style="float:right;width:14px;margin:0 5px;" trigger="click">
                                                         <span class="el-dropdown-link">
@@ -149,7 +155,7 @@ class Knowledge {
                                                 </span>
                                                 <span v-else>
                                                     <i class="el-icon-c-scale-to-original" style="color:#0088cc;"></i>
-                                                    <el-tooltip placement="top" open-delay="500" :content="node.label">
+                                                    <el-tooltip placement="top" open-delay="800" :content="node.label">
                                                         <span>#{node.label | pickShortLabel}#</span>
                                                     </el-tooltip>
                                                     <el-button v-show="data.show" type="text" @click.stop="onDownload(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-download"></el-button>
@@ -187,15 +193,22 @@ class Knowledge {
                             this.$set(item, 'show', false)
                         },
                         onRefresh(item,index){
-                            let childrenData = fsHandler.fsList(item.fullname);
                             
-                            this.$set(item, 'children', childrenData);
+                            if(_.isEmpty(index)){
+                                this.initData();
+                            } else {
+                                fsHandler.fsListAsync(item.fullname).then((rtn)=>{
+                                    this.$set(item, 'children', rtn);
+                                });
+                            }
+                        
                         },
                         onNewDir(item,index){
                             this.$prompt('请输入目录名称', '提示', {
                                 confirmButtonText: '确定',
                                 cancelButtonText: '取消'
                               }).then(({ value }) => {
+
                                 if(_.isEmpty(value)){
                                     this.$message({
                                         type: 'warning',
@@ -206,23 +219,24 @@ class Knowledge {
 
                                 let _attr = {remark: '', rate: 0};
                 
-                                let rtn = fsHandler.fsNew('dir', item.fullname, value, null, _attr);
+                                fsHandler.fsNewAsync('dir', item.fullname, value, null, _attr).then((rtn)=>{
+                                    if(rtn == 1){
+                                        this.$message({
+                                            type: "success",
+                                            message: "新建目录成功！"
+                                        })
+    
+                                        // 刷新
+                                        this.onRefresh(item,index);
+    
+                                    } else {
+                                        this.$message({
+                                            type: "error",
+                                            message: "新建目录失败，" + rtn.message
+                                        })
+                                    }
+                                });
                                 
-                                if(rtn == 1){
-                                    this.$message({
-                                        type: "success",
-                                        message: "新建目录成功！"
-                                    })
-
-                                    // 刷新
-                                    this.onRefresh(item,index);
-
-                                } else {
-                                    this.$message({
-                                        type: "error",
-                                        message: "新建目录失败，" + rtn.message
-                                    })
-                                }
                                 
                               }).catch(() => {
                                 this.$message({
@@ -247,25 +261,29 @@ class Knowledge {
 
                                 let _attr = {remark: '', rate: 0};
 
-                                let content = fsHandler.callFsJScript("/matrix/knowledge/getDefaultContent.js",null).message;
-                
-                                let rtn = fsHandler.fsNew('md', item.fullname, [value,'md'].join("."), content, _attr);
+                                fsHandler.callFsJScriptAsync("/matrix/knowledge/getDefaultContent.js",null).then((rtn)=>{
+                                    let content = rtn.message;
+
+                                    fsHandler.fsNewAsync('md', item.fullname, [value,'md'].join("."), content, _attr).then((rt)=>{
+                                        if(rt == 1){
+                                            this.$message({
+                                                type: "success",
+                                                message: "新建成功！"
+                                            })
+    
+                                            // 刷新
+                                            this.onRefresh(item,index);
+    
+                                        } else {
+                                            this.$message({
+                                                type: "error",
+                                                message: "新建失败，" + rt.message
+                                            })
+                                        }
+                                    });
                                 
-                                if(rtn == 1){
-                                    this.$message({
-                                        type: "success",
-                                        message: "新建成功！"
-                                    })
-
-                                    // 刷新
-                                    this.onRefresh(item,index);
-
-                                } else {
-                                    this.$message({
-                                        type: "error",
-                                        message: "新建失败，" + rtn.message
-                                    })
-                                }
+                                });
+                
                                 
                               }).catch(() => {
                                 this.$message({
@@ -275,39 +293,39 @@ class Knowledge {
                               });
                         },
                         onDelete(item,index){
-                            const self = this;
-
+                            
                             this.$confirm(`确认要删除该知识：${item.name}？`, '提示', {
                                 confirmButtonText: '确定',
                                 cancelButtonText: '取消',
                                 type: 'warning'
                             }).then(() => {
 								
-                                let rtn = fsHandler.fsDelete(item.parent,item.name);
-                                
-                                if(rtn == 1){
-                                    this.$message({
-                                        type: "success",
-                                        message: "删除成功！"
-                                    })
-                                    
-                                    // 刷新
-                                    try{
-                                        let childrenData = fsHandler.fsList(item.parent);
-                                        let parent = this.$refs.tree.getNode(item.parent)
-                                        this.$set(parent.data, 'children', childrenData);
-                                    } catch(err){
-                                        this.initData();
+                                fsHandler.fsDeleteAsync(item.parent,item.name).then((rtn)=>{
+                                    if(rtn == 1){
+                                        this.$message({
+                                            type: "success",
+                                            message: "删除成功！"
+                                        })
+                                        
+                                        // 刷新
+                                        try{
+                                            let childrenData = fsHandler.fsList(item.parent);
+                                            let parent = this.$refs.tree.getNode(item.parent)
+                                            this.$set(parent.data, 'children', childrenData);
+                                        } catch(err){
+                                            this.initData();
+                                        }
+                                        
+                                        
+    
+                                    } else {
+                                        this.$message({
+                                            type: "error",
+                                            message: "删除失败！"
+                                        })
                                     }
-                                    
-                                    
-
-                                } else {
-                                    this.$message({
-                                        type: "error",
-                                        message: "删除失败！"
-                                    })
-                                }
+                                });
+                                
 
                             }).catch((err) => {
                                 console.log(err)
@@ -419,8 +437,9 @@ class Knowledge {
                         onFilterNode:_.debounce(function(value, data) {
                             if (!value) return true;
                             try{
-                                let rtn = fsHandler.callFsJScript("/matrix/fs/getFsByTerm.js", encodeURIComponent(value)).message;
-                                this.treeData = rtn;
+                                fsHandler.callFsJScriptAsync("/matrix/fs/getFsByTerm.js", encodeURIComponent(value)).then((rtn)=>{
+                                    this.treeData = rtn.message;
+                                });
                             } catch(err){
                                 this.treeData = [];
                             }
@@ -437,37 +456,40 @@ class Knowledge {
                                 } 
                                 // 目录
                                 else {
-                                    let childrenData = fsHandler.fsList(data.fullname);
-
-                                    this.$set(data, 'children', childrenData);
+                                    fsHandler.fsListAsync(data.fullname).then((rtn)=>{
+                                        this.$set(data, 'children', rtn);
+                                    });
                                 }
                             } catch(err){
                                 console.log(err)
                             }
                         },
                         initData(){
-                            let rtn = fsHandler.callFsJScript("/matrix/devops/getFsForTree.js", encodeURIComponent(this.root)).message;
-                            
-                            this.treeData = _.map(rtn,(v)=>{
-                                return _.extend(v,{show:false});
-                            });
-                            
-                            try{
-                                // let childrenData = fsHandler.fsList(this.treeData[2].fullname);
-                                // this.$set(this.treeData[2], 'children', childrenData);
+                            fsHandler.callFsJScriptAsync("/matrix/devops/getFsForTree.js", encodeURIComponent(this.root)).then((rt)=>{
+                                let rtn = rt.message;
 
-                                // 默认首页
-                                let homeNode = _.find(this.treeData,{name: '知识通介绍.md'}) || _.find(_.flattenDeep(_.map(this.treeData,'children')),{name: '知识通介绍.md'});
-                                
-                                let item = _.extend(homeNode,{
-                                    size: _.find(fsHandler.fsList(homeNode.parent),{name: homeNode.name}).size || 0
+                                this.treeData = _.map(rtn,(v)=>{
+                                    return _.extend(v,{show:false});
                                 });
                                 
-                                this.$root.model = {item:homeNode, content:fsHandler.fsContent(homeNode.parent, homeNode.name)};
-
-                            } catch(err){
-                                this.$root.model = null;
-                            }
+                                try{
+                                    // let childrenData = fsHandler.fsList(this.treeData[2].fullname);
+                                    // this.$set(this.treeData[2], 'children', childrenData);
+    
+                                    // 默认首页
+                                    let homeNode = _.find(this.treeData,{name: '知识通介绍.md'}) || _.find(_.flattenDeep(_.map(this.treeData,'children')),{name: '知识通介绍.md'});
+                                    
+                                    let item = _.extend(homeNode,{
+                                        size: _.find(fsHandler.fsList(homeNode.parent),{name: homeNode.name}).size || 0
+                                    });
+                                    
+                                    this.$root.model = {item:homeNode, content:fsHandler.fsContent(homeNode.parent, homeNode.name)};
+    
+                                } catch(err){
+                                    this.$root.model = null;
+                                }
+                            });
+                            
                         }
                     }
                 });
@@ -891,13 +913,15 @@ class Knowledge {
                     methods: {
                         onSearch(){
                             try{
-                                let rtn = fsHandler.callFsJScript("/matrix/knowledge/searchByTerm.js",encodeURIComponent(this.search.term)).message;
-                                
-                                if(_.isEmpty(rtn)){
-                                    this.search.result = [];
-                                } else {
-                                    this.search.result = rtn;
-                                }
+                                fsHandler.callFsJScriptAsync("/matrix/knowledge/searchByTerm.js",encodeURIComponent(this.search.term)).then((rt)=>{
+                                    let rtn = rt.message;
+                                    
+                                    if(_.isEmpty(rtn)){
+                                        this.search.result = [];
+                                    } else {
+                                        this.search.result = rtn;
+                                    }
+                                });
                                 
                             } catch(err){
                                 this.search.result = [];
@@ -1055,7 +1079,7 @@ class Knowledge {
                                     }).$mount("#movView");
 
                                 } else {
-                                    let url = `/fs/${data.fullname}?type=download&issys=true`;
+                                    let url = `/fs${data.fullname}?type=download&issys=true`;
                                     window.open(url,"_blank");
                                 }
                             } catch(err){
@@ -1076,7 +1100,9 @@ class Knowledge {
                                         }
                                     }
                                     
-                                    fsHandler.fsUpdateAttr(data.parent,data.name,attr);
+                                    fsHandler.fsUpdateAttrAsync(data.parent,data.name,attr).then((rtn)=>{
+                                        this.onSearch();
+                                    });
                                     
                                 } catch(err){
 

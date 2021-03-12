@@ -138,7 +138,7 @@ class FsHandler {
         fm.append("data", content);
         fm.append("type", ftype);
         fm.append("attr", JSON.stringify(attr)=='{}'?'':JSON.stringify(attr));
-        fm.append("index", false);
+        fm.append("index", true);
 
         jQuery.ajax({
             url: _url,
@@ -199,7 +199,7 @@ class FsHandler {
             fm.append("data", content);
             fm.append("type", ftype);
             fm.append("attr", JSON.stringify(attr)=='{}'?'':JSON.stringify(attr));
-            fm.append("index", false);
+            fm.append("index", true);
 
             await jQuery.ajax({
                 url: _url,
@@ -878,6 +878,53 @@ class FsHandler {
                 rtn = xhr.responseJSON;
             }
         })
+
+        return rtn;
+    };
+
+    async fsUpdateAttrAsync(path, name, attr) {
+        let rtn = null;
+        
+        try{
+            let parent = path.replace(/\/\//g,'/');
+            let _url = `/fs${parent}/${name}?type=attr`;
+
+            if(window.SignedUser_IsAdmin){
+                _url += '&issys=true';
+            }
+            let form = new FormData();
+            form.append("attr", JSON.stringify(attr));
+
+            await jQuery.ajax({
+                url: _url,
+                dataType: 'json',
+                type: 'PUT',
+                processData: false,
+                contentType: false,
+                mimeType: 'multipart/form-data',
+                data: form,
+                async: true,
+                beforeSend: function (xhr) {
+                    // Pace.restart();
+                },
+                complete: function (xhr, textStatus) {
+                },
+                success: function (data, textStatus, xhr) {
+
+                    userHandler.ifSignIn(data);
+
+                    if( _.lowerCase(data.status) == "ok"){
+                        rtn = 1;
+                    }
+
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    rtn = xhr.responseJSON;
+                }
+            })
+        }catch(err){
+
+        }
 
         return rtn;
     };

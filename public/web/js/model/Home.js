@@ -54,8 +54,8 @@ class Home extends Matrix {
                                                                 <i class="el-icon-arrow-down el-icon--right" style="color:rgba(255,255,255,0.5)"></i>
                                                             </span>
                                                             <el-dropdown-menu slot="dropdown">
-                                                                <el-dropdown-item :command="{cmd:'update',data:item}">#{ $t('home.actions.updateGroup') }#</el-dropdown-item>
-                                                                <el-dropdown-item :command="{cmd:'remove',data:item}" divided>#{ $t('home.actions.deleteGroup') }#</el-dropdown-item>
+                                                                <!--el-dropdown-item :command="{cmd:'update',data:item}">#{ $t('home.actions.updateGroup') }#</el-dropdown-item-->
+                                                                <el-dropdown-item :command="{cmd:'remove',data:item}">#{ $t('home.actions.deleteGroup') }#</el-dropdown-item>
                                                             </el-dropdown-menu>
                                                         </el-dropdown>
                                                     </el-button>
@@ -385,6 +385,7 @@ class Home extends Matrix {
                         loadApps() {
                             
                             fsHandler.callFsJScriptAsync("/matrix/user/user.js",window.SignedUser_UserName).then( (rtn)=>{
+                                
                                 this.apps = rtn.message;
 
                                 _.extend(this.apps, {appList:_.orderBy(this.apps.appList,["seat"],["asc"]) });

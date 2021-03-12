@@ -2047,7 +2047,7 @@ class AI {
                                                 <object data="/static/assets/images/files/svg/configWorld.svg" 
                                                     type="image/svg+xml" style="width:40vw;height:40vh;background: #ffffff;">
                                                 </object>
-                                                <p>
+                                                <p v-if="window.COMPANY_NAME=='wecise'">
                                                     如有任何意见或建议，请及时反馈给我们。
                                                     <el-link href="mailto:m3@wecise.com">Email：m3@wecise.com</el-link>
                                                 </p>

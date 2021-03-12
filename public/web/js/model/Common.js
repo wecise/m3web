@@ -2400,6 +2400,7 @@ Vue.component("mx-entity-tree",{
             }
         },1000),
         onNodeClick(data){
+            console.log(2323,data)
             try{
 
                 if(!data.isdir) {
