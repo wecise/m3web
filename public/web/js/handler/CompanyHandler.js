@@ -37,7 +37,7 @@ class CompanyHandler{
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -80,7 +80,7 @@ class CompanyHandler{
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 rtn = data;
 
@@ -117,7 +117,7 @@ class CompanyHandler{
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 rtn = data;
 
@@ -148,7 +148,7 @@ class CompanyHandler{
                 },
                 success: function (data, status) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     rtn = data;
 
@@ -188,7 +188,7 @@ class CompanyHandler{
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -232,7 +232,7 @@ class CompanyHandler{
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -271,7 +271,7 @@ class CompanyHandler{
                 },
                 success(data, status) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if( _.lowerCase(data.status) == "ok"){
                         rtn = 1;

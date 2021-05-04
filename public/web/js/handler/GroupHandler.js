@@ -36,7 +36,7 @@ class GroupHandler {
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = data;
@@ -85,7 +85,7 @@ class GroupHandler {
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 rtn = data;
 
@@ -116,7 +116,7 @@ class GroupHandler {
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 rtn = data;
             },

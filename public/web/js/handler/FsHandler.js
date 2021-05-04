@@ -50,7 +50,7 @@ class FsHandler {
                 },
                 success(data) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if( _.lowerCase(data.status) == "ok"){
                         rtn = 1;
@@ -98,7 +98,7 @@ class FsHandler {
             },
             success(data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = data.message;
@@ -155,7 +155,7 @@ class FsHandler {
             },
             success(data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -216,7 +216,7 @@ class FsHandler {
                 },
                 success(data, textStatus, xhr) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if( _.lowerCase(data.status) == "ok"){
                         rtn = 1;
@@ -275,7 +275,7 @@ class FsHandler {
             },
             success: function(data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if (_.isEmpty(data.message)) return false;
 
@@ -320,7 +320,7 @@ class FsHandler {
                 },
                 success: function(data, textStatus, xhr) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if (_.isEmpty(data.message)) return false;
 
@@ -370,7 +370,7 @@ class FsHandler {
             },
             success: function(data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -408,7 +408,7 @@ class FsHandler {
                 },
                 success: function(data, textStatus, xhr) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if( _.lowerCase(data.status) == "ok"){
                         rtn = 1;
@@ -462,7 +462,7 @@ class FsHandler {
             },
             success: function (data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if (_.isEmpty(data.message)) return false;
 
@@ -504,7 +504,7 @@ class FsHandler {
                 },
                 success(data, textStatus, xhr) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if (_.isEmpty(data.message)) return false;
 
@@ -563,7 +563,7 @@ class FsHandler {
             },
             success: function (data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -611,7 +611,7 @@ class FsHandler {
                 },
                 success(data, textStatus, xhr) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if( _.lowerCase(data.status) == "ok"){
                         rtn = 1;
@@ -665,7 +665,7 @@ class FsHandler {
             },
             success: function (data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -709,7 +709,7 @@ class FsHandler {
                 },
                 success(data, textStatus, xhr) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if( _.lowerCase(data.status) == "ok"){
                         rtn = 1;
@@ -764,7 +764,7 @@ class FsHandler {
             },
             success: function (data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -812,7 +812,7 @@ class FsHandler {
                 },
                 success: function (data, textStatus, xhr) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if( _.lowerCase(data.status) == "ok"){
                         rtn = 1;
@@ -867,7 +867,7 @@ class FsHandler {
             },
             success: function (data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -911,7 +911,7 @@ class FsHandler {
                 },
                 success: function (data, textStatus, xhr) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if( _.lowerCase(data.status) == "ok"){
                         rtn = 1;
@@ -997,7 +997,7 @@ class FsHandler {
                 },
                 success(data, textStatus, xhr) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if( _.lowerCase(data.status) == "ok"){
                         rtn = 1;
@@ -1105,7 +1105,7 @@ class FsHandler {
             },
             success: function (data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -1158,7 +1158,7 @@ class FsHandler {
             },
             success: function (data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -1225,7 +1225,7 @@ class FsHandler {
             },
             success: function(data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                
 
                 rtn = data;
             },
@@ -1267,7 +1267,7 @@ class FsHandler {
             beforeSend: function(xhr) {},
             complete: function(xhr, textStatus) {},
             success: function(data, textStatus, xhr) {
-                userHandler.ifSignIn(data);
+                
                 rtn = data;
             },
             error: function(xhr, textStatus, errorThrown) {
@@ -1316,7 +1316,7 @@ class FsHandler {
                 },
                 success(data, textStatus, xhr) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     rtn = data;
 
@@ -1368,7 +1368,7 @@ class FsHandler {
             },
             success(data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                
 
                 rtn = data.data;
             },
@@ -1417,7 +1417,7 @@ class FsHandler {
                 },
                 success(data, textStatus, xhr) {
 
-                    userHandler.ifSignIn(data);
+                    
                     rtn = data;
                 },
                 error(xhr, textStatus, errorThrown) {
@@ -1471,7 +1471,7 @@ class FsHandler {
                 },
                 success(data, textStatus, xhr) {
 
-                    userHandler.ifSignIn(data);
+                    
                     rtn = data;
                 },
                 error(xhr, textStatus, errorThrown) {
@@ -1525,7 +1525,7 @@ class FsHandler {
                 },
                 success(data, textStatus, xhr) {
 
-                    userHandler.ifSignIn(data);
+                    
                     rtn = data;
                 },
                 error(xhr, textStatus, errorThrown) {

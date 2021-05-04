@@ -23,6 +23,7 @@ class Config {
             $(function () {
                 
                 Vue.component('config-tree',{
+                    i18n,
                     delimiters: ['#{', '}#'],
                     data(){
                         return {
@@ -62,22 +63,22 @@ class Config {
                     template:   `<el-container style="height:100%;">
                                     <el-header style="height:40px;line-height:40px;display:flex;">
                                         <el-input v-model="filterText" 
-                                            placeholder="搜索"
+                                            :placeholder="$t('config.search')"
                                             clearable></el-input>
 
                                             <el-dropdown placement="top-start" trigger="click">
-                                                <el-tooltip content="导出、导入" open-delay="800">
+                                                <el-tooltip :content="$t('config.export')+' ' + $t('config.import')" open-delay="800">
                                                     <el-button type="text" icon="el-icon-menu" style="color:#333333;"></el-button>
                                                 </el-tooltip>
                                                 <el-dropdown-menu slot="dropdown">
                                                     <el-dropdown-item>
                                                         <label for="auto-file-upload" class="custom-file-upload" style="display: inline-block;padding: 6px 12px;cursor: pointer;">
-                                                            <i class="el-icon-download"></i> 导入
+                                                            <i class="el-icon-download"></i> #{ $t('config.import') }#
                                                         </label>
                                                         <input id="auto-file-upload" type="file" @change="$root.configImport" required="required" style="display:none;" />
                                                     </el-dropdown-item>
                                                     <el-dropdown-item>
-                                                        <el-button type="text" @click="$root.configExport"><i class="el-icon-upload2"></i> 导出</el-button>
+                                                        <el-button type="text" @click="$root.configExport"><i class="el-icon-upload2"></i> #{ $t('config.export') }#</el-button>
                                                     </el-dropdown-item>
                                                 </el-dropdown-menu>
                                             </el-dropdown>
@@ -102,19 +103,19 @@ class Config {
                                                     <i class="el-icon-lock" style="color:#FFC107;" v-else-if="_.endsWith(node.label,'lock')"></i>
                                                     <i class="el-icon-warning" style="color:#FFC107;" v-else-if="_.endsWith(node.label,'notify')"></i>
                                                     <i class="el-icon-folder" style="color:#FFC107;" v-else></i>
-                                                    <span v-if="node.label=='/'">我的配置(#{data.nodes.length}#)</span>
+                                                    <span v-if="node.label=='/'">#{ $t('config.home') }#(#{data.nodes.length}#)</span>
                                                     <span v-else>#{ _.last(node.label.split("/")) }#(#{data.nodes.length}#)</span>
                                                     <el-dropdown v-show="data.show" style="float:right;width:14px;margin:0 5px;">
                                                         <span class="el-dropdown-link">
                                                             <i class="el-icon-more el-icon--right"></i>
                                                         </span>
                                                         <el-dropdown-menu slot="dropdown">
-                                                            <el-dropdown-item @click.native="onRefresh(data)"icon="el-icon-refresh">刷新</el-dropdown-item>
-                                                            <el-dropdown-item @click.native="onNewFile(data)"icon="el-icon-plus" divided>新建</el-dropdown-item>
-                                                            <el-dropdown-item @click.native="onNewDir(data)"icon="el-icon-folder-add">新建目录</el-dropdown-item>
-                                                            <el-dropdown-item @click.native="onEditFile(data)"icon="el-icon-edit-outline" divided>编辑</el-dropdown-item>
-                                                            <el-dropdown-item @click.native="onExport(data)"icon="el-icon-download" divided>导出</el-dropdown-item>
-                                                            <el-dropdown-item @click.native="onDelete(data)" icon="el-icon-delete" divided>删除</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onRefresh(data)"icon="el-icon-refresh">#{ $t('config.refresh') }#</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onNewFile(data)"icon="el-icon-plus" divided>#{ $t('config.new') }#</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onNewDir(data)"icon="el-icon-folder-add">#{ $t('config.newDir') }#</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onEditFile(data)"icon="el-icon-edit-outline" divided>#{ $t('config.edit') }#</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onExport(data)"icon="el-icon-download" divided>#{ $t('config.export') }#</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onDelete(data)" icon="el-icon-delete" divided>#{ $t('config.delete') }#</el-dropdown-item>
                                                         </el-dropdown-menu>
                                                     </el-dropdown>
                                                 </span>
@@ -126,10 +127,10 @@ class Config {
                                                             <i class="el-icon-more el-icon--right"></i>
                                                         </span>
                                                         <el-dropdown-menu slot="dropdown">
-                                                            <el-dropdown-item @click.native="onEditFile(data)"icon="el-icon-edit-outline">编辑</el-dropdown-item>
-                                                            <el-dropdown-item @click.native="onNewFile(data)"icon="el-icon-plus" divided>新建</el-dropdown-item>
-                                                            <el-dropdown-item @click.native="onNewDir(data)"icon="el-icon-folder-add">新建目录</el-dropdown-item>
-                                                            <el-dropdown-item @click.native="onDelete(data)" icon="el-icon-delete" divided>删除</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onEditFile(data)"icon="el-icon-edit-outline">#{ $t('config.edit') }#</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onNewFile(data)"icon="el-icon-plus" divided>#{ $t('config.new') }#</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onNewDir(data)"icon="el-icon-folder-add">#{ $t('config.newDir') }#</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onDelete(data)" icon="el-icon-delete" divided>#{ $t('config.delete') }#</el-dropdown-item>
                                                         </el-dropdown-menu>
                                                     </el-dropdown>
                                                     <el-tooltip content="编辑" open-delay="800">
@@ -138,35 +139,35 @@ class Config {
                                                 </span>
                                             </span>  
                                         </el-tree>
-                                        <el-dialog :title="dialog.configNew.formItem.ifDir?'新增目录':'新增配置'" 
+                                        <el-dialog :title="dialog.configNew.formItem.ifDir?$t('config.newDir'):$t('config.new')" 
                                             :visible.sync="dialog.configNew.show" 
                                             v-if="dialog.configNew.show">
                                             <el-container>
                                                 <el-main style="padding:0px 20px;height:100%;overflow:auto;">
                                                     <el-form label-width="80">
-                                                        <el-form-item label="位置" prop="parent">
-                                                            <el-input v-model="dialog.configNew.parent" placeholder="位置" :disabled="true"></el-input>
+                                                        <el-form-item :label="$t('config.parent')" prop="parent">
+                                                            <el-input v-model="dialog.configNew.parent" :placeholder="$t('config.parent')" :disabled="true"></el-input>
                                                         </el-form-item>
-                                                        <el-form-item label="名称" prop="name">
-                                                            <el-input v-model="dialog.configNew.name" :placeholder="dialog.configNew.formItem.ifDir?'目录名称':'配置名称'" autofocus="true"></el-input>
+                                                        <el-form-item :label="$t('config.name')" prop="name">
+                                                            <el-input v-model="dialog.configNew.name" :placeholder="dialog.configNew.formItem.ifDir?$t('config.parent'):$t('config.name')" autofocus="true"></el-input>
                                                         </el-form-item>
-                                                        <el-form-item :label="dialog.configNew.formItem.ifDir?'目录':'配置'">
+                                                        <el-form-item :label="dialog.configNew.formItem.ifDir?$t('config.dir'):$t('config.config')">
                                                             <el-switch v-model="dialog.configNew.formItem.ifDir"
                                                                 active-color="#13ce66"
                                                                 :active-value="true"
                                                                 :inactive-value="false"></el-switch>
                                                         </el-form-item>
-                                                        <el-form-item label="TTL" prop="ttl">
-                                                            <el-input v-model="dialog.configNew.formItem.ttl" placeholder="TTL"></el-input>
+                                                        <el-form-item :label="$t('config.ttl')" prop="ttl">
+                                                            <el-input v-model="dialog.configNew.formItem.ttl" :placeholder="$t('config.ttl')"></el-input>
                                                         </el-form-item>
-                                                        <el-form-item label="值" prop="value">
-                                                            <el-input v-model="dialog.configNew.formItem.value" type="textarea" placeholder="配置内容"></el-input>
+                                                        <el-form-item :label="$t('config.value')" prop="value">
+                                                            <el-input v-model="dialog.configNew.formItem.value" type="textarea" :placeholder="$t('config.value')"></el-input>
                                                         </el-form-item>
                                                     </el-form>
                                                 </el-main>
                                                 <el-footer style="text-align:right;">
-                                                    <el-button type="default" @click="dialog.configNew.show = false;">取消</el-button>
-                                                    <el-button type="primary" @click="onConfigSave" :loading="dialog.configNew.loading">提交</el-button>
+                                                    <el-button type="default" @click="dialog.configNew.show = false;">#{ $t('config.cancel') }#</el-button>
+                                                    <el-button type="primary" @click="onConfigSave" :loading="dialog.configNew.loading">#{ $t('config.apply') }#</el-button>
                                                 </el-footer>
                                             </el-container>
                                         </el-dialog> 
@@ -223,15 +224,15 @@ class Config {
 
                             const h = this.$createElement;
                             this.$msgbox({
-                                    title: `确认要删除以下配置`, 
+                                    title: this.$t('config.confirmDeleteTip'), 
                                     message: h('span', null, [
-                                        h('p', null, `位置：${item.key}`),
-                                        h('p', null, `值：${_.truncate(item.value)}`),
-                                        h('p', null, `TTL：${  _.isUndefined(item.ttl) ? '' : item.ttl }`)
+                                        h('p', null, `${ this.$t('config.parent') }：${item.key}`),
+                                        h('p', null, `${ this.$t('config.value') }：${_.truncate(item.value)}`),
+                                        h('p', null, `${ this.$t('config.ttl') }：${  _.isUndefined(item.ttl) ? '' : item.ttl }`)
                                     ]),
                                     showCancelButton: true,
-                                    confirmButtonText: '确定',
-                                    cancelButtonText: '取消',
+                                    confirmButtonText: this.$t('config.confirm'),
+                                    cancelButtonText: this.$t('config.cancel'),
                                     type: 'warning'
                             }).then(() => {
 
@@ -286,9 +287,9 @@ class Config {
                         },
                         onExport(data){
                             
-                            this.$confirm(`确认要导出 ${data.key} 下的配置?`, '提示', {
-                                confirmButtonText: '确定',
-                                cancelButtonText: '取消',
+                            this.$confirm(`${ this.$t('config.confirmExport1') } ${data.key} ${ this.$t('config.confirmExport2') }`, this.$t('config.tip'), {
+                                confirmButtonText: this.$t('config.confirm'),
+                                cancelButtonText: this.$t('config.cancel'),
                                 type: 'warning'
                             }).then(() => {
                                 
@@ -304,7 +305,7 @@ class Config {
                             if(_.isEmpty(this.dialog.configNew.name)){
                                 this.$message({
                                     type: "warning",
-                                    message: "配置名称不能为空！"
+                                    message: this.$t('config.nameNotNullTip')
                                 })
                                 return false;
                             }
@@ -315,15 +316,15 @@ class Config {
                             
                             const h = this.$createElement;
                             this.$msgbox({
-                                    title: `确认要添加以下配置`, 
+                                    title: this.$t('config.confirmAddTip'), 
                                     message: h('span', null, [
-                                        h('p', null, `位置：${this.dialog.configNew.formItem.key}`),
-                                        h('p', null, `值：${_.truncate(this.dialog.configNew.formItem.value)}`),
-                                        h('p', null, `TTL：${ this.dialog.configNew.formItem.ttl ? this.dialog.configNew.formItem.ttl : ''}`)
+                                        h('p', null, `${ this.$t('config.parent') }：${this.dialog.configNew.formItem.key}`),
+                                        h('p', null, `${ this.$t('config.value') }：${_.truncate(this.dialog.configNew.formItem.value)}`),
+                                        h('p', null, `${ this.$t('config.ttl') }：${ this.dialog.configNew.formItem.ttl ? this.dialog.configNew.formItem.ttl : ''}`)
                                     ]),
                                     showCancelButton: true,
-                                    confirmButtonText: '确定',
-                                    cancelButtonText: '取消',
+                                    confirmButtonText: this.$t('config.confirm'),
+                                    cancelButtonText: this.$t('config.cancel'),
                                     type: 'warning'
                             }).then(() => {
 
@@ -331,7 +332,7 @@ class Config {
                                     if(rtn == 1){
                                         this.$message({
                                             type: "success",
-                                            message: "保存成功！"
+                                            message: this.$t('config.saveSuccess')
                                         })
                                         
                                         // 刷新
@@ -345,7 +346,7 @@ class Config {
                                     } else {
                                         this.$message({
                                             type: "error",
-                                            message: "保存失败：" + rtn
+                                            message: this.$t('config.saveFailed') + rtn
                                         })
                                     }
 
@@ -362,19 +363,20 @@ class Config {
 
                 // 调试
                 Vue.component('config-debug-console',{
+                    i18n,
                     delimiters: ['#{', '}#'],
                     props: {
                         rule: String
                     },
                     template:   `<el-container style="height:calc(100% - 70px);">
                                     <el-header style="height:30px;line-height:30px;text-align:right;">
-                                        <el-tooltip content="重置测试内容" open-delay="800">
+                                        <el-tooltip :content="$t('config.resetTestValue')" open-delay="800">
                                             <el-button type="text" @click="onReset" icon="el-icon-refresh"></el-button>
                                         </el-tooltip>
-                                        <el-tooltip content="发送测试内容" open-delay="800">
+                                        <el-tooltip :content="$t('config.sendTestValue')" open-delay="800">
                                             <el-button type="text" @click="onSubmit" icon="el-icon-s-promotion"></el-button>
                                         </el-tooltip>
-                                        <el-tooltip content="文件类型" open-delay="800">
+                                        <el-tooltip :content="$t('config.testFileType')" open-delay="800">
                                             <el-dropdown @command="onHandleCommand" trigger="click" style="margin-left:10px;">
                                                 <span class="el-dropdown-link">
                                                     <i class="el-icon-document"></i>
@@ -441,7 +443,7 @@ class Config {
                             if(debug.length < 1){
                                 this.$message({
                                     type:"info",
-                                    message: "请输入调试信息"
+                                    message: this.$t('config.testTip')
                                 })
                                 return false;
                             }
@@ -462,6 +464,7 @@ class Config {
 
                 // 数据
                 Vue.component('config-data-console',{
+                    i18n,
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
@@ -470,14 +473,14 @@ class Config {
                     },
                     template:   `<el-container>
                                     <el-header style="height:30px;line-height:30px;">
-                                        <el-tooltip content="清空" open-delay="800">
+                                        <el-tooltip :content="$t('config.clear')" open-delay="800">
                                             <el-button type="text" @click="onReset"><i class="fas fa-trash"></i></el-button>
                                         </el-tooltip>
-                                        <el-tooltip content="重新加载" open-delay="800">
+                                        <el-tooltip :content="$t('config.refresh')" open-delay="800">
                                             <el-button type="text" @click="onLoad"><i class="fas fa-sync"></i></el-button>
                                         </el-tooltip>
-                                        <el-tooltip content="默认只删除对象数据，勾选此项同时删除版本数据。" open-delay="800">
-                                            <el-checkbox v-model="ifDeleteVersionData" style="height: 35px;line-height: 35px;float:right;">删除版本数据</el-checkbox>
+                                        <el-tooltip :content="$t('config.deleteVersionTip')" open-delay="800">
+                                            <el-checkbox v-model="ifDeleteVersionData" style="height: 35px;line-height: 35px;float:right;">#{ $t('config.deleteData') }#</el-checkbox>
                                         </el-tooltip>
                                     </el-header>
                                     <el-main style="padding: 20px;height:100%;">
@@ -497,11 +500,6 @@ class Config {
                                                             :formatter="item.render"
                                                             v-if="item.visible">
                                             </el-table-column>
-                                            <!--el-table-column align="right">
-                                                <template slot="header" slot-scope="scope">
-                                                    <el-input size="mini" placeholder="输入关键字搜索"/>
-                                                </template>
-                                            </el-table-column-->
                                         </el-table>
                                     </el-main>
                                 </el-container>`,
@@ -547,11 +545,11 @@ class Config {
                         onReset(){
                             const h = this.$createElement;
                             this.$msgbox({
-                                    title: `确认要删除下列数据`, 
+                                    title: this.$t('config.confirmDeleteData'), 
                                     message: h( 'span', null, _.map(this.selectedRows, (v)=>{ return h('p',null, v.id); }) ),
                                     showCancelButton: true,
-                                    confirmButtonText: '确定',
-                                    cancelButtonText: '取消',
+                                    confirmButtonText: this.$t('config.confirm'),
+                                    cancelButtonText: this.$t('config.cancel'),
                                     type: 'warning'
                             }).then(() => {
 
@@ -581,6 +579,7 @@ class Config {
                 })
     
                 Vue.component('config-manage',{
+                    i18n,
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
@@ -594,13 +593,13 @@ class Config {
                                     <el-footer :style="'padding:0px;height:'+footerHeight+'%;'" ref="footerView">
                                         <el-tabs v-model="debug.tabs.activeIndex" type="border-card" closable @tab-remove="logClose" @tab-click="handleClick">
                                             <el-tab-pane name="log" style="padding:10px;">
-                                                <span slot="label">日志 <i class="el-icon-date"></i></span>
+                                                <span slot="label">#{ $t('config.log') }#</span>
                                                 <mx-consolelog :fullname="id" logType="rule" v-if="!_.isEmpty(id)" ref="configLogConsoleRef"></mx-consolelog> 
                                             </el-tab-pane>
-                                            <el-tab-pane label="测试" name="debug" style="padding:10px;">
+                                            <el-tab-pane :label="$t('config.test')" name="debug" style="padding:10px;">
                                                 <config-debug-console :rule="id"></config-debug-console>
                                             </el-tab-pane>
-                                            <el-tab-pane label="数据" name="data" style="padding:10px;">
+                                            <el-tab-pane :label="$t('config.data')" name="data" style="padding:10px;">
                                                 <config-data-console :id="id" :model="classModel"></config-data-console>
                                             </el-tab-pane>
                                         </el-tabs>
@@ -865,6 +864,7 @@ class Config {
                 })
     
                 let main = {
+                    i18n,
                     delimiters: ['#{', '}#'],
                     template:   `<el-container style="height: calc(100vh - 85px);background-color:#f2f2f2;">
                                     
@@ -876,19 +876,19 @@ class Config {
                                             <el-container ref="mainView">
                                                 <el-header style="height: 35px;line-height: 35px;background:#f2f2f2;border-bottom:1px solid #dddddd; padding: 0px 10px 0px 0px;">
                                                     
-                                                    <el-tooltip content="切换视图" open-delay="800" placement="top">
+                                                    <el-tooltip :content="$t('config.toggle')" open-delay="800" placement="top">
                                                         <el-button type="text" @click="onTogglePanel">
                                                             <span :class="control.configTree.show?'el-icon-s-fold':'el-icon-s-unfold'" style="font-size:17px;"></span>
                                                         </el-button>
                                                     </el-tooltip>
 
-                                                    <el-tooltip content="保存" open-delay="800">
+                                                    <el-tooltip :content="$t('config.save')" open-delay="800">
                                                         <el-button type="text" @click="configUpdate" v-if="control.save.show && !_.isEmpty(configTabs.tabs)">
                                                             <i class="far fa-save" style="color:#009688;font-size:15px;"><i>
                                                         </el-button>
                                                     </el-tooltip>
                                                     
-                                                    <el-tooltip content="主题" open-delay="800">
+                                                    <el-tooltip :content="$t('config.theme')" open-delay="800">
                                                         <el-button type="text" 
                                                             :class="'editor-select-theme-'+objectHash.sha1(configTabs.activeIndex)" 
                                                             v-show="!_.isEmpty(configTabs.tabs)" 
@@ -907,11 +907,11 @@ class Config {
                                                                         <i class="el-icon-arrow-down"></i>
                                                                     </span>
                                                                     <el-dropdown-menu slot="dropdown">
-                                                                        <el-dropdown-item @click.native="configCopy(item.name)" :class="'copy'+objectHash.sha1(item.name)">复制</el-dropdown-item>
-                                                                        <el-dropdown-item divided @click.native="configDegug(item.name)">调试</el-dropdown-item>
-                                                                        <el-dropdown-item @click.native="tabClose(0,item)" divided>关闭</el-dropdown-item>
-                                                                        <el-dropdown-item @click.native="tabClose(1,item)">关闭其它标签页</el-dropdown-item>
-                                                                        <el-dropdown-item @click.native="tabClose(2,item)">关闭右侧标签页</el-dropdown-item>
+                                                                        <el-dropdown-item @click.native="configCopy(item.name)" :class="'copy'+objectHash.sha1(item.name)">#{ $t('config.copy') }#</el-dropdown-item>
+                                                                        <el-dropdown-item divided @click.native="configDegug(item.name)">#{ $t('config.debug') }#</el-dropdown-item>
+                                                                        <el-dropdown-item @click.native="tabClose(0,item)" divided>#{ $t('config.close') }#</el-dropdown-item>
+                                                                        <el-dropdown-item @click.native="tabClose(1,item)">#{ $t('config.closeOther') }#</el-dropdown-item>
+                                                                        <el-dropdown-item @click.native="tabClose(2,item)">#{ $t('config.closeOnTheRight') }#</el-dropdown-item>
                                                                     </el-dropdown-menu>
                                                                 </el-dropdown>
                                                             </span>
@@ -923,11 +923,11 @@ class Config {
                                                                         <i class="el-icon-arrow-down"></i>
                                                                     </span>
                                                                     <el-dropdown-menu slot="dropdown">
-                                                                        <!--el-dropdown-item @click.native="configCopy(item.name)" :class="'copy'+objectHash.sha1(item.name)">复制</el-dropdown-item-->
-                                                                        <el-dropdown-item @click.native="configDegug(item.name)">调试</el-dropdown-item>
-                                                                        <el-dropdown-item @click.native="tabClose(0,item)" divided>关闭</el-dropdown-item>
-                                                                        <el-dropdown-item @click.native="tabClose(1,item)">关闭其它标签页</el-dropdown-item>
-                                                                        <el-dropdown-item @click.native="tabClose(2,item)">关闭右侧标签页</el-dropdown-item>
+                                                                        <!--el-dropdown-item @click.native="configCopy(item.name)" :class="'copy'+objectHash.sha1(item.name)">#{ $t('config.copy') }#</el-dropdown-item-->
+                                                                        <el-dropdown-item @click.native="configDegug(item.name)">#{ $t('config.debug') }#</el-dropdown-item>
+                                                                        <el-dropdown-item @click.native="tabClose(0,item)" divided>#{ $t('config.close') }#</el-dropdown-item>
+                                                                        <el-dropdown-item @click.native="tabClose(1,item)">#{ $t('config.closeOther') }#</el-dropdown-item>
+                                                                        <el-dropdown-item @click.native="tabClose(2,item)">#{ $t('config.closeOnTheRight') }#</el-dropdown-item>
                                                                     </el-dropdown-menu>
                                                                 </el-dropdown>
                                                             </span>
@@ -936,31 +936,31 @@ class Config {
                                                     </el-tabs>
                                                     
                                                     <div style="background:#ffffff;padding:20px;height:100%;display:block;text-align:center;" v-else>
-                                                        <h2 style="margin: 0px 0px 40px 0px;">欢迎使用配置管理</h2>
+                                                        <h2 style="margin: 0px 0px 40px 0px;">#{ $t('config.welcome') }#</h2>
                                                         <p>
                                                             
                                                             <el-button style="width:100px;height:90px;" @click="onToggleKey('etc')">
-                                                                <i class="el-icon-money" style="font-size:48px;"></i> <p>全局配置</p>
+                                                                <i class="el-icon-money" style="font-size:48px;"></i> <p>#{ $t('config.globleConfig') }#</p>
                                                             </el-button>
 
                                                             <el-button style="width:100px;height:90px;" @click="onToggleKey('hosts')">
-                                                                <i class="el-icon-office-building" style="font-size:48px;"></i> <p>服务器组管理</p>
+                                                                <i class="el-icon-office-building" style="font-size:48px;"></i> <p>#{ $t('config.hostGroup') }#</p>
                                                             </el-button>
                                                             
                                                             <el-button style="width:100px;height:90px;" @click="onToggleKey('jobs')">
-                                                                <i class="el-icon-postcard" style="font-size:48px;"></i> <p>作业定义</p>
+                                                                <i class="el-icon-postcard" style="font-size:48px;"></i> <p>#{ $t('config.job') }#</p>
                                                             </el-button>
                                                         
                                                             <el-button style="width:100px;height:90px;" @click="onToggleKey('rules')">
-                                                                <i class="el-icon-s-data" style="font-size:48px;"></i> <p>规则管理</p>
+                                                                <i class="el-icon-s-data" style="font-size:48px;"></i> <p>#{ $t('config.rule') }#</p>
                                                             </el-button>
 
                                                             <el-button style="width:100px;height:90px;" @click="onToggleKey('locks')">
-                                                                <i class="el-icon-lock" style="font-size:48px;"></i> <p>全局锁</p>
+                                                                <i class="el-icon-lock" style="font-size:48px;"></i> <p>#{ $t('config.lock') }#</p>
                                                             </el-button>
 
                                                             <el-button style="width:100px;height:90px;" @click="onToggleKey('notify')">
-                                                                <i class="el-icon-warning-outline" style="font-size:48px;"></i> <p>通知设置</p>
+                                                                <i class="el-icon-warning-outline" style="font-size:48px;"></i> <p>#{ $t('config.notify') }#</p>
                                                             </el-button>
                                                         
                                                         </p>
@@ -968,7 +968,7 @@ class Config {
                                                             type="image/svg+xml" style="width:40vw;height:40vh;background: #ffffff;">
                                                         </object>
                                                         <p>
-                                                            如有任何意见或建议，请及时反馈给我们。
+                                                            #{ $t('config.feedback') }#
                                                             <el-link href="mailto:m3@wecise.com">Email：m3@wecise.com</el-link>
                                                         </p>
                                                     </div>
@@ -1065,15 +1065,15 @@ class Config {
                             const h = this.$createElement;
 
                             this.$msgbox({
-                                    title: `确认要导入配置`, 
+                                    title: this.$t('config.confirmImport'), 
                                     message: h('span', null, [
-                                        h('p', null, `文件名称：${file.name}`),
-                                        h('p', null, `修改时间：${file.lastModifiedDate}`),
-                                        h('p', null, `文件大小：${mx.bytesToSize(file.size)}`)
+                                        h('p', null, `${ this.$t('config.fileName') }：${file.name}`),
+                                        h('p', null, `${ this.$t('config.modifyTime') }：${file.lastModifiedDate}`),
+                                        h('p', null, `${ this.$t('config.fileSize') }：${mx.bytesToSize(file.size)}`)
                                     ]),
                                     showCancelButton: true,
-                                    confirmButtonText: '确定',
-                                    cancelButtonText: '取消',
+                                    confirmButtonText: this.$t('config.confirm'),
+                                    cancelButtonText: this.$t('config.cancel'),
                                     type: 'warning'
                             }).then(() => {
 
@@ -1090,9 +1090,9 @@ class Config {
                         },
                         configExport(){
                             
-                            this.$confirm(`确认要导出所有配置?`, '提示', {
-                                confirmButtonText: '确定',
-                                cancelButtonText: '取消',
+                            this.$confirm(this.$t('config.confirmExport1'), this.$t('config.tip'), {
+                                confirmButtonText: this.$t('config.confirm'),
+                                cancelButtonText: this.$t('config.cancel'),
                                 type: 'warning'
                             }).then(() => {
 								
@@ -1151,9 +1151,9 @@ class Config {
 
                             if(_.includes(this.control.save.list, targetName)) {
 
-                                this.$confirm(`${targetName} 已修改，确认是否保存`, '提示', {
-                                    confirmButtonText: '确定',
-                                    cancelButtonText: '取消',
+                                this.$confirm(`${targetName} ${ this.$t('config.confirmUpdatedTip') }`, '提示', {
+                                    confirmButtonText: this.$t('config.confirm'),
+                                    cancelButtonText: this.$t('config.cancel'),
                                     type: 'warning'
                                 }).then(() => {
                                     
@@ -1184,7 +1184,7 @@ class Config {
                                     }
                                 },
                                 items: {
-                                    "bright": { name: "亮色", items: {
+                                    "bright": { name: this.$t('config.light'), items: {
                                             "chrome": { name: "chrome"},
                                             "clouds": { name: "clouds"},
                                             "crimson_editor": { name: "crimson_editor"},
@@ -1202,7 +1202,7 @@ class Config {
                                             "sqlserver": { name: "sqlserver"}
                                         }
                                     },
-                                    "dark": { name: "暗色", items: {
+                                    "dark": { name: this.$t('config.dark'), items: {
                                             "ambiance": { name: "ambiance"},
                                             "chaos": { name: "chaos"},
                                             "clouds_midnight": { name: "clouds_midnight"},
@@ -1244,7 +1244,7 @@ class Config {
                             if(_.isEmpty(this.dialog.configNew.name)){
                                 this.$message({
                                     type: "warning",
-                                    message: "配置名称不能为空！"
+                                    message: this.$t('config.nameNotNullTip')
                                 })
                                 return false;
                             }
@@ -1255,15 +1255,15 @@ class Config {
                             
                             const h = this.$createElement;
                             this.$msgbox({
-                                    title: `确认要添加以下配置`, 
+                                    title: this.$t('config.confirmAddTip'),
                                     message: h('span', null, [
-                                        h('p', null, `位置：${this.dialog.configNew.formItem.key}`),
-                                        h('p', null, `值：${_.truncate(this.dialog.configNew.formItem.value)}`),
-                                        h('p', null, `TTL：${ this.dialog.configNew.formItem.ttl ? this.dialog.configNew.formItem.ttl : ''}`)
+                                        h('p', null, `${ this.$t('config.parent') }：${this.dialog.configNew.formItem.key}`),
+                                        h('p', null, `${ this.$t('config.value') }：${_.truncate(this.dialog.configNew.formItem.value)}`),
+                                        h('p', null, `${ this.$t('config.ttl') }：${ this.dialog.configNew.formItem.ttl ? this.dialog.configNew.formItem.ttl : ''}`)
                                     ]),
                                     showCancelButton: true,
-                                    confirmButtonText: '确定',
-                                    cancelButtonText: '取消',
+                                    confirmButtonText: this.$t('config.confirm'),
+                                    cancelButtonText: this.$t('config.cancel'),
                                     type: 'warning'
                             }).then(() => {
 
@@ -1271,7 +1271,7 @@ class Config {
                                     if(rtn == 1){
                                         this.$message({
                                             type: "success",
-                                            message: "保存成功！"
+                                            message: this.$t('config.saveSuccess')
                                         })
                                         
                                         eventHub.$emit("CONFIG-TREE-REFRESH-EVENT", this.dialog.configNew.formItem.key);
@@ -1284,7 +1284,7 @@ class Config {
                                     } else {
                                         this.$message({
                                             type: "error",
-                                            message: "保存失败：" + rtn
+                                            message: this.$t('config.saveFailed') + rtn
                                         })
                                     }
 
@@ -1310,15 +1310,15 @@ class Config {
 
                             const h = this.$createElement;
                             this.$msgbox({
-                                    title: `确认要更新以下配置`, 
+                                    title: this.$t('config.confirmUpdateTip'), 
                                     message: h('span', null, [
-                                        h('p', null, `位置：${item.key}`),
-                                        h('p', null, `值：${_.truncate(item.value)}`),
-                                        h('p', null, `TTL：${ _.isUndefined(item.ttl) ? '' : item.ttl }`)
+                                        h('p', null, `${ this.$t('config.parent') }：${item.key}`),
+                                        h('p', null, `${ this.$t('config.value') }：${_.truncate(item.value)}`),
+                                        h('p', null, `${ this.$t('config.ttl') }：${ _.isUndefined(item.ttl) ? '' : item.ttl }`)
                                     ]),
                                     showCancelButton: true,
-                                    confirmButtonText: '确定',
-                                    cancelButtonText: '取消',
+                                    confirmButtonText: this.$t('config.confirm'),
+                                    cancelButtonText: this.$t('config.cancel'),
                                     type: 'warning'
                             }).then(() => {
 
@@ -1326,7 +1326,7 @@ class Config {
                                     if(rtn == 1){
                                         this.$message({
                                             type: "success",
-                                            message: "更新成功！"
+                                            message: this.$t('config.updateSuccess')
                                         });
 
                                         this.control.save.show = false;
@@ -1338,7 +1338,7 @@ class Config {
                                     } else {
                                         this.$message({
                                             type: "error",
-                                            message: "更新失败：" + rtn
+                                            message: this.$t('config.updateFailed') + rtn
                                         })
                                     }
                                 } );
@@ -1354,15 +1354,15 @@ class Config {
 
                             const h = this.$createElement;
                             this.$msgbox({
-                                    title: `确认要删除以下配置`, 
+                                    title: this.$t('config.confirmDeleteTip'), 
                                     message: h('span', null, [
-                                        h('p', null, `位置：${item.key}`),
-                                        h('p', null, `值：${_.truncate(item.value)}`),
-                                        h('p', null, `TTL：${  _.isUndefined(item.ttl) ? '' : item.ttl }`)
+                                        h('p', null, `${ this.$t('config.parent') }：${item.key}`),
+                                        h('p', null, `${ this.$t('config.value') }：${_.truncate(item.value)}`),
+                                        h('p', null, `${ this.$t('config.ttl') }：${  _.isUndefined(item.ttl) ? '' : item.ttl }`)
                                     ]),
                                     showCancelButton: true,
-                                    confirmButtonText: '确定',
-                                    cancelButtonText: '取消',
+                                    confirmButtonText: this.$t('config.confirm'),
+                                    cancelButtonText: this.$t('config.cancel'),
                                     type: 'warning'
                             }).then(() => {
 
@@ -1389,7 +1389,7 @@ class Config {
                         configCopy(item){
                             new Clipboard(`.copy${objectHash.sha1(item)}`, {
                                 text: (trigger)=> {
-                                    this.$message("已复制");
+                                    this.$message(this.$t('config.copyed'));
                                     let id = objectHash.sha1(this.configTabs.activeIndex);
                                     let editor = ace.edit(this.$refs[`configManageRef${id}`][0].$refs.editorContainer);
                                     return editor.getValue();

@@ -36,7 +36,7 @@ class RuleHandler{
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = data;
@@ -74,7 +74,7 @@ class RuleHandler{
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -114,7 +114,7 @@ class RuleHandler{
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;

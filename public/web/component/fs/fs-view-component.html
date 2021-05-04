@@ -818,7 +818,7 @@
                             } else {
                                 try{
                                     if(_.includes(['png','jpeg'],item.ftype)){
-                                        return `/fs${item.parent}/${item.name}?type=open&issys=${window.SignedUser_IsAdmin}`;    
+                                        return `/static${item.parent}/${item.name}`;    
                                     } else {
                                         return _.attempt(JSON.parse.bind(null, item.attr)).icon || `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
                                     }
@@ -912,7 +912,14 @@
                                                             @keyup.enter.native="$event.target.blur"
                                                             @blur.self="onRename(scope.row, scope.$index)" :ref="'input_'+scope.row.id"></el-input>
                                                     </el-link>
-                                                    <el-link type="info" :underline="true" @dblclick.native.prevent="forward(scope.row)" @click.native.prevent="onSetFocus(scope.row)" v-show="!scope.row.editable">
+
+                                                    <el-link type="info" 
+                                                        :underline="true" 
+                                                        @dblclick.native.prevent="forward(scope.row)" 
+                                                        @click.native.prevent="onSetFocus(scope.row)" 
+                                                        v-show="!scope.row.editable">
+                                                        <i class="el-icon-folder-opened" style="color: #ff9800;font-size: 16px;" v-if="scope.row.ftype==='dir'"></i> 
+                                                        <i class="el-icon-tickets" style="color: #2196f3;font-size: 16px;" v-else></i> 
                                                         #{scope.row.name}#
                                                     </el-link>
                                                     
@@ -984,54 +991,30 @@
                 Vue.component('fs-editor-view-by-json',{
                     delimiters: ['#{', '}#'],
                     props:{
-                        fs: Object,
-                        options: Object
+                        fs: Object
                     },
-                    template:   `<el-container style="height: calc(100% - 60px);">
-                                    <el-main style="padding: 0px;overflow:hidden;" ref="editor">
-                                    </el-main>
-                                </el-container>`,
+                    template:   `<v-jsoneditor v-model="model" :options="options" :plus="false" height="100%" ref="jsoneditor">`,
                     data(){
                         return{
-                            langTools: null,
-                            editor: null
-                        }
-                    },
-                    mounted() {
-                        this.initEditor();
-
-                        eventHub.$on(this.fs.fullname,()=>{
-                            this.setValue(this.fs.output);
-                        });
-                    },
-                    methods: {
-                        initEditor(){
-                            let options = {
+                            model: null,
+                            options: {
                                 modes: ['text', 'code', 'tree', 'form', 'view'],
                                 mode: 'code',
-                            };
-                            this.editor = new JSONEditor(this.$refs.editor.$el, options);
-                            this.setValue(this.fs.output);
-                        },
-                        setValue(output){
-                            try{
-                                
-                                if(output.message) {
-                                    
-                                    if (typeof output.message === 'object') {
-                                        this.editor.set(output.message);
-                                    } else {
-                                        this.editor.set(JSON.parse(output.message));
-                                    }
-        
-                                } else {
-                                    this.editor.set(output);
-                                }
-                            } catch(err){
-                                this.editor.set(err);
                             }
-
                         }
+                    },
+                    created(){
+                        this.model = this.fs.output;
+                    },
+                    mounted() {
+                        
+                        eventHub.$on(this.fs.fullname,()=>{
+                            this.model = this.fs.output;
+                        });
+
+                        /* eventHub.$on("omdb-vertical-size-change",(sizes)=>{
+                            this.$refs.jsoneditor.editor.resize();
+                        }); */
                     }
     
                 })

@@ -41,9 +41,9 @@ class System {
 											<el-tooltip content="新增公司信息">
 												<el-button type="text" icon="el-icon-plus" @click="companyNew" >新增</el-button>
 											</el-tooltip>
-											<el-tooltip content="更新文件系统">
+											<!--el-tooltip content="更新文件系统">
 												<el-button type="text" icon="el-icon-files" @click="updateFs">更新</el-button>
-											</el-tooltip>
+											</el-tooltip-->
 										</span>
 									</el-header>
 									
@@ -96,10 +96,10 @@ class System {
 											<el-table-column label="操作" width="130" fixed="right" v-if="window.COMPANY_OSPACE == 'matrix' && window.SignedUser_IsAdmin">
 												<template slot-scope="scope">
 													<div>
-														<el-tooltip content="更新公司信息" open-delay="500" placement="top">
+														<el-tooltip content="更新公司信息" open-delay="800" placement="top">
 															<el-button type="text" icon="el-icon-edit" @click="onCompanyUpdate(scope.row)"></el-button>
 														</el-tooltip>
-														<el-tooltip content="删除公司信息" open-delay="500" placement="top">
+														<el-tooltip content="删除公司信息" open-delay="800" placement="top">
 															<el-button type="text" icon="el-icon-delete" @click="onCompanyDelete(scope.row)"></el-button>
 														</el-tooltip>
 													</div>
@@ -227,7 +227,7 @@ class System {
 														<el-form-item label="名称">
 															<el-input v-model="form.name" :disabled="true"></el-input>
 														</el-form-item>
-														<el-form-item label="应用">
+														<el-form-item label="英文简称">
 															<el-input v-model="form.ospace" :disabled="true"></el-input>
 														</el-form-item>
 														<el-form-item label="网站">
@@ -308,7 +308,7 @@ class System {
 												message: h('span', null, [
 													h('p', null, `公司全称：${me.form.fullname}`),
 													h('p', null, `公司名称：${me.form.name}`),
-													h('p', null, `应用名称：${me.form.ospace}`),
+													h('p', null, `英文简称：${me.form.ospace}`),
 													h('p', null, `标题：${me.form.title}`)
 												]),
 												showCancelButton: true,
@@ -378,14 +378,14 @@ class System {
 								template: 	`<el-container style="height:100%;">
 												<el-main>
 													<el-form ref="form" :model="form" label-width="120px">
-														<el-form-item label="公司全称(fullname)">
+														<el-form-item label="公司全称(Fullname)">
 															<el-input v-model="form.fullname" placeholder="公司全称" clearable></el-input>
 														</el-form-item>
-														<el-form-item label="名称(name)">
+														<el-form-item label="名称(Name)">
 															<el-input v-model="form.name" placeholder="公司简称" clearable></el-input>
 														</el-form-item>
-														<el-form-item label="应用(ospace)">
-															<el-input v-model="form.ospace" placeholder="应用" clearable></el-input>
+														<el-form-item label="英文简称(Ospace)">
+															<el-input v-model="form.ospace" placeholder="英文简称" clearable></el-input>
 														</el-form-item>
 														<el-form-item label="网站">
 															<el-input v-model="form.web" placeholder="公司网站" clearable></el-input>
@@ -445,28 +445,62 @@ class System {
 									companySave() {
 										const me = this;
 										
-										alertify.confirm(`确定要新建该公司? <br><br> 
-															公司全称：${me.form.fullname}<br><br>
-															公司名称：${me.form.name}<br><br>
-															应用名称：${me.form.ospace}<br><br>
-															标题：${me.form.title}`, function (e) {
-											if (e) {
-												let rtn = companyHandler.companyNew(me.form);
-												
-												me.$message({
-													type: "info",
-													message: "新建操作将提交至后台，请稍后刷新确认。。。"
-												});
+										if(_.isEmpty(me.form.fullname)){
+											me.$message.warning("请输入公司全称");
+											return false;
+										}
+										if(_.isEmpty(me.form.name)){
+											me.$message.warning("请输入公司名称");
+											return false;
+										}
+										if(_.isEmpty(me.form.ospace)){
+											me.$message.warning("请输入英文简称");
+											return false;
+										}
+										if(_.isEmpty(me.form.title)){
+											me.$message.warning("请输入系统标题");
+											return false;
+										}
+										if(_.isEmpty(me.form.logo)){
+											me.$message.warning("请上传Logo");
+											return false;
+										}
+										
+										const h = this.$createElement;
+										this.$msgbox({
+												title: `确定要新建该公司`, 
+												message: h('span', null, [
+													h('p', null, `公司全称：${me.form.fullname}`),
+													h('p', null, `公司名称：${me.form.name}`),
+													h('p', null, `英文简称${me.form.ospace}`),
+													h('p', null, `标题：${me.form.title}`)
+												]),
+												showCancelButton: true,
+												confirmButtonText: '确定',
+												cancelButtonText: '取消',
+												type: 'warning'
+										}).then(() => {
 
-												if(rtn == 1){
-													self.initData();
-												}
+											let rtn = companyHandler.companyNew(me.form);
 												
-												wnd.close();
-											} else {
-												
+											me.$message({
+												type: "info",
+												message: "新建操作将提交至后台，请稍后刷新确认。。。"
+											});
+
+											if(rtn == 1){
+												self.initData();
 											}
-										});
+											
+											wnd.close();
+
+										}).catch(() => {
+											me.$message({
+												type: "info",
+												message: "新建操作已取消"
+											});	
+										}); 
+
 									},
 									closeMe(){
 										wnd.close();
@@ -488,17 +522,19 @@ class System {
 
 							const h = this.$createElement;
 							this.$msgbox({
-									title: `确定要删除该公司`, 
+									title: `确定要删除该公司租户`, 
 									message: h('span', null, [
-										h('p', null, `公司全称：${row.fullname}`),
-										h('p', null, `公司名称：${row.name}`),
-										h('p', null, `应用名称：${row.ospace}`),
-										h('p', null, `标题：${row.title}`)
+										h('p', {style: "font-weight:900;"}, `公司全称(Fullname)：${row.fullname}`),
+										h('p', {style: "font-weight:900;"}, `公司名称(Name)：${row.name}`),
+										h('p', {style: "font-weight:900;"}, `英文简称(Ospace)：${row.ospace}`),
+										h('p', {style: "font-weight:900;"}, `标题(Title)：${row.title}`),
+										h('h3', {style: "color:#ff0000;font-weight:900;"}, `特别提醒，删除公司租户，将删除该公司下所有相关的数据，请再次确认!`)
 									]),
 									showCancelButton: true,
+									dangerouslyUseHTMLString: true,
 									confirmButtonText: '确定',
 									cancelButtonText: '取消',
-									type: 'warning'
+									type: 'error'
 							}).then(() => {
 
 								let rtn = companyHandler.companyDelete(row.name);
@@ -1271,7 +1307,8 @@ class System {
 								pagination:{
                                     pageSize: 20,
                                     currentPage: 1
-                                }
+                                },
+								term: ""
 							},
 							info: [],
 							dialog: {
@@ -1293,10 +1330,10 @@ class System {
 					},
 					template:   `<el-container style="width:100%;height:100%;">
 									<el-header style="height:30px;line-height:30px;">
-										<el-tooltip content="切换视图" open-delay="500" placement="top">
+										<el-tooltip content="切换视图" open-delay="800" placement="top">
 											<el-button type="text" icon="el-icon-s-fold" @click="onTogglePanel"></el-button>
 										</el-tooltip>
-										<el-tooltip content="刷新" open-delay="500" placement="top">
+										<el-tooltip content="刷新" open-delay="800" placement="top">
 											<el-button type="text" icon="el-icon-refresh" @click="onRefresh"></el-button>
 										</el-tooltip>
 										<el-tooltip content="导出" delay-time="500">
@@ -1328,10 +1365,11 @@ class System {
 											@selection-change="onSelectionChange"
 											@current-change="onCurrentChange"
 											ref="table">
-											<el-table-column type="selection" align="center"></el-table-column> 
+											<!--el-table-column type="selection" align="center"></el-table-column--> 
 											<el-table-column align="center">
 												<template slot-scope="scope">
 													<i class="el-icon-office-building el-avatar el-avatar--48 el-avatar--circle" style="font-size:32px;color:#03a9f4;" v-if="scope.row.otype==='org'"></i>
+													<i class="el-icon-user el-avatar el-avatar--48 el-avatar--circle" style="font-size:32px;color:#ffffff;background:#ff9800" v-else-if="scope.row.otype!=='org' && scope.row.isadmin"></i>
 													<i class="el-icon-user el-avatar el-avatar--48 el-avatar--circle" style="font-size:32px;color:#ffffff;background:#2196F3;" v-else></i>
 												</template>
 											</el-table-column> 
@@ -1364,35 +1402,38 @@ class System {
 													</template>
 											</el-table-column>
 											<el-table-column label="操作" width="160">
+												<template slot="header" slot-scope="scope">
+													<el-input v-model="dt.term" placeholder="关键字" clearable></el-input>
+												</template>
 												<template slot-scope="scope">
 													<div v-if="_.includes(['/','system','admin'],scope.row.username)">
 														
 													</div>
 													<div v-else-if="scope.row.otype=='usr'">
-														<!--el-tooltip content="授权" open-delay="500" placement="top">
+														<!--el-tooltip content="授权" open-delay="800" placement="top">
 															<el-button type="text" icon="el-icon-s-check" @click="onToogleExpand(scope.row, scope.$index, 'userPermission')"></el-button>
 														</el-tooltip-->
-														<el-tooltip content="编辑" open-delay="500" placement="top">
+														<el-tooltip content="编辑" open-delay="800" placement="top">
 															<el-button type="text" icon="el-icon-edit" @click="onUpdateUser(scope.row,scope.$index)"></el-button>
 														</el-tooltip>
-														<el-tooltip content="删除" open-delay="500" placement="top">
+														<el-tooltip content="删除" open-delay="800" placement="top">
 															<el-button type="text" @click="onDeleteUser(scope.row, scope.$index)" icon="el-icon-delete" v-if="!_.includes(['/系统组','/'],scope.row.fullname)"></el-button>
 														</el-tooltip>
 													</div>
 													<div v-else>
-														<!--el-tooltip content="授权" open-delay="500" placement="top">
+														<!--el-tooltip content="授权" open-delay="800" placement="top">
 															<el-button type="text" icon="el-icon-s-check" @click="onToogleExpand(scope.row, scope.$index, 'userPermission')"></el-button>
 														</el-tooltip-->
-														<el-tooltip content="新建组织" open-delay="500" placement="top">
+														<el-tooltip content="新建组织" open-delay="800" placement="top">
 															<el-button type="text" @click="$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$refs.ldapManage.onNewGroup(scope.row,$event)" icon="el-icon-folder-add"></el-button>
 														</el-tooltip>
-														<el-tooltip content="新建用户" open-delay="500" placement="top">
+														<el-tooltip content="新建用户" open-delay="800" placement="top">
 															<el-button type="text" @click="$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$refs.ldapManage.onNewUser(scope.row,$event)" icon="el-icon-plus"></el-button>
 														</el-tooltip>
-														<el-tooltip content="编辑" open-delay="500" placement="top">
+														<el-tooltip content="编辑" open-delay="800" placement="top">
 															<el-button type="text" icon="el-icon-edit"  @click="onUpdateUser(scope.row,scope.$index)"></el-button>
 														</el-tooltip>
-														<el-tooltip content="删除" open-delay="500" placement="top">
+														<el-tooltip content="删除" open-delay="800" placement="top">
 															<el-button type="text" @click="onDeleteUser(scope.row,scope.$index)" icon="el-icon-delete" v-if="!_.includes(['/系统组','/'],scope.row.fullname)"></el-button>
 														</el-tooltip>
 													</div>
@@ -1476,6 +1517,10 @@ class System {
 															<el-switch v-model="dialog.user.row.isactive" true-value="true" false-value="false"></el-switch>
 														</el-form-item>
 
+														<el-form-item label="管理员">
+															<el-switch v-model="dialog.user.row.isadmin" true-value="true" false-value="false"></el-switch>
+														</el-form-item>
+
 													</form>
 												</el-main>
 											</el-container>
@@ -1521,6 +1566,15 @@ class System {
 							},
 							deep:true,
 							immediate:true
+						},
+						'dt.term':{
+							handler(val){
+								if(_.isEmpty(val)){
+									this.initData();
+								} else {
+									this.dt.rows = this.dt.rows.filter(data => !val || data.name.toLowerCase().includes(val.toLowerCase()));
+								}
+							}
 						},
 						'dialog.user.resetPasswd'(val){
 
@@ -1736,7 +1790,7 @@ class System {
 							
 						},
 						onSaveUser(row){
-
+							console.log(11,row)
 							if(this.dialog.user.resetPasswd){
 
 								if (_.isEmpty(this.dialog.user.passwd)) {
@@ -1972,7 +2026,7 @@ class System {
 															autofocus>
 															<template slot="prepend">
 																<el-dropdown trigger="hover" placement="top-end"  :hide-on-click="true">
-																	<el-tooltip content="选则类" open-delay="500">
+																	<el-tooltip content="选则类" open-delay="800">
 																		<el-button type="text" size="mini">
 																			<i class="el-icon-office-building" style="font-size:16px;"></i>
 																		</el-button>
@@ -2017,7 +2071,7 @@ class System {
 															autofocus>
 															<template slot="prepend">
 																<el-dropdown trigger="hover" placement="top-end"  :hide-on-click="true">
-																	<el-tooltip content="选则类" open-delay="500">
+																	<el-tooltip content="选则类" open-delay="800">
 																		<el-button type="text" size="mini">
 																			<i class="el-icon-office-building" style="font-size:16px;"></i>
 																		</el-button>
@@ -2275,7 +2329,7 @@ class System {
 													<el-form-item label="类规则">
 														<span>
 															<el-dropdown trigger="hover" placement="top-end"  :hide-on-click="true">
-																<el-tooltip content="选则类" open-delay="500">
+																<el-tooltip content="选则类" open-delay="800">
 																	<el-button type="text" size="mini">
 																		<i class="el-icon-office-building" style="font-size:16px;"></i>
 																	</el-button>
@@ -2308,7 +2362,7 @@ class System {
 													<el-form-item label="所属类规则">
 														<span>
 															<el-dropdown trigger="hover" placement="top-end"  :hide-on-click="true">
-																<el-tooltip content="选则类" open-delay="500">
+																<el-tooltip content="选则类" open-delay="800">
 																	<el-button type="text" size="mini">
 																		<i class="el-icon-office-building" style="font-size:16px;"></i>
 																	</el-button>
@@ -2378,7 +2432,7 @@ class System {
 													<el-form-item label="类规则">
 														<span>
 															<el-dropdown trigger="hover" placement="top-end"  :hide-on-click="true">
-																<el-tooltip content="选则类" open-delay="500">
+																<el-tooltip content="选则类" open-delay="800">
 																	<el-button type="text" size="mini">
 																		<i class="el-icon-office-building" style="font-size:16px;"></i>
 																	</el-button>
@@ -2411,7 +2465,7 @@ class System {
 													<el-form-item label="所属类规则">
 														<span>
 															<el-dropdown trigger="hover" placement="top-end"  :hide-on-click="true">
-																<el-tooltip content="选则类" open-delay="500">
+																<el-tooltip content="选则类" open-delay="800">
 																	<el-button type="text" size="mini">
 																		<i class="el-icon-office-building" style="font-size:16px;"></i>
 																	</el-button>
@@ -3264,10 +3318,10 @@ class System {
 					},
 					template:   `<el-container style="width:100%;height:70vh;background:#f2f2f2;">
 									<el-header style="height:40px;line-height:40px;">
-										<el-tooltip content="刷新" open-delay="500" placement="top">
+										<el-tooltip content="刷新" open-delay="800" placement="top">
 											<el-button type="text" icon="el-icon-refresh" @click="initData"></el-button>
 										</el-tooltip>
-										<el-tooltip content="新建接口组" open-delay="500" placement="top">
+										<el-tooltip content="新建接口组" open-delay="800" placement="top">
 											<el-button type="text" icon="el-icon-plus" @click="dialog.newApi.show = true;"></el-button>
 										</el-tooltip>
 										<el-tooltip content="导出" delay-time="500">
@@ -3344,10 +3398,10 @@ class System {
 											<el-table-column label="操作" width="160">
 												<template slot-scope="scope">
 													
-													<el-tooltip content="编辑" open-delay="500" placement="top">
+													<el-tooltip content="编辑" open-delay="800" placement="top">
 														<el-button type="text" icon="el-icon-edit" @click="onToogleExpand(scope.row, scope.$index, 'edit')"></el-button>
 													</el-tooltip>
-													<el-tooltip content="删除" open-delay="500" placement="top">
+													<el-tooltip content="删除" open-delay="800" placement="top">
 														<el-button type="text" icon="el-icon-delete" @click="onDeleteApi(scope.row, scope.$index)"></el-button>
 													</el-tooltip>
 													
@@ -3377,10 +3431,10 @@ class System {
 											</el-main>
 										</el-container>
 										<div slot="footer" class="dialog-footer">
-											<el-tooltip content="取消" open-delay="500" placement="top">
+											<el-tooltip content="取消" open-delay="800" placement="top">
 												<el-button type="default" icon="el-icon-close" @click="dialog.newApi.show = false;">关闭</el-button>
 											</el-tooltip>	
-											<el-tooltip content="确定" open-delay="500" placement="top">
+											<el-tooltip content="确定" open-delay="800" placement="top">
 												<el-button type="primary" icon="el-icon-edit" @click="onSaveApi">确定</el-button>
 											</el-tooltip>	
 										</div>
@@ -3756,10 +3810,10 @@ class System {
 													<el-button type="text" @click="showView='table'" icon="el-icon-menu">
 													</el-button>
 												</el-tooltip>
-												<!--el-tooltip content="更新权限" open-delay="500" v-if="showView=='table'">
+												<!--el-tooltip content="更新权限" open-delay="800" v-if="showView=='table'">
 													<el-button type="text" icon="el-icon-edit-outline" @click="$parent.$parent.$parent.$parent.$parent.onUpdateRoleGroup"></el-button>
 												</el-tooltip-->	
-												<el-tooltip content="刷新" open-delay="500" placement="top">
+												<el-tooltip content="刷新" open-delay="800" placement="top">
 													<el-button type="text" icon="el-icon-refresh" @click="onRefresh"></el-button>
 												</el-tooltip>
 												<el-tooltip content="导出" delay-time="500">
@@ -4165,7 +4219,8 @@ class System {
 								pagination:{
                                     pageSize: 100,
                                     currentPage: 1
-                                }
+                                },
+								term: ""
 							},
 							info: [],
 							tree: {
@@ -4228,13 +4283,13 @@ class System {
 													</el-breadcrumb>
 												</el-col>
 												<el-col :span="12" style="text-align:right;">
-													<!--el-tooltip content="切换视图" open-delay="500" placement="top">
+													<!--el-tooltip content="切换视图" open-delay="800" placement="top">
 														<el-button type="text" icon="el-icon-s-fold" @click="onTogglePanel"></el-button>
 													</el-tooltip-->
-													<el-tooltip content="新建角色组" open-delay="500" placement="top">
+													<el-tooltip content="新建角色组" open-delay="800" placement="top">
 														<el-button type="text" icon="el-icon-plus" @click="onNewRole" style="padding-left:5px;"></el-button>
 													</el-tooltip>
-													<el-tooltip content="刷新" open-delay="500" placement="top">
+													<el-tooltip content="刷新" open-delay="800" placement="top">
 														<el-button type="text" icon="el-icon-refresh" @click="onRefresh"></el-button>
 													</el-tooltip>
 													<el-tooltip content="导出" delay-time="500">
@@ -4268,7 +4323,7 @@ class System {
 												@selection-change="onSelectionChange"
 												@current-change="onCurrentChange"
 												ref="table">
-												<el-table-column type="selection" align="center"></el-table-column> 
+												<!--el-table-column type="selection" align="center"></el-table-column--> 
 												<el-table-column
 													sortable 
 													show-overflow-tooltip
@@ -4289,6 +4344,9 @@ class System {
 																<el-link type="info" :underline="true" v-else>
 																	#{scope.row.name}#
 																</el-link>
+															</div>
+															<div v-else-if="_.includes(['isldap'],item.field)">
+																#{scope.row.isldap?'是':'否'}#
 															</div>
 															<div v-else-if="_.includes(['fields', 'member', 'writable', 'readexps', 'readonly'],item.field)">
 																<el-select :value="_.first(scope.row[item.field])" :placeholder="_.upperFirst(item.field)">
@@ -4311,30 +4369,33 @@ class System {
 													</template>
 												</el-table-column-->
 												<el-table-column label="操作" width="160">
+													<template slot="header" slot-scope="scope">
+														<el-input v-model="dt.term" placeholder="关键字" clearable></el-input>
+													</template>
 													<template slot-scope="scope">
 													
 														<div v-if="_.includes(['/','system'],scope.row.name)">
 															
 														</div>
 														<div v-else-if="_.includes(['admin'],scope.row.name) && window.SignedUser_UserName == 'admin'">
-															<el-tooltip content="授权用户" open-delay="500" placement="top">
+															<el-tooltip content="授权用户" open-delay="800" placement="top">
 																<el-button type="text" icon="el-icon-user" @click="onSetLdap(scope.row)"></el-button>
 															</el-tooltip>
 														</div>
 														<div v-else>
-															<el-tooltip content="权限设置" open-delay="500" placement="top">
+															<el-tooltip content="权限设置" open-delay="800" placement="top">
 																<el-button type="text" icon="el-icon-lock" @click="onSetPermission(scope.row);"></el-button>
 															</el-tooltip>
-															<el-tooltip content="授权用户" open-delay="500" placement="top">
+															<el-tooltip content="授权用户" open-delay="800" placement="top">
 																<el-button type="text" icon="el-icon-user" @click="onSetLdap(scope.row)"></el-button>
 															</el-tooltip>
-															<el-tooltip content="新建角色组" open-delay="500" placement="top">
+															<el-tooltip content="新建角色组" open-delay="800" placement="top">
 																<el-button type="text" icon="el-icon-plus" @click="onNewRole(scope.row)"></el-button>
 															</el-tooltip>
-															<!--el-tooltip content="编辑" open-delay="500" placement="top">
+															<!--el-tooltip content="编辑" open-delay="800" placement="top">
 																<el-button type="text" icon="el-icon-edit" @click="onToogleExpand(scope.row,scope.$index,'roleGroupEdit')"></el-button>
 															</el-tooltip-->
-															<el-tooltip content="删除" open-delay="500" placement="top">
+															<el-tooltip content="删除" open-delay="800" placement="top">
 																<el-button type="text" icon="el-icon-delete" @click="onDeleteRole(scope.row)"></el-button>
 															</el-tooltip>
 														</div>
@@ -4358,14 +4419,14 @@ class System {
 																	v-if="!_.isEmpty(dialog.permission.row)"></tagdir-group-select>
 															</el-tab-pane>
 															<el-tab-pane name="app" lazy>
-																<span slot="label"><i class="el-icon-files"></i> 应用权限 (#{ count.app }#)</span>
+																<span slot="label"><i class="el-icon-files"></i> 应用权限 </span>
 																<app-permission  :rowData="dialog.permission" ref="appTree" 
 																	@count:selectedApp="(count)=>{ this.count.app = count;}"
 																	@update:selectedApp="()=>{ this.initData(); }" v-if="!_.isEmpty(dialog.permission.row)"></app-permission>
 															</el-tab-pane>	
 															
 															<el-tab-pane name="api" lazy>
-																<span slot="label"><i class="el-icon-tickets"></i> 接口权限 (#{ count.api }#)</span>
+																<span slot="label"><i class="el-icon-tickets"></i> 接口权限 </span>
 																<api-permission 
 																	@count:selectedApi="(count)=>{ this.count.api = count;}"
 																	:roleGroup="dialog.permission.row"></api-permission>
@@ -4446,6 +4507,15 @@ class System {
 							},
 							deep:true,
 							immediate:true
+						},
+						'dt.term':{
+							handler(val){
+								if(_.isEmpty(val)){
+									this.initData();
+								} else {
+									this.dt.rows = this.dt.rows.filter(data => !val || data.name.toLowerCase().includes(val.toLowerCase()));
+								}
+							}
 						}
 					},
 					mounted(){
@@ -5226,7 +5296,10 @@ class System {
 					delimiters: ['#{', '}#'],
 					template: 	`<el-container style="height:100%;padding:20px;">
 									<el-header style="line-height: 60px;">
-										<el-tooltip content="发布应用" open-delay="500">
+										<el-tooltip content="刷新" open-delay="800">
+											<el-button type="default" icon="el-icon-refresh" @click="onRefresh">刷新</el-button> 
+										</el-tooltip>
+										<el-tooltip content="发布应用" open-delay="800">
 											<el-button type="success" icon="el-icon-plus" @click="dialog.appDeploy.show = true;">发布应用</el-button> 
 										</el-tooltip>
 
@@ -5423,6 +5496,9 @@ class System {
 						}
 					},
 					methods: {
+						onRefresh(){
+							this.init();
+						},
 						init(){
 							fsHandler.callFsJScriptAsync("/matrix/apps/appList.js",null).then( (rtn)=>{
 								this.model = rtn.message;

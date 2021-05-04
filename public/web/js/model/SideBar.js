@@ -850,7 +850,7 @@ class SideBar {
             },
             success(data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                
 
                 sideBar.app.$message({
                     type: "info",
@@ -883,7 +883,7 @@ class SideBar {
             },
             success(data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                
 
                 sideBar.app.$message({
                     type: "info",

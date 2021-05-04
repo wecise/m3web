@@ -507,14 +507,23 @@ Vue.component("mx-fs-editor",{
                                                 </el-dropdown-menu>
                                             </el-dropdown>
                                         </span>
+                                        <!--v-jsoneditor v-model="item.model" 
+                                            options="{
+                                                modes: ['text', 'code', 'tree', 'form', 'view'],
+                                                mode: 'code'}" 
+                                            :plus="false" 
+                                            height="100%" 
+                                            ref="editor" v-if="item.model.ftype==='json'"></v-jsoneditor-->
                                         <fs-editor-view :id="item.name" :item="item.model" :toolBar="toolBar" ref="editor"></fs-editor-view>
                                     </el-tab-pane>
                                 </el-tabs>
                             </el-main>
                         </el-container>
                     </el-container>
-                    <el-footer style="height:30px;line-height:30px;background:#f6f6f6;" class="draggable"> 
+                    <el-footer style="height:30px;line-height:30px;background:#f6f6f6;color:#777777;" class="draggable"> 
                         <span>#{moment().format(mx.global.register.format)}#</span>
+                        <el-divider direction="vertical"></el-divider>
+                        <span>#{ model.fullname }#</span>
                     </el-footer>
                 </el-container>`,
     created() {
@@ -1599,7 +1608,8 @@ Vue.component("mx-fs-tree",{
                                 ref="tree">
                             <span slot-scope="{ node, data }" style="width:100%;height:30px;line-height: 30px;"  @mouseenter="onMouseEnter(data)" @mouseleave="onMouseLeave(data)">
                                 <span v-if="data.ftype=='dir'">
-                                    <i class="el-icon-folder" style="color:#FFC107;"></i>
+                                    <i class="el-icon-folder-opened" style="color:#FFC107;" v-if="node.expanded"></i>
+                                    <i class="el-icon-folder" style="color:#FFC107;" v-else></i>
                                     <span>#{node.label}#</span>
                                     <el-dropdown v-show="data.show" style="float:right;width:14px;margin:0 5px;">
                                         <span class="el-dropdown-link">
@@ -3017,8 +3027,8 @@ Vue.component("mx-class-entity-select",{
     },
     methods: {
         initData(){
-            let term = encodeURIComponent(JSON.stringify({class: this.root, term:''}));
-            fsHandler.callFsJScriptAsync("/matrix/ai/baseline/getEntityListByClassName.js",term).then( (rtn)=>{
+            let param = encodeURIComponent(JSON.stringify({class: this.root, term:''}));
+            fsHandler.callFsJScriptAsync("/matrix/ai/baseline/getEntityListByClassName.js",param).then( (rtn)=>{
                 this.entity.list = rtn.message;
             } );
         },
@@ -3333,7 +3343,6 @@ Vue.component("mx-job-cron",{
                     <el-main style="height:100%;width:87.5%;padding-top: 40px;">
                         <h3>定时说明</h3>#{this.cron.join(" ")}#
                         <el-input v-model="human"></el-input>
-
                         <h3>常用Cron示例</h3>
                         <el-input placeholder="选择示例" v-model="defaultCron.cron">
                             <el-select slot="prepend" 

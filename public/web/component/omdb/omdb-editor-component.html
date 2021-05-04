@@ -118,45 +118,45 @@
         <el-container>
 			<el-header id="editorToolBar" style="padding:0px 10px;height:30px;line-height: 30px;display: flex;">
 				<el-button-group style="width:70%;">
-                    <el-tooltip content="另存到文件系统" placement="bottom" open-delay="800">
+                    <el-tooltip :content="$t('omdb.actions.saveAsDfs')" placement="bottom" open-delay="800">
                         <el-button type="text" class="saveas" @click="saveToFs"><i class="fas fa-save"></i></el-button>
                     </el-tooltip>
-                    <el-tooltip content="加载" placement="bottom" open-delay="800">
+                    <el-tooltip :content="$t('omdb.actions.loadFromDfs')" placement="bottom" open-delay="800">
                         <el-button type="text" class="load" @click="loadFromFs"><i class="fas fa-arrow-circle-down"></i></el-button>
                     </el-tooltip>
-                    <el-tooltip content="复制" placement="bottom" open-delay="800">
+                    <el-tooltip :content="$t('omdb.actions.copy')" placement="bottom" open-delay="800">
                         <el-button type="text" class="copy" @click="copyIt"><i class="fas fa-copy"></i></el-button>
                     </el-tooltip>
-                    <el-tooltip content="粘贴" placement="bottom" open-delay="800">
+                    <el-tooltip :content="$t('omdb.actions.paste')" placement="bottom" open-delay="800">
                         <el-button type="text"  class="paste" @click="pasteIt"><i class="fas fa-paste"></i></el-button>
                     </el-tooltip>
-					<el-tooltip content="全选" placement="bottom" open-delay="800">
+					<el-tooltip :content="$t('omdb.actions.select')" placement="bottom" open-delay="800">
                         <el-button type="text"  class="selectAll" @click="selectAll"><i class="fas fa-check"></i></el-button>
                     </el-tooltip>
-                    <el-tooltip content="清空" placement="bottom" open-delay="800">
+                    <el-tooltip :content="$t('omdb.actions.clear')" placement="bottom" open-delay="800">
                         <el-button type="text"  class="clear" @click="clearIt"><i class="fas fa-trash"></i></el-button>
                     </el-tooltip>
-                    <el-tooltip content="执行输出为表格" placement="bottom" open-delay="800">
+                    <el-tooltip :content="$t('omdb.actions.execute')" placement="bottom" open-delay="800">
                         <el-button type="text"  class="query" @click="query"><i class="fas fa-play"></i></el-button>
                     </el-tooltip>
                     <!--el-tooltip content="执行输出为新表格" placement="bottom" open-delay="800">
                         <el-button type="text"  class="query" @click="queryPlus"><i class="fas fa-play-circle"></i></el-button>
                     </el-tooltip-->
-                    <el-tooltip content="执行输出为JSON" placement="bottom" open-delay="800">
+                    <el-tooltip :content="$t('omdb.actions.executeAsJson')" placement="bottom" open-delay="800">
                         <el-button type="text"  class="queryByJson" @click="queryByJson"><i class="fas fa-file-code"></i></el-button>
                     </el-tooltip>
-					<el-tooltip content="在新窗口执行" placement="bottom" open-delay="800">
-                        <!--<el-button type="text"  class="queryPlus" @click="queryPlus"><i class="fa fa-play"></i>+</el-button>-->
-                    </el-tooltip>
-                    <el-tooltip content="执行并保存到文件" placement="bottom" open-delay="800">
+					<!--el-tooltip content="在新窗口执行" placement="bottom" open-delay="800">
+                        <<el-button type="text"  class="queryPlus" @click="queryPlus"><i class="fa fa-play"></i>+</el-button>>
+                    </el-tooltip-->
+                    <el-tooltip :content="$t('omdb.actions.executeToDfs')" placement="bottom" open-delay="800">
                         <el-button type="text"  class="queryAndSave" @click="queryAndSave"><i class="fas fa-file-export"></i></el-button>
                     </el-tooltip>
                 </el-button-group>
                 <el-button-group style="width:30%;text-align: right;">
-                    <el-tooltip content="帮助"" placement="bottom" open-delay="800">
+                    <el-tooltip :content="$t('omdb.actions.help')"" placement="bottom" open-delay="800">
                         <el-button type="text" @click="window.open('/matrix/notes','_blank')" icon="el-icon-question"></el-button>
                     </el-tooltip>
-                    <el-tooltip content="主题" placement="bottom" open-delay="800">
+                    <el-tooltip :content="$t('omdb.actions.theme')" placement="bottom" open-delay="800">
                         <el-button type="text" :class="'pull-right editor-select-theme-'+objectHash.sha1(id)"><i class="fas fa-tshirt"></i></el-button>
                     </el-tooltip>
                     <el-button type="text" :icon="control.ifFullScreen | pickScreenStyle" style="float:right;" @click="onFullScreen"></el-button>
@@ -172,7 +172,7 @@
                                 <el-input
                                     type="textarea"
                                     :autosize="{ minRows: 2, maxRows: 4}"
-                                    placeholder="请输入需要转换的时间"
+                                    :placeholder="$t('omdb.tip.converTimeTip')"
                                     v-model="control.timeTranslate.bValue">
                                 </el-input>
                             </el-col>
@@ -180,7 +180,7 @@
                                 <el-input
                                     type="textarea"
                                     :autosize="{ minRows: 2, maxRows: 4}"
-                                    placeholder="转换结果"
+                                    :placeholder="$t('omdb.tip.converTimeResult')"
                                     v-model="control.timeTranslate.eValue">
                                 </el-input>
                             </el-col>
@@ -198,6 +198,7 @@
 	<script id="omdb-editor-component">
 	{
 	    delimiters: ['${', '}'],
+        i18n,
         props: {
             id: String,
 			bid: String,
@@ -453,7 +454,7 @@
 		        
                 let clipboard = new Clipboard(".copy", {
                                     text: (trigger)=> {
-                                        this.$message("已复制");
+                                        this.$message( this.$t("omdb.tip.copyed") );
                                         return this.editor.getValue();
                                     }
                                 });
@@ -467,7 +468,7 @@
                 const self = this;
 
                 document.execCommand("paste");
-                this.$message("已粘贴");
+                this.$message(this.$t("omdb.tip.pasted"));
             },
 	        selectAll(){
                 const self = this;
@@ -478,7 +479,7 @@
                 const self = this;
 
                 self.editor.setValue();
-                this.$message("已清空");
+                this.$message(this.$t("omdb.tip.cleared"));
             },
             query(){
                 const self = this;
@@ -515,7 +516,7 @@
                         self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
                                                                             type: 'omdb-query-output-console',
                                                                             name: self.id+'-output-table',
-                                                                            title: `结果(耗时:${_list.consume})`,
+                                                                            title: `${this.$t("omdb.tip.result")}(${this.$t("omdb.tip.consume")}: ${_list.consume})`,
                                                                             model: self.result
                                                                         });
 
@@ -527,7 +528,7 @@
                     if(_.isEmpty(_list)) {
                         this.$message({
                             type: "info",
-                            message: "查询结果为空"
+                            message: this.$t("omdb.tip.searchNull")
                         });
 
                         return false;
@@ -537,7 +538,7 @@
                     if(_.includes(['create'],_list.meta.type)){
                         this.$message({
                             type: "success",
-                            message: "创建类成功"
+                            message: this.$t("omdb.tip.createClassSuccess")
                         });
                         eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'create-class', node: null});
                         
@@ -546,7 +547,7 @@
                         self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
                                                                             type: 'omdb-query-output-console',
                                                                             name: self.id+'-output-table',
-                                                                            title: `结果(耗时:${_list.consume})`,
+                                                                            title: `${this.$t("omdb.tip.result")}(${this.$t("omdb.tip.consume")}: ${_list.consume})`,
                                                                             model: self.result
                                                                         });
                         return false;
@@ -555,7 +556,7 @@
                     if(_.includes(['drop'],_list.meta.type)){
                         this.$message({
                             type: "success",
-                            message: "删除类成功"
+                            message: this.$t("omdb.tip.deleteClassSuccess")
                         });
                         eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'drop-class', node: null});
                         
@@ -564,7 +565,7 @@
                         self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
                                                                             type: 'omdb-query-output-console',
                                                                             name: self.id+'-output-table',
-                                                                            title: `结果(耗时:${_list.consume})`,
+                                                                            title: `${this.$t("omdb.tip.result")}(${this.$t("omdb.tip.consume")}: ${_list.consume})`,
                                                                             model: self.result
                                                                         });
                         return false;
@@ -573,7 +574,7 @@
                     if(_.includes(['delete'],_list.meta.type)){
                         this.$message({
                             type: "success",
-                            message: "删除数据成功"
+                            message: this.$t("omdb.tip.deleteDataSuccess")
                         });
                         eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'delete', node: null});
                         
@@ -582,7 +583,7 @@
                         self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
                                                                             type: 'omdb-query-output-console',
                                                                             name: self.id+'-output-table',
-                                                                            title: `结果(耗时:${_list.consume})`,
+                                                                            title: `${this.$t("omdb.tip.result")}(${this.$t("omdb.tip.consume")}: ${_list.consume})`,
                                                                             model: self.result
                                                                         });
                         return false;
@@ -591,7 +592,7 @@
                     if(_.includes(['update'],_list.meta.type)){
                         this.$message({
                             type: "success",
-                            message: "更新数据成功"
+                            message: this.$t("omdb.tip.updateDataSuccess")
                         });
                         eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'update', node: null});
                         
@@ -600,7 +601,7 @@
                         self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
                                                                             type: 'omdb-query-output-console',
                                                                             name: self.id+'-output-table',
-                                                                            title: `结果(耗时:${_list.consume})`,
+                                                                            title: `${this.$t("omdb.tip.result")}(${this.$t("omdb.tip.consume")}: ${_list.consume})`,
                                                                             model: self.result
                                                                         });
                         return false;
@@ -609,7 +610,7 @@
                     if(_.includes(['create edgetype'],_list.meta.type)){
                         this.$message({
                             type: "success",
-                            message: "创建关系成功"
+                            message: this.$t("omdb.tip.createEdgeSuccess")
                         });
                         eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'create-edge-type', node: null});
 
@@ -618,7 +619,7 @@
                         self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
                                                                             type: 'omdb-query-output-console',
                                                                             name: self.id+'-output-table',
-                                                                            title: `结果(耗时:${_list.consume})`,
+                                                                            title: `${this.$t("omdb.tip.result")}(${this.$t("omdb.tip.consume")}: ${_list.consume})`,
                                                                             model: self.result
                                                                         });
                         return false;
@@ -627,7 +628,7 @@
                     if(_.includes(['drop edge'],_list.meta.type)){
                         this.$message({
                             type: "success",
-                            message: "删除关系成功"
+                            message: this.$t("omdb.tip.deleteEdgeSuccess")
                         });
                         eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'drop-edge-type', node: null});
 
@@ -636,7 +637,7 @@
                         self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
                                                                             type: 'omdb-query-output-console',
                                                                             name: self.id+'-output-table',
-                                                                            title: `结果(耗时:${_list.consume})`,
+                                                                            title: `${this.$t("omdb.tip.result")}(${this.$t("omdb.tip.consume")}: ${_list.consume})`,
                                                                             model: self.result
                                                                         });
                         return false;
@@ -645,7 +646,7 @@
                     if(_list.meta.type === 'alter'){
                         this.$message({
                             type: "success",
-                            message: "修改类成功"
+                            message: this.$t("omdb.tip.updateClassSuccess")
                         });
                         eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'alter-class', node: null});
 
@@ -654,7 +655,7 @@
                         self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
                                                                             type: 'omdb-query-output-console',
                                                                             name: self.id+'-output-table',
-                                                                            title: `结果(耗时:${_list.consume})`,
+                                                                            title: `${this.$t("omdb.tip.result")}(${this.$t("omdb.tip.consume")}: ${_list.consume})`,
                                                                             model: self.result
                                                                         });
                         return false;
@@ -663,7 +664,7 @@
                     if(_list.meta.type === 'insert'){
                         this.$message({
                             type: "success",
-                            message: "插入类成功"
+                            message: this.$t("omdb.tip.insertDataSuccess")
                         });
                         eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'insert-class', node: null});
                         
@@ -672,7 +673,7 @@
                         self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
                                                                             type: 'omdb-query-output-console',
                                                                             name: self.id+'-output-table',
-                                                                            title: `结果(耗时:${_list.consume})`,
+                                                                            title: `${this.$t("omdb.tip.result")}(${this.$t("omdb.tip.consume")}: ${_list.consume})`,
                                                                             model: self.result
                                                                         });
                         return false;
@@ -693,7 +694,7 @@
                             self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
                                                                 type: 'omdb-query-graph-console',
                                                                 name: self.id+'-graph',
-                                                                title: `结果(耗时:${_list.consume})`,
+                                                                title: `${this.$t("omdb.tip.result")}(${this.$t("omdb.tip.consume")}: ${_list.consume})`,
                                                                 model: _data[0].graph
                                                             });
                             return false;
@@ -703,7 +704,7 @@
                             self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
                                                                             type: 'omdb-query-graph-console',
                                                                             name: self.id+'-graph',
-                                                                            title: `结果(耗时:${_list.consume})`,
+                                                                            title: `${this.$t("omdb.tip.result")}(${this.$t("omdb.tip.consume")}: ${_list.consume})`,
                                                                             model: {nodes:[],edges:[]}
                                                                         });
                             return false;
@@ -716,7 +717,7 @@
                         self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
                                                                             type: 'omdb-query-graph-console',
                                                                             name: self.id+'-graph',
-                                                                            title: `结果(耗时:${_list.consume})`,
+                                                                            title: `${this.$t("omdb.tip.result")}(${this.$t("omdb.tip.consume")}: ${_list.consume})`,
                                                                             model: _data[0].graph
                                                                         });
 
@@ -733,10 +734,10 @@
 
                     // 结果数据太大,超过阈值【max_record_threshold】，以html形式显示
                     if( _list.meta.type == 'select' &&  _list.message.length > mx.global.register.omdb.max_record_threshold){
-                        this.$confirm(`返回结果集超过阈值【${mx.global.register.omdb.max_record_threshold}】  
-                                        点击【确定】以文本形式输出`, '提示', {
-                            confirmButtonText: '确定',
-                            cancelButtonText: '取消',
+                        this.$confirm(`${ this.$t("omdb.tip.resultExceedsTresholdTip1") }【${mx.global.register.omdb.max_record_threshold}】  
+                        ${ this.$t("omdb.tip.resultExceedsTresholdTip2") }`, this.$t("omdb.actions.tip") , {
+                            confirmButtonText: this.$t("omdb.actions.apply"),
+                            cancelButtonText: this.$t("omdb.actions.cancel"),
                             type: 'warning',
                             center: true
                             }).then(() => {
@@ -746,10 +747,10 @@
                             });
                         return false;
                     } else if( _list.meta.type == 'graph' && _list.message[0].graph.nodes.length > mx.global.register.omdb.max_record_threshold){
-                        this.$confirm(`返回结果集超过阈值【${mx.global.register.omdb.max_record_threshold}】 
-                                        点击【确定】以文本形式输出`, '提示', {
-                            confirmButtonText: '确定',
-                            cancelButtonText: '取消',
+                        this.$confirm(`${ this.$t("omdb.tip.resultExceedsTresholdTip1") }【${mx.global.register.omdb.max_record_threshold}】 
+                        ${ this.$t("omdb.tip.resultExceedsTresholdTip2") }`, this.$t("omdb.actions.tip"), {
+                            confirmButtonText: this.$t("omdb.actions.apply"),
+                            cancelButtonText: this.$t("omdb.actions.cancel"),
                             type: 'warning',
                             center: true
                             }).then(() => {
@@ -770,194 +771,10 @@
                     self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
                                                                             type: 'omdb-query-output-console',
                                                                             name: self.id+'-output-table',
-                                                                            title: `结果(耗时:${_list.consume})`,
+                                                                            title: `${this.$t("omdb.tip.result")}(${this.$t("omdb.tip.consume")}: ${_list.consume})`,
                                                                             model: self.result
                                                                         });
                 } );
-            },
-            queryPlus(){
-                const self = this;
-                
-                let _mql = self.editor.getValue();
-
-                if(_.isEmpty(self.editor.getValue())){
-                    return false;
-                }
-
-                if( self.editor.getSelectedText().length > 0 ) {
-                    _mql = self.editor.getSelectedText();
-                }
-
-                let _list = omdbHandler.fetchDataByMql(_mql);
-
-                if(_list.status === 'ok'){
-                    eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'info', _list)
-                } else {
-                    // 设置表格为空
-                    self.result = { id:self.id, bid: self.bid, type: 'table-update', data: [], columns: [] };
-                    eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
-                    eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT-${self.bid}`,self.result);
-
-                    // 输出日志
-                    eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'error', _list)
-                    
-                    this.$message({
-                        type: "error",
-                        message: _list.message,
-                        showClose: true
-                    })
-
-                    return false;
-                }
-
-                if(_.isEmpty(_list)) {
-                    this.$message({
-                        type: "info",
-                        message: "查询结果为空"
-                    });
-                    return false;
-                }
-
-                // MQL for  CRUD
-                if(_.includes(['create'],_list.meta.type)){
-                    this.$message({
-                        type: "success",
-                        message: "创建成功"
-                    });
-                    eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'create-class', node: null});
-                    return false;
-                }
-
-                if(_.includes(['drop'],_list.meta.type)){
-                    this.$message({
-                        type: "success",
-                        message: "删除成功"
-                    });
-                    eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'drop-class', node: null});
-                    return false;
-                }
-
-                if(_.includes(['create edge'],_list.meta.type)){
-                    this.$message({
-                        type: "success",
-                        message: "创建成功"
-                    });
-                    eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'create-edge-type', node: null});
-                    return false;
-                }
-
-                if(_.includes(['drop edge'],_list.meta.type)){
-                    this.$message({
-                        type: "success",
-                        message: "删除成功"
-                    });
-                    eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'drop-edge-type', node: null});
-                    return false;
-                }
-
-                if(_list.meta.type === 'alter'){
-                    this.$message({
-                        type: "success",
-                        message: "修改成功"
-                    });
-                    eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'alter-class', node: null});
-                    return false;
-                }
-
-                if(_list.meta.type === 'insert'){
-                    this.$message({
-                        type: "success",
-                        message: "插入成功"
-                    });
-                    eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'insert-class', node: null});
-                    return false;
-                }
-
-
-                let _data = _list.message;
-
-                let _columns = mx.columnsParse(_list.meta);
-
-
-                // Graph
-                if(_list.meta.type === 'graph'){
-
-                    //有数据
-                    if(!_.isEmpty(_data)){   
-                        self.result = {id:self.id, bid: self.bid, type: 'graph-update', data: _data[0].graph};
-
-                        eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
-                        return false;
-                    }
-                    // 没数据 
-                    else {
-                        self.result = {id:self.id, bid: self.bid, type: 'graph-update', data: {nodes:[],edges:[]}};
-
-                        eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
-                        return false;
-                    }
-                }
-
-                // Graph-PATH
-                if(_list.meta.type === 'path'){
-
-                    self.result = {id:self.id, bid: self.bid, type: 'graph-update', data: _data[0].graph};
-
-                    eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
-
-                    return false;
-                }
-
-                // For Select count Pattern
-	            // 判断数据中没有返回class属性，如果没有将meta中的class属性赋值到数据中，构造Table所需要的结构
-	            let temp = _list.message;
-
-                if(!_.has(temp[0],'class')) {
-                    _data = _.map(_data,function(v){ return _.merge(v,{class:_.keys(_list.meta.classes)[0]})});
-                }
-
-                // 结果数据太大,超过阈值【max_record_threshold】，以html形式显示
-                if( _list.meta.type == 'select' &&  _list.message.length > mx.global.register.omdb.max_record_threshold){
-                    this.$confirm(`返回结果集超过阈值【${mx.global.register.omdb.max_record_threshold}】  
-                                    点击【确定】以文本形式输出`, '提示', {
-                        confirmButtonText: '确定',
-                        cancelButtonText: '取消',
-                        type: 'warning',
-                        center: true
-                        }).then(() => {
-                            self.queryByJson();
-                        }).catch(() => {
-                        
-                        });
-                    return false;
-                } else if( _list.meta.type == 'graph' && _list.message[0].graph.nodes.length > mx.global.register.omdb.max_record_threshold){
-                    this.$confirm(`返回结果集超过阈值【${mx.global.register.omdb.max_record_threshold}】  
-                                    点击【确定】以文本形式输出`, '提示', {
-                        confirmButtonText: '确定',
-                        cancelButtonText: '取消',
-                        type: 'warning',
-                        center: true
-                        }).then(() => {
-                            self.queryByJson();
-                        }).catch(() => {
-                        
-                        });
-                    return false;
-                }
-                // 正常Table显示 
-                else {
-                    //self.result = { id:self.id, bid: self.bid, type: 'table-update', data: _.groupBy(_data,'class'), columns: _columns, rootclass: _list.meta.rootclass};
-                    self.result = { id:self.id, bid: self.bid, type: 'table-update', data: _data, columns: _columns, rootclass: _list.meta.rootclass};
-                }
-
-                // 更新当前实例
-                self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
-                                                                        type: 'omdb-query-output-console',
-                                                                        name: self.id+'-output-table',
-                                                                        title: `结果_${moment().format("LT")}`,
-                                                                        model: self.result
-                                                                    });
-                                                
             },
             queryByJson(){
                 const self = this;
@@ -991,7 +808,7 @@
                         self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
                                                                             type: 'omdb-query-output-json-console',
                                                                             name: self.id+'-output-json',
-                                                                            title: `结果_JSON_${moment().format("LT")}`,
+                                                                            title: `${this.$t("omdb.tip.result")}_JSON_${moment().format("LT")}`,
                                                                             model: self.result
                                                                         });
 
@@ -1001,7 +818,7 @@
                         self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
                                                                             type: 'omdb-query-output-json-console',
                                                                             name: self.id+'-output-json',
-                                                                            title: `结果_JSON_${moment().format("LT")}`,
+                                                                            title: `${this.$t("omdb.tip.result")}_JSON_${moment().format("LT")}`,
                                                                             model: self.result
                                                                         });
 
@@ -1018,117 +835,6 @@
                     }
                 } );
    
-            },
-            queryPlus(){
-                const self = this;
-
-                let _mql = self.editor.getValue();
-
-                if(_.isEmpty(self.editor.getValue())){
-                    return false;
-                }
-
-                if( self.editor.getSelectedText().length > 0 ) {
-                    _mql = self.editor.getSelectedText();
-                }
-
-                let _list = omdbHandler.fetchDataByMql(_mql);
-
-                if(_list.status === 'ok'){
-                    eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'info', _list)
-                } else {
-                    eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'error', _list)
-                    
-                    this.$message({
-                        type: "error",
-                        message: _list.message,
-                        showClose: true
-                    })
-                    
-                }
-
-
-                if(_.isEmpty(_list)) {
-
-                    this.$message({
-                        type: "info",
-                        message: "查询结果为空"
-                    })
-
-                    return false;
-                }
-
-                // MQL for  CRUD
-                if(_.includes(['create'],_list.meta.type)){
-                    
-                    this.$message({
-                        type: "success",
-                        message: "创建成功"
-                    });
-                    
-                    return false;
-                }
-
-                if(_.includes(['drop'],_list.meta.type)){
-                    this.$message({
-                        type: "success",
-                        message: "删除成功"
-                    });
-                    
-                    return false;
-                }
-
-                if(_.includes(['create edge'],_list.meta.type)){
-                    this.$message({
-                        type: "success",
-                        message: "创建成功"
-                    });
-                    return false;
-                }
-
-                if(_.includes(['drop edge'],_list.meta.type)){
-                    this.$message({
-                        type: "success",
-                        message: "删除成功"
-                    });
-                    return false;
-                }
-
-                if(_list.meta.type === 'alter'){
-                    this.$message({
-                        type: "success",
-                        message: "修改成功"
-                    });
-                    return false;
-                }
-
-                if(_list.meta.type === 'insert'){
-                    this.$message({
-                        type: "success",
-                        message: "插入成功"
-                    });
-                    return false;
-                }
-
-
-                let _data = _list.message;
-
-                let _columns = mx.columnsParse(_list.meta);
-
-
-                // Graph
-                if(_list.meta.type === 'graph'){
-
-                    self.result = {id:self.id, bid: self.bid, type: 'graph-new', data: _data[0].graph};
-
-                    eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
-
-                    return false;
-                }
-
-                self.result = {id:self.id, bid: self.bid, type: 'table-new', data: _.groupBy(_data,'class'), columns: _columns};
-                eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
-                eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT-${self.bid}`,self.result);
             },
             queryAndSave(){
                 const self = this;
@@ -1156,7 +862,7 @@
                     let _content = JSON.stringify({mql: _mql, result: {message: _list.message, meta: _list.meta}},null,4).replace(/   /g, ' ');
                     let _ftype = "html";
                     let _attr = {remark: "", ctime: _.now(), author: window.SignedUser_UserName, type: _ftype};
-                    let _name = '查询_' + moment().format("YYYY-MM-DD HH:MM:SS");
+                    let _name = `${ this.$t("omdb.tip.query") }_` + moment().format("YYYY-MM-DD HH:MM:SS");
                     let _html = `<!DOCTYPE html>
                                 <html>
                                     <head>
@@ -1176,19 +882,19 @@
                     if(!_url){
                         this.$message({
                             type: "error",
-                            message: "文件保存失败，请确认！",
+                            message: this.$t("omdb.tip.saveToDfsFailed"),
                             showClose: true
                         });
                         return false;
                     }
                     
                     this.$notify({
-                        title: '运行结果已保存',
+                        title: this.$t("omdb.tip.saveToDfsComplete"),
                         dangerouslyUseHTMLString: true,
                         duration: 10*1000,
-                        message: `<p>目录：${_url} </p>
-                                    <p>返回记录: ${_list.message.length} </p>
-                                    <p>点击 <a href="/fs${_url}?type=open&issys=${window.SignedUser_IsAdmin}" class="el-button el-button--success el-button--mini" style="text-decoration: none;" target="_blank">确认</a> 查看详细</p>`,
+                        message: `<p>${ this.$t("omdb.tip.dir") }：${_url} </p>
+                                    <p>${ this.$t("omdb.tip.record") }: ${_list.message.length} </p>
+                                    <p>${ this.$t("omdb.tip.click") } <a href="/static${_url}" class="el-button el-button--success el-button--mini" style="text-decoration: none;" target="_blank">${ this.$t("omdb.tip.apply") }</a> ${ this.$t("omdb.tip.details") }</p>`,
                         position: 'bottom-right'
                     });
                 } );

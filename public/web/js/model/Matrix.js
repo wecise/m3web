@@ -23,6 +23,7 @@ class Matrix {
 
         this.currentUserTemplate = null;
         this.searchJson = null;
+        this.vue = null;
 
         this.urlParams = (function(url){
                             var result = new Object();
@@ -92,11 +93,12 @@ class Matrix {
 
     // 日子转换
     secondsToDay(seconds) {
+        
         let units = ['秒', '小时', '天', '月', '年'];
         let step = 60;
 
-        if (seconds == -1) return '永久保存';
-        if (seconds == 0) return '不保存';
+        if (seconds == -1) return this.vue?this.vue.$t('omdb.tip.longTime'):'永久保存';
+        if (seconds == 0) return this.vue?this.vue.$t('omdb.tip.noSave'):'不保存';
         
         if(seconds <= 60 * 60){
             return _.round(moment.duration(seconds, 'seconds').asSeconds(), 1) + units[0];

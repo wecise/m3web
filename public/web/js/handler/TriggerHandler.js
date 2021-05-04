@@ -34,7 +34,7 @@ class TriggerHandler {
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if (_.isEmpty(data.message)) return rtn;
 
@@ -65,7 +65,7 @@ class TriggerHandler {
                 },
                 success(data, status) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if (_.isEmpty(data.message)) return rtn;
 
@@ -104,7 +104,7 @@ class TriggerHandler {
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) === "ok"){
                     rtn = 1;
@@ -139,7 +139,7 @@ class TriggerHandler {
                 },
                 success(data, status) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if( _.lowerCase(data.status) === "ok"){
                         rtn = 1;
@@ -176,7 +176,7 @@ class TriggerHandler {
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) === "ok"){
                     rtn = 1;
@@ -209,7 +209,7 @@ class TriggerHandler {
                     },
                     success: function (data, status) {
 
-                        userHandler.ifSignIn(data);
+                        
 
                         if( _.lowerCase(data.status) === "ok"){
                             rtn = 1;

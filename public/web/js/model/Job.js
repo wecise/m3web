@@ -35,6 +35,7 @@ class Job extends Matrix {
 
                 // JobList Table组件
                 Vue.component("el-joblist-component",{
+                    i18n,
                     delimiters: ['#{', '}#'],
                     props: {
                         model: Object
@@ -77,8 +78,8 @@ class Job extends Matrix {
                         dt: {
                             handler(val,oldVal){
                                 this.info = [];
-                                this.info.push(`共 ${this.dt.rows.length} 项`);
-                                this.info.push(`已选择 ${this.dt.selected.length} 项`);
+                                this.info.push(`${this.$t('job.all')} ${this.dt.rows.length} ${this.$t('job.item')}`);
+                                this.info.push(`${this.$t('job.selected')} ${this.dt.selected.length} ${this.$t('job.item')}`);
                                 this.info.push(moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
                             },
                             deep:true,
@@ -87,16 +88,16 @@ class Job extends Matrix {
                     },
                     template:   `<el-container class="animated fadeIn" :style="cHeight">
                                     <el-header style="height:30px;line-height:30px;">
-                                        <el-tooltip content="运行模式切换" open-delay="500" placement="top">
+                                        <el-tooltip :ontent="$t('job.toggle')" open-delay="800" placement="top">
                                             <el-button type="text" @click="onToggle" icon="el-icon-notebook-2"></el-button>
                                         </el-tooltip>
-                                        <el-tooltip :content="mx.global.register.event.status[item][1]" open-delay="500" placement="top" v-for="item in model.actions" v-if="model.actions">
+                                        <el-tooltip :content="mx.global.register.event.status[item][1]" open-delay="800" placement="top" v-for="item in model.actions" v-if="model.actions">
                                             <el-button type="text" @click="onAction(item)" :icon="mx.global.register.event.status[item][2]"></el-button>
                                         </el-tooltip>
-                                        <el-tooltip content="刷新" open-delay="500" placement="top">
+                                        <el-tooltip :content="$t('job.refresh')" open-delay="800" placement="top">
                                             <el-button type="text" @click="onRefresh" icon="el-icon-refresh"></el-button>
                                         </el-tooltip>
-                                        <el-tooltip content="导出" delay-time="500">
+                                        <el-tooltip :content="$t('job.export')" delay-time="500">
                                             <el-dropdown @command="onExport">
                                                 <span class="el-dropdown-link">
                                                     <i class="el-icon-download el-icon--right"></i>
@@ -241,7 +242,7 @@ class Job extends Matrix {
                                 document.execCommand("Copy"); 
                                 this.$message({
                                     type: "info",
-                                    message: "已复制"
+                                    message: this.$t("job.copyed")
                                 });
                             } catch(err){
         
@@ -295,7 +296,7 @@ class Job extends Matrix {
                             if(_.isEmpty(this.dt.selected)){
                                 this.$message({
                                     type: "info",
-                                    message: "请选择事件！"
+                                    message: this.$t("job.selectTip")
                                 });
                                 return false;
                             }
@@ -386,6 +387,7 @@ class Job extends Matrix {
 
                 // 执行命令时间轴
                 Vue.component("cmds-timeline",{
+                    i18n,
                     delimiters: ['#{', '}#'],
                     props: {
                         model: Object
@@ -397,23 +399,23 @@ class Job extends Matrix {
                                             placement="top" 
                                             v-for="item in model">
                                             <el-card style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);padding:0 20px;">
-                                                <h4>名称：#{item.name}#</h4>
+                                                <h4>#{ $t('job.name') }#：#{item.name}#</h4>
                                                 <el-form label-width="80px">
-                                                    <el-form-item label="位置">#{item.dir}#</el-form-item>
-                                                    <el-form-item label="源">#{item.source}#</el-form-item>
-                                                    <el-form-item label="服务器">#{item.host}#</el-form-item>
-                                                    <el-form-item label="进程ID">#{item.pid}#</el-form-item>
-                                                    <el-form-item label="RUNID">#{item.runid}#</el-form-item>
-                                                    <el-form-item label="SID">#{item.sid}#</el-form-item>
-                                                    <el-form-item label="状态" style="font-size:12px;" v-if="mx.global.register.jobs.status[item.stauts]">#{mx.global.register.jobs.status[item.stauts][1]}#</el-form-item>
-                                                    <el-form-item label="类型" style="font-size:12px;" v-if="mx.global.register.jobs.type[item.type]">#{mx.global.register.jobs.type[item.type][1]}#</el-form-item>
-                                                    <el-form-item label="开始时间">#{moment(item.stime).format("YYYY-MM-DD HH:mm:ss")}#</el-form-item>
-                                                    <el-form-item label="结束时间">#{moment(item.etime).format("YYYY-MM-DD HH:mm:ss")}#</el-form-item>
-                                                    <el-form-item label="耗时">#{ item | pickDiff }#</el-form-item>
-                                                    <el-form-item label="命令" v-if="item.cmd"><mx-editor :model="item.cmd | pickString" cHeight="200px"></el-form-item>
-                                                    <el-form-item label="输出" v-if="item.out"><mx-editor :model="item.out" cHeight="200px"></mx-editor></el-form-item>
-                                                    <el-form-item label="错误" v-if="item.err"><mx-editor :model="item.err" cHeight="200px"></mx-editor></el-form-item>
-                                                    <el-form-item label="代码">#{item.code}#</el-form-item>
+                                                    <el-form-item :label="$t('job.dir')">#{item.dir}#</el-form-item>
+                                                    <el-form-item :label="$t('job.source')">#{item.source}#</el-form-item>
+                                                    <el-form-item :label="$t('job.host')">#{item.host}#</el-form-item>
+                                                    <el-form-item :label="$t('job.pid')">#{item.pid}#</el-form-item>
+                                                    <el-form-item :label="$t('job.rid')">#{item.runid}#</el-form-item>
+                                                    <el-form-item :label="$t('job.sid')">#{item.sid}#</el-form-item>
+                                                    <el-form-item :label="$t('job.status')" style="font-size:12px;" v-if="mx.global.register.jobs.status[item.stauts]">#{mx.global.register.jobs.status[item.stauts][1]}#</el-form-item>
+                                                    <el-form-item :label="$t('job.type')" style="font-size:12px;" v-if="mx.global.register.jobs.type[item.type]">#{mx.global.register.jobs.type[item.type][1]}#</el-form-item>
+                                                    <el-form-item :label="$t('job.stime')">#{moment(item.stime).format("YYYY-MM-DD HH:mm:ss")}#</el-form-item>
+                                                    <el-form-item :label="$t('job.etime')">#{moment(item.etime).format("YYYY-MM-DD HH:mm:ss")}#</el-form-item>
+                                                    <el-form-item :label="$t('job.consume')">#{ item | pickDiff }#</el-form-item>
+                                                    <el-form-item :label="$t('job.cmd')" v-if="item.cmd"><mx-editor :model="item.cmd | pickString" cHeight="200px"></el-form-item>
+                                                    <el-form-item :label="$t('job.output')" v-if="item.out"><mx-editor :model="item.out" cHeight="200px"></mx-editor></el-form-item>
+                                                    <el-form-item :label="$t('job.error')" v-if="item.err"><mx-editor :model="item.err" cHeight="200px"></mx-editor></el-form-item>
+                                                    <el-form-item :label="$t('job.code')">#{item.code}#</el-form-item>
                                                 </el-form>
                                             </el-card>
                                         </el-timeline-item>
@@ -423,9 +425,9 @@ class Job extends Matrix {
                         pickDiff(item){
                             let timeDiff = moment(item.etime).diff(moment(item.stime), "millisecond");
                             if(timeDiff > 1000){
-                                return moment(item.etime).diff(moment(item.stime), "seconds") + ' 秒';    
+                                return moment(item.etime).diff(moment(item.stime), "seconds") + ' second';    
                             } else {
-                                return timeDiff + ' 毫秒';    
+                                return timeDiff + ' millisecond';    
                             }
                         }
                     }
@@ -433,6 +435,7 @@ class Job extends Matrix {
 
                 // 时间轴
                 Vue.component("job-timeline",{
+                    i18n,
                     delimiters: ['#{', '}#'],
                     props: {
                         model: Object
@@ -450,31 +453,31 @@ class Job extends Matrix {
                                                     #{item.name}#
                                                 </h4>
                                                 <el-form label-width="80px">
-                                                    <el-form-item label="状态" v-if="item.status">
+                                                    <el-form-item :label="$t('job.status')" v-if="item.status">
                                                         <el-button type="text" :style="item.status | pickStatusStyle">#{mx.global.register.jobs.status[item.status][1]}#</el-button>
                                                     </el-form-item>
-                                                    <el-form-item label="类型" v-if="item.type">
+                                                    <el-form-item :label="$t('job.type')" v-if="item.type">
                                                         #{mx.global.register.jobs.type[item.type][1]}#
                                                     </el-form-item>
-                                                    <el-form-item label="开始时间">
+                                                    <el-form-item :label="$t('job.stime')">
                                                         #{moment(item.stime).format("YYYY-MM-DD HH:mm:ss")}# 
                                                     </el-form-item>
-                                                    <el-form-item label="结束时间">
+                                                    <el-form-item :label="$t('job.etime')">
                                                         #{moment(item.etime).format("YYYY-MM-DD HH:mm:ss")}#
                                                     </el-form-item>
-                                                    <el-form-item label="耗时">
+                                                    <el-form-item :label="$t('job.consume')">
                                                         #{ item | pickDiff }#
                                                     </el-form-item>
-                                                    <el-form-item label="命令" v-if="item.cmds">
+                                                    <el-form-item :label="$t('job.cmd')" v-if="item.cmds">
                                                         <mx-editor :model="item.cmds | pickString" cHeight="200px">
                                                     </el-form-item>
-                                                    <el-form-item label="输出" v-if="item.out">
+                                                    <el-form-item :label="$t('job.output')" v-if="item.out">
                                                         <mx-editor :model="item.out" cHeight="200px"></mx-editor>
                                                     </el-form-item>
-                                                    <el-form-item label="错误" v-if="item.err">
+                                                    <el-form-item :label="$t('job.error')" v-if="item.err">
                                                         <mx-editor :model="item.err" cHeight="200px"></mx-editor>
                                                     </el-form-item>
-                                                    <el-form-item label="代码" v-if="item.code">
+                                                    <el-form-item :label="$t('job.code')" v-if="item.code">
                                                         #{item.code}#
                                                     </el-form-item>
                                                 </el-form>
@@ -504,9 +507,9 @@ class Job extends Matrix {
                         pickDiff(item){
                             let timeDiff = moment(item.etime).diff(moment(item.stime), "millisecond");
                             if(timeDiff > 1000){
-                                return moment(item.etime).diff(moment(item.stime), "seconds") + ' 秒';    
+                                return moment(item.etime).diff(moment(item.stime), "seconds") + ' second';    
                             } else {
-                                return timeDiff + ' 毫秒';    
+                                return timeDiff + ' millisecond';    
                             }
                         }
                     }
@@ -514,6 +517,7 @@ class Job extends Matrix {
 
                 // 作业详情
                 Vue.component("job-diagnosis-detail",{
+                    i18n,
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
@@ -580,6 +584,7 @@ class Job extends Matrix {
 
                 // 作业轨迹
                 Vue.component("job-diagnosis-journal",{
+                    i18n,
                     delimiters: ['#{', '}#'],
                     props: {
                         model:Object
@@ -588,7 +593,7 @@ class Job extends Matrix {
                                     <el-main>
                                         <el-card class="box-card">
                                             <div slot="header" class="clearfix">
-                                                <span>作业轨迹</span>
+                                                <span>#{ $t("job.diagnosisJournal") }#</span>
                                             </div>
                                             <job-timeline :model="model.journal.rows"></job-timeline>
                                         </el-card>
@@ -601,6 +606,7 @@ class Job extends Matrix {
 
                 // 执行命令
                 Vue.component("job-diagnosis-cmd",{
+                    i18n,
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
@@ -610,7 +616,7 @@ class Job extends Matrix {
                                     <el-main>
                                         <el-card class="box-card">
                                             <div slot="header" class="clearfix">
-                                                <span id="event-diagnosis-cmds">执行命令</span>
+                                                <span id="event-diagnosis-cmds"> #{ $t("job.diagnosisCmd") }# </span>
                                             </div>
                                             <cmds-timeline :model="model.cmds.rows"></cmds-timeline>
                                         </el-card>
@@ -634,6 +640,7 @@ class Job extends Matrix {
     mount(el,cHeight){
         
         let main = {
+            i18n,
             delimiters: ['#{', '}#'],
             template:   `<el-container style="height:100%;">
                             <el-header class="job-view-header" style="height: 40px;line-height: 40px;padding: 0px;">
@@ -646,27 +653,14 @@ class Job extends Matrix {
                                     <el-tab-pane v-for="(item,index) in layout.main.tabs" :key="item.name" :label="item.title" :name="item.name">
                                         <div v-if="item.type==='main'">
                                             <div class="job-view-summary-control">
-                                                <el-tooltip :content="control.refresh.enable?'自动刷新启用中':'自动刷新关闭中'" placement="top" open-delay="500">
+                                                <el-tooltip :content="control.refresh.enable?$t('job.autoRefreshOn'):$t('job.autoRefreshOff')" placement="top" open-delay="800">
                                                     <div>
-                                                        #{control.refresh.enable?'自动刷新':'自动刷新'}#
+                                                        #{control.refresh.enable?$t('job.autoRefresh'):$t('job.autoRefresh')}#
                                                         <el-switch
                                                         v-model="control.refresh.enable"
                                                         active-color="#13ce66"
                                                         inactive-color="#dddddd"
                                                         @change="toggleSummaryByRefresh">
-                                                        </el-switch>
-                                                    </div>
-                                                </el-tooltip>
-                                                <el-tooltip :content="control.ifSmart==1?'智能分析启用中':'智能分析关闭中'" placement="top" open-delay="500" style="display:none;">
-                                                    <div>
-                                                        #{control.ifSmart==1?'智能分析':'智能分析'}#
-                                                        <el-switch
-                                                        v-model="control.ifSmart"
-                                                        active-color="#13ce66"
-                                                        inactive-color="#dddddd"
-                                                        active-value="1"
-                                                        inactive-value="0"
-                                                        @change="toggleSummaryBySmart">
                                                         </el-switch>
                                                     </div>
                                                 </el-tooltip>
@@ -706,9 +700,7 @@ class Job extends Matrix {
                     main:{
                         tabIndex: 1,
                         activeIndex: 'job-view-console',
-                        tabs:[
-                            {name: 'job-view-console', title:'作业列表', type: 'main'}
-                        ],
+                        tabs:[],
                         detail: {
                             model: [],
                             tabIndex: 1,
@@ -740,7 +732,7 @@ class Job extends Matrix {
                         value: "all"
                     },
                     // 搜索窗口
-                    window: { name:"所有", value: ""},
+                    window: null,
                     // 输入
                     term: "",
                     autoSearch: true,
@@ -779,13 +771,13 @@ class Job extends Matrix {
                             },this.control.refresh.interval);
                             this.$message({
                                 type: "info",
-                                message: "自动刷新开启"
+                                message: this.$t("job.autoRefreshOn")
                             })
                         } else {
                             clearInterval(this.control.refresh.inst);
                             this.$message({
                                 type: "info",
-                                message: "自动刷新关闭"
+                                message: this.$t("job.autoRefreshOff")
                             })
                         }
                     },
@@ -816,6 +808,10 @@ class Job extends Matrix {
                 }
             },
             created(){
+
+                this.layout.main.tabs = [{name: 'job-view-console', title: this.$t('job.jobList'), type: 'main'}];
+                this.options.window = { name:  this.$t("job.all"), value: ""};
+
                 try {
                     // 列表容器高度
                     this.cHeight = cHeight;
@@ -942,10 +938,10 @@ class Job extends Matrix {
                             let model = rtn.message
 
                             // 添加tab
-                            let detail = {title:`作业分析 ${event.name}`, name:`diagnosis-${id}`, type: 'diagnosis', child:[
-                                {title:'作业详情', name:`diagnosis-detail-${id}`, type: 'detail', model:model},
-                                {title:'作业轨迹', name:`diagnosis-journal-${id}`, type: 'journal', model:model},
-                                {title:'执行命令', name:`diagnosis-cmd-${id}`, type: 'cmd', model:model}
+                            let detail = {title:`${ this.$t("job.diagnosis") } ${event.name}`, name:`diagnosis-${id}`, type: 'diagnosis', child:[
+                                {title: this.$t("job.diagnosisDetail"), name:`diagnosis-detail-${id}`, type: 'detail', model:model},
+                                {title: this.$t("job.diagnosisJournal"), name:`diagnosis-journal-${id}`, type: 'journal', model:model},
+                                {title: this.$t("job.diagnosisCmd"), name:`diagnosis-cmd-${id}`, type: 'cmd', model:model}
                             ]};
                             
                             this.layout.main.tabs.push(detail);

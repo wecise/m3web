@@ -15,13 +15,6 @@ class UserHandler{
 
     }
 
-    ifSignIn(event) {
-        if (event.status == 'signin'){
-            window.location.href = event.message;
-            return false;
-        }
-    }
-
     /* 
         用户列表
     */
@@ -43,7 +36,7 @@ class UserHandler{
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 rtn = data;
 
@@ -83,7 +76,7 @@ class UserHandler{
                 },
                 success: function (data, status) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     rtn = data;
 
@@ -134,7 +127,7 @@ class UserHandler{
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -200,7 +193,7 @@ class UserHandler{
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -266,7 +259,7 @@ class UserHandler{
                 },
                 success(data, status) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if( _.lowerCase(data.status) == "ok"){
                         rtn = 1;
@@ -313,7 +306,7 @@ class UserHandler{
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -353,7 +346,7 @@ class UserHandler{
                 },
                 success(data, status) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if( _.lowerCase(data.status) == "ok"){
                         
@@ -492,7 +485,7 @@ class UserHandler{
             },
             success: function (data, status) {
                 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -528,7 +521,7 @@ class UserHandler{
                 },
                 success(data, status) {
                     
-                    userHandler.ifSignIn(data);
+                    
 
                     if( _.lowerCase(data.status) == "ok"){
                         rtn = 1;
@@ -570,7 +563,7 @@ class UserHandler{
             },
             success: function (data, status) {
                 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -608,7 +601,7 @@ class UserHandler{
                 },
                 success(data, status) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if( _.lowerCase(data.status) == "ok"){
                         rtn = 1;
@@ -648,7 +641,7 @@ class UserHandler{
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = data.message;
@@ -684,7 +677,7 @@ class UserHandler{
                 },
                 success: function (data, status) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if( _.lowerCase(data.status) == "ok"){
                         rtn = data.message;
@@ -724,7 +717,7 @@ class UserHandler{
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = data.message;
@@ -770,7 +763,7 @@ class UserHandler{
                 },
                 success: function (data, status) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if( _.lowerCase(data.status) == "ok"){
                         rtn = 1;
@@ -809,7 +802,7 @@ class UserHandler{
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -854,7 +847,7 @@ class UserHandler{
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -890,7 +883,7 @@ class UserHandler{
             },
             success(data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = data.message;
@@ -926,7 +919,7 @@ class UserHandler{
                 },
                 success(data, status) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if( _.lowerCase(data.status) == "ok"){
                         rtn = data.message;
@@ -966,7 +959,7 @@ class UserHandler{
             },
             success(data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = data.message;
@@ -1013,7 +1006,7 @@ class UserHandler{
                 },
                 success(data, status) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if( _.lowerCase(data.status) == "ok"){
                         rtn = 1;
@@ -1058,7 +1051,7 @@ class UserHandler{
                 },
                 success(data, status) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if( _.lowerCase(data.status) == "ok"){
                         rtn = 1;
@@ -1097,7 +1090,7 @@ class UserHandler{
                     
                 },
                 success(data, status) {
-                    userHandler.ifSignIn(data);
+                    
 
                     // Audit
                     auditLogHandler.writeLog("system:permission", "Refresh app Cache", 0);
@@ -1132,7 +1125,7 @@ class UserHandler{
                 },
                 success: function (data, status) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if( _.lowerCase(data.status) == "ok" && _.isEmpty(data.message)){
                         rtn = 1;

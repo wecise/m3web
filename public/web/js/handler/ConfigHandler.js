@@ -36,7 +36,7 @@ class ConfigHandler {
             },
             success: function(data, textStatus, xhr) {
                 
-                userHandler.ifSignIn(data);
+                
 
                 if(!_.isEmpty(data.message)){
                     let tmp = JSON.stringify(data.message).replace(new RegExp('"dir":true', 'gm'), '"isParent":true,"dir":true');
@@ -70,7 +70,7 @@ class ConfigHandler {
                 },
                 success(data, textStatus, xhr) {
                     
-                    userHandler.ifSignIn(data);
+                    
 
                     if(!_.isEmpty(data.message)){
                         let tmp = JSON.stringify(data.message).replace(new RegExp('"dir":true', 'gm'), '"isParent":true,"dir":true');
@@ -112,7 +112,7 @@ class ConfigHandler {
             },
             success: function(data, textStatus, xhr) {
                 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -147,7 +147,7 @@ class ConfigHandler {
                 },
                 success(data, textStatus, xhr) {
                     
-                    userHandler.ifSignIn(data);
+                    
 
                     if( _.lowerCase(data.status) == "ok"){
                         rtn = 1;
@@ -187,7 +187,7 @@ class ConfigHandler {
             },
             success: function(data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -222,7 +222,7 @@ class ConfigHandler {
                 },
                 success(data, textStatus, xhr) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if( _.lowerCase(data.status) == "ok"){
                         rtn = 1;
@@ -297,7 +297,7 @@ class ConfigHandler {
             },
             success: function(data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;

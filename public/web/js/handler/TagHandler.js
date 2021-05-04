@@ -41,7 +41,7 @@ class TagHandler{
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if (data.status == "ok"){
                     rtn = 1;
@@ -77,7 +77,7 @@ class TagHandler{
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if (data.status == "ok"){
                     rtn = data.message;
@@ -115,7 +115,7 @@ class TagHandler{
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if (data.status == "ok"){
                     rtn = 1;
@@ -151,7 +151,7 @@ class TagHandler{
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if (data.status == "ok"){
                     rtn = 1;
@@ -190,7 +190,7 @@ class TagHandler{
             complete: function(xhr, textStatus) {},
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if (data.status == "ok"){
                     rtn = 1;

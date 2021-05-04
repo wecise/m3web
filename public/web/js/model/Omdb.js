@@ -104,6 +104,7 @@ class Omdb{
         // Class Tree组件
         Vue.component("omdb-tree",{
             delimiters: ['#{', '}#'],
+            i18n,
             props: {
                 control: Object
             },
@@ -121,7 +122,7 @@ class Omdb{
             template:   `<el-container style="height:100%;">
                             <!--el-header style="height:40px;line-height:40px;padding:0px 10px;">
                                 <el-input v-model="filterText" 
-                                    placeholder="搜索" size="mini"
+                                    :placeholder="$t('omdb.tip.search')" size="mini"
                                     clearable></el-input>
                             </el-header-->
                             <el-main style="padding:0px 5px; height: 100%;">
@@ -168,25 +169,25 @@ class Omdb{
                                                     <i class="el-icon-more el-icon--right"></i>
                                                 </span>
                                                 <el-dropdown-menu slot="dropdown">
-                                                    <el-dropdown-item @click.native="onClassNew(data)">新建子类</el-dropdown-item>
+                                                    <el-dropdown-item @click.native="onClassNew(data)">#{$t('omdb.actions.newSubClass')}#</el-dropdown-item>
                                                     
-                                                    <el-dropdown-item @click.native="onClassFieldNew(data)" divided>新建属性</el-dropdown-item>
-                                                    <el-dropdown-item @click.native="onClassFieldDelete(data)">删除属性</el-dropdown-item>
-                                                    <el-dropdown-item @click.native="onClassIndexNew(data)" divided>新建索引</el-dropdown-item>
-                                                    <el-dropdown-item @click.native="onClassIndexDelete(data,'delete')">删除索引</el-dropdown-item>
-                                                    <el-dropdown-item @click.native="onClassSetup(data,'delete')" divided>属性设置</el-dropdown-item>
+                                                    <el-dropdown-item @click.native="onClassFieldNew(data)" divided>#{$t('omdb.actions.newAttribute')}#</el-dropdown-item>
+                                                    <el-dropdown-item @click.native="onClassFieldDelete(data)">#{$t('omdb.actions.delAttribute')}#</el-dropdown-item>
+                                                    <el-dropdown-item @click.native="onClassIndexNew(data)" divided>#{$t('omdb.actions.newIndex')}#</el-dropdown-item>
+                                                    <el-dropdown-item @click.native="onClassIndexDelete(data,'delete')">#{$t('omdb.actions.deleteIndex')}#</el-dropdown-item>
+                                                    <el-dropdown-item @click.native="onClassSetup(data,'delete')" divided>#{$t('omdb.actions.setupAttribute')}#</el-dropdown-item>
                                                     
-                                                    <el-dropdown-item @click.native="onClassDelete(data)" divided>删除类</el-dropdown-item>
-                                                    <el-dropdown-item @click.native="onClassDeleteData(data, 'delete-data')">删除数据</el-dropdown-item>
-                                                    <el-dropdown-item @click.native="onClassDeleteData(data, 'delete-data-withversion')">删除数据（带版本）</el-dropdown-item>
-                                                    <el-dropdown-item @click.native="onClassDeleteData(data, 'delete-column-data')">删除列数据</el-dropdown-item>
+                                                    <el-dropdown-item @click.native="onClassDelete(data)" divided>#{$t('omdb.actions.deleteClass')}#</el-dropdown-item>
+                                                    <el-dropdown-item @click.native="onClassDeleteData(data, 'delete-data')">#{$t('omdb.actions.deleteData')}#</el-dropdown-item>
+                                                    <el-dropdown-item @click.native="onClassDeleteData(data, 'delete-data-withversion')">#{$t('omdb.actions.deleteDataWithVersion')}#</el-dropdown-item>
+                                                    <el-dropdown-item @click.native="onClassDeleteData(data, 'delete-column-data')">#{$t('omdb.actions.deleteDataByColumn')}#</el-dropdown-item>
 
                                                     <el-dropdown-item @click.native="onClassMql(data,'select')" divided>SELECT</el-dropdown-item>
                                                     <el-dropdown-item @click.native="onClassMql(data,'insert')">INSERT</el-dropdown-item>
                                                     <el-dropdown-item @click.native="onClassMql(data,'update')">UPDATE</el-dropdown-item>
                                                     <el-dropdown-item @click.native="onClassMql(data,'delete')">DELETE</el-dropdown-item>
                                                     
-                                                    <el-dropdown-item @click.native="onClassExport(data)" divided>导出</el-dropdown-item>
+                                                    <el-dropdown-item @click.native="onClassExport(data)" divided>#{$t('omdb.actions.export')}#</el-dropdown-item>
                                                 </el-dropdown-menu>
                                             </el-dropdown>
                                             <el-button v-show="data.show" type="text" @click.native.stop="onClassConsole(data)" icon="el-icon-s-platform" style="float:right;width:14px;margin:0 5px;"></el-button>
@@ -202,9 +203,9 @@ class Omdb{
                                                         <i class="el-icon-more el-icon--right"></i>
                                                     </span>
                                                     <el-dropdown-menu slot="dropdown">
-                                                        <el-dropdown-item @click.native="initEdgeData(data)">刷新</el-dropdown-item>
-                                                        <el-dropdown-item @click.native="onEdgeDelete(data,'drop-all-edge-type')" divided>删除所有关系</el-dropdown-item>
-                                                        <el-dropdown-item @click.native="onEdgeExport(data)" divided>导出</el-dropdown-item>
+                                                        <el-dropdown-item @click.native="initEdgeData(data)">#{$t('omdb.actions.refresh')}#</el-dropdown-item>
+                                                        <el-dropdown-item @click.native="onEdgeDelete(data,'drop-all-edge-type')" divided>#{$t('omdb.actions.deleteEdges')}#</el-dropdown-item>
+                                                        <el-dropdown-item @click.native="onEdgeExport(data)" divided>#{$t('omdb.actions.export')}#</el-dropdown-item>
                                                     </el-dropdown-menu>
                                                 </el-dropdown>
                                                 <el-button v-show="data.show" type="text" @click.native.stop="onEdgeNew(data)" icon="el-icon-plus" style="float:right;width:14px;margin:0 5px;"></el-button>
@@ -217,7 +218,7 @@ class Omdb{
                                                         <i class="el-icon-more el-icon--right"></i>
                                                     </span>
                                                     <el-dropdown-menu slot="dropdown">
-                                                        <el-dropdown-item @click.native="onEdgeDelete(data,'drop-edge-type')">删除关系</el-dropdown-item>
+                                                        <el-dropdown-item @click.native="onEdgeDelete(data,'drop-edge-type')">#{$t('omdb.actions.deleteEdge')}#</el-dropdown-item>
                                                     </el-dropdown-menu>
                                                 </el-dropdown>
                                                 <el-button v-show="data.show" type="text" @click.native.stop="onEdgeEdit(data)" icon="el-icon-edit" style="float:right;width:14px;margin:0 5px;"></el-button>
@@ -449,6 +450,7 @@ class Omdb{
         // ClassList Table组件
         Vue.component("omdb-classlist-component",{
             delimiters: ['#{', '}#'],
+            i18n,
             props: {
                 model: Object
             },
@@ -466,8 +468,8 @@ class Omdb{
                 dt: {
                     handler(val,oldVal){
                         this.info = [];
-                        this.info.push(`共 ${this.dt.rows.length} 项`);
-                        this.info.push(`已选择 ${this.dt.selected.length} 项`);
+                        this.info.push(`${this.$t('omdb.tip.all')} ${this.dt.rows.length} ${this.$t('omdb.tip.item')}`);
+                        this.info.push(`${this.$t('omdb.tip.selected')} ${this.dt.selected.length} ${this.$t('omdb.tip.item')}`);
                         this.info.push(moment().format("YYYY-MM-DD HH:MM:SS.SSS"));
                     },
                     deep:true,
@@ -476,7 +478,7 @@ class Omdb{
             },
             template:   `<el-container class="animated fadeIn" style="height:calc(100% - 70px);">
                             <el-header style="height:30px;line-height:30px;">
-                                <el-tooltip content="导出" delay-time="500">
+                                <el-tooltip :content="$t('omdb.actions.export')" delay-time="500">
                                     <el-dropdown @command="onExport">
                                         <span class="el-dropdown-link">
                                             <i class="el-icon-download el-icon--right"></i>
@@ -601,7 +603,7 @@ class Omdb{
                     if(_.isEmpty(this.dt.selected)){
                         this.$message({
                             type: "info",
-                            message: "请选择事件！"
+                            message: this.$t('omdb.tip.selectTip')
                         });
                         return false;
                     }
@@ -717,6 +719,7 @@ class Omdb{
         // 日志控制台
         Vue.component("omdb-log-console", {
             delimiters: ['#{', '}#'],
+            i18n,
             props:{
                 id: String,
                 model: Object
@@ -906,7 +909,7 @@ class Omdb{
 
                 },
                 logFormat(level, event){
-                    const self = this;
+                    
                     let _content = event;
 
                     if(typeof(event) === 'object'){
@@ -929,7 +932,7 @@ class Omdb{
                         text: (trigger)=> {
                             this.$message({
                                 type: "info",
-                                message: "已复制"
+                                message: this.$t("omdb.tip.copyed")
                             });
 
                             let rtn = _.map(this.log.msg,function(v){
@@ -946,7 +949,7 @@ class Omdb{
                         text: (trigger)=> {
                             this.$message({
                                 type: "info",
-                                message: "已复制"
+                                message: this.$t("omdb.tip.copyed")
                             });
                             return item[2].content;
                         }
@@ -1045,31 +1048,42 @@ class Omdb{
         // JSON输出控制台
         Vue.component("omdb-query-output-json-console",{
             delimiters: ['#{', '}#'],
+            i18n,
             props: {
                 model: Object
             },
             template: `<el-container style="height: calc(100% - 30px);">
                             <el-header style="height:30px;line-height:30px;background: #f2f2f2;">
                                 <el-button-group>
-                                    <el-tooltip content="复制" placement="bottom" open-delay="500">
+                                    <el-tooltip :content="$t('omdb.tip.copyed')" placement="bottom" open-delay="500">
                                         <el-button type="text" icon="fas fa-copy" class="btn-copy"></el-button>
                                     </el-tooltip>
                                 </el-button-group>
                             </el-header>
                             <el-main style="padding:0px;height:100%;" ref="editor">
+                                <v-jsoneditor v-model="model" :options="options" :plus="false" height="100%" ref="jsoneditor">
                             </el-main>
                         </el-container>`,
             data(){
                 return {
-
+                    options: {
+                        modes: ['text', 'code', 'tree', 'form', 'view'],
+                        mode: 'code',
+                    }
                 }
             },
-            created: function(){
-                const self = this;
-
-            },
             mounted() {
-               this.init();
+                //this.init();
+                new Clipboard('.el-button.btn-copy',{
+                    text: (trigger)=> {
+                        this.$message(this.$t("omdb.tip.copyed"));
+                        return JSON.stringify(this.model,null,2);
+                    }
+                });
+
+                eventHub.$on("omdb-vertical-size-change",(sizes)=>{
+                    this.$refs.jsoneditor.editor.resize();
+                });
             },
             methods: {
                 init(){
@@ -1092,7 +1106,7 @@ class Omdb{
 
                     new Clipboard('.el-button.btn-copy',{
                         text: (trigger)=> {
-                            this.$message('已复制');
+                            this.$message(this.$t("omdb.tip.copyed"));
                             return jsonStr;
                         }
                     });
@@ -1130,6 +1144,7 @@ class Omdb{
         // 类编辑控制台 
         Vue.component("omdb-class-console",{
             delimiters: ['#{', '}#'],
+            i18n,
             props: {
                 id: String,
                 model: Object
@@ -1137,22 +1152,22 @@ class Omdb{
             template:   `<el-container style="height: calc(100vh - 110px);">
                             <el-main style="padding:0px;overflow:hidden;background:#f2f2f2;">
                                 <el-form label-width="80px" :model="formModel" style="width:70%;padding: 10px 0px;">
-                                    <el-form-item label="类名称">
+                                    <el-form-item :label="$t('omdb.classList.name')">
                                         <el-input v-model="formModel.name" :disabled="true"></el-input>
                                     </el-form-item>
-                                    <el-form-item label="类别名">
+                                    <el-form-item :label="$t('omdb.classList.alias')">
                                         <el-input v-model="formModel.alias">
                                             <el-button slot="append" icon="fas fa-save" @click="onUpdate('alias')"></el-button>
                                         </el-input>
                                     </el-form-item>
-                                    <el-form-item label="TTL">
+                                    <el-form-item :label="$t('omdb.classList.ttl')">
                                         <el-input-number v-model="formModel.ttl" controls-position="right" :min="-1">
                                         </el-input-number>
                                         <span style="font-size:10px;padding-left:10px;">#{ mx.secondsToDay(formModel.ttl) }#</span>
                                         <el-button icon="fas fa-save" @click="onUpdate('ttl')" style="float:right;"></el-button>
-                                        <span style="font-size:10px;float:right;padding-right:10px;">数据生命周期(单位：秒)，-1为永久保存，0为不保存</span>
+                                        <span style="font-size:10px;float:right;padding-right:10px;">#{ $t('omdb.classList.ttlTip') }#</span>
                                     </el-form-item>
-                                    <el-form-item label="备注">
+                                    <el-form-item :label="$t('omdb.classList.remark')">
                                         <el-input v-model="formModel.remedy" clearable>
                                             <el-button slot="append" icon="fas fa-save" @click="onUpdate('remedy')"></el-button>
                                         </el-input>
@@ -1162,12 +1177,12 @@ class Omdb{
                                     @tab-click="onClick" 
                                     style="border-top:1px solid #dddddd;height:100%;">
                                     <el-tab-pane name="columns">
-                                        <span slot="label"><i class="fas fa-columns"></i> 属性</span>
+                                        <span slot="label"><i class="fas fa-columns"></i> #{ $t('omdb.classList.attribute') }#</span>
                                         <el-container style="height:calc(100% - 145px);padding:10px;"> 
                                             <el-header style="height:30px;"> 
                                                 <el-breadcrumb separator="/" style="height:30px;line-height:30px;">
                                                     <el-breadcrumb-item>
-                                                        <el-button type="text" @click="onChangeClassColumn('/')">基类</el-button>
+                                                        <el-button type="text" @click="onChangeClassColumn('/')">#{ $t('omdb.classList.rootClass') }#</el-button>
                                                     </el-breadcrumb-item>
                                                     <el-breadcrumb-item  :key="item" v-for="(item,index) in ddlPath" v-if="index > 0">
                                                         <el-button type="text" @click="onChangeClassColumn(ddlPath.slice(0,index+1).join('/'))">#{item}#</el-button>
@@ -1180,12 +1195,12 @@ class Omdb{
                                         </el-container>
                                     </el-tab-pane>
                                     <el-tab-pane name="keys">
-                                        <span slot="label"><i class="fas fa-key"></i> 主键</span>
+                                        <span slot="label"><i class="fas fa-key"></i> #{ $t('omdb.classList.primaryKey') }#</span>
                                         <el-container style="height:calc(100% - 230px);padding:10px;"> 
                                             <el-header style="height:30px;"> 
                                                 <el-breadcrumb separator="/" style="height:30px;line-height:30px;">
                                                     <el-breadcrumb-item>
-                                                        <el-button type="text">基类</el-button>
+                                                        <el-button type="text">#{ $t('omdb.classList.rootClass') }#</el-button>
                                                     </el-breadcrumb-item>
                                                     <el-breadcrumb-item  :key="item" v-for="(item,index) in ddlPath" v-if="index > 0">
                                                         <el-button type="text">#{item}#</el-button>
@@ -1201,12 +1216,12 @@ class Omdb{
                                         </el-container>
                                     </el-tab-pane>
                                     <el-tab-pane name="indexes">
-                                        <span slot="label"><i class="fas fa-indent"></i> 索引</span>
+                                        <span slot="label"><i class="fas fa-indent"></i> #{ $t('omdb.classList.index') }#</span>
                                         <el-container style="height:calc(100% - 230px);padding:10px;"> 
                                             <el-header style="height:30px;"> 
                                                 <el-breadcrumb separator="/" style="height:30px;line-height:30px;">
                                                     <el-breadcrumb-item>
-                                                        <el-button type="text">基类</el-button>
+                                                        <el-button type="text">#{ $t('omdb.classList.rootClass') }#</el-button>
                                                     </el-breadcrumb-item>
                                                     <el-breadcrumb-item  :key="item" v-for="(item,index) in ddlPath" v-if="index > 0">
                                                         <el-button type="text">#{item}#</el-button>
@@ -1222,12 +1237,12 @@ class Omdb{
                                         </el-container>
                                     </el-tab-pane>
                                     <el-tab-pane name="subClass">
-                                        <span slot="label"><i class="fas fa-cube"></i> 子类</span>
+                                        <span slot="label"><i class="fas fa-cube"></i> #{ $t('omdb.classList.subClass') }#</span>
                                         <el-container style="height:calc(100% - 230px);padding:10px;"> 
                                             <el-header style="height:30px;"> 
                                                 <el-breadcrumb separator="/" style="height:30px;line-height:30px;">
                                                     <el-breadcrumb-item>
-                                                        <el-button type="text">基类</el-button>
+                                                        <el-button type="text">#{ $t('omdb.classList.rootClass') }#</el-button>
                                                     </el-breadcrumb-item>
                                                     <el-breadcrumb-item  :key="item" v-for="(item,index) in ddlPath" v-if="index > 0">
                                                         <el-button type="text">#{item}#</el-button>
@@ -1243,12 +1258,12 @@ class Omdb{
                                         </el-container>
                                     </el-tab-pane>
                                     <el-tab-pane name="options">
-                                        <span slot="label"><i class="fas fa-cog"></i> 设置</span>
+                                        <span slot="label"><i class="fas fa-cog"></i> #{ $t('omdb.classList.setup') }#</span>
                                         <el-container style="height:calc(100% - 230px);padding:10px;"> 
                                             <el-header style="height:30px;"> 
                                                 <el-breadcrumb separator="/" style="height:30px;line-height:30px;">
                                                     <el-breadcrumb-item>
-                                                        <el-button type="text">基类</el-button>
+                                                        <el-button type="text">#{ $t('omdb.classList.rootClass') }#</el-button>
                                                     </el-breadcrumb-item>
                                                     <el-breadcrumb-item  :key="item" v-for="(item,index) in ddlPath" v-if="index > 0">
                                                         <el-button type="text">#{item}#</el-button>
@@ -1264,12 +1279,12 @@ class Omdb{
                                         </el-container>
                                     </el-tab-pane>
                                     <el-tab-pane name="ddl">
-                                        <span slot="label"><i class="fas fa-table"></i> DDL</span>
+                                        <span slot="label"><i class="fas fa-table"></i> #{ $t('omdb.classList.ddl') }#</span>
                                         <el-container style="height:calc(100% - 230px);padding:10px;"> 
                                             <el-header style="height:30px;"> 
                                                 <el-breadcrumb separator="/" style="height:30px;line-height:30px;">
                                                     <el-breadcrumb-item>
-                                                        <el-button type="text" @click="onChangeClassDDL('/')">基类</el-button>
+                                                        <el-button type="text" @click="onChangeClassDDL('/')">#{ $t('omdb.classList.rootClass') }#</el-button>
                                                     </el-breadcrumb-item>
                                                     <el-breadcrumb-item  :key="item" v-for="(item,index) in ddlPath" v-if="index > 0">
                                                         <el-button type="text" @click="onChangeClassDDL(ddlPath.slice(0,index+1).join('/'))">#{item}#</el-button>
@@ -1285,12 +1300,12 @@ class Omdb{
                                         </el-container>
                                     </el-tab-pane>
                                     <el-tab-pane name="trigger">
-                                        <span slot="label"><i class="fas fa-stopwatch"></i> 触发器</span>
+                                        <span slot="label"><i class="fas fa-stopwatch"></i> #{ $t('omdb.classList.trigger') }#</span>
                                         <el-container style="height:calc(100% - 215px);padding:10px;"> 
                                             <!--el-header style="height:30px;"> 
                                                 <el-breadcrumb separator="/" style="height:30px;line-height:30px;">
                                                     <el-breadcrumb-item>
-                                                        <el-button type="text">基类</el-button>
+                                                        <el-button type="text">#{ $t('omdb.classList.rootClass') }#</el-button>
                                                     </el-breadcrumb-item>
                                                     <el-breadcrumb-item  :key="item" v-for="(item,index) in ddlPath" v-if="index > 0">
                                                         <el-button type="text">#{item}#</el-button>
@@ -1417,41 +1432,41 @@ class Omdb{
                     });
     
                     this.dt.columns = [
-                                        {"field": "id", title:"序号", width: 80, render: function(row,column,cellValue,index) {
+                                        {"field": "id", title: this.$t("omdb.classList.num"), width: 80, render: function(row,column,cellValue,index) {
                                                 return index + 1;
                                             }
                                         },
-                                        {"field": "icon", "title": "继承", width: 120, render: function(row,column,cellValue,index) {
+                                        {"field": "icon", "title": this.$t("omdb.classList.inherit"), width: 120, render: function(row,column,cellValue,index) {
                                                 return `<img src="${window.ASSETS_ICON}/tools/png/${cellValue}.png?type=open&issys=${window.SignedUser_IsAdmin}" style="width:22px;height:22px;">`;
                                             }
                                         },
-                                        {"field": "name", "title": "属性", width: 120},
-                                        {"field": "colname", "title": "列属性", width: 120, visible: false},
-                                        {"field": "title", "title": "标题", width: 120},
-                                        {"field": "ftype", "title": "类型", width: 80, render: function(row,column,cellValue,index) {
+                                        {"field": "name", "title": this.$t("omdb.classList.name"), width: 120},
+                                        {"field": "colname", "title": this.$t("omdb.classList.property"), width: 120, visible: false},
+                                        {"field": "title", "title": this.$t("omdb.classList.title"), width: 120},
+                                        {"field": "ftype", "title": this.$t("omdb.classList.ftype"), width: 80, render: function(row,column,cellValue,index) {
                                                 return cellValue==='smallint'?'enum':cellValue;
                                             }
                                         },
-                                        {"field": "loption", "title": "Loption", width: 120},
-                                        {"field": "fparam", "title": "Fparam", width: 160},
-                                        {"field": "isindex", "title": "索引", width: 80, render: function (row,column,cellValue,index) {
-                                                return cellValue===1?'是':'否';
+                                        {"field": "loption", "title": this.$t("omdb.classList.loption"), width: 120},
+                                        {"field": "fparam", "title": this.$t("omdb.classList.fparam"), width: 160},
+                                        {"field": "isindex", "title": this.$t("omdb.classList.index"), width: 80, render:  (row,column,cellValue,index)=> {
+                                                return cellValue===1?this.$t('omdb.tip.yes'):this.$t('omdb.tip.no');
                                             }
                                         },
-                                        {"field": "iskey", "title": "主键", width: 120, render: function (row,column,cellValue,index) {
-                                                return cellValue===1?'是':'否';
+                                        {"field": "iskey", "title": this.$t("omdb.classList.primaryKey"), width: 120, render:  (row,column,cellValue,index)=> {
+                                            return cellValue===1?this.$t('omdb.tip.yes'):this.$t('omdb.tip.no');
                                             }
                                         },
-                                        {"field": "note", "title": "备注"},
-                                        {"field": "mtime", "title": "时间", width: 160, render: function (row,column,cellValue,index) {
+                                        {"field": "note", "title": this.$t("omdb.classList.remark")},
+                                        {"field": "mtime", "title": this.$t("omdb.classList.time"), width: 160, render: function (row,column,cellValue,index) {
                                                 return moment(cellValue).format("YYYY-MM-DD HH:MM:SS.SSS");
                                             }
                                         },
-                                        {"field": "class", "title": "类", width: 80, "visible": false},
-                                        {"field": "dispname", "title": "显示名称", width: 80, "visible": false},
-                                        {"field": "tags", "title": "标签", width: 80, "visible": false},
-                                        {"field": "isrel", "title": "Rel", width: 80, "visible": false},
-                                        {"field": "btype", "title": "Btype", width: 80, "visible": false}
+                                        {"field": "class", "title": this.$t("omdb.classList.class"), width: 80, "visible": false},
+                                        {"field": "dispname", "title": this.$t("omdb.classList.label"), width: 80, "visible": false},
+                                        {"field": "tags", "title": this.$t("omdb.classList.tag"), width: 80, "visible": false},
+                                        {"field": "isrel", "title": this.$t("omdb.classList.rel"), width: 80, "visible": false},
+                                        {"field": "btype", "title": this.$t("omdb.classList.btype"), width: 80, "visible": false}
                                     ];
     
                     this.dt.columns = _.uniqBy(this.dt.columns, 'field');
@@ -1544,12 +1559,12 @@ class Omdb{
                         if(rtn.status == 'ok'){
                             this.$message({
                                 type: "success",
-                                message: "更新成功"
+                                message: this.$t("omdb.tip.updateSuccess")
                             })
                         } else {
                             this.$message({
                                 type: "error",
-                                message: "更新失败：" + rtn.message
+                                message: this.$t("omdb.tip.updateFailed") + ": " + rtn.message
                             })
                         }
                     } );
@@ -1607,10 +1622,10 @@ class Omdb{
             },
             template:   `<el-container style="height:calc(100% - 30px);">
                             <el-header style="height:30px;line-height:30px;" v-if="!_.isEmpty(model.data) && _.includes(['select'],model.type)">
-                                <el-tooltip content="删除" open-delay="800" placement="top">
+                                <el-tooltip :content="$t('omdb.actions.delete')" open-delay="800" placement="top">
                                     <el-button type="text" @click="onDelete" icon="el-icon-delete"></el-button>
                                 </el-tooltip>
-                                <el-tooltip content="导出" open-delay="900" placement="top">
+                                <el-tooltip :content="$t('omdb.actions.export')" open-delay="900" placement="top">
                                     <el-dropdown @command="onExport">
                                         <span class="el-dropdown-link">
                                             <i class="el-icon-download el-icon--right"></i>
@@ -1641,14 +1656,14 @@ class Omdb{
                                     ref="table"
                                     v-if="!_.isEmpty(dt.rows)">
                                     
-                                    <el-table-column type="index" label="序号" sortable align="center">
+                                    <el-table-column type="index" label="Num" sortable align="center">
                                         <template slot-scope="scope">
                                             <div style="width:100%; text-align: center;"> <b> #{scope.$index + 1}# </b> </div>
                                         </template>
                                     </el-table-column>
                                     <el-table-column type="selection" align="center">
                                     </el-table-column>                                                
-                                    <el-table-column type="expand" label="详细" align="center" >
+                                    <el-table-column type="expand" align="center" >
                                         <template slot-scope="props">
                                             <el-container style="width:50vw;">
                                                 <el-main>
@@ -1670,7 +1685,8 @@ class Omdb{
                                             sortable
                                             resizable
                                             :formatter="item.render"
-                                            v-for="item in dt.columns"
+                                            v-for="(item,cIndex) in dt.columns"
+                                            :key="cIndex"
                                             min-width="180">
                                         <template slot-scope="scope" slot="header">
                                             <span> #{item['field']}# 
@@ -1691,14 +1707,23 @@ class Omdb{
                                                 width="550"
                                                 trigger="click"
                                                 popper-class="dataTablePopper"
-                                                v-else-if="pickFtype(item['field']) == 'bucket'">
-                                                <el-container>
+                                                v-else-if="pickFtype(item['field']) == 'bucket'"
+                                                @show="onBucketShow(scope.row[item['field']],scope.$index,cIndex)">
+                                                <el-container style="height:40vh;">
                                                     <el-header style="height:30px;line-height:30px;padding:0px;">
-                                                        <el-button type="text" icon="el-icon-timer" @click="arrayToCsvByLocal(item['field'],scope.$index)"></el-button>
-                                                        <el-button type="text" icon="el-icon-copy-document" class="el-button-copy" @click="onCopy(item['field'],scope.$index)"></el-button>
+                                                        <el-button type="text" icon="el-icon-timer" @click="arrayToCsvByLocal(item['field'],scope.$index,cIndex)"></el-button>
+                                                        <el-button type="text" icon="el-icon-copy-document" class="el-button-copy" @click="onCopy(scope.$index,$event,cIndex)"></el-button>
+                                                        <el-switch style="display: block;float:right;"
+                                                            v-model="bucketShow.timeConverByUtc"
+                                                            active-color="#13ce66"
+                                                            inactive-color="#999999"
+                                                            active-text="UTC"
+                                                            inactive-text="Local"
+                                                            @change="((data)=>{ onBucketReset(data,item['field'],scope.$index,cIndex); })">
+                                                        </el-switch>
                                                     </el-header>
-                                                    <el-main style="padding:0px;">
-                                                        <textarea rows="10" style="width:98%;white-space:nowrap;" :id="'textarea_'+scope.$index">#{arrayToCsv(scope.row[item['field']])}#</textarea>
+                                                    <el-main style="padding:0px;border:1px solid #dddddd;" :ref="'editorBucket'+scope.$index+cIndex">
+                                                        
                                                     </el-main>
                                                 </el-container>
                                                 <el-button type="text" icon="el-icon-date" slot="reference">#{scope.row[item['field']].length}#</el-button>
@@ -1711,7 +1736,7 @@ class Omdb{
                                                 v-else-if="_.includes(['msg','cmds','err','out','config','depot','attr'],item['field']) && !_.isEmpty(scope.row[item['field']])">
                                                 <el-container>
                                                     <el-header style="height:30px;line-height:30px;padding:0px;">
-                                                        <el-button type="text" icon="el-icon-copy-document" class="el-button-copy" @click="onCopy(item['field'],scope.$index)"></el-button>
+                                                        <el-button type="text" icon="el-icon-copy-document" class="el-button-copy" @click="onCopy(scope.$index,$event)"></el-button>
                                                     </el-header>
                                                     <el-main style="padding:0px;">
                                                         <textarea rows="10" style="width:98%;white-space:nowrap;" :id="'textarea_'+scope.$index">#{ scope.row[item['field']] }#</textarea>
@@ -1727,7 +1752,7 @@ class Omdb{
                                                 v-else-if="_.includes(['map','set','list'],pickFtype(item['field'])) && !_.isEmpty(scope.row[item['field']])">
                                                 <el-container>
                                                     <el-header style="height:30px;line-height:30px;padding:0px;">
-                                                        <el-button type="text" icon="el-icon-copy-document" class="el-button-copy" @click="onCopy(item['field'],scope.$index)"></el-button>
+                                                        <el-button type="text" icon="el-icon-copy-document" class="el-button-copy" @click="onCopy(scope.$index,$event)"></el-button>
                                                     </el-header>
                                                     <el-main style="padding:0px;">
                                                         <textarea rows="10" style="width:98%;white-space:nowrap;" :id="'textarea_'+scope.$index">#{ scope.row[item['field']] }#</textarea>
@@ -1741,64 +1766,59 @@ class Omdb{
                                     </el-table-column>
                                 </el-table>
                                 <div style="padding:20px;" v-else>
-                                    <h3><i class="el-icon-info" style="font-size:32px;color:#4caf50;"></i> 没有找到相关的记录</h3>
-                                    <p>温馨提示：  
-                                    请检查您的输入是否正确
-                                    如有任何意见或建议，请及时反馈给我们。
+                                    <h3><i class="el-icon-info" style="font-size:32px;color:#4caf50;"></i> #{ $t('omdb.tip.searchNull') }#</h3>
+                                    <p>#{ $t('omdb.tip.searchTip') }#
                                     </p>
-                                    <p>耗时：#{model.consume}#</p>
+                                    <p>#{ $t('omdb.tip.consume') }#：#{model.consume}#</p>
                                 </div>
                             </el-main>
                             <!-- 异常信息提示 -->
                             <el-main style="height:100%;padding:0px;" v-else>
                                 <div style="padding:20px;" v-if="model.type=='create-class'">
-                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 创建类成功</h3>
-                                    <p>耗时：#{model.consume}#</p>
+                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> #{ $t('omdb.tip.createClassSuccess') }#</h3>
+                                    <p>#{ $t('omdb.tip.consume') }#：#{model.consume}#</p>
                                 </div>
                                 <div style="padding:20px;" v-else-if="model.type=='drop-class'">
-                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 删除类成功</h3>
-                                    <p>耗时：#{model.consume}#</p>
+                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> #{ $t('omdb.tip.deleteClassSuccess') }#</h3>
+                                    <p>#{ $t('omdb.tip.consume') }#：#{model.consume}#</p>
                                 </div>
                                 <div style="padding:20px;" v-else-if="model.type=='insert-class'">
-                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 插入数据成功</h3>
-                                    <p>耗时：#{model.consume}#</p>
+                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> #{ $t('omdb.tip.insertDataSuccess') }#</h3>
+                                    <p>#{ $t('omdb.tip.consume') }#：#{model.consume}#</p>
                                 </div>
                                 <div style="padding:20px;" v-else-if="model.type=='delete'">
-                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 删除数据成功</h3>
-                                    <p>耗时：#{model.consume}#</p>
+                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> #{ $t('omdb.tip.deleteDataSuccess') }#</h3>
+                                    <p>#{ $t('omdb.tip.consume') }#：#{model.consume}#</p>
                                 </div>
                                 <div style="padding:20px;" v-else-if="model.type=='update'">
-                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 更新数据成功</h3>
-                                    <p>耗时：#{model.consume}#</p>
+                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> #{ $t('omdb.tip.updateDataSuccess') }#</h3>
+                                    <p>#{ $t('omdb.tip.consume') }#：#{model.consume}#</p>
                                 </div>
                                 <div style="padding:20px;" v-else-if="model.type=='create edge'">
-                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 创建关系成功</h3>
-                                    <p>耗时：#{model.consume}#</p>
+                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> #{ $t('omdb.tip.createEdgeDataSuccess') }#</h3>
+                                    <p>#{ $t('omdb.tip.consume') }#：#{model.consume}#</p>
                                 </div>
                                 <div style="padding:20px;" v-else-if="model.type=='create-edge-type'">
-                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 创建关系类型成功</h3>
-                                    <p>耗时：#{model.consume}#</p>
+                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> #{ $t('omdb.tip.createEdgeSuccess') }#</h3>
+                                    <p>#{ $t('omdb.tip.consume') }#：#{model.consume}#</p>
                                 </div>
                                 <div style="padding:20px;" v-else-if="model.type=='drop-edge-type'">
-                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 删除关系成功</h3>
-                                    <p>耗时：#{model.consume}#</p>
+                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> #{ $t('omdb.tip.deleteEdgeSuccess') }#</h3>
+                                    <p>#{ $t('omdb.tip.consume') }#：#{model.consume}#</p>
                                 </div>
                                 <div style="padding:20px;" v-else-if="model.type=='alter-class'">
-                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> 更新类属性成功</h3>
-                                    <p>耗时：#{model.consume}#</p>
+                                    <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> #{ $t('omdb.tip.updateClassPropSuccess') }#</h3>
+                                    <p>#{ $t('omdb.tip.consume') }#：#{model.consume}#</p>
                                 </div>
                                 <div style="padding:20px;" v-else-if="model.type=='error'">
-                                    <h3><i class="el-icon-info" style="font-size:32px;color:#ff0000;"></i> 操作失败</h3>
-                                    <p>消息：#{model.data}#</p>
-                                    <p>耗时：#{model.consume}#</p>
+                                    <h3><i class="el-icon-info" style="font-size:32px;color:#ff0000;"></i> #{ $t('omdb.tip.actionFailed') }#</h3>
+                                    <p>#{ $t("omdb.tip.result") }#：#{model.data}#</p>
+                                    <p>#{ $t('omdb.tip.consume') }#：#{model.consume}#</p>
                                 </div>
                                 <div style="padding:20px;" v-else>
-                                    <h3><i class="el-icon-info" style="font-size:32px;color:#4caf50;"></i> 没有找到相关的记录</h3>
-                                    <p>温馨提示：  
-                                    请检查您的输入是否正确
-                                    如有任何意见或建议，请及时反馈给我们。
-                                    </p>
-                                    <p>耗时：#{model.consume}#</p>
+                                    <h3><i class="el-icon-info" style="font-size:32px;color:#4caf50;"></i> #{ $t('omdb.tip.searchNull') }#</h3>
+                                    <p>#{ $t('omdb.tip.searchTip') }#</p>
+                                    <p>#{ $t('omdb.tip.consume') }#：#{model.consume}#</p>
                                 </div>
                             </el-main>
                             <el-footer  style="height:30px;line-height:30px;" v-if="!_.isEmpty(model.data) && _.includes(['select'],model.type)">
@@ -1812,7 +1832,10 @@ class Omdb{
                         columns: [],
                         selected: [],
                     },
-                    info: []
+                    info: [],
+                    bucketShow: {
+                        timeConverByUtc: true
+                    }
                 }
             },
             filters: {
@@ -1834,8 +1857,8 @@ class Omdb{
                 dt:{
                     handler: function(val,oldVal){
                         this.info = [];
-                        this.info.push(`共 ${val.rows.length} 项`);
-                        this.info.push(`已选择 ${val.selected.length} 项`);
+                        this.info.push(`${this.$t('omdb.tip.all')} ${val.rows.length} ${this.$t('omdb.tip.item')}`);
+                        this.info.push(`${this.$t('omdb.tip.selected')} ${val.selected.length} ${this.$t('omdb.tip.item')}`);
                         this.info.push(moment().format("YYYY-MM-DD HH:MM:SS.SSS"));
                     },
                     deep:true
@@ -1890,26 +1913,47 @@ class Omdb{
                 }
             },
             mounted(){
-                this.info.push(`共 ${this.dt.rows.length} 项`);
+                this.info.push(`${this.$t('omdb.tip.all')} ${this.dt.rows.length} ${this.$t('omdb.tip.item')}`);
             },
             methods: {
-                onCopy(data,index){
-                    try{
-                        let tx = document.getElementById('textarea_'+index);
-                        tx.select(); 
-                        document.execCommand("Copy"); 
-                        this.$message({
-                            type: "info",
-                            message: "已复制"
-                        });
-                    } catch(err){
-
-                    }
+                onBucketShow(data,index,cIndex){
+                    
+                    let editor = ace.edit(this.$refs['editorBucket'+index+cIndex][0].$el);
+                    
+                    editor.setOptions({
+                        // maxLines: 1000,
+                        minLines: 20,
+                        autoScrollEditorIntoView: true,
+                        enableBasicAutocompletion: true,
+                        enableSnippets: true,
+                        enableLiveAutocompletion: false
+                    });
+                    
+                    editor.getSession().setMode("ace/mode/text");
+                    editor.setTheme("ace/theme/chrome");
+                    editor.getSession().setUseSoftTabs(true);
+                    editor.getSession().setTabSize(2);
+                    editor.getSession().setUseWrapMode(false);
+                    editor.renderer.setShowGutter(true);
+                    editor.setValue(this.arrayToCsv(data));
+                    
+                },
+                onCopy(index,evt,cIndex){
+                    new Clipboard(evt.target, {
+                        text: (trigger)=> {
+                            let editor = ace.edit(this.$refs['editorBucket'+index+cIndex][0].$el);
+                            this.$message({
+                                type: "info",
+                                message: this.$t("omdb.tip.copyed")
+                            });
+                            return editor.getValue();
+                        }
+                    });
                 },
                 arrayToCsv(data){
                     
                     let lineArray = [];
-                    _.forEach(data, (infoArray, index)=> {
+                    _.forEach(data, (infoArray)=> {
                         let line = infoArray.join(", ");
                         lineArray.push(line);
                     });
@@ -1917,23 +1961,73 @@ class Omdb{
                     return lineArray.join("\n");
                     
                 },
-                arrayToCsvByLocal(data,index){
+                onBucketReset(value,data,index,cIndex){
                     
                     try{
-                        _.forEach(this.dt.rows[index][data], (infoArray, index)=> {
+                        _.forEach(this.dt.rows[index][data], infoArray=> {
+                            
                             let valid = (new Date(infoArray[0])).getTime() > 0;
                             
                             if(valid){
-                                if(typeof infoArray[0] == 'string'){
-                                    this.$set(infoArray, 0, moment(infoArray[0]).valueOf());
-                                } else {
-                                    this.$set(infoArray, 0, moment(infoArray[0]).format(mx.global.register.format));
-                                }
                                 
+                                if(value){
+                                    if(typeof infoArray[0] === 'string'){    
+                                        this.$set(infoArray, 0, moment(infoArray[0]).valueOf());
+                                    }    
+                                } else {
+                                    if(typeof infoArray[0] === 'string'){    
+                                        this.$set(infoArray, 0, moment.utc(infoArray[0]).valueOf());
+                                    }   
+                                }
+ 
+                            } else {
+                                return;
+                            }
+
+                        })
+
+                        let editor = ace.edit(this.$refs['editorBucket'+index+cIndex][0].$el);
+                        
+                        editor.setValue(this.arrayToCsv(this.dt.rows[index][data]))
+
+
+                    } catch(err){
+                        console.error(err)
+                    }
+                },
+                arrayToCsvByLocal(data,index,cIndex){
+                    
+                    try{
+                        _.forEach(this.dt.rows[index][data], infoArray=> {
+                            
+                            let valid = (new Date(infoArray[0])).getTime() > 0;
+                            
+                            if(valid){
+                                
+                                if(this.bucketShow.timeConverByUtc){
+                                    if(typeof infoArray[0] === 'string'){    
+                                        this.$set(infoArray, 0, moment.utc(infoArray[0]).valueOf());
+                                    } else {
+                                        this.$set(infoArray, 0, moment.utc(infoArray[0]).format(mx.global.register.format));
+                                    }    
+                                } else {
+                                    if(typeof infoArray[0] === 'string'){    
+                                        this.$set(infoArray, 0, moment(infoArray[0]).valueOf());
+                                    } else {
+                                        this.$set(infoArray, 0, moment(infoArray[0]).format(mx.global.register.format));
+                                    }   
+                                }
+ 
+                            } else {
+                                return;
                             }
                         });
+
+                        let editor = ace.edit(this.$refs['editorBucket'+index+cIndex][0].$el);
+                        editor.setValue(this.arrayToCsv(this.dt.rows[index][data]))
+
                     } catch(err){
-                        console.log(err)
+                        console.error(err)
                     }
                     
                 },
@@ -2046,6 +2140,7 @@ class Omdb{
         // 查询控制台
         Vue.component("omdb-query-console",{
             delimiters: ['#{', '}#'],
+            i18n,
             props: {
                 id: String,
                 model: Object
@@ -2083,7 +2178,7 @@ class Omdb{
                 return {
                     main: {
                         tabs: [
-                                {title: '日志', name: `log`, type: 'omdb-log-console', model: []}
+                                {title: this.$t('omdb.tip.log'), name: `log`, type: 'omdb-log-console', model: []}
                             ],
                         activeIndex: 'log',
                         splitInst: null,
@@ -2280,6 +2375,7 @@ class Omdb{
                         onDragEnd:(sizes)=> {
                             this.main.headerHeight = sizes[0];
                             this.main.mainHeight = sizes[1];
+                            eventHub.$emit("omdb-vertical-size-change",sizes);
                         }
                     });
                 },
@@ -2288,7 +2384,7 @@ class Omdb{
                     let log = _.find(this.main.tabs,{name:'log'});
                     
                     if(_.isEmpty(log)){
-                        this.main.tabs.push({title: '日志', name: `log`, type: 'omdb-log-console', model: []});
+                        this.main.tabs.push({title: this.$t('omdb.tip.log'), name: `log`, type: 'omdb-log-console', model: []});
                         log = _.find(this.main.tabs,{name:'log'});   
                     }
                     
@@ -2369,13 +2465,13 @@ class Omdb{
                                                         <el-dropdown-item @click.native="classDataImport">#{ $t('omdb.actions.import') }#</el-dropdown-item>
                                                         <el-dropdown-item @click.native="classPropsDirectory" divided>#{ $t('omdb.actions.directory') }#</el-dropdown-item>
                                                         <el-dropdown-item divided>
-                                                            显示别名(Alias)：<el-switch
+                                                            #{ $t("omdb.actions.showAlias") }#：<el-switch
                                                                 v-model="control.alias.show"
                                                                 active-color="#13ce66"
                                                                 inactive-color="#dddddd">
                                                         </el-dropdown-item>
                                                         <el-dropdown-item divided>
-                                                            搜索标记(Autosearch)：<el-switch
+                                                            #{ $t("omdb.actions.searchFlag") }#：<el-switch
                                                                 v-model="control.autosearch.show"
                                                                 active-color="#13ce66"
                                                                 inactive-color="#dddddd">
@@ -2414,36 +2510,36 @@ class Omdb{
                                             </el-tab-pane>
                                         </el-tabs>
                                         <div style="background:#ffffff;padding:5% 20px;height:100%;display:block;text-align:center;" v-else>
-                                            <h2 style="margin: 0px 0px 40px 0px;">欢迎使用#{ $t('omdb.title') }#</h2>
+                                            <h2 style="margin: 0px 0px 40px 0px;"> #{ $t('omdb.tip.welcome') }# #{ $t('omdb.title') }#</h2>
                                             <p>
                                                 <el-button style="width:100px;height:90px;">
-                                                    <i class="el-icon-office-building" style="font-size:48px;"></i> <p>类管理</p>
+                                                    <i class="el-icon-office-building" style="font-size:48px;"></i> <p> #{ $t('omdb.tip.classManageTip') }# </p>
                                                 </el-button>
                                                 <!--el-link style="margin-left: 20px;">文章</el-link>
                                                 <el-link style="margin-left: 20px;">视频</el-link-->
                                             
                                                 <el-button style="width:100px;height:90px;">
-                                                    <i class="el-icon-postcard" style="font-size:48px;"></i> <p>属性管理</p>
+                                                    <i class="el-icon-postcard" style="font-size:48px;"></i> <p>#{ $t('omdb.tip.propManageTip') }#</p>
                                                 </el-button>
                                             
                                                 <el-button style="width:100px;height:90px;">
-                                                    <i class="el-icon-s-data" style="font-size:48px;"></i> <p>数据管理</p>
+                                                    <i class="el-icon-s-data" style="font-size:48px;"></i> <p>#{ $t('omdb.tip.dataManageTip') }#</p>
                                                 </el-button>
                                             
                                                 <el-button style="width:100px;height:90px;">
-                                                    <i class="el-icon-money" style="font-size:48px;"></i> <p>关系管理</p>
+                                                    <i class="el-icon-money" style="font-size:48px;"></i> <p>#{ $t('omdb.tip.relManageTip') }#</p>
                                                 </el-button>
                                             </p>
                                             <object data="/fs/assets/images/files/svg/configWorld.svg?type=open&issys=true" 
                                                 type="image/svg+xml" style="width:40vw;height:40vh;background: #ffffff;">
                                             </object>
                                             <p>
-                                                如有任何意见或建议，请及时反馈给我们。
+                                                #{ $t('omdb.tip.contact') }#
                                                 <el-link href="mailto:m3@wecise.com">Email：m3@wecise.com</el-link>
                                             </p>
                                             
                                         </div>
-                                        <el-dialog title="导出" :visible.sync="dialog.omdbExport.show" v-if="dialog.omdbExport.show" width="60vw">
+                                        <el-dialog :title="$t('omdb.actions.export')" :visible.sync="dialog.omdbExport.show" v-if="dialog.omdbExport.show" width="60vw">
                                             <el-container style="height:55vh;">
                                                 <el-header style="height:auto;line-height:40px;min-height:40px;background: #f2f2f2;">
                                                     <el-checkbox v-model="dialog.omdbExport.model.ifRelation" label="导出关系"></el-checkbox>
@@ -2949,6 +3045,8 @@ class Omdb{
                         }
                     }
                 }).$mount("#app");
+
+                mx.vue = odb.app;
 
             })
 

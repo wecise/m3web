@@ -516,7 +516,7 @@ class AI {
                                                         <el-input type="text" v-model="content.name" disabled></el-input>
                                                     </el-form-item>
 
-                                                    <el-form-item label="指定不参与计算对象黑名单">
+                                                    <el-form-item label="指定不参与计算对象">
                                                         <el-popover
                                                             placement="top-start"
                                                             trigger="hover"
@@ -524,7 +524,15 @@ class AI {
                                                             style="position:absolute;top:-40px;right:0px;">
                                                             <span slot="reference" class="el-icon-question"></span>
                                                         </el-popover>
-                                                        <mx-class-entity-select :root="content.class" :value="content.model.blacklist" multiplenable="true" ref="blacklist"></mx-class-entity-select>
+                                                        <el-tabs value="blacklist" type="border-card" style="background: #f2f2f2;border: 1px solid #ddd;">
+                                                            <el-tab-pane label="黑名单" name="blacklist">
+                                                                <mx-class-entity-select :root="content.class" :value="content.model.blacklist" multiplenable="true" ref="blacklist" style="margin-top: 0px;"></mx-class-entity-select>
+                                                            </el-tab-pane>
+                                                            <el-tab-pane label="白名单" name="whitelist">
+                                                                <mx-class-entity-select :root="content.class" :value="content.model.whitelist" multiplenable="true" ref="whitelist" style="margin-top: 0px;"></mx-class-entity-select>
+                                                            </el-tab-pane>
+                                                        </el-tabs>
+                                                        </template>
                                                     </el-form-item>
 
                                                     <el-form-item label="时间" prop="time">
@@ -557,8 +565,8 @@ class AI {
                                     if(val.alarm == 1){
                                         
                                         // 根据采集间隔生成cron
-                                        let interval = parseInt(this.content.interval / 60);
-                                        let cron = `cron 0 0/${interval} * * *`; 
+                                        let interval = Math.floor(this.content.interval / 60);
+                                        let cron = `cron 0/${interval} * * * *`; 
 
                                         let jobAlert = { 
                                                 name: name, 
@@ -566,7 +574,8 @@ class AI {
                                                 exec: [this.content.job.exec[0], this.model.fullname, 'alert'].join(" "), 
                                                 group: this.content.job.group, 
                                                 schedule: cron, // 'cron 0 0 * * *'
-                                                timeout: 43200
+                                                timeout: 43200,
+                                                enable: this.content.job.enable
                                         };
                                         
                                         let rtn = jobHandler.jobMerge(jobAlert);
@@ -695,9 +704,19 @@ class AI {
                         this.$watch(
                             "$refs.blacklist.entity.selected",{
                                 handler:(val, oldVal) => {
-                                    console.log(val)
                                     this.$set(this.content, 'blacklist',  _.map(val,(v)=>{ return v;}))
                                     this.$set(this.content.model,'blacklist', _.map(val,(v)=>{ return v;}));
+                                },
+                                deep:true
+                            }
+                        );
+
+                        // whitelist
+                        this.$watch(
+                            "$refs.whitelist.entity.selected",{
+                                handler:(val, oldVal) => {
+                                    this.$set(this.content, 'whitelist',  _.map(val,(v)=>{ return v;}))
+                                    this.$set(this.content.model,'whitelist', _.map(val,(v)=>{ return v;}));
                                 },
                                 deep:true
                             }
@@ -1879,7 +1898,7 @@ class AI {
                                     dir: this.content.job.dir, 
                                     exec: [this.content.job.exec[0], this.model.fullname].join(" "), 
                                     group: this.content.job.group, 
-                                    schedule: `${this.content.job.cron}`, // 'cron 0 0 * * *'
+                                    schedule: `${this.content.job.cron.replace(/?/,'')}`, // 'cron 0 0 * * *'
                                     timeout: 43200,
                                     enable: this.content.job.enable
                                 };
@@ -1888,7 +1907,7 @@ class AI {
                                     dir: this.content.job.dir, 
                                     exec: [this.content.job.exec[0], this.model.parent+'/analysis/' + this.model.name].join(" "), 
                                     group: this.content.job.group, 
-                                    schedule: `${this.content.job.cron}`, // 'cron 0 0 * * *'
+                                    schedule: `${this.content.job.cron.replace(/?/,'')}`, // 'cron 0 0 * * *'
                                     timeout: 43200,
                                     enable: this.content.job.enable
                                 };

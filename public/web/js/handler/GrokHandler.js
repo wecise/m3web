@@ -33,7 +33,7 @@ class GrokHandler {
                 },
                 success: function (data, status) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if (data.status == "ok"){
                         rtn = data;
@@ -73,7 +73,7 @@ class GrokHandler {
                 },
                 success: function (data, status) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if( _.lowerCase(data.status) == "ok"){
                         rtn = 1;
@@ -108,7 +108,7 @@ class GrokHandler {
                 },
                 success: function (data, status) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if( _.lowerCase(data.status) == "ok"){
                         rtn = 1;

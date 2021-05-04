@@ -41,7 +41,7 @@ class OmdbHandler  {
             },
             success: function(data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if (!_.isEmpty(data.message)){
                     rtn = data.message;
@@ -74,7 +74,7 @@ class OmdbHandler  {
                 },
                 success(data, textStatus, xhr) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if (!_.isEmpty(data.message)){
                         rtn = data.message;
@@ -115,7 +115,7 @@ class OmdbHandler  {
             },
             success(data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if (!_.isEmpty(data.message)){
                     rtn = data.message;
@@ -153,7 +153,7 @@ class OmdbHandler  {
             },
             success(data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if (!_.isEmpty(data.message)){
                     rtn = data.message;
@@ -185,7 +185,7 @@ class OmdbHandler  {
                 },
                 success(data, textStatus, xhr) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if (!_.isEmpty(data.message)){
                         rtn = data.message;
@@ -248,7 +248,7 @@ class OmdbHandler  {
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -287,7 +287,7 @@ class OmdbHandler  {
             },
             success: function(data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -333,7 +333,7 @@ class OmdbHandler  {
             },
             success: function(data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if (_.isEmpty(data.message)) return false;
 
@@ -372,7 +372,7 @@ class OmdbHandler  {
             },
             success: function(data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                
 
                 rtn = data;
             },
@@ -411,7 +411,7 @@ class OmdbHandler  {
             },
             success: function(data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) === "ok"){
                     rtn = 1;
@@ -452,7 +452,7 @@ class OmdbHandler  {
             },
             success(data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -495,7 +495,7 @@ class OmdbHandler  {
             },
             success: function(data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                
 
                 rtn = data;
 
@@ -536,7 +536,7 @@ class OmdbHandler  {
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 // MQL for CRUD
                 if(_.lowerCase(data.status) == "ok"){
@@ -583,14 +583,14 @@ class OmdbHandler  {
                     let now = _.now();
                     let timeDiff = moment(now).diff(moment(stime), "millisecond");
                     if(timeDiff > 1000){
-                        _.extend(rtn, { consume: moment(now).diff(moment(stime), "seconds") + ' 秒' }); 
+                        _.extend(rtn, { consume: moment(now).diff(moment(stime), "seconds") + ' s' }); 
                     } else {
-                        _.extend(rtn, { consume: timeDiff + ' 毫秒' }); 
+                        _.extend(rtn, { consume: timeDiff + ' ms' }); 
                     }
                 },
                 success(data, status) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     // MQL for CRUD
                     if(_.lowerCase(data.status) == "ok"){
@@ -643,7 +643,7 @@ class OmdbHandler  {
             },
             success(data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if(_.lowerCase(data.status) == "ok"){
                     rtn = data;
@@ -753,7 +753,7 @@ class OmdbHandler  {
                 },
                 success(data, textStatus, xhr) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if( _.lowerCase(data.status) == "ok"){
                         rtn = 1;
@@ -800,7 +800,7 @@ class OmdbHandler  {
                 },
                 success(data, textStatus, xhr) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if( _.lowerCase(data.status) == "ok"){
                         rtn = 1;

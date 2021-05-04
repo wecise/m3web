@@ -30,7 +30,7 @@ class ProbeHandler {
             },
             success: function(data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                
 
                 rtn = data;
             },
@@ -74,7 +74,7 @@ class ProbeHandler {
             },
             success: function(data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -109,7 +109,7 @@ class ProbeHandler {
             },
             success: function(data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                
 
                 rtn = data;
             },
@@ -136,7 +136,7 @@ class ProbeHandler {
             },
             success: function(data, textStatus, xhr) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;

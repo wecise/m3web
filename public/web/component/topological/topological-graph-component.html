@@ -1942,15 +1942,16 @@
                         graph.getModel();
 
                         let parent = graph.getDefaultParent();
-                        let allNodes = _.concat([],this.graphData.nodes);
-                        let allEdges = _.concat([],this.graphData.edges);
+                        let allNodes = this.graphData?_.concat([],this.graphData.nodes):[];
+                        let allEdges = this.graphData?_.concat([],this.graphData.edges):[];
 
-                        if( this.graphData['diff'] && 'add' in this.graphData['diff'] ){
+
+                        if(this.graphData &&  this.graphData['diff'] && 'add' in this.graphData['diff'] ){
                             allNodes = _.concat(allNodes, this.graphData.diff.add.nodes);
                             allEdges = _.concat(allEdges, this.graphData.diff.add.edges);
                         }
 
-                        if( this.graphData['diff'] && 'del' in this.graphData['diff'] ){
+                        if(this.graphData && this.graphData['diff'] && 'del' in this.graphData['diff'] ){
                             allNodes = _.concat(allNodes, this.graphData.diff.del.nodes);
                             allEdges = _.concat(allEdges, this.graphData.diff.del.edges);
                         }

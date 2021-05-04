@@ -33,7 +33,7 @@ class  JobHandler {
             complete(xhr, textStatus) {},
             success(data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 rtn = data;
 
@@ -64,7 +64,7 @@ class  JobHandler {
             complete(xhr, textStatus) {},
             success(data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 rtn = data;
 
@@ -89,7 +89,7 @@ class  JobHandler {
                 complete(xhr, textStatus) {},
                 success(data, status) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     rtn = data;
 
@@ -123,7 +123,7 @@ class  JobHandler {
                 complete(xhr, textStatus) {},
                 success(data, status) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                 },
                 error(xhr, textStatus, errorThrown){
@@ -155,7 +155,7 @@ class  JobHandler {
                 complete(xhr, textStatus) {},
                 success(data, status) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                 },
                 error(xhr, textStatus, errorThrown){
@@ -188,7 +188,7 @@ class  JobHandler {
             complete(xhr, textStatus) {},
             success(data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 rtn = data;
 
@@ -220,7 +220,7 @@ class  JobHandler {
             complete(xhr, textStatus) {},
             success(data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 rtn = data;
 
@@ -253,7 +253,7 @@ class  JobHandler {
             complete: function(xhr, textStatus) {},
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 rtn = data;
 
@@ -277,7 +277,7 @@ class  JobHandler {
                 complete: function(xhr, textStatus) {},
                 success: function (data, status) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     rtn = data;
 
@@ -311,7 +311,7 @@ class  JobHandler {
             complete: function(xhr, textStatus) {},
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 rtn = data;
 
@@ -336,7 +336,7 @@ class  JobHandler {
                 complete: function(xhr, textStatus) {},
                 success: function (data, status) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     rtn = data;
 
@@ -375,7 +375,7 @@ class  JobHandler {
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if (_.isEmpty(data.message)) return rtn;
 
@@ -414,7 +414,7 @@ class  JobHandler {
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -452,7 +452,7 @@ class  JobHandler {
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -501,7 +501,7 @@ class  JobHandler {
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if (_.isEmpty(data.message)) return rtn;
 
@@ -534,7 +534,7 @@ class  JobHandler {
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if (_.isEmpty(data.message)) return rtn;
 

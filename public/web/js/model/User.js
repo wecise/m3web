@@ -22,9 +22,10 @@ class User {
 
             $(function() {
                 
-                moment.locale('zh_CN');
+                
 
                 Vue.component('user-update',{
+                    i18n,
                     delimiters: ['#{', '}#'],
                     data(){
                         return {
@@ -38,69 +39,69 @@ class User {
                         }
                     },
                     template:   `<div>
-                                    <h2>用户信息</h2>
+                                    <h2>#{ $t('user.userInfo') }#</h2>
                                     <el-divider></el-divider>
                                     <el-form label-width="80px">
                                         
-                                        <el-form-item label="组名称" required>
+                                        <el-form-item :label="$t('user.parent')" required>
                                             <el-input v-model="signedUser.parent" disabled="true"></el-input>
                                         </el-form-item>
 
-                                        <el-form-item label="登录名称" required>
+                                        <el-form-item :label="$t('user.userName')" required>
                                             <el-input v-model="signedUser.username" disabled="true"></el-input>
                                         </el-form-item>
 
-                                        <el-form-item label="重置密码">
+                                        <el-form-item :label="$t('user.resetPassword')">
                                             <el-switch v-model="user.resetPasswd"></el-switch>
                                         </el-form-item>
 
-                                        <el-form-item label="登录密码" required v-if="user.resetPasswd">
+                                        <el-form-item :label="$t('user.password')" required v-if="user.resetPasswd">
                                             <el-input type="password" v-model="user.passwd" autocomplete="off" show-password @blur="onPasswordVaild($event)">
                                                 <template v-if="validPasswd>0">
                                                     <el-button slot="append" type="success" icon="el-icon-check" style="background: #67c23a;color: #fff;" v-if="validPasswd==1">
-                                                        密码设置安全
+                                                        #{ $t('user.passwordSetup') }#
                                                     </el-button>
                                                     <el-button slot="append" type="error" style="background: #ffa500;color: #fff;" icon="el-icon-warning" v-else>
-                                                        密码设置安全级别过低，建议由数字、符号、字母组合设立
+                                                    #{ $t('user.passwordTip') }#
                                                     </el-button>
                                                 </template>
                                             </el-input>
-                                        </el-form-item>
+                                        </el-form-item>"
 
-                                        <el-form-item label="确认密码" required v-if="user.resetPasswd">
+                                        <el-form-item :label="$t('user.checkPassword')" required v-if="user.resetPasswd">
                                             <el-input type="password" v-model="user.checkPasswd" autocomplete="off" show-password></el-input>
                                         </el-form-item>
 
-                                        <el-form-item label="姓名">
+                                        <el-form-item :label="$t('user.fullName')">
                                             <el-input v-model="signedUser.firstname" autofocus placeholder="姓" style="width:30%;"></el-input>
                                             <el-input v-model="signedUser.lastname" placeholder="名" style="width:30%;"></el-input>
                                         </el-form-item>
                                         
-                                        <el-form-item label="邮箱" required>
+                                        <el-form-item :label="$t('user.email')" required>
                                             <el-input v-model="signedUser.email"></el-input>
                                         </el-form-item>
 
-                                        <el-form-item label="手机">
+                                        <el-form-item :label="$t('user.mobile')">
                                             <el-input v-model="signedUser.mobile"></el-input>
                                         </el-form-item>
 
-                                        <el-form-item label="座机">
+                                        <el-form-item :label="$t('user.telephone')">
                                             <el-input v-model="signedUser.telephone"></el-input>
                                         </el-form-item>
 
-                                        <el-form-item label="微信">
+                                        <el-form-item :label="$t('user.wechat')">
                                             <el-input v-model="signedUser.wechat"></el-input>
                                         </el-form-item>
 
-                                        <el-form-item label="地址">
+                                        <el-form-item :label="$t('user.address')">
                                             <el-input type="textarea" v-model="signedUser.address"></el-input>
                                         </el-form-item>
 
                                     </el-form>
 
                                     <div class="dialog-footer" style="text-align:right;">
-                                        <el-button type="default" @click="onCancel">取消</el-button>
-                                        <el-button type="primary" @click="onSaveUser(signedUser)" :disabled="user.resetPasswd && validPasswd==2">更新用户</el-button>	
+                                        <el-button type="default" @click="onCancel">#{ $t('user.cancel') }#</el-button>
+                                        <el-button type="primary" @click="onSaveUser(signedUser)" :disabled="user.resetPasswd && validPasswd==2">#{ $t('user.applyUser') }#</el-button>	
                                     </div>
                                     
                                 </div>`,
@@ -124,7 +125,7 @@ class User {
 								if (_.isEmpty(this.user.passwd)) {
 									this.$message({
 										type: "warning",
-										message: `登录密码不能为空！`
+										message: this.$t('user.passwordNotNull')
 									})
 									return false;
 								}
@@ -132,7 +133,7 @@ class User {
 								if (_.isEmpty(this.user.checkPasswd)) {
 									this.$message({
 										type: "warning",
-										message: `确认密码不能为空！`
+										message: this.$t('user.checkPasswordNotNull')
 									})
 									return false;
 								}
@@ -140,7 +141,7 @@ class User {
 								if ( this.user.passwd !== this.user.checkPasswd) {
 									this.$message({
 										type: "warning",
-										message: `确认密码不一致！`
+										message: this.$t('user.checkPasswordNotSame')
 									})
 									return false;
 								}
@@ -153,7 +154,7 @@ class User {
 							if (_.isEmpty(row.email)) {
 								this.$message({
 									type: "warning",
-									message: `邮件不能为空！`
+									message: this.$t('user.emailNotNull')
 								})
 								return false;
 							}
@@ -170,9 +171,9 @@ class User {
 								this.$set(row, 'telephone', row.telephone.split(","));
 							}
 
-							this.$confirm(`确认要更新该用户：${row.fullname}？`, '提示', {
-								confirmButtonText: '确定',
-								cancelButtonText: '取消',
+							this.$confirm(`${ this.$t('user.confirmUpdateUser') }：${row.fullname}？`, this.$t('user.tip'), {
+								confirmButtonText: this.$t('user.confirm'),
+								cancelButtonText: this.$t('user.cancel'),
 								type: 'warning'
 							}).then(() => {
 									
@@ -181,7 +182,7 @@ class User {
                                     if(rtn == 1){
                                         this.$message({
                                             type: "success",
-                                            message: `更新用户: ${row.username} 成功！`
+                                            message: `${ this.$t('user.updateSuccess') } ${row.username}`
                                         })
     
                                         this.$root.currentView = "user-info";
@@ -189,7 +190,7 @@ class User {
                                     }else {
                                         this.$message({
                                             type: "error",
-                                            message: `更新用户: ${row.username} 失败 ` + rtn
+                                            message: `${this.$t('user.updateFailed')}  ${row.username} ` + rtn
                                         })
                                     }
                                 } );
@@ -205,6 +206,7 @@ class User {
                 });
         
                 Vue.component('user-info',{
+                    i18n,
                     delimiters: ['#{', '}#'],
                     data(){
                         return {
@@ -217,40 +219,40 @@ class User {
                         }
                     },
                     template:   `<div>
-                                    <h2>用户信息</h2>
+                                    <h2>#{ $t('user.userInfo') }#</h2>
                                     <el-divider></el-divider>
                                     <el-form label-width="80px">
                                         
-                                        <el-form-item label="组名称" required>
+                                        <el-form-item :label="$t('user.parent')" required>
                                             <el-input v-model="signedUser.parent" disabled="true"></el-input>
                                         </el-form-item>
 
-                                        <el-form-item label="登录名称" required>
+                                        <el-form-item :label="$t('user.userName')" required>
                                             <el-input v-model="signedUser.username" disabled="true"></el-input>
                                         </el-form-item>
 
-                                        <el-form-item label="姓名">
+                                        <el-form-item :label="$t('user.fullName')">
                                             <el-input v-model="signedUser.firstname" autofocus placeholder="姓" style="width:30%;" disabled="true"></el-input>
                                             <el-input v-model="signedUser.lastname" placeholder="名" style="width:30%;" disabled="true"></el-input>
                                         </el-form-item>
                                         
-                                        <el-form-item label="邮箱" required>
+                                        <el-form-item :label="$t('user.email')" required>
                                             <el-input v-model="signedUser.email" disabled="true"></el-input>
                                         </el-form-item>
 
-                                        <el-form-item label="手机">
+                                        <el-form-item :label="$t('user.mobile')">
                                             <el-input v-model="signedUser.mobile" disabled="true"></el-input>
                                         </el-form-item>
 
-                                        <el-form-item label="座机">
+                                        <el-form-item :label="$t('user.telephone')">
                                             <el-input v-model="signedUser.telephone" disabled="true"></el-input>
                                         </el-form-item>
 
-                                        <el-form-item label="微信">
+                                        <el-form-item :label="$t('user.wechat')">
                                             <el-input v-model="signedUser.wechat" disabled="true"></el-input>
                                         </el-form-item>
 
-                                        <el-form-item label="地址">
+                                        <el-form-item :label="$t('user.address')">
                                             <el-input type="textarea" v-model="signedUser.address" disabled="true"></el-input>
                                         </el-form-item>
                                         
@@ -265,42 +267,43 @@ class User {
                 });
         
                 Vue.component('company-update',{
+                    i18n,
                     delimiters: ['#{', '}#'],
                     template:   `<div class="animated fadeIn">
-                                    <h2>企业信息</h2>
+                                    <h2>#{ $t('user.companyInfo') }#</h2>
                                     <el-divider></el-divider>
                                     <el-form>
-                                        <el-form-item label="企业简称">
-                                            <el-input  v-model="signedUser.Company.name" autofocus required></el-input>
+                                        <el-form-item :label="$t('user.companyName')">
+                                            <el-input  v-model="signedUser.Company.name" autofocus required disabled></el-input>
                                         </el-form-item>
-                                        <el-form-item label="企业全称">
+                                        <el-form-item :label="$t('user.companyFullname')">
                                             <el-input v-model="signedUser.Company.fullname" autofocus required></el-input>
                                         </el-form-item>
                             
-                                        <el-form-item label="系统名称">
+                                        <el-form-item :label="$t('user.ospace')">
                                             <el-input v-model="signedUser.Company.ospace" required disabled="true"></el-input>
                                         </el-form-item>
                             
-                                        <el-form-item label="系统标题">
+                                        <el-form-item :label="$t('user.title')">
                                             <el-input v-model="signedUser.Company.title" required></el-input>
                                         </el-form-item>
                             
-                                        <el-form-item label="企业网站">
+                                        <el-form-item :label="$t('user.website')">
                                             <el-input v-model="signedUser.Company.web" required></el-input>
                                         </el-form-item>
                             
-                                        <el-form-item label="License">
+                                        <el-form-item :label="$t('user.license')">
                                             <el-input id="config" class="form-control" :value="license" required disabled>
                                                 <el-button type="success" slot="append">
-                                                    导入
+                                                    #{ $t('user.import') }#
                                                     <input type="file" name="loadfile" @change="importLicense" />
                                                 </el-button>
                                             </el-input>
                                         </el-form-item>
                             
                                         <el-form-item style="text-align:right;">
-                                            <el-button type="default" @click="cancel">取消</el-button>
-                                            <el-button type="primary" @click="update">更新企业</el-button>
+                                            <el-button type="default" @click="cancel">#{ $t('user.cancel') }#</el-button>
+                                            <el-button type="primary" @click="update">#{ $t('user.applyCompany') }#</el-button>
                                         </el-form-item>
                             
                                     </el-form>
@@ -325,9 +328,9 @@ class User {
                             let license = _.attempt(JSON.parse.bind(null, this.signedUser.Company.license));
                             
                             if(_.isEmpty(license)){
-                                this.license = "未经授权用户";
+                                this.license = this.$t('user.unauthorizedUsers');
                             } else {
-                                this.license = `截止日期：${license.expire} 服务器数量：${license.server} 代理数量：${license.agent}`;
+                                this.license = `${ this.$t('user.closingDate') } ${license.expire} ${ this.$t('user.numberOfServers') } ${license.server} ${ this.$t('user.NumberOfAgents') } ${license.agent}`;
                             }
         
                         },
@@ -367,6 +370,7 @@ class User {
 
     mount(el){
         let main = {
+            i18n,
             delimiters: ['#{', '}#'],
             template:   `<el-container style="background:#fff;height: calc(100vh - 85px);">
                             <el-aside id="nav" style="width:auto;">
@@ -376,18 +380,18 @@ class User {
                                         <p><img :src="logo" style="width:120px;max-width:120px;"></img></p>
                                     </el-header>
                                     <el-main style="overflow:hidden;">
-                                        <h5>企业信息</h5>
-                                        <p>企业简称：#{signedUser.Company.name}#</p>
-                                        <p>企业全称：#{signedUser.Company.fullname}#</p>
-                                        <p>系统名称：#{signedUser.Company.ospace}#</p>
-                                        <p>系统标题：#{signedUser.Company.title}#</p>
-                                        <p>License：#{license}#</p>
+                                        <h5>#{ $t('user.companyInfo') }#</h5>
+                                        <p>#{ $t('user.companyName') }#：#{signedUser.Company.name}#</p>
+                                        <p>#{ $t('user.companyFullname') }#：#{signedUser.Company.fullname}#</p>
+                                        <p>#{ $t('user.ospace') }#：#{signedUser.Company.ospace}#</p>
+                                        <p>#{ $t('user.title') }#：#{signedUser.Company.title}#</p>
+                                        <p>#{ $t('user.license') }#：#{license}#</p>
                                         <p>
-                                            <el-link type="default" icon="el-icon-location" href="http://{{.website}}" target="_blank" :underline="false">官网</el-link>
+                                            <el-link type="default" icon="el-icon-location" href="http://{{.website}}" target="_blank" :underline="false">#{ $t('user.website') }#</el-link>
                                         </p>
                                         <p style="display:flex;">
-                                            <el-button type="success" icon="el-icon-edit" @click="toggleView('company-update')" v-if="mxAuth.isAdmin">更新企业信息</el-button>
-                                            <el-button type="success" icon="el-icon-user" @click="toggleView('user-update')">更新用户信息</el-button>
+                                            <el-button type="success" icon="el-icon-edit" @click="toggleView('company-update')" v-if="mxAuth.isAdmin">#{ $t('user.applyCompany') }#</el-button>
+                                            <el-button type="success" icon="el-icon-user" @click="toggleView('user-update')">#{ $t('user.applyUser') }#</el-button>
                                         </p>
                                     </el-main>
                                 </el-container>
@@ -395,7 +399,7 @@ class User {
                             <el-main id="content" style="margin: 0px 0px 0px 10px;height: calc(100vh - 90px);background: rgb(255, 255, 255);">
                                 <component v-bind:is="currentView"></component>
                             </el-main>
-                            <el-dialog title="更换图标" :visible.sync="dialog.iconUpdate.show" v-if="dialog.iconUpdate.show" destroy-on-close="true">
+                            <el-dialog :title="$t('user.changeIcon')" :visible.sync="dialog.iconUpdate.show" v-if="dialog.iconUpdate.show" destroy-on-close="true">
                                 <el-container style="height:50vh;">
                                     <el-main style="display:flex;flex-wrap:wrap;align-content: flex-start;padding:10px;">
                                         <el-button type="text" style="width:10em;max-width: 10em;height: 105px;padding: 10px;line-height: 1;margin: 5px;text-align: center;border:1px solid rgba(0,0,0,.2);"
@@ -410,7 +414,7 @@ class User {
                                         </el-main>
                                     <el-footer style="padding:20px 0px 50px 0px;display:flex;height:auto;position:releative;">
                                         <span style="position:absolute;right:140px;">
-                                            <el-button type="default" icon="el-icon-close" @click="dialog.iconUpdate.show=false;">取消</el-button>
+                                            <el-button type="default" icon="el-icon-close" @click="dialog.iconUpdate.show=false;">#{ $t('user.cancel') }#</el-button>
                                         </span>
                                         <span style="position:absolute;right:20px;">
                                             <el-upload
@@ -422,7 +426,7 @@ class User {
                                                 :on-error="onError"
                                                 :show-file-list="false"
                                                 name="uploadfile">
-                                                <el-button icon="el-icon-upload" type="primary" style="padding-left:20px;" :loading="dialog.iconUpdate.upload.loading">上传图标</el-button>
+                                                <el-button icon="el-icon-upload" type="primary" style="padding-left:20px;" :loading="dialog.iconUpdate.upload.loading">#{ $t('user.uploadIcon') }#</el-button>
                                             </el-upload>
                                         </span>
                                     </el-footer>
@@ -459,9 +463,9 @@ class User {
                 'dialog.iconUpdate.model.icon.value': {
                     handler(val,oldVal){
                         
-                        this.$confirm(`确认要更换图标？`, '提示', {
-                            confirmButtonText: '确定',
-                            cancelButtonText: '取消',
+                        this.$confirm(`${ this.$t('user.confirmChangeIcon') }`, this.$t('user.tip'), {
+                            confirmButtonText: this.$t('user.confirm'),
+                            cancelButtonText: this.$t('user.cancel'),
                             type: 'warning'
                         }).then(() => {
                             
@@ -505,13 +509,13 @@ class User {
                         let license = _.attempt( JSON.parse.bind(null, this.signedUser.Company.license) );
                         
                         if(_.isEmpty(license)){
-                            return "未经授权用户";
+                            return this.$t('user.unauthorizedUsers');
                         } else {
                             return license.expire;
                         }
                     } catch(err){
                         console.error(err);
-                        return "未经授权用户";
+                        return this.$t('user.unauthorizedUsers');
                     }
                 }
             },
@@ -551,7 +555,7 @@ class User {
                     this.dialog.iconUpdate.upload.fileList = FileList;
                     this.$message({
                         type: "success",
-                        message: "上传成功！"
+                        message: this.$t('user.uploadSuccess')
                     })
                     this.dialog.iconUpdate.upload.loading = false;
                     this.init();
@@ -559,7 +563,7 @@ class User {
                 onError(err,file,FileList){
                     this.$message({
                         type: "error",
-                        message: "上传失败：" + err
+                        message: this.$t('user.uploadFailed') + err
                     })
                     this.dialog.iconUpdate.upload.loading = false;
                     this.init();

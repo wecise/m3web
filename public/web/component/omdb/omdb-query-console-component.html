@@ -21,6 +21,7 @@
 	<script id="omdb-query-console-component">
 	{
 	    delimiters: ['${', '}'],
+		i18n,
         props: {
             id: String,
             bid: String,
@@ -62,7 +63,7 @@
 	                                id: 'log-console',
 	                                type: 'component',
 	                                componentName: 'omdbComponent',
-	                                title: `<i class="fas fa-newspaper"></i> 日志`,
+	                                title: `<i class="fas fa-newspaper"></i> ${this.$t("omdb.tip.log")}`,
 	                                componentState: {
 	                                    id: 'log-console',
 	                                    component: 'logConsole',
@@ -75,7 +76,7 @@
 	                                id: 'result-console',
 	                                type: 'component',
 	                                componentName: 'omdbComponent',
-	                                title: `<i class="fas fa-list-alt"></i> 结果`,
+	                                title: `<i class="fas fa-list-alt"></i> ${this.$t("omdb.tip.result")}`,
 	                                componentState: {
 	                                    id: 'result-console',
 	                                    component: 'resultConsole',

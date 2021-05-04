@@ -50,7 +50,7 @@ class ScriptHandler {
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -94,7 +94,7 @@ class ScriptHandler {
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -152,7 +152,7 @@ class ScriptHandler {
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -202,7 +202,7 @@ class ScriptHandler {
             },
             success(data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     
@@ -245,7 +245,7 @@ class ScriptHandler {
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = data;
@@ -302,7 +302,7 @@ class ScriptHandler {
                 },
                 success: function (data, status) {
                     
-                    userHandler.ifSignIn(data);
+                    
     
                     if( _.lowerCase(data.status) == "ok"){
                         rtn = 1;
@@ -358,7 +358,7 @@ class ScriptHandler {
                 },
                 success: function (data, status) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if( _.lowerCase(data.status) == "ok"){
                         rtn = 1;
@@ -404,7 +404,7 @@ class ScriptHandler {
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = data.message;
@@ -462,7 +462,7 @@ class ScriptHandler {
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -505,7 +505,7 @@ class ScriptHandler {
             },
             success: function (data, status) {
 
-                userHandler.ifSignIn(data);
+                
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = data.message;
@@ -555,7 +555,7 @@ class ScriptHandler {
                 },
                 success: function(data, textStatus, xhr) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if( _.lowerCase(data.status) == "ok"){
                         rtn = 1;
@@ -606,7 +606,7 @@ class ScriptHandler {
                 },
                 success: function(data, textStatus, xhr) {
 
-                    userHandler.ifSignIn(data);
+                    
 
                     if( _.lowerCase(data.status) == "ok"){
                         rtn = 1;
@@ -653,7 +653,7 @@ class ScriptHandler {
                 },
                 success: function(data, textStatus, xhr) {
 
-                    userHandler.ifSignIn(data);
+                    
                     
                     // Audit
                     auditLogHandler.writeLog("Sccollection:ruleript", depot.action + " for zabbix agent: " + depot.hosts.join(", "), 0);

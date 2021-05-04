@@ -377,9 +377,6 @@ class Knowledge {
                                         ifIndex: {index:true}
                                     }
                                 },
-                                created(){
-                                    
-                                },
                                 methods: {
                                     onBeforeUpload(file){
                                         
@@ -388,15 +385,8 @@ class Knowledge {
                                         this.upload.fileList = FileList;
                                         
                                         _.forEach(FileList,(v)=>{
-                                            try{
-                                                
-                                                let attr = {remark: '', rate:0};
-                                                fsHandler.fsUpdateAttr(item.parent, v.name, attr);
-
-                                            } catch(err){
-                                                let attr = {remark: '', rate:0};
-                                                fsHandler.fsUpdateAttr(item.parent, v.name, attr);
-                                            }
+                                            let attr = {remark: '', rate:0};
+                                            fsHandler.fsUpdateAttrAsync(item.parent, v.name, attr);
                                         })
 
                                         // 刷新
@@ -417,11 +407,13 @@ class Knowledge {
                                         })
                                     },
                                     onRemove(file, fileList) {
-                                        let rtn = fsHandler.fsDelete(item.fullname,file.name);
-                                        if(rtn == 1){
-                                            // 刷新
-                                            self.onRefresh(item,index);
-                                        }
+                                        fsHandler.fsDeleteAsync(item.fullname,file.name).then((rtn)=>{
+                                            if(rtn == 1){
+                                                // 刷新
+                                                self.onRefresh(item,index);
+                                            }
+                                        });
+                                        
                                     },
                                     onPreview(file) {
                                         
