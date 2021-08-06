@@ -85,9 +85,29 @@
                                     active-color="#dddddd"
                                     active-value="true"
                                     inactive-value="false"
+                                    active-text="启用"
+                                    inactive-text="禁用"
                                     @change="changeStatus"
+                                    size="mini"
                                     v-if="!_.isEmpty(selected)">
                             </el-switch>
+
+                            <el-divider direction="vertical"></el-divider>
+
+                            <el-switch v-model="selected.before"
+                                    active-color="#13ce66"
+                                    inactive-color="#dddddd"
+                                    active-value="true"
+                                    inactive-value="false"
+                                    active-text="插入前触发"
+                                    inactive-text="插入后触发"
+                                    size="mini"
+                                    v-if="!_.isEmpty(selected)">
+                            </el-switch>
+
+                            <el-divider direction="vertical"></el-divider>
+
+                            <span>优先级：</span><el-input-number v-model="selected.level" size="mini"></el-input-number></span>
         
                             <el-tooltip content="选择主题" placement="bottom" open-delay="800">
                                 <el-button type="text" :class="'editor-select-theme-'+objectHash.sha1(className)" style="float:right;"><i class="fas fa-tshirt"></i></el-button>
@@ -110,7 +130,7 @@
 
             <el-tab-pane name="log" style="padding:10px;">
                 <span slot="label"><i class="el-icon-date"></i> 日志</span>
-                <mx-consolelog :fullname="logName" logType="trigger" v-if="!_.isEmpty(logName)"></mx-consolelog> 
+                <mx-consolelog :fullname="logName" logType="trigger" :ownerClass="className" v-if="!_.isEmpty(logName)"></mx-consolelog> 
             </el-tab-pane>
         </el-tabs>
 	</template>
@@ -134,6 +154,8 @@
                 selected: {
                     name: "",
                     disable: false,
+                    before: true,
+                    level: 1,
                     time: moment().format("YYYY-MM-DD hh:mm:ss"),
                     class: "",
 	                script: ""
@@ -350,7 +372,7 @@
             // 触发器数据结构化整理
             treatNode(event){
                 return _.map(event.script,function(v,k){
-                    let attr = {disable:false};
+                    let attr = {disable:false, before:true, level:"1"};
 
                     if(event.attr && event.attr != null){
                         if(event.attr[k]) {
@@ -376,6 +398,8 @@
                             return   {
                                 name: _.trim(v.name),
                                 disable: v.disable,
+                                before: v.before,
+                                level: v.level,
                                 time: v.vtime,
                                 class: v.class,
                                 script: v.script
@@ -428,7 +452,7 @@
                 
                 let script = this.editor.getValue();
 
-                triggerHandler.triggerNewAsync({class: this.className, name: this.selected.name, script: script, attr:{disable: `${this.selected.disable}`}}).then( (rtn)=>{
+                triggerHandler.triggerNewAsync({class: this.className, name: this.selected.name, script: script, attr:{ disable: `${this.selected.disable}`, before: `${this.selected.before}`,level: `${this.selected.level}` } }).then( (rtn)=>{
                     if(rtn == 1) {
                         this.$message({
                                 type: 'success',
@@ -448,7 +472,7 @@
                 
                 let script = this.editor.getValue();
 
-                triggerHandler.triggerNewAsync({class: this.className, name: this.selected.name, script: script, attr:{disable: `${this.selected.disable}`}}).then( (rtn)=>{
+                triggerHandler.triggerNewAsync({class: this.className, name: this.selected.name, script: script, attr:{disable: `${this.selected.disable}`, before: `${this.selected.before}`,level: `${this.selected.level}`}}).then( (rtn)=>{
                     if(rtn === 1) {
                         this.refresh(this.selected.name);
                     }
@@ -463,6 +487,8 @@
                             return   {
                                 name: v.name,
                                 disable: v.disable,
+                                before: v.before,
+                                level: v.level,
                                 time: v.vtime,
                                 class: v.class,
                                 script: v.script

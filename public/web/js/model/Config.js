@@ -644,10 +644,20 @@ class Config {
                     },
                     created(){
                         
-                        if(_.startsWith(this.model.key,"/matrix/rules")){
+                        if(_.startsWith(this.model.key,"/matrix/rules") || _.includes(this.model.key,"/rules")){
                             this.mode = "lua";
                         }
+
+                        if(_.includes(this.model.key,".json")){
+                            this.mode = "json";
+                        }
+                
+                        if(_.includes(this.model.key,"/etc/")){
+                            this.mode = "ini";
+                        }
+
                         this.cid = objectHash.sha1(this.id);
+                        
                         try{
                             let name = _.trim(_.split(_.first(this.model.value.match(/^--class.*/mgi)),"=",2)[1]);
                             _.extend(this.classModel, {name:name});
@@ -888,6 +898,37 @@ class Config {
                                                         </el-button>
                                                     </el-tooltip>
                                                     
+                                                    <el-popover
+                                                        placement="left"
+                                                        trigger="click"
+                                                        popper-class="info-popper"
+                                                        style="float:right;padding-left:10px;"
+                                                        v-show="!_.isEmpty(configTabs.tabs)" >
+                                                        <el-container>
+                                                            <el-main style="padding:0px;">
+                                                                <el-tabs value="setup" label-position="top">
+                                                                    <el-tab-pane label="编辑器设置" name="setup">
+                                                                        <el-form>
+                                                                            <el-form-item label="TabSize">
+                                                                                <el-input v-model="control.editor.options.tabSize"></el-input>
+                                                                            </el-form-item>
+                                                                            <el-form-item label="UseSoftTabs">
+                                                                                <el-switch
+                                                                                    v-model="control.editor.options.useSoftTabs"
+                                                                                    active-color="#13ce66"
+                                                                                    inactive-color="#dddddd">
+                                                                                </el-switch>
+                                                                            </el-form-item>
+                                                                        </el-form>
+                                                                    </el-tab-pane>
+                                                                </el-tabs>
+                                                            </el-main>
+                                                        </el-container>
+                                                        <el-button type="text" slot="reference">
+                                                            <i class="el-icon-setting" style="float:right;">
+                                                        </el-button>
+                                                    </el-popover>
+
                                                     <el-tooltip :content="$t('config.theme')" open-delay="800">
                                                         <el-button type="text" 
                                                             :class="'editor-select-theme-'+objectHash.sha1(configTabs.activeIndex)" 
@@ -995,6 +1036,12 @@ class Config {
                             save: {
                                 show: false,
                                 list: []
+                            },
+                            editor: {
+                                options:{
+                                    tabSize: 4,     
+                                    useSoftTabs: false
+                                }
                             }
                         },
                         configTreeSelectedNode:{}
@@ -1004,6 +1051,26 @@ class Config {
                             if(_.isEmpty(val)){
                                 this.control.save.show = false;
                             }
+                        },
+                        'control.editor.options.tabSize':{
+                            handler(val){
+                                this.$nextTick(()=>{
+                                    let id = objectHash.sha1(this.configTabs.activeIndex);
+                                    let editor = ace.edit(this.$refs[`configManageRef${id}`][0].$refs.editorContainer);
+                                    editor.getSession().setTabSize(val);
+                                })
+                            }
+                        },
+                        'control.editor.options.useSoftTabs':{
+                            handler(val){
+                                if(_.isEmpty(val)) return false;
+                                this.$nextTick(()=>{
+                                    let id = objectHash.sha1(this.configTabs.activeIndex);
+                                    let editor = ace.edit(this.$refs[`configManageRef${id}`][0].$refs.editorContainer);
+                                    editor.getSession().setUseSoftTabs(val);
+                                })
+                            },
+                            immediate:true
                         }
                     },
                     created() {

@@ -523,7 +523,7 @@
             deployIt: function(item){
                 let self = this;
 
-                let wnd = maxWindow.winDeployApp( `<i class="fab fa-codepen"></i> 应用发布`, `<div id="fs-app-deploy-${self.bid}"></div>`, null, 'editor-container');
+                let wnd = maxWindow.winDeployApp( `<i class="fab fa-codepen"></i> 应用安装`, `<div id="fs-app-deploy-${self.bid}"></div>`, null, 'editor-container');
 
                 let form = {
                     el: `#fs-app-deploy-${self.bid}`,
@@ -640,13 +640,13 @@
 
                             let rtn = fsHandler.callFsJScript("/matrix/apps/app.js",encodeURIComponent(JSON.stringify(app)));
                             if( _.lowerCase(rtn.status) == "ok"){
-                                alertify.success("应用发布成功");
+                                alertify.success("应用安装成功");
                                 eventHub.$emit("APP-REFRESH-EVENT");
 
                                 $("ul.nav").find("li>a[data-original-title='应用']").popover({
                                     container: "body",
 	                                title: "",
-	                                content: `${me.app.cnname} 应用发布成功！`
+	                                content: `${me.app.cnname} 应用安装成功！`
                                 }).popover('show');
 
                                 _.delay(function(){

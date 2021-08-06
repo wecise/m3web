@@ -1,7 +1,7 @@
 $.ajaxSetup({
 	dataType : "json",
     success: function (data, status) {
-
+        
         if (data.status == 'signin'){
             window.location.href = data.message;
         }
@@ -22,7 +22,6 @@ $.ajaxSetup({
                 alert('请求超时');
                 break; */
             default:
-                console.log(xhr)
                 //alert('未知错误,请联系管理员');
 		}
 	},

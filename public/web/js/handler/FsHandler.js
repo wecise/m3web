@@ -604,26 +604,19 @@ class FsHandler {
                     srcpath: srcpath,
                     dstpath: dstpath
                 },
-                beforeSend(xhr) {
+                success(data) {
                     
-                },
-                complete(xhr, textStatus) {
-                },
-                success(data, textStatus, xhr) {
-
-                    
-
                     if( _.lowerCase(data.status) == "ok"){
                         rtn = 1;
                     }
 
                 },
-                error(xhr, textStatus, errorThrown) {
-                    rtn = xhr.responseText;
+                error(xhr) {
+                    rtn = xhr.responseJSON;
                 }
             })
         } catch(err){
-
+            rtn = err.responseJSON;
         }
 
         return rtn;
@@ -1387,14 +1380,20 @@ class FsHandler {
     *       参数：
     *          url
     */
-    async traceLogAsync(type,name,param) {
+    async traceLogAsync(type,name,param,ownerClass) {
 
         let rtn = null;
         let stime = _.now();
 
         try {
             
-            let url = `/consolelog/${type}?name=${encodeURIComponent( name.replace(/\/script/g,"") )}&limit=${param.limit}`;
+            let url = "";
+            if(type==='trigger'){
+                url = `/consolelog/${type}?name=${encodeURIComponent( ownerClass.replace(/\/script/g,"") )}${ encodeURIComponent( '#' + name ) }&limit=${param.limit}`;
+            } else {
+                url = `/consolelog/${type}?name=${encodeURIComponent( name.replace(/\/script/g,"") )}&limit=${param.limit}`;
+            }
+            
             if(!_.isEmpty(param.level)){
                 url = `${url}&level=${param.level.join("&level=")}`;
             }

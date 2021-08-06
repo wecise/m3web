@@ -22,6 +22,64 @@ Vue.directive('focus', {
 /* Common App Deploy */
 Vue.component("mx-app-deploy",{
     delimiters: ['#{', '}#'],
+    data(){
+        return {
+            app: {
+                data: null                          
+            },
+            url: '',
+            appList: []
+        }
+    },
+    template:  `<el-container>
+                    <el-main>
+                        <el-upload drag
+                            multiple
+                            show-file-list="false"
+                            :action="url"
+                            :on-success="onSuccess"
+                            :on-error="onError"
+                            :on-remove="onRemove"
+                            list-type="text"
+                            name="uploadfile">
+                            <i class="el-icon-upload"></i>
+                        </el-upload>
+                    </el-main>
+                    <el-footer>
+                        
+                    </el-footer>
+                </el-container>`,
+    mounted(){
+        this.$nextTick().then(()=> {
+            
+        })
+    },
+    methods: {
+        onSuccess(res,file,FileList){
+            
+            this.$message({
+                type: "success",
+                dangerouslyUseHTMLString: true,
+                message: `应用发布成功`
+            })
+
+        },
+        onError(res,file,FileList){
+            this.$message({
+                type: "error",
+                dangerouslyUseHTMLString: true,
+                message: `应用发布失败`
+            })
+        },
+        onRemove(file, fileList) {
+            
+        }
+    }
+})
+
+/* Common App Install */
+Vue.component("mx-app-install",{
+    delimiters: ['#{', '}#'],
     props:{
         model: Object
     },
@@ -93,7 +151,7 @@ Vue.component("mx-app-deploy",{
                                     </el-main>
                                     <el-footer style="height:40px;line-height:40px;text-align:right;">
                                         <el-button type="defult" @click="model.show = false;">关闭</el-button>
-                                        <el-button type="primary" @click="onSaveAppDeploy">发布应用</el-button>
+                                        <el-button type="primary" @click="onSaveAppDeploy">开始安装</el-button>
                                     </el-footer>
                                 </el-container>
                             </el-tab-pane>
@@ -183,11 +241,11 @@ Vue.component("mx-app-deploy",{
                 if(check==1){
                     this.$message({
                         type: "info",
-                        message:"应用已经发布，请确认!"
+                        message:"应用已经安装，请确认!"
                     });
                     return false;
                 } else {
-                    _.extend(this.app,{ icon: this.app.icon.value.replace(/\/static\/assets\/images\/apps\/png\//,"") } );
+                    _.extend(this.app,{ icon: _.last(this.app.icon.value.split("/")), action: "add" } );
                     _.extend(this.app.groups, { group: this.app.groups.default.name} );
                     
                     fsHandler.callFsJScriptAsync("/matrix/apps/app.js",encodeURIComponent(JSON.stringify(this.app))).then( (rtn)=>{
@@ -195,7 +253,7 @@ Vue.component("mx-app-deploy",{
                             
                             this.$notify({
                                 title: window.MATRIX_LANG == 'zh-CN' ? this.app.cnname : this.app.enname,
-                                message: '应用发布成功',
+                                message: '应用安装成功',
                                 position: 'top-left'
                             });
                             
@@ -282,6 +340,7 @@ Vue.component("mx-editor",{
 
 /* Common FS Editor */
 Vue.component("mx-fs-editor",{
+    i18n,
     delimiters: ['#{', '}#'],
     props: {
         model: Object,
@@ -299,6 +358,12 @@ Vue.component("mx-fs-editor",{
                 save: {
                     disabled: true,
                     list: []
+                },
+                editor: {
+                    options:{
+                        tabSize: 4,     
+                        useSoftTabs: false
+                    }
                 }
             },
             tree: {
@@ -336,45 +401,45 @@ Vue.component("mx-fs-editor",{
                         <div>
                             <el-dropdown style="padding-right: 10px;cursor:pointer;" trigger="click">
                                 <span class="el-dropdown-link">
-                                    文件
+                                    #{ $t('fsview.editor_toolbar_file') }#
                                 </span>
                                 <el-dropdown-menu slot="dropdown">
                                     
-                                    <el-dropdown-item @click.native="onNewProject">新建项目</el-dropdown-item>
-                                    <el-dropdown-item @click.native="onNewFile">新建文件</el-dropdown-item>
+                                    <el-dropdown-item @click.native="onNewProject">#{ $t('fsview.editor_toolbar_file_newProject') }#</el-dropdown-item>
+                                    <el-dropdown-item @click.native="onNewFile">#{ $t('fsview.editor_toolbar_file_newFile') }#</el-dropdown-item>
 
-                                    <el-dropdown-item @click.native="onReload" divided>打开</el-dropdown-item>
-                                    <el-dropdown-item @click.native="onReload">重打开</el-dropdown-item>
+                                    <el-dropdown-item @click.native="onReload" divided>#{ $t('fsview.editor_toolbar_file_open') }#</el-dropdown-item>
+                                    <el-dropdown-item @click.native="onReload">#{ $t('fsview.editor_toolbar_file_reload') }#</el-dropdown-item>
                                     
-                                    <el-dropdown-item @click.native="onSave" divided>保存  ctrl+s</el-dropdown-item>
-                                    <el-dropdown-item @click.native="file.dialogSaveAs.visible=true">另存为</el-dropdown-item>
+                                    <el-dropdown-item @click.native="onSave" divided>#{ $t('fsview.editor_toolbar_file_save') }#</el-dropdown-item>
+                                    <el-dropdown-item @click.native="file.dialogSaveAs.visible=true">#{ $t('fsview.editor_toolbar_file_saveas') }#</el-dropdown-item>
 
-                                    <el-dropdown-item @click.native="onCloseTab" divided>关闭当前页</el-dropdown-item>
-                                    <el-dropdown-item @click.native="onCloseWin">关闭窗口</el-dropdown-item>
+                                    <el-dropdown-item @click.native="onCloseTab" divided>#{ $t('fsview.editor_toolbar_file_close') }#</el-dropdown-item>
+                                    <el-dropdown-item @click.native="onCloseWin">#{ $t('fsview.editor_toolbar_file_exit') }#</el-dropdown-item>
                                 </el-dropdown-menu>
                             </el-dropdown>
                             <el-dropdown style="padding-right: 10px;cursor:pointer;" trigger="click">
                                 <span class="el-dropdown-link">
-                                    编辑
+                                #{ $t('fsview.editor_toolbar_edit') }#
                                 </span>
                                 <el-dropdown-menu slot="dropdown">
-                                    <el-dropdown-item @click.native="onUndo">撤销</el-dropdown-item>
-                                    <el-dropdown-item @click.native="onUndo">重做</el-dropdown-item>
-                                    <el-dropdown-item :class="'copy-'+tabs.activeIndex" @click="onCopy" divided>复制</el-dropdown-item>
-                                    <el-dropdown-item @click.native="onPaste">粘贴</el-dropdown-item>
-                                    <el-dropdown-item @click.native="onSelect">选择</el-dropdown-item>
-                                    <el-dropdown-item @click.native="onRemove" divided>清除</el-dropdown-item>
+                                    <el-dropdown-item @click.native="onUndo">#{ $t('fsview.editor_toolbar_edit_undo') }#</el-dropdown-item>
+                                    <el-dropdown-item @click.native="onUndo">#{ $t('fsview.editor_toolbar_edit_redo') }#</el-dropdown-item>
+                                    <el-dropdown-item :class="'copy-'+tabs.activeIndex" @click="onCopy" divided>#{ $t('fsview.editor_toolbar_edit_copy') }#</el-dropdown-item>
+                                    <el-dropdown-item @click.native="onPaste">#{ $t('fsview.editor_toolbar_edit_paste') }#</el-dropdown-item>
+                                    <el-dropdown-item @click.native="onSelect">#{ $t('fsview.editor_toolbar_edit_select') }#</el-dropdown-item>
+                                    <el-dropdown-item @click.native="onRemove" divided>#{ $t('fsview.editor_toolbar_edit_clear') }#</el-dropdown-item>
                                 </el-dropdown-menu>
                             </el-dropdown>
                             
                             <el-dropdown style="padding-right: 10px;cursor:pointer;" trigger="click" v-if="!_.isEmpty(tabs.activeNode) && tabs.activeNode.ftype=='js'">
                                 <span class="el-dropdown-link">
-                                    运行
+                                #{ $t('fsview.editor_toolbar_running') }#
                                 </span>
                                 <el-dropdown-menu slot="dropdown">
-                                    <el-dropdown-item @click.native="onSaveAndPlay">运行</el-dropdown-item>
-                                    <el-dropdown-item @click.native="onToggleRunningView('log')" divided>执行日志</el-dropdown-item>
-                                    <el-dropdown-item @click.native="onToggleRunningView('result')" divided>执行结果</el-dropdown-item>
+                                    <el-dropdown-item @click.native="onSaveAndPlay">#{ $t('fsview.editor_toolbar_running_execute') }#</el-dropdown-item>
+                                    <el-dropdown-item @click.native="onToggleRunningView('log')" divided>#{ $t('fsview.editor_toolbar_running_log') }#</el-dropdown-item>
+                                    <el-dropdown-item @click.native="onToggleRunningView('result')" divided>#{ $t('fsview.editor_toolbar_running_result') }#</el-dropdown-item>
                                 </el-dropdown-menu>
                             </el-dropdown>   
 
@@ -437,6 +502,35 @@ Vue.component("mx-fs-editor",{
                                         <el-button type="text" icon="el-icon-platform-eleme" @click="onToggleRunningView('preview')" ></el-button>
                                     </el-tooltip>
                                 </span>
+                                <el-popover
+                                    placement="left"
+                                    trigger="click"
+                                    popper-class="info-popper"
+                                    style="float:right;padding-left:10px;">
+                                    <el-container>
+                                        <el-main style="padding:0px;">
+                                            <el-tabs value="setup" label-position="top">
+                                                <el-tab-pane label="编辑器设置" name="setup">
+                                                    <el-form>
+                                                        <el-form-item label="TabSize">
+                                                            <el-input v-model="control.editor.options.tabSize"></el-input>
+                                                        </el-form-item>
+                                                        <el-form-item label="UseSoftTabs">
+                                                            <el-switch
+                                                                v-model="control.editor.options.useSoftTabs"
+                                                                active-color="#13ce66"
+                                                                inactive-color="#dddddd">
+                                                            </el-switch>
+                                                        </el-form-item>
+                                                    </el-form>
+                                                </el-tab-pane>
+                                            </el-tabs>
+                                        </el-main>
+                                    </el-container>
+                                    <el-button type="text" slot="reference">
+                                        <i class="el-icon-setting" style="float:right;">
+                                    </el-button>
+                                </el-popover>
                                 <el-tooltip content="主题" placement="top" open-delay="800">
                                     <el-button type="text" :class="'M3-EDITOR-THEME-'+tabs.activeIndex" v-show="!_.isEmpty(tabs.list)" style="float:right;">
                                         <i class="fas fa-tshirt"></i>
@@ -453,7 +547,7 @@ Vue.component("mx-fs-editor",{
                         <el-container style="height: 100%;" ref="mainView">
                             <el-main style="padding:0px;overflow:hidden;">
                                 <div style="background:#ffffff;padding:20px;height:100%;display:block;text-align:center;" v-if="_.isEmpty(tabs.list)">
-                                    <h2 style="margin: 0px 0px 40px 0px;">欢迎使用${MATRIX_TITLE} 在线编辑器</h2>
+                                    <h2 style="margin: 0px 0px 40px 0px;"> #{ $t('fsview.weclome') }#${MATRIX_TITLE}#{ $t('fsview.weclome_what') }#</h2>
                                     <p>
                                         
                                         <el-button style="width:100px;height:90px;" @click="onOpenFile">
@@ -514,7 +608,7 @@ Vue.component("mx-fs-editor",{
                                             :plus="false" 
                                             height="100%" 
                                             ref="editor" v-if="item.model.ftype==='json'"></v-jsoneditor-->
-                                        <fs-editor-view :id="item.name" :item="item.model" :toolBar="toolBar" ref="editor"></fs-editor-view>
+                                        <fs-editor-view :id="item.name" :item="item.model" :toolBar="toolBar"></fs-editor-view>
                                     </el-tab-pane>
                                 </el-tabs>
                             </el-main>
@@ -552,6 +646,18 @@ Vue.component("mx-fs-editor",{
         'toolBar.log.show':{
             handler(val){
                 localStorage.setItem('M3-EDITOR-LOG', val);
+            }
+        },
+        'control.editor.options.tabSize':{
+            handler(val){
+                let editor = ace.edit('editor-'+this.tabs.activeIndex);
+                editor.getSession().setTabSize(val);
+            }
+        },
+        'control.editor.options.useSoftTabs':{
+            handler(val){
+                let editor = ace.edit('editor-'+this.tabs.activeIndex);
+                editor.getSession().setUseSoftTabs(val);
             }
         }
     },
@@ -992,7 +1098,12 @@ Vue.component("mx-consolelog",{
     props:{
         logType: String,
         //规则名称
-        fullname: String
+        fullname: String,
+        // 所属类
+        ownerClass: {
+            type: String,
+            default: ""
+        }
     },
     data(){
         return {
@@ -1135,7 +1246,7 @@ Vue.component("mx-consolelog",{
             this.initTheme();
         },
         onLoad(){
-            fsHandler.traceLogAsync(this.logType,this.fullname,this.consolelog).then( (rtn)=>{
+            fsHandler.traceLogAsync(this.logType,this.fullname,this.consolelog,this.ownerClass).then( (rtn)=>{
                 this.dt.rows = rtn.message.logs;
             })
         },
@@ -1416,13 +1527,15 @@ Vue.component("mx-fs-info",{
                                 
                             </el-tab-pane>
                             <el-tab-pane label="图标" name="icon">
-                                <el-radio-group v-model="icon.value" style="display:flex;flex-wrap:wrap;align-content:flex-start;" @change="onIconChange">
+                                <el-radio-group v-model="icon.value" style="display:flex;flex-wrap:wrap;align-content:center;" @change="onIconChange">
                                     <el-button type="default" 
                                         style="width:8em;max-width:8em;height:90px;height:auto;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);" v-for="icon in icon.list" :key="icon.id">
-                                        <el-radio :label="icon | pickIcon">
-                                            <el-image :src="icon | pickIcon" style="max-width: 55px;min-width: 55px;"></el-image>
-                                            <span slot="label">#{icon.id}#</span>
-                                        </el-radio>
+                                        <p>
+                                            <el-radio :label="icon | pickIcon">
+                                                <el-image :src="icon | pickIcon" style="max-width: 55px;min-width: 55px;"></el-image>
+                                                <span slot="label">#{icon.id}#</span>
+                                            </el-radio>
+                                        </p>
                                     </el-button>
                                 </el-radio-group> 
                             </el-tab-pane>
@@ -1444,7 +1557,7 @@ Vue.component("mx-fs-info",{
                 tags: []
             },
             icon: {
-                    value: `${window.ASSETS_ICON}/files/png/${this.node.ftype}.png?type=download&issys=${window.SignedUser_IsAdmin}`,
+                    value: `${window.STATIC_ASSETS_ICON}/files/png/${this.node.ftype}.png`,
                     list: []
             },
             attr:{
@@ -1485,7 +1598,7 @@ Vue.component("mx-fs-info",{
     },
     filters: {
         pickIcon(item) {
-            return `/fs${item.parent}/${item.name}?type=open&issys=${window.SignedUser_IsAdmin}`;
+            return `/static${item.parent}/${item.name}`;
         },
         toLocalTime(value) {
             return moment(value).format(mx.global.register.format);
@@ -1532,22 +1645,21 @@ Vue.component("mx-fs-info",{
                 return false;
             }
 
-            let _rtn = fsHandler.fsRename(_old, _new);
-
-            if(_rtn == 1){
-                
-                this.load();
-
-                this.$message({
-                    type: "success",
-                    message: "重命名成功！"
-                })
-            }else {
-                this.$message({
-                    type: "error",
-                    message: _rtn.message
-                })
-            }
+            fsHandler.fsRenameAsync(_old, _new).then( rtn=>{
+                if(rtn == 1){
+                    this.load();
+                    this.$message({
+                        type: "success",
+                        message: "重命名成功！"
+                    })
+                }else {
+                    this.load();
+                    this.$message({
+                        type: "error",
+                        message: rtn.message
+                    })
+                }
+            })
         },
         saveAttr(){
             
@@ -1574,6 +1686,7 @@ Vue.component("mx-fs-info",{
 
 /* Common Fs Tree */
 Vue.component("mx-fs-tree",{
+    i18n,
     delimiters: ['#{', '}#'],
     props: {
         root: String
@@ -1591,7 +1704,7 @@ Vue.component("mx-fs-tree",{
     template:   `<el-container style="height:100%;">
                     <el-header style="height:40px;line-height:40px;padding:0px 10px;">
                         <el-input v-model="filterText" 
-                            placeholder="搜索" size="mini"
+                            :placeholder="$t('fsview.tree_search_placeholder')" size="mini"
                             clearable></el-input>
                     </el-header>
                     <el-main style="padding:0px 10px; height: 100%;">
@@ -1616,11 +1729,11 @@ Vue.component("mx-fs-tree",{
                                             <i class="el-icon-more el-icon--right"></i>
                                         </span>
                                         <el-dropdown-menu slot="dropdown">
-                                            <el-dropdown-item @click.native="onDelete(data,$event)" icon="el-icon-delete">删除</el-dropdown-item>
-                                            <el-dropdown-item @click.native="onNodeClick(data)"icon="el-icon-refresh">刷新</el-dropdown-item>
-                                            <el-dropdown-item @click.native="onNewFile(data,$event)"icon="el-icon-plus">新建文件</el-dropdown-item>
-                                            <el-dropdown-item @click.native="onNewDir(data,$event)"icon="el-icon-folder-add">新建目录</el-dropdown-item>
-                                            <el-dropdown-item @click.native="onUpload(data,$event)"icon="el-icon-upload">上传</el-dropdown-item>
+                                            <el-dropdown-item @click.native="onDelete(data,$event)" icon="el-icon-delete">#{$t('fsview.tree_contextmenu_delete')}#</el-dropdown-item>
+                                            <el-dropdown-item @click.native="onNodeClick(data)"icon="el-icon-refresh">#{$t('fsview.tree_contextmenu_refresh')}#</el-dropdown-item>
+                                            <el-dropdown-item @click.native="onNewFile(data,$event)"icon="el-icon-plus">#{$t('fsview.tree_contextmenu_newfile')}#</el-dropdown-item>
+                                            <el-dropdown-item @click.native="onNewDir(data,$event)"icon="el-icon-folder-add">#{$t('fsview.tree_contextmenu_newdir')}#</el-dropdown-item>
+                                            <el-dropdown-item @click.native="onUpload(data,$event)"icon="el-icon-upload">#{$t('fsview.tree_contextmenu_upload')}#</el-dropdown-item>
                                         </el-dropdown-menu>
                                     </el-dropdown>
                                 </span>
@@ -1659,14 +1772,14 @@ Vue.component("mx-fs-tree",{
             } );
         },
         onNewDir(item,index){
-            this.$prompt('请输入目录名称', '提示', {
-                confirmButtonText: '确定',
-                cancelButtonText: '取消'
+            this.$prompt(this.$t('fsview.tree_contextmenu_newdir_prompt'), this.$t('fsview.tree_contextmenu_newdir_tip'), {
+                confirmButtonText: this.$t('fsview.tree_contextmenu_newdir_confirm'),
+                cancelButtonText: this.$t('fsview.tree_contextmenu_newdir_cancel')
               }).then(({ value }) => {
                 if(_.isEmpty(value)){
                     this.$message({
                         type: 'warning',
-                        message: '请输入目录名称！'
+                        message: this.$t('fsview.tree_contextmenu_newdir_prompt')
                     });
                     return false;
                 }
@@ -1677,7 +1790,7 @@ Vue.component("mx-fs-tree",{
                     if(rtn == 1){
                         this.$message({
                             type: "success",
-                            message: "新建目录成功！"
+                            message: this.$t('fsview.tree_contextmenu_newdir_success')
                         })
                         
                         this.onInit();
@@ -1685,7 +1798,7 @@ Vue.component("mx-fs-tree",{
                     } else {
                         this.$message({
                             type: "error",
-                            message: "新建目录失败，" + rtn.message
+                            message: this.$t('fsview.tree_contextmenu_newdir_failed') + rtn.message
                         })
                     }
                 } );
@@ -1693,20 +1806,20 @@ Vue.component("mx-fs-tree",{
               }).catch(() => {
                 this.$message({
                   type: 'info',
-                  message: '取消输入'
+                  message: this.$t('fsview.tree_contextmenu_newdir_cancelAction')
                 });       
               });
             
         },
         onNewFile(item,index){
-            this.$prompt('请输入文件名称', '提示', {
-                confirmButtonText: '确定',
-                cancelButtonText: '取消'
+            this.$prompt(this.$t('fsview.tree_contextmenu_newfile_prompt'), this.$t('fsview.tree_contextmenu_newfile_tip'), {
+                confirmButtonText: this.$t('fsview.tree_contextmenu_newfile_confirm'),
+                cancelButtonText: this.$t('fsview.tree_contextmenu_newfile_cancel')
               }).then(({ value }) => {
                 if(_.isEmpty(value)){
                     this.$message({
                         type: 'warning',
-                        message: '请输入名称！'
+                        message: this.$t('fsview.tree_contextmenu_newfile_prompt')
                     });
                     return false;
                 }
@@ -1717,13 +1830,13 @@ Vue.component("mx-fs-tree",{
                     if(rtn == 1){
                         this.$message({
                             type: "success",
-                            message: "新建成功！"
+                            message: this.$t('fsview.tree_contextmenu_newfile_success')
                         })
                         this.onInit();
                     } else {
                         this.$message({
                             type: "error",
-                            message: "新建失败，" + rtn.message
+                            message: this.$t('fsview.tree_contextmenu_newfile_failed') + rtn.message
                         })
                     }
                 } );
@@ -1731,15 +1844,15 @@ Vue.component("mx-fs-tree",{
               }).catch(() => {
                 this.$message({
                   type: 'info',
-                  message: '取消输入'
+                  message: this.$t('fsview.tree_contextmenu_newfile_cancelAction')
                 });       
               });
         },
         onDelete(item,index){
             
-            this.$confirm(`确认要删除该目录或文件：${item.name}？`, '提示', {
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
+            this.$confirm(this.$t('fsview.tree_contextmenu_delete_prompt')+`${item.name}？`, this.$t('fsview.tree_contextmenu_delete_tip'), {
+                confirmButtonText: this.$t('fsview.tree_contextmenu_delete_confirm'),
+                cancelButtonText: this.$t('fsview.tree_contextmenu_delete_cancel'),
                 type: 'warning'
             }).then(() => {
                 
@@ -1747,7 +1860,7 @@ Vue.component("mx-fs-tree",{
                     if(rtn == 1){
                         this.$message({
                             type: "success",
-                            message: "删除成功！"
+                            message: this.$t('fsview.tree_contextmenu_delete_success')
                         })
                         
                         this.onInit();
@@ -1755,13 +1868,16 @@ Vue.component("mx-fs-tree",{
                     } else {
                         this.$message({
                             type: "error",
-                            message: "删除失败！"
+                            message: this.$t('fsview.tree_contextmenu_delete_failed')
                         })
                     }
                 } );
 
             }).catch(() => {
-                
+                this.$message({
+                    type: 'info',
+                    message: this.$t('fsview.tree_contextmenu_delete_cancelAction')
+                });   
             });
         },
         onUpload(item,index){
@@ -1777,10 +1893,11 @@ Vue.component("mx-fs-tree",{
 
             }
             finally{
-                wnd = maxWindow.winUpload('文件上传', `<div id="${wndID}"></div>`, null, null);
+                wnd = maxWindow.winUpload(this.$t('fsview.tree_contextmenu_file_upload'), `<div id="${wndID}"></div>`, null, null);
             }
             
             new Vue({
+                i18n,
                 delimiters: ['#{', '}#'],
                 template:   `<el-container>
                                 <el-main>
@@ -1796,7 +1913,7 @@ Vue.component("mx-fs-tree",{
                                     </el-upload>
                                 </el-main>
                                 <el-footer>
-                                    <i class="fas fa-clock"></i> 上传文件：#{upload.fileList.length}# 
+                                    <i class="fas fa-clock"></i> #{$t('fsview.tree_contextmenu_file_uploaded')}# #{upload.fileList.length}# 
                                 </el-footer>
                             </el-container>`,
                 data: {

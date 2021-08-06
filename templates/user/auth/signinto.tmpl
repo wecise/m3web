@@ -100,6 +100,12 @@
                      username: "",
                      password: "",
                      remember: false
+                  },
+                  lang: {
+                     list: [
+                        {name: 'English', value: 'en_US'},
+                        {name: '简体中文', value: 'zh_CN'}
+                     ]
                   }
                },
                created(){
@@ -107,6 +113,11 @@
                   this.loginForm.company = '{{.company}}'.replace(/"/g,"");
                   this.loginForm.username = '{{.user_name}}'.replace(/"/g,"");
                   this.loginForm.password = '{{.password}}'.replace(/"/g,"");
+               },
+               methods:{
+                  onLangCommand(cmd) {
+                     window.location.href=`?lang=${cmd}`;
+                  }
                }
             }).$mount("#app");
          });
@@ -146,6 +157,13 @@
                            </el-form-item>
                         </el-form>
                      </el-main>
+                     <!--el-footer>
+                        <el-dropdown @command="onLangCommand" style="font-size: 12px;margin-right:5px;cursor:pointer;">
+                              <el-dropdown-menu slot="dropdown">
+                                 <el-dropdown-item :command="item.value" v-for="item in lang.list">${item.name}</el-dropdown-item>
+                              </el-dropdown-menu>
+                           </el-dropdown>
+                     </el-footer-->
                   </el-container>
                </div>
             </el-col>

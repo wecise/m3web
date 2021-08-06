@@ -1361,7 +1361,7 @@
             // 状态刷新标志
             this.model.control.refresh.enable = (localStorage.getItem("GRAPH-STATUS-IFREFRESH") == 'true');
             //初始化theme
-            this.model.graph.theme.color = localStorage.getItem(`GRAPH-VIEW-THEME-${window.SignedUser_UserName}`);
+            this.model.graph.theme.color = localStorage.getItem(`GRAPH-VIEW-THEME-${window.SignedUser_UserName}`) || '#ffffff';
             // 画布背景
             this.model.graph.style.grid.show = (localStorage.getItem("GRAPH-GRID-SHOW") == 'true');
 
@@ -2042,7 +2042,9 @@
                     // 图居中
                     _.delay(()=>{
                         this.toCenter(true);
-                        this.setTheme(this.model.graph.theme.color);
+                        _.delay(()=>{
+                            this.setTheme(this.model.graph.theme.color);
+                        },1000)
                     },1000)
 
                     // 鹰眼
@@ -3871,6 +3873,10 @@
             },
             // 设置主题色
             setTheme(bgColor){
+                
+                if(_.isEmpty(bgColor) || bgColor == 'null') {
+                    bgColor = "#FFFFFF";
+                }
 
                 $("body").css({
                     "background": bgColor
@@ -4618,7 +4624,7 @@
                 if(_.includes(icon,'http://')){
                     return icon;
                 } else {
-                    return `${window.ASSETS_ICON}/entity/png/${icon}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
+                    return `${window.STATIC_ASSETS_ICON}/entity/png/${icon}.png`;
                 }
 
             },

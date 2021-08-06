@@ -124,6 +124,7 @@
 			window.COMPANY_WEBSITE = "{{.website}}";
 			window.COMPANY_LICENSE = "{{.license}}";
 			window.ASSETS_ICON = '/fs/assets/images';
+			window.STATIC_ASSETS_ICON = '/static/assets/images';
 			window.ASSETS_APP_ICON = '/static/assets/images/apps/png';
 			window.ASSETS_ENTITY_ICON = '/static/assets/images/entity/png';
 			window.ASSETS_ROBOT_ICON = '/static/assets/images/robot/png';
@@ -152,7 +153,7 @@
 
 	<!-- App JS-->
 	<script src="{{AppSubUrl}}/web/js/model/m3.js" type="text/javascript"></script>
-	<script src="{{AppSubUrl}}/web/js/model/Common.js" type="text/javascript"></script>
+	<script src="{{AppSubUrl}}/web/js/model/Common.js" type="text/javascript" defer="defer"></script>
 	<script src="{{AppSubUrl}}/web/js/model/ContextMenu.js" type="text/javascript"></script>
 	<script src="{{AppSubUrl}}/web/js/model/Matrix.js" type="text/javascript"></script>
 	<script src="{{AppSubUrl}}/web/js/model/SideBar.js" type="text/javascript"></script>

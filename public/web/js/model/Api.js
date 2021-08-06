@@ -33,6 +33,7 @@ class Api {
 
                 // API统计
                 Vue.component("api-summary",{
+                    i18n,
                     delimiters: ['#{', '}#'],
                     data(){
                         return {
@@ -40,7 +41,7 @@ class Api {
                         }
                     },
                     template:   `<el-container>
-                                    <el-header style="padding:0px;height:40px;line-height:40px;"><h5 style="margin: 0px 10px;">接口服务概览</h5></el-header>
+                                    <el-header style="padding:0px;height:40px;line-height:40px;"><h5 style="margin: 0px 10px;">#{ $t('api.title') }#</h5></el-header>
                                     <el-main style="display: flex;float: left;padding:0px;">
                                         <div @click="onForward(item.url)" 
                                             :key="item.name" v-for="item in model.api"
@@ -90,8 +91,9 @@ class Api {
 
                 // API管理
                 Vue.component("api-view-console",{
+                    i18n,
                     delimiters: ['${', '}'],
-                    template: `<fs-view-component id="api-view-console-file-fs-view" :root="root" defaultView="list-view" rootName="我的接口"></fs-view-component>`,
+                    template: `<fs-view-component id="api-view-console-file-fs-view" :root="root" defaultView="list-view" :rootName="$t('api.home')"></fs-view-component>`,
                     data(){
                         return {
                             root: "/script"
@@ -99,7 +101,7 @@ class Api {
                     },
                     mounted(){
                         $(".el-container.api-view-console").css({
-                            "height": "calc(100vh - 240px)"
+                            "height": "calc(100vh - 80px)"
                         });
                     }
                 });
@@ -111,7 +113,7 @@ class Api {
                                         <api-view-tree ref="treeRef"></api-view-tree>
                                     </el-aside>
                                     <el-main style="padding:0px;overflow:hidden;display:grid;" ref="mainView">
-                                        <api-summary></api-summary>
+                                        <!--api-summary></api-summary-->
                                         <api-view-console ref="viewRef"></api-view-console>
                                     </el-main>
                                 </el-container>`,

@@ -199,7 +199,7 @@ class FileSystem {
                     }
 
                     let name = me.fileForm.name + "." + me.fileForm.extName;
-                    let attr = {remark: me.fileForm.remark, ctime: _.now(), author: window.SignedUser_UserName};
+                    let attr = {remark: me.fileForm.remark};
                     
                     fsHandler.fsNewAsync(me.fileForm.extName, me.fileForm.path, name, null, attr).then( (rtn)=>{
                         if(rtn == 1){

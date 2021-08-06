@@ -356,10 +356,10 @@
                         <el-col :span="24">
                             <el-breadcrumb separator-class="el-icon-arrow-right">
                                 <el-breadcrumb-item>
-                                    <el-button type="text" @click="openIt(null,'/')">${rootName}</el-button>
+                                    <el-button type="text" @click="openIt(null,'/')">#{rootName}#</el-button>
                                 </el-breadcrumb-item>
                                 <el-breadcrumb-item  v-for="(item,index) in filePath" v-if="index > 0">
-                                    <el-button type="text" @click="openIt(item, filePath.slice(0,index+1).join('/'))">${item}</el-button>
+                                    <el-button type="text" @click="openIt(item, filePath.slice(0,index+1).join('/'))">#{item}#</el-button>
                                 </el-breadcrumb-item>
                             </el-breadcrumb>
                         </el-col>
@@ -369,80 +369,80 @@
                         <el-col :span="24">
                             <div style="padding:0px;text-align:right;height:30px;line-height:30px;width:100%;">
     
-                                <el-tooltip content="格子视图" placement="top">
+                                <el-tooltip :content="$t('fsview.toolbar_grid')" placement="top">
                                     <el-button type="text" @click="currentView='list-view'" icon="el-icon-picture">
                                     </el-button>
                                 </el-tooltip>
-                                <el-tooltip content="列表视图" placement="top">
+                                <el-tooltip :content="$t('fsview.toolbar_list')" placement="top">
                                     <el-button type="text" @click="currentView='grid-view'" icon="el-icon-s-grid">
                                     </el-button>
                                 </el-tooltip>
-                                <el-tooltip content="表格视图" placement="top">
+                                <el-tooltip :content="$t('fsview.toolbar_table')" placement="top">
                                     <el-button type="text" @click="currentView='table-view'" icon="el-icon-menu">
                                     </el-button>
                                 </el-tooltip>
 
-                                <el-tooltip content="刷新" placement="top">
+                                <el-tooltip :content="$t('fsview.toolbar_refresh')" placement="top">
                                     <el-button type="text" @click="load();refreshTree();" icon="el-icon-refresh">
                                     </el-button>
                                 </el-tooltip>
 
-                                <el-tooltip content="排序" placement="top">
+                                <el-tooltip :content="$t('fsview.toolbar_order')" placement="top">
                                     <el-dropdown @command="onOrderCommand" style="margin-left: 5px;">
                                         <span class="el-dropdown-link">
                                           <el-button type="text" icon="el-icon-sort"></el-button>
                                         </span>
                                         <el-dropdown-menu slot="dropdown">
-                                          <el-dropdown-item command='{"prop":"name","type":"asc"}'>按名称升序</el-dropdown-item>
-                                          <el-dropdown-item command='{"prop":"name","type":"desc"}'>按名称降序</el-dropdown-item>
-                                          <el-dropdown-item command='{"prop":"vtime","type":"asc"}'>按时间升序</el-dropdown-item>
-                                          <el-dropdown-item command='{"prop":"vtime","type":"desc"}'>按时间降序</el-dropdown-item>
-                                          <el-dropdown-item command='{"prop":"ftype","type":"asc"}'>按类型排序</el-dropdown-item>
+                                          <el-dropdown-item command='{"prop":"name","type":"asc"}'>#{$t('fsview.toolbar_order_byname_asc')}#</el-dropdown-item>
+                                          <el-dropdown-item command='{"prop":"name","type":"desc"}'>#{$t('fsview.toolbar_order_byname_desc')}#</el-dropdown-item>
+                                          <el-dropdown-item command='{"prop":"vtime","type":"asc"}'>#{$t('fsview.toolbar_order_bytime_asc')}#</el-dropdown-item>
+                                          <el-dropdown-item command='{"prop":"vtime","type":"desc"}'>#{$t('fsview.toolbar_order_bytime_desc')}#</el-dropdown-item>
+                                          <el-dropdown-item command='{"prop":"ftype","type":"asc"}'>#{$t('fsview.toolbar_order_bytype')}#</el-dropdown-item>
                                         </el-dropdown-menu>
                                       </el-dropdown>
                                 </el-tooltip>
     
-                                <el-tooltip content="新建目录" placement="top">
+                                <el-tooltip :content="$t('fsview.toolbar_newdir')" placement="top">
                                     <el-button type="text" @click="newDir" icon="el-icon-folder-add" style="margin-left: 5px;">
                                     </el-button>
                                 </el-tooltip>
     
-                                <el-tooltip content="新建文件" placement="top">
+                                <el-tooltip :content="$t('fsview.toolbar_newfile')" placement="top">
                                     <el-button type="text" @click="newFile" icon="el-icon-document-add">
                                     </el-button>
                                 </el-tooltip>
     
-                                <el-tooltip :content="_.isEmpty(selectedItem)?'选择所有':'取消选择'" placement="top">
+                                <el-tooltip :content="_.isEmpty(selectedItem)?$t('fsview.toolbar_select_all'):$t('fsview.toolbar_select_cancel')" placement="top">
                                     <el-button type="text" @click="selectAll" :icon="_.isEmpty(selectedItem)?'el-icon-folder-checked':'el-icon-document-remove'">
                                     </el-button>
                                 </el-tooltip>
     
-                                <el-tooltip content="复制到" placement="top">
+                                <el-tooltip :content="$t('fsview.toolbar_copyto')" placement="top">
                                     <el-button type="text" @click="copyTo" icon="el-icon-document-copy">
                                     </el-button>
                                 </el-tooltip>
     
-                                <el-tooltip content="移动到" placement="top">
+                                <el-tooltip :content="$t('fsview.toolbar_moveto')" placement="top">
                                     <el-button type="text" @click="moveTo" icon="el-icon-shopping-cart-full">
                                     </el-button>
                                 </el-tooltip>
     
-                                <el-tooltip content="删除" placement="top">
+                                <el-tooltip :content="$t('fsview.toolbar_delete')" placement="top">
                                     <el-button type="text" @click="deleteThem" icon="el-icon-delete">
                                     </el-button>
                                 </el-tooltip>
     
-                                <el-tooltip content="上传文件" placement="top">
+                                <el-tooltip :content="$t('fsview.toolbar_upload')" placement="top">
                                     <el-button type="text" class="fileinput-button" style="color:#16e216;" icon="el-icon-upload">
                                         <input id="file-upload" type="file" name="uploadfile" multiple>
                                     </el-button>
                                 </el-tooltip>
-                                <el-tooltip content="导出备份" placement="top">
+                                <el-tooltip :content="$t('fsview.toolbar_export')" placement="top">
                                     <el-button type="text" @click="exportIt(rootPath)" icon="el-icon-download">
                                     </el-button>
                                 </el-tooltip>
     
-                                <el-tooltip content="导入恢复" placement="top">
+                                <el-tooltip :content="$t('fsview.toolbar_import')" placement="top">
                                     <el-button type="text" class="fileinput-button" icon="el-icon-upload2">
                                         <input type="file" name="loadfile" multiple @change="importIt">
                                     </el-button>
@@ -457,14 +457,14 @@
                         </el-col>
                     </el-row>
                 </el-header>
-                <el-main ref="contentRef">
+                <el-main ref="contentRef" style="overflow: hidden;">
                     <component v-bind:is="currentView" :model.sync="model" @dblclick.native="resetStatus"></component>
-                    <el-dialog title="应用发布" :visible.sync="dialog.appDeploy.show" v-if="dialog.appDeploy.show" destroy-on-close="true">
-                        <mx-app-deploy :model="dialog.appDeploy"></mx-app-deploy>
+                    <el-dialog :title="$t('fsview.dialog_app_install')" :visible.sync="dialog.appDeploy.show" v-if="dialog.appDeploy.show" destroy-on-close="true">
+                        <mx-app-install :model="dialog.appDeploy"></mx-app-install>
                     </el-dialog>
                 </el-main>
                 <el-footer style="padding:0 10px;height:30px;line-height:30px;">
-                    <small>数量：${model.length}  | 已选中：${selectedItem.length} </small>
+                    <small>#{$t('fsview.footer_count')}##{model.length}#  | #{$t('fsview.footer_selected')}##{selectedItem.length}# </small>
                 </el-footer>
             </el-container>>
     
@@ -473,7 +473,8 @@
         /*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
         <script id="fs-view-component">
         {
-            delimiters: ['${', '}'],
+            i18n,
+            delimiters: ['#{', '}#'],
             props: {
                 id: String,
                 root: String,
@@ -523,15 +524,15 @@
                                                         @blur.self="onRename(item)" :ref="'input_'+item.id"></el-input>
                                                 </p>
                                                 <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;" @click.self="onSetFocus(item)" v-show="!item.editable">
-                                                    名称：#{item.name}#
+                                                    #{$t('fsview.file_name')}##{item.name}#
                                                 </p>
-                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">作者：#{item|pickAuthor}#</p>
-                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">创建：#{moment(item.vtime).format("YYYY-MM-DD hh:mm:ss")}#</p>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">#{$t('fsview.file_author')}##{item|pickAuthor}#</p>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">#{$t('fsview.file_ctime')}##{moment(item.vtime).format("YYYY-MM-DD hh:mm:ss")}#</p>
                                                 <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">
-                                                    标签：
+                                                    #{$t('fsview.file_tags')}#
                                                     <mx-tag domain='files' :model.sync="item.tags" :id="item.id" limit="1"></mx-tag>
                                                 </p>
-                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">描述：#{item|pickRemark}#</p>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">#{$t('fsview.file_desc')}##{item|pickRemark}#</p>
                                             </div>
                                             <el-checkbox :label="item.id" :ref="'checkBox_'+item.id"></el-checkbox>
                                     </el-button>
@@ -619,6 +620,7 @@
                 });
     
                 Vue.component('list-view',{
+                    i18n,
                     delimiters: ['#{', '}#'],
                     props: {
                         model: Array
@@ -662,11 +664,11 @@
                                                         @blur.self="onRename(item)" :ref="'input_'+item.id"></el-input>
                                                 </p>
                                                 <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;" @click.self="onSetFocus(item)" v-show="!item.editable">
-                                                    名称：#{item.name}#
+                                                    #{$t('fsview.file_name')}##{item.name}#
                                                 </p>
-                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">作者：#{item|pickAuthor}#</p>
-                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">创建：#{moment(item.ctime).format("YYYY-MM-DD hh:mm:ss")}#</p>
-                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">描述：#{item|pickRemark}#</p>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">#{$t('fsview.file_author')}##{item|pickAuthor}#</p>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">#{$t('fsview.file_ctime')}##{moment(item.ctime).format("YYYY-MM-DD hh:mm:ss")}#</p>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">#{$t('fsview.file_desc')}##{item|pickRemark}#</p>
                                                 <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">
                                                     <mx-tag domain='files' :model.sync="item.tags" :id="item.id" limit="1"></mx-tag>
                                                 </p>
@@ -814,17 +816,17 @@
     
                             // extend || ...
                             if( item.fullname === '/extend' ){
-                                return `${window.ASSETS_ICON}/files/png/dir-lock.png?type=open&issys=${window.SignedUser_IsAdmin}`;
+                                return `${window.STATIC_ASSETS_ICON}/files/png/dir-lock.png`;
                             } else {
                                 try{
                                     if(_.includes(['png','jpeg'],item.ftype)){
                                         return `/static${item.parent}/${item.name}`;    
                                     } else {
-                                        return _.attempt(JSON.parse.bind(null, item.attr)).icon || `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
+                                        return _.attempt(JSON.parse.bind(null, item.attr)).icon || `${window.STATIC_ASSETS_ICON}/files/png/${item.ftype}.png`;
                                     }
                                 }
                                 catch(error){
-                                    return `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
+                                    return `${window.STATIC_ASSETS_ICON}/files/png/${item.ftype}.png`;
                                 }
                             }
                         },
@@ -1020,6 +1022,7 @@
                 })
                 
                 Vue.component("fs-editor-view",{
+                    i18n,
                     delimiters: ['#{', '}#'],
                     props:{
                         id: String,
@@ -1060,11 +1063,11 @@
                                     <el-footer :style="'background-color:#ddd;overflow:hidden;padding:0px;width:100%;height:'+footerHeight+'%;'" ref="footerView" v-show="toolBarShow">
                                         <el-tabs v-model="toolBar.activeView" type="border-card" style="height:100%;" closable @tab-remove="onRemoveTab">
                                             <el-tab-pane name="log" style="height:100%;" v-show="toolBar.log.show">
-                                                <span slot="label">执行日志</span>
+                                                <span slot="label">#{ $t('fsview.editor_toolbar_running_log') }#</span>
                                                 <mx-consolelog :fullname="item.fullname" logType="serverjs" v-if="!_.isEmpty(item)"></mx-consolelog> 
                                             </el-tab-pane>
                                             <el-tab-pane name="result" style="height:100%;overflow:auto;padding-top: 1px;" v-show="toolBar.result.show">
-                                                <span slot="label">#{ item | pickResultTitle }#</span>
+                                                <span slot="label">#{ pickResultTitle(item) }#</span>
                                                 <fs-editor-view-by-json :fs="item" :options="options"></fs-editor-view-by-json>
                                             </el-tab-pane>
                                         </el-tabs>
@@ -1086,19 +1089,20 @@
                         }
                     },
                     filters: {
-                        pickResultTitle(item){
-                            if(_.isEmpty(item.output)){
-                                return '执行结果';
-                            } else {
-                                return `执行结果(耗时:${item.output.consume})`;
-                            }
-                        }
+                        
                     },
                     mounted() {
                         this.init();
                         this.initSplit();
                     },
                     methods: {
+                        pickResultTitle(item){
+                            if(_.isEmpty(item.output)){
+                                return this.$t('fsview.editor_toolbar_running_result');
+                            } else {
+                                return this.$t('fsview.editor_toolbar_running_result') + '(' + this.$t('fsview.editor_toolbar_running_consume') + `:${item.output.consume})`;
+                            }
+                        },
                         init() {
                             fsHandler.fsContentAsync(this.item.parent, this.item.name).then( (rtn)=>{
                                 _.extend(this.model, { newInput: rtn });
@@ -1370,10 +1374,11 @@
                                 type: "error",
                                 message: rtn.message
                             })
+                            this.load();
                         }
 
                         newItem.editable = false;
-                    } );
+                    })
                 },
                 // 同步文件系统到本地目录
                 onSyncToLocal(item){
@@ -1767,7 +1772,7 @@
                     
                     let _name = '新文件夹_' + _.now();
                     let _type = 'dir';
-                    let _attr = {remark: '', ctime: _.now(), author: window.SignedUser_UserName};
+                    let _attr = {remark: ''};
     
                     fsHandler.fsNewAsync(_type, this.rootPath, _name, null, _attr).then( (rtn)=>{
                         if(rtn == 1){

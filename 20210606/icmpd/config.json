@@ -1,0 +1,21 @@
+{
+    "rule": "/eventbus/rules/icmpd_rule",
+    "domain":"test",
+    "servers": [
+        {
+            "enable": true,
+            "server": "172.26.38.248",
+            "timeout": 10,
+            "numberofpings": 5,
+            "packetinterval": 0,
+            "packetsize": 0,
+            "typeofservice": 0,
+            "retries": 3,
+            "poll": 10,
+            "failureretests": 0,
+            "retestinterval": 0,
+            "hostnamelookuppreference": "4Then6",
+            "description": "Test ping"
+        }
+    ]
+}

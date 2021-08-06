@@ -211,7 +211,8 @@ class Omdb{
                                                 <el-button v-show="data.show" type="text" @click.native.stop="onEdgeNew(data)" icon="el-icon-plus" style="float:right;width:14px;margin:0 5px;"></el-button>
                                             </span>
                                             <span v-else>
-                                                <i class="el-icon-share" style="color:#0088cc;"></i>
+                                                <i class="el-icon-share" style="color:#0088cc;" v-if="data.type==='edge'"></i>
+                                                <i class="el-icon-folder-opened" style="color:#ffc107;" v-else></i>
                                                 <span>#{ node.label }#(#{ data.remedy }#)</span>
                                                 <el-dropdown v-show="data.show" style="float:right;width:14px;margin:0 5px;">
                                                     <span class="el-dropdown-link">
@@ -256,7 +257,7 @@ class Omdb{
                 onInit(){
                     this.treeData = [
                         {cid:'1', pid:null, class: "/", type: 'class', name: `/`, title: this.$t('omdb.classTree.class'), child:true, children:[]},
-                        {cid:'-10', pid:null, class: null, type: 'edge', name: `/${this.$t('omdb.classTree.edge')}`, title: this.$t('omdb.classTree.edge'), child:true, children:[]}
+                        {cid:'-10', pid:null, class: null, type: 'edge-root', name: `/${this.$t('omdb.classTree.edge')}`, title: this.$t('omdb.classTree.edge'), child:true, children:[]}
                     ];
                 },
                 initClassData(data){
@@ -282,15 +283,19 @@ class Omdb{
                 },
                 initEdgeData(data){
 				
-                    omdbHandler.fetchDataByMqlAsync('select edge type').then( (val)=>{
+                    fsHandler.callFsJScriptAsync("/matrix/m3omdb/getEdgeList.js").then( (val)=>{
                         
                         if(_.isEmpty(val)){
                             return;
                         }
                         
-                        let rtn = _.sortBy(_.map(val.message, (v)=>{
-                            return _.merge(v, {type: 'edge', cid: objectHash.sha1(v.name)});
-                        }),'name');
+                        let rtn = _.map(val.message, (v)=>{
+                            if(v.type){
+                                return _.merge(v, {cid: objectHash.sha1(v.name)});
+                            } else {
+                                return _.merge(v, {type: 'edge', cid: objectHash.sha1(v.name)});
+                            }
+                        });
                         
                         this.$set(data, 'children', rtn);
                     } );
@@ -310,7 +315,9 @@ class Omdb{
                     if(data.type == 'class'){
                         this.initClassData(data);
                     } else {
-                        this.initEdgeData(data);
+                        if(data.type === 'edge-root'){
+                            this.initEdgeData(data);
+                        }
                     }
                 },
                 // 类新建
@@ -1620,7 +1627,7 @@ class Omdb{
                 id: String,
                 model: Object
             },
-            template:   `<el-container style="height:calc(100% - 30px);">
+            template:   `<el-container style="height:calc(100% - 30px);" class="output-container">
                             <el-header style="height:30px;line-height:30px;" v-if="!_.isEmpty(model.data) && _.includes(['select'],model.type)">
                                 <el-tooltip :content="$t('omdb.actions.delete')" open-delay="800" placement="top">
                                     <el-button type="text" @click="onDelete" icon="el-icon-delete"></el-button>
@@ -1643,6 +1650,7 @@ class Omdb{
                             </el-header>
                             
                             <el-main style="height:100%;padding:0px;" v-if="!_.isEmpty(model.data) && _.includes(['select'],model.type)">
+                            
                                 <el-table :data="dt.rows" 
                                     stripe
                                     border
@@ -1689,25 +1697,30 @@ class Omdb{
                                             :key="cIndex"
                                             min-width="180">
                                         <template slot-scope="scope" slot="header">
-                                            <span> #{item['field']}# 
+                                            <span> <el-button type="text" @click="onCopyToClip(item['field'])">#{item['field']}# </el-button>
                                                 <el-popover
                                                     placement="top-start"
                                                     width="100"
                                                     trigger="hover"
                                                     :content="item.type">
-                                                    <code slot="reference" style="color: #333;background-color: #f7f7f7;">#{item.type.substr(0,1)}#</code>
+                                                    <code slot="reference" style="color: #333333;background-color: #f7f7f7;">#{item.type.substr(0,1)}#</code>
                                                 </el-popover>
                                             </span>
                                         </template>
                                         <template slot-scope="scope">
-                                            <div v-if="pickFtype(item['field']) == 'timestamp'">#{moment(scope.row[item['field']]).format(mx.global.register.format)}#</div>
-                                            <div v-else-if="pickFtype(item['field']) == 'date'">#{moment(scope.row[item['field']]).format('YYYY-MM-DD')}#</div>
+                                            <div v-if="pickFtype(item['field']) == 'timestamp'">
+                                                <el-button type="text" @click="onCopyToClip(scope.row[item['field']])">#{moment(scope.row[item['field']]).format(mx.global.register.format)}#</el-button>
+                                            </div>
+                                            <div v-else-if="pickFtype(item['field']) == 'date'">
+                                                <el-button type="text" @click="onCopyToClip(scope.row[item['field']])">#{moment(scope.row[item['field']]).format('YYYY-MM-DD')}#</el-button>
+                                            </div>
                                             <el-popover
-                                                placement="top"
+                                                :ref="'bucketPopover-'+scope.$index+cIndex"
+                                                placement="left-start"
                                                 width="550"
                                                 trigger="click"
-                                                popper-class="dataTablePopper"
-                                                v-else-if="pickFtype(item['field']) == 'bucket'"
+                                                popper-class="inTablePopover"
+                                                v-else-if="pickFtype(item['field']) == 'bucket' && !_.isEmpty(scope.row[item['field']])"
                                                 @show="onBucketShow(scope.row[item['field']],scope.$index,cIndex)">
                                                 <el-container style="height:40vh;">
                                                     <el-header style="height:30px;line-height:30px;padding:0px;">
@@ -1729,10 +1742,10 @@ class Omdb{
                                                 <el-button type="text" icon="el-icon-date" slot="reference">#{scope.row[item['field']].length}#</el-button>
                                             </el-popover>
                                             <el-popover
-                                                placement="top"
+                                                placement="left-start"
                                                 width="550"
                                                 trigger="click"
-                                                popper-class="dataTablePopper"
+                                                popper-class="inTablePopover"
                                                 v-else-if="_.includes(['msg','cmds','err','out','config','depot','attr'],item['field']) && !_.isEmpty(scope.row[item['field']])">
                                                 <el-container>
                                                     <el-header style="height:30px;line-height:30px;padding:0px;">
@@ -1745,10 +1758,10 @@ class Omdb{
                                                 <el-button type="text" slot="reference">#{ _.truncate(scope.row[item['field']], {'length': 24}) }# <i class="el-icon-more-outline"></i></el-button>
                                             </el-popover>
                                             <el-popover
-                                                placement="top"
+                                                placement="left-start"
                                                 width="550"
                                                 trigger="click"
-                                                popper-class="dataTablePopper"
+                                                popper-class="inTablePopover"
                                                 v-else-if="_.includes(['map','set','list'],pickFtype(item['field'])) && !_.isEmpty(scope.row[item['field']])">
                                                 <el-container>
                                                     <el-header style="height:30px;line-height:30px;padding:0px;">
@@ -1760,8 +1773,9 @@ class Omdb{
                                                 </el-container>
                                                 <el-button type="text" slot="reference">#{ _.truncate(JSON.stringify(scope.row[item['field']]), {'length': 24}) }# <i class="el-icon-more-outline"></i></el-button>
                                             </el-popover>
-                                            <!--div v-else-if="_.includes(['map','set','list'],pickFtype(item['field']))">#{JSON.stringify(scope.row[item['field']],null,4)}#</div-->
-                                            <div v-else>#{scope.row[item['field']]}#</div>
+                                            <div v-else>
+                                                <el-button type="text" @click="onCopyToClip(scope.row[item['field']])">#{scope.row[item['field']]}#</el-button>
+                                            </div>
                                         </template>
                                     </el-table-column>
                                 </el-table>
@@ -1774,6 +1788,7 @@ class Omdb{
                             </el-main>
                             <!-- 异常信息提示 -->
                             <el-main style="height:100%;padding:0px;" v-else>
+                            
                                 <div style="padding:20px;" v-if="model.type=='create-class'">
                                     <h3><i class="el-icon-success" style="font-size:32px;color:#4caf50;"></i> #{ $t('omdb.tip.createClassSuccess') }#</h3>
                                     <p>#{ $t('omdb.tip.consume') }#：#{model.consume}#</p>
@@ -1834,7 +1849,7 @@ class Omdb{
                     },
                     info: [],
                     bucketShow: {
-                        timeConverByUtc: true
+                        timeConverByUtc: false
                     }
                 }
             },
@@ -1856,6 +1871,9 @@ class Omdb{
             watch: {
                 dt:{
                     handler: function(val,oldVal){
+                        
+                        if(_.isEmpty(val)) return false;
+
                         this.info = [];
                         this.info.push(`${this.$t('omdb.tip.all')} ${val.rows.length} ${this.$t('omdb.tip.item')}`);
                         this.info.push(`${this.$t('omdb.tip.selected')} ${val.selected.length} ${this.$t('omdb.tip.item')}`);
@@ -1909,13 +1927,27 @@ class Omdb{
 
                     }
                 } catch(err){
-                    console.log(err)
+                    console.error(err)
                 }
+
             },
             mounted(){
-                this.info.push(`${this.$t('omdb.tip.all')} ${this.dt.rows.length} ${this.$t('omdb.tip.item')}`);
+                this.info.push(`${this.$t('omdb.tip.all')} ${this.dt.rows ? this.dt.rows.length : 0} ${this.$t('omdb.tip.item')}`);
             },
             methods: {
+                onCopyToClip(content, message) {
+                    var aux = document.createElement("input"); 
+                    aux.setAttribute("value", content); 
+                    document.body.appendChild(aux); 
+                    aux.select();
+                    document.execCommand("copy"); 
+                    document.body.removeChild(aux);
+                    if (message == null) {
+                        this.$message.success("复制成功");
+                    } else{
+                        this.$message.success(message);
+                    }
+                },
                 onBucketShow(data,index,cIndex){
                     
                     let editor = ace.edit(this.$refs['editorBucket'+index+cIndex][0].$el);
@@ -1937,6 +1969,11 @@ class Omdb{
                     editor.renderer.setShowGutter(true);
                     editor.setValue(this.arrayToCsv(data));
                     
+                    
+                    this.$nextTick(()=>{
+                        this.$refs[`bucketPopover-${index}${cIndex}`][0].updatePopper();
+                    })
+                    
                 },
                 onCopy(index,evt,cIndex){
                     new Clipboard(evt.target, {
@@ -1951,14 +1988,19 @@ class Omdb{
                     });
                 },
                 arrayToCsv(data){
-                    
-                    let lineArray = [];
-                    _.forEach(data, (infoArray)=> {
-                        let line = infoArray.join(", ");
-                        lineArray.push(line);
-                    });
-                    
-                    return lineArray.join("\n");
+
+                    if(_.isEmpty(data)) {
+                        return "";
+                    } else {
+
+                        let lineArray = [];
+                        _.forEach(data, (infoArray)=> {
+                            let line = infoArray.join(", ");
+                            lineArray.push(line);
+                        });
+                        
+                        return lineArray.join("\n");
+                    }
                     
                 },
                 onBucketReset(value,data,index,cIndex){
@@ -2145,7 +2187,7 @@ class Omdb{
                 id: String,
                 model: Object
             },
-            template: `<el-container style="height:calc(100vh - 110px);">
+            template: `<el-container style="height:calc(100vh - 110px);" class="omdb-query-console">
                             <el-header :style="'padding:0px;height:'+main.headerHeight+'%;'" ref="topView">
                                 <omdb-editor-component :id="id" :bid="id"
                                                         :model="editorModel"

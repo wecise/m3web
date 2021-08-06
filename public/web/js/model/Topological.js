@@ -2252,6 +2252,7 @@ class Topological {
             data(){
                 return {
                     chart: null,
+                    timer: null,
                     option: {
                         tooltip: {
                             trigger: 'axis'
@@ -2297,6 +2298,10 @@ class Topological {
                 // 初始化数据
                 this.initData();
 
+                this.timer = setTimeout(()=>{
+                                this.initData();
+                            }, 15 * 1000)
+
                 // 接收窗体RESIZE事件
                 eventHub.$on("WINDOW-RESIZE-EVENT", this.checkChart);
             },
@@ -2321,16 +2326,16 @@ class Topological {
 
                         let term = encodeURIComponent( JSON.stringify(this.model) );
                         fsHandler.callFsJScriptAsync("/matrix/performance/searchPerformanceByTerm.js",term).then( (val)=>{
-                            let rtn = val.message.result;
+                            let rtn = val.message.result.reverse();
 
                             //取实时数据的time作为xAxis
-                            this.option.xAxis.data = _.map(rtn.reverse(),(v)=>{
+                            this.option.xAxis.data = _.map(rtn,(v)=>{
                                 return moment(v[0]).format('YY-MM-DD HH:mm');
                             });
                             
                             this.option.series = [{
                                 name: this.model.bucket + ' ' + this.model.key,
-                                data: _.map(rtn.reverse(),(v)=>{ return v[1];}),
+                                data: _.map(rtn,(v)=>{ return v[1];}),
                                 type: 'line',
                                 smooth:true,
                                 color: 'rgba(108, 212, 11, 1)',
@@ -2425,6 +2430,46 @@ class Topological {
                                         const end = new Date();
                                         const start = new Date();
                                         start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+                                        picker.$emit('pick', [start, end]);
+                                    }
+                                }, {
+                                    text: '最近60天',
+                                    onClick(picker) {
+                                        const end = new Date();
+                                        const start = new Date();
+                                        start.setTime(start.getTime() - 3600 * 1000 * 24 * 60);
+                                        picker.$emit('pick', [start, end]);
+                                    }
+                                }, {
+                                    text: '最近半年',
+                                    onClick(picker) {
+                                        const end = new Date();
+                                        const start = new Date();
+                                        start.setTime(start.getTime() - 3600 * 1000 * 24 * 180);
+                                        picker.$emit('pick', [start, end]);
+                                    }
+                                }, {
+                                    text: '最近1年',
+                                    onClick(picker) {
+                                        const end = new Date();
+                                        const start = new Date();
+                                        start.setTime(start.getTime() - 3600 * 1000 * 24 * 365);
+                                        picker.$emit('pick', [start, end]);
+                                    }
+                                }, {
+                                    text: '最近2年',
+                                    onClick(picker) {
+                                        const end = new Date();
+                                        const start = new Date();
+                                        start.setTime(start.getTime() - 3600 * 1000 * 24 * 365 * 2);
+                                        picker.$emit('pick', [start, end]);
+                                    }
+                                }, {
+                                    text: '最近5年',
+                                    onClick(picker) {
+                                        const end = new Date();
+                                        const start = new Date();
+                                        start.setTime(start.getTime() - 3600 * 1000 * 24 * 365 * 5);
                                         picker.$emit('pick', [start, end]);
                                     }
                                 }

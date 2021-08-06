@@ -49,7 +49,7 @@ class Home extends Matrix {
                                                         <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
                                                             #{ _.isEmpty($t('home.group')[item.name])?item.title:$t('home.group')[item.name] }#（ #{item.groups.length}# ） 
                                                         </p>
-                                                        <el-dropdown @command="onGroupCommand" trigger="hover" placement="top-start"  style="position: absolute;right: 5px;top: 5px;">
+                                                        <el-dropdown @command="onGroupCommand" trigger="hover" placement="top-end"  style="position: absolute;right: 5px;top: 5px;">
                                                             <span class="el-dropdown-link">
                                                                 <i class="el-icon-arrow-down el-icon--right" style="color:rgba(255,255,255,0.5)"></i>
                                                             </span>
@@ -107,7 +107,7 @@ class Home extends Matrix {
                                                         <span v-if="window.MATRIX_LANG == 'zh-CN'">#{item.cnname}#</span>
                                                         <span v-else>#{item.enname}#</span>
                                                     </p>
-                                                    <el-dropdown @command="onAppCommand" trigger="hover" placement="top-start" style="position: absolute;right: 5px;top: 5px;">
+                                                    <el-dropdown @command="onAppCommand" trigger="hover" placement="top-end" style="position: absolute;right: 5px;top: 5px;">
                                                         <span class="el-dropdown-link">
                                                             <i class="el-icon-arrow-down el-icon--right" style="color:rgba(255,255,255,0.5)"></i>
                                                         </span>
@@ -130,7 +130,7 @@ class Home extends Matrix {
                                                 </el-button>
                                                 <el-button type="default" 
                                                     style="max-width: 120px;width: 120px;height:90px;border-radius:10px!important;background: rgba(255,255,255,0.3);margin: 5px;" v-if="mxAuth.isAdmin">
-                                                    <el-dropdown trigger="hover" placement="top-start">
+                                                    <el-dropdown trigger="hover" placement="top-end">
                                                         <span class="el-dropdown-link">
                                                             <i class="el-icon-plus" style="font-size: 20px;"></i>
                                                         </span>
@@ -191,8 +191,8 @@ class Home extends Matrix {
                                                     </div>
                                                 </el-dialog>
 
-                                                <el-dialog title="应用发布" :visible.sync="dialog.appDeploy.show" v-if="dialog.appDeploy.show" destroy-on-close="true">
-                                                    <mx-app-deploy :model="dialog.appDeploy"></mx-app-deploy>
+                                                <el-dialog title="应用安装" :visible.sync="dialog.appDeploy.show" v-if="dialog.appDeploy.show" destroy-on-close="true">
+                                                    <mx-app-install :model="dialog.appDeploy"></mx-app-install>
                                                 </el-dialog>
                                                 
                                             </el-col>
