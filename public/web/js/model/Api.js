@@ -93,7 +93,7 @@ class Api {
                 Vue.component("api-view-console",{
                     i18n,
                     delimiters: ['${', '}'],
-                    template: `<fs-view-component id="api-view-console-file-fs-view" :root="root" defaultView="list-view" :rootName="$t('api.home')"></fs-view-component>`,
+                    template: `<fs-view-component id="api-view-console-file-fs-view" :root="root" defaultView="grid-view" :rootName="$t('api.home')"></fs-view-component>`,
                     data(){
                         return {
                             root: "/script"

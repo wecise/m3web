@@ -431,7 +431,7 @@ class SideBar {
                                 display: none;">
                             
                             <el-link style="font-size: 12px;margin-right:5px;">
-                                <i class="fas fa-copyright"></i> 2018 #{appVersion}#
+                                <i class="fas fa-copyright"></i> #{ version }# #{appVersion}#
                             </el-link>
                             
                             <el-dropdown @command="onApiCommand" style="font-size: 12px;margin-right:5px;cursor:pointer;">
@@ -476,6 +476,9 @@ class SideBar {
                     }catch(err){
                         return [{name: '简体中文', value: 'zh_CN'}];
                     }
+                },
+                version(){
+                    return moment().format("YYYY");
                 }
             },
             created(){

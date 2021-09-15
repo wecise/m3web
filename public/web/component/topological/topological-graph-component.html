@@ -509,14 +509,13 @@
                                                     </el-option>
                                                 </el-select>
                                             </el-form-item>
-                                            
                                         </el-form>
                                     </el-tab-pane>
                                 </el-tabs>
                             </el-main>
                         </el-container>
                         <el-button type="text" slot="reference">
-                            <i class="el-icon-setting" style="font-size:15px;margin:0 5px;">
+                            <i class="el-icon-setting" style="font-size:15px;margin:0 5px;"></i>
                         </el-button>
                     </el-popover>
                 </div>
@@ -563,7 +562,7 @@
                             
                         </el-card>
                         <el-button type="text" slot="reference">
-                            <i class="el-icon-postcard" style="font-size:18px;margin:0 5px;">
+                            <i class="el-icon-postcard" style="font-size:18px;margin:0 5px;"></i>
                         </el-button>
                     </el-popover>
                     <el-popover
@@ -583,31 +582,31 @@
                             </el-timeline-item>
                         </el-timeline>
                         <el-button type="text" slot="reference">
-                            <i class="el-icon-notebook-2" style="font-size:18px;margin:0 5px;">
+                            <i class="el-icon-notebook-2" style="font-size:18px;margin:0 5px;"></i>
                         </el-button>
                     </el-popover>
                     <el-divider></el-divider>
                     <el-tooltip content="撤销" open-delay="500" placement="left">
                         <el-button type="text"  @click="model.editor.execute('undo');">
-                             <i class="el-icon-refresh-left" style="font-size:18px;">
+                             <i class="el-icon-refresh-left" style="font-size:18px;"></i>
                         </el-button>
                     </el-tooltip>
                     <el-divider></el-divider>
                     <el-tooltip content="放大" open-delay="500" placement="left">
                        <el-button type="text"  @click="onZoomIn">
-                            <i class="el-icon-zoom-in" style="font-size:18px;">
+                            <i class="el-icon-zoom-in" style="font-size:18px;"></i>
                        </el-button>
                    </el-tooltip>
                    <el-divider></el-divider>
                    <el-tooltip content="缩小" open-delay="500" placement="left">
                        <el-button type="text"  @click="onZoomOut">
-                            <i class="el-icon-zoom-out" style="font-size:18px;">
+                            <i class="el-icon-zoom-out" style="font-size:18px;"></i>
                        </el-button>
                    </el-tooltip>
                    <el-divider></el-divider>
                    <el-tooltip content="将图居中显示"" open-delay="500" placement="left">
                        <el-button type="text"  @click="toCenter(true)">
-                            <i class="el-icon-rank" style="font-size:18px;">
+                            <i class="el-icon-rank" style="font-size:18px;"></i>
                        </el-button>
                    </el-tooltip>
                    <el-divider></el-divider>
@@ -625,7 +624,7 @@
                    <el-tooltip content="调整布局" open-delay="500" placement="left">
                        <el-dropdown @command="onSetLayout">
                            <span class="el-dropdown-link">
-                                <i class="el-icon-view" style="font-size:18px;">
+                                <i class="el-icon-view" style="font-size:18px;"></i>
                            </span>
                            <el-dropdown-menu slot="dropdown">
                                <el-dropdown-item :command="{name:'hierarchical_vertical',value:4}">分层</el-dropdown-item>
@@ -638,7 +637,7 @@
                    <el-divider></el-divider>
                    <el-tooltip content="打印" open-delay="500" placement="left">
                        <el-button type="text"  @click="onPrint">
-                           <i class="el-icon-printer" style="font-size:18px;">
+                           <i class="el-icon-printer" style="font-size:18px;"></i>
                        </el-button>
                    </el-tooltip>
                    <el-divider></el-divider>
