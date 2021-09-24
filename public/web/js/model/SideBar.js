@@ -545,10 +545,10 @@ class SideBar {
                                     <el-menu-item index="toggle" style="display:">
                                         <i :class="isCollapse?'el-icon-s-unfold':'el-icon-s-fold'" style="width:16px;color:#fff;"></i>
                                     </el-menu-item>
-                                    <el-menu-item index="apps" v-if="window.COMPANY_NAME == 'wecise'">
+                                    <!--el-menu-item index="apps" v-if="window.COMPANY_NAME == 'wecise'">
                                         <img :src="preFixIcon+'app.png'+postFixIcon" style="width:16px;"></img> 
                                         <span style="padding-left:5px;" slot="title">#{ $t('sideBar.menu.application') }#</span>
-                                    </el-menu-item>
+                                    </el-menu-item-->
                                     <el-menu-item index="/">
                                         <img :src="preFixIcon+'home.png'+postFixIcon" style="width:16px;"></img>
                                         <span style="padding-left:5px;" slot="title">#{ $t('sideBar.menu.home') }#</span>

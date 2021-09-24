@@ -36,16 +36,23 @@ class VueHub {
                 });    
                 
             } else {
+                
+                let xhr = new XMLHttpRequest();
+                let name = '/matrix/lang/getLangList.js';
+                xhr.open("POST", `/script/exec/js?filepath=${name}`, true);
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState == 4 && xhr.status == 200) {
+                        let rtn = xhr.response;
+                        localStorage.setItem("MATRIX-LANG-LIST", JSON.stringify(rtn.message));
 
-                fsHandler.callFsJScriptAsync("/matrix/lang/getLangList.js",null).then( (rtn)=>{
-                    
-                    localStorage.setItem("MATRIX-LANG-LIST", JSON.stringify(rtn.message));
-
-                    return new VueI18n({
-                        locale: window.MATRIX_LANG,
-                        messages: rtn.message
-                    });
-                } );
+                        return new VueI18n({
+                            locale: window.MATRIX_LANG,
+                            messages: rtn.message
+                        });
+                    }
+                }
+                xhr.responseType = "json";
+                xhr.send({ input: null, isfile: true });
                 
             }
             

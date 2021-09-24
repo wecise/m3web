@@ -1049,6 +1049,7 @@ mxSvgCanvas2D.prototype.ellipse = function(x, y, w, h)
  */
 mxSvgCanvas2D.prototype.image = function(x, y, w, h, src, aspect, flipH, flipV)
 {
+	
 	src = this.converter.convert(src);
 	
 	// LATER: Add option for embedding images as base64.
@@ -1065,6 +1066,10 @@ mxSvgCanvas2D.prototype.image = function(x, y, w, h, src, aspect, flipH, flipV)
 	node.setAttribute('y', this.format(y * s.scale) + this.imageOffset);
 	node.setAttribute('width', this.format(w * s.scale));
 	node.setAttribute('height', this.format(h * s.scale));
+	
+	node.onerror = ()=>{
+		node.href.baseVal=this.converter.convert('/static/assets/images/entity/png/matrix.png');
+	}
 	
 	// Workaround for missing namespace support
 	if (node.setAttributeNS == null)
@@ -1120,7 +1125,7 @@ mxSvgCanvas2D.prototype.image = function(x, y, w, h, src, aspect, flipH, flipV)
 	{
 		node.setAttribute('pointer-events', 'none');
 	}
-	
+
 	this.root.appendChild(node);
 	
 	// Disables control-clicks on images in Firefox to open in new tab
