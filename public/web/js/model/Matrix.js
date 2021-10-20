@@ -139,9 +139,13 @@ class Matrix {
         try{
             
             let pathName = window.location.pathname;
-            
+
             if(_.isEmpty(pathName)){
                 document.title = mxAuth.signedUser.Company.title;
+                return false;
+            }
+
+            if(pathName.includes("/static")) {
                 return false;
             }
             

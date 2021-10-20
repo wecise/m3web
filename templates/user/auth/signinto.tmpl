@@ -138,7 +138,7 @@
                         </div>
                      </el-header>
                      <el-main>
-                        <el-form  action="{{.Link}}" method="POST" ref="loginForm">
+                        <el-form  action="/user/login" method="POST" ref="loginForm">
                            {{template "base/alert" .}}
                            <el-form-item label="{{.i18n.Tr "home.company_name_holder"}}">
                               <el-input name="company" v-model="loginForm.company" autofocus required placeholder="{{.i18n.Tr "home.company_name_holder"}}"></el-input>

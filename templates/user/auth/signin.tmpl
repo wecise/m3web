@@ -31,7 +31,7 @@
             /*google style*/
             background:url("/web/assets/images/bg.png") no-repeat 50% fixed;
             background-size:cover;
-            overflow:hidden;
+            overflow:auto;
          }
 
          .logo{
@@ -361,7 +361,7 @@
                         </div>
                      </el-header>
                      <el-main>
-                        <el-form action="{{.Link}}" method="POST" ref="loginForm">
+                        <el-form action="/user/login" method="POST" ref="loginForm">
                            {{template "base/alert" .}}
                            <el-form-item label="{{.i18n.Tr "home.company_name_holder"}}" style="display:none;">
                               <el-input name="company" v-model="loginForm.company" required placeholder="{{.i18n.Tr "home.company_name_holder"}}"></el-input>

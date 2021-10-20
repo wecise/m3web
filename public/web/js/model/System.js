@@ -5805,10 +5805,10 @@ class System {
 												<i class="el-icon-finished"></i>
 												<span slot="title">解析规则</span>
 											</el-menu-item>
-											<el-menu-item index="apps-manage">
+											<!--el-menu-item index="apps-manage">
 												<i class="el-icon-menu"></i>
 												<span slot="title">应用管理</span>
-											</el-menu-item>
+											</el-menu-item-->
 										</el-menu>
 									</el-aside>
 									<el-main style="padding:0px;overflow:hidden;" ref="mainView">
